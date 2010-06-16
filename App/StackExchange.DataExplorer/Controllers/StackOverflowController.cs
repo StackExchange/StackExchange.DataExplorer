@@ -187,11 +187,6 @@ namespace StackExchange.DataExplorer.Controllers {
             log.Debug("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " + watch.ElapsedMilliseconds.ToString());
             System.Diagnostics.Trace.WriteLine("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " + watch.ElapsedMilliseconds.ToString());
 #endif
-            // set currentuser up for views, if we have it -- requires controller to access CurrentUser prior 
-            // to view rendering
-            if (filterContext.Result is ViewResult && _currentUser != null && !ViewData.ContainsKey(ViewDataKeys.CurrentUser)) {
-                ViewData.Add(ViewDataKeys.CurrentUser, CurrentUser);
-            }
             base.OnActionExecuted(filterContext);
         }
 
@@ -199,14 +194,6 @@ namespace StackExchange.DataExplorer.Controllers {
         /// fires after a View has finished execution
         /// </summary>
         protected override void OnResultExecuted(ResultExecutedContext filterContext) {
-            /*
-            if (_currentUser != null && RequiresUserPreferences && CurrentUser.SerializePreferences(Cookie) && !CurrentUser.IsAnonymous) {
-                // CurrentUser.SerializePreferences will update the User.PreferencesRaw field..
-                DB.SubmitChanges();
-            }
-
-            if (_cookie != null && Cookie.IsWritable) Cookie.Write();
-             */
             base.OnResultExecuted(filterContext);
         }
 
@@ -308,17 +295,6 @@ namespace StackExchange.DataExplorer.Controllers {
             }
 
             _currentUser.IPAddress = Request.UserHostAddress;
-        }
-
-
-        /// <summary>
-        /// Adds the 'message' to the current ViewData under the key ViewDataKeys.Error.
-        /// </summary>
-        protected void AddError(string message) {
-            if (ViewData.ContainsKey(ViewDataKeys.Error)) {
-                message = (string)ViewData[ViewDataKeys.Error] + message;
-            }
-            ViewData[ViewDataKeys.Error] = message;
         }
 
 

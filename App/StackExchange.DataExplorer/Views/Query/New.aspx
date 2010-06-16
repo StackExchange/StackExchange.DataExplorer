@@ -20,7 +20,7 @@
       if (query != null) {
         sql = Html.Encode(query.QueryBody);
       } else {
-        sql = Html.Encode("-- Enter Query Title\n-- Enter Query Description");
+        sql = StackExchange.DataExplorer.Helpers.ParsedQuery.DefaultComment;
       }
 
       StackExchange.DataExplorer.Models.CachedResult cached_results = ViewData["cached_results"] as StackExchange.DataExplorer.Models.CachedResult;
@@ -30,8 +30,8 @@
     <div id="queryText">
         <div>
           <div id="queryInfo">
-            <h2><%= (query != null && query.Name != null) ? query.Name : "Enter Query Title" %></h2>
-            <p><%= (query != null && query.Description != null) ? query.Description : "Enter Query Description" %></p>
+            <h2><%= (query != null && query.Name != null) ? query.Name : StackExchange.DataExplorer.Helpers.ParsedQuery.DEFAULT_NAME %></h2>
+            <p><%= (query != null && query.Description != null) ? query.Description : StackExchange.DataExplorer.Helpers.ParsedQuery.DEFAULT_DESCRIPTION %></p>
           </div>
           <%= Html.Partial("AboutSite", Model) %>
           <div class="clear"></div>

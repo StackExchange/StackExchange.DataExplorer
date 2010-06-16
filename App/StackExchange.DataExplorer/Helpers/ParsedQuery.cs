@@ -8,6 +8,14 @@ using System.Text.RegularExpressions;
 
 namespace StackExchange.DataExplorer.Helpers {
     public class ParsedQuery {
+        public const string DEFAULT_NAME = "Enter Query Title";
+        public const string DEFAULT_DESCRIPTION = "Enter Query Description";
+
+        public static string DefaultComment {
+            get {
+                return string.Format("-- {0}\n-- {1}",DEFAULT_NAME, DEFAULT_DESCRIPTION);
+            }
+        }
 
         static Regex paramsRegex = new Regex("##([a-zA-Z0-9]+)##");
 
@@ -22,7 +30,9 @@ namespace StackExchange.DataExplorer.Helpers {
 
             bool commentParsed = false;
 
-            StringBuilder sqlWithoutComment = new StringBuilder(); 
+            StringBuilder sqlWithoutComment = new StringBuilder();
+
+            bool gotName = false;
 
             foreach (string line in rawSql.Split('\n')) {
                 if (commentParsed || !line.StartsWith("--")) {
@@ -33,9 +43,17 @@ namespace StackExchange.DataExplorer.Helpers {
 
                 var trimmed = line.Substring(2).Trim();
 
-                if (Name == null) {
-                    Name = trimmed;
+                if (!gotName) {
+                    gotName = true;
+                    if (trimmed != DEFAULT_NAME) {
+                        Name = trimmed;
+                    }
                 } else {
+
+                    if (trimmed == DEFAULT_DESCRIPTION) {
+                        continue;
+                    }
+
                     if (gotDescription) {
                         description.Append('\n'); 
                     }

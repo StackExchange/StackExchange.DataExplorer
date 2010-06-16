@@ -15,6 +15,11 @@ Configuring the databases:
 
 - Contributing Patches
 
+1. Install a mercurial client such as tortoiseHG: http://tortoisehg.bitbucket.org/
+2. Create a clone of the current trunk in google code on this page: https://code.google.com/p/stack-exchange-data-explorer/source/checkout
+3. Check out your clone
+4. Commit your changes to the clone 
+5. Open up a question on meta.stackoverflow.com asking for your change to be merged, tag it data-explorer
 
 
 Full list of all third party software used to build Data Explorer:
@@ -26,3 +31,4 @@ Full list of all third party software used to build Data Explorer:
 - JSon.Net: http://james.newtonking.com/projects/json-net.aspx
 - DotNetOpenAuth: http://james.newtonking.com/projects/json-net.aspx
 - YUI Compressor: http://developer.yahoo.com/yui/compressor/
+- Slick Grid: http://github.com/mleibman/SlickGrid

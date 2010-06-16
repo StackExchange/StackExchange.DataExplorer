@@ -791,7 +791,7 @@ float: right;
 font-weight:bold;
 }
 
-.querylist .views, .querylist .favorites {
+.querylist .views  {
   color: #555;
   width: 45px;
   margin-right: 3px;
@@ -799,6 +799,17 @@ font-weight:bold;
   padding: 5px 6px;
   text-align: center;
 }
+
+.querylist .favorites {
+  width: 30px;
+  margin-right: 3px;
+  padding: 1px 6px;
+  text-align: center;
+}
+
+.querylist .favorites .star-off {
+  cursor:default;
+ }
 
 .querylist .views {
    color:#999;  

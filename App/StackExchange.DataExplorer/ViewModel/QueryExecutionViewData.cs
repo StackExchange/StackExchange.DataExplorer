@@ -3,9 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using StackExchange.DataExplorer.Models;
+using System.Text;
 
 namespace StackExchange.DataExplorer.ViewModel {
     public struct QueryExecutionViewData {
+
+        public QueryVoting QueryVoting {
+            get {
+                return new QueryVoting() { 
+                  HasVoted = false, 
+                  TotalVotes = FavoriteCount,
+                  ReadOnly = true
+                };
+            }
+        }
 
         public bool Featured { get; set; }
         public bool Skipped { get; set; }
@@ -32,7 +43,7 @@ namespace StackExchange.DataExplorer.ViewModel {
         private string description;
         public string Description { 
             get {
-                return description ?? SQL; 
+                return description ?? StripInitialComments(SQL); 
             }
             set {
                 description = value;
@@ -49,9 +60,26 @@ namespace StackExchange.DataExplorer.ViewModel {
             }
         }
 
+        private string StripInitialComments(string str) {
+            StringBuilder sb = new StringBuilder();
+
+            bool atStart = true; 
+            foreach (var line in str.Split('\n'))
+	        {
+                if (atStart && (line.StartsWith("--") || line.Trim() == "")) {
+                    continue;
+                }
+                atStart = false;
+                sb.AppendLine(line); 
+	        }
+           
+
+            return sb.ToString();
+        }
+
         private string ShortSqlExcerpt {
             get {
-                var str = SQL;
+                var str = StripInitialComments(SQL);
                 if (str.Length > 80) {
                     str = str.Substring(0, 80);
                     str += " ...";

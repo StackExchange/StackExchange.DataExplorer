@@ -154,7 +154,6 @@
     <Content Include="Content\images\icon-odatafeed-32x32.png" />
     <Content Include="Content\images\see_logo.png" />
     <Content Include="Content\images\windows_azure_logo.png" />
-    <Content Include="Content\jquery.treeview.css" />
     <Content Include="Content\packaged\editor.js" />
     <Content Include="Content\packaged\sitecss.css" />
     <Content Include="Content\packaged\viewer.js" />
@@ -198,11 +197,9 @@
     <Content Include="Content\smoothness\images\ui-icons_888888_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
     <Content Include="Content\smoothness\jquery-ui-1.8.1.custom.css" />
-    <Content Include="Content\ui.jqgrid.css" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\jquery-1.4.2.js" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
-    <Content Include="Scripts\jquery.treeview.js" />
     <Content Include="Views\Admin\Index.aspx" />
     <Content Include="Views\Error\PageNotFound.aspx" />
     <Content Include="Views\Home\Faq.aspx" />
@@ -235,12 +232,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Content\site.css" />
-    <Content Include="Scripts\MicrosoftAjax.js" />
-    <Content Include="Scripts\MicrosoftAjax.debug.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
-    <Content Include="Scripts\MicrosoftMvcValidation.js" />
-    <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
     <Content Include="Views\Account\LogIn.aspx" />
     <Content Include="Views\Home\About.aspx" />
     <Content Include="Views\Home\Index.aspx" />

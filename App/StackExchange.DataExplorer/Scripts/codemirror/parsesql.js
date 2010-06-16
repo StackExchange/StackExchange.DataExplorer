@@ -32,7 +32,7 @@ var SqlParser = Editor.Parser = (function() {
   ]);
 
   var keywords = wordRegexp([
-    "alter", "grant", "revoke", "primary", "key", "table", "start",
+    "alter", "grant", "revoke", "primary", "key", "table", "start", "top",
     "transaction", "select", "update", "insert", "delete", "create", "describe",
     "from", "into", "values", "where", "join", "inner", "left", "natural", "and",
     "or", "in", "not", "xor", "like", "using", "on", "order", "group", "by",

@@ -67,8 +67,10 @@
       <% foreach (var query in Model) { %>
       <li>
         <div class="favorites">
-          <span class="totalFavorites"><%= query.FavoriteCount %></span> 
-          <span class="favoriteDesc"><%= "favorite".Pluralize(query.FavoriteCount) %></span>
+          <% if (query.FavoriteCount > 0) { %>
+            <span title="You can favorite this query if you navigate to it" class="star-off"></span>
+            <div class="favoritecount"><b><%= query.FavoriteCount%></b></div>
+          <% } %>
         </div>
         <div class="views">
           <span class="totalViews"><%= query.Views %></span> 
