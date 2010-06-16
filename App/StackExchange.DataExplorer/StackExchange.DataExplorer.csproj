@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E3A21146-D76B-487D-96A8-9D15222662FE}</ProjectGuid>
+    <ProjectTypeGuids>{F85E285D-A4E0-4152-9332-AB1D724D3325};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>StackExchange.DataExplorer</RootNamespace>
+    <AssemblyName>StackExchange.DataExplorer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PublishDatabaseSettings>
+      <Objects>
+      </Objects>
+    </PublishDatabaseSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DotNetOpenAuth">
+      <HintPath>..\..\Lib\DotNetOpenAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\Lib\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="MarkdownSharp">
+      <HintPath>..\..\Lib\MarkdownSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Diagnostics" />
+    <Reference Include="Microsoft.WindowsAzure.ServiceRuntime" />
+    <Reference Include="Microsoft.WindowsAzure.StorageClient" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\Lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SimpleErrorHandler">
+      <HintPath>..\..\Lib\SimpleErrorHandler.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web.Mobile" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssetPackager.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\LegalController.cs" />
+    <Compile Include="Controllers\SavedQueryController.cs" />
+    <Compile Include="Controllers\StackOverflowController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\QueryController.cs" />
+    <Compile Include="Controllers\SiteController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Controllers\VoteController.cs" />
+    <Compile Include="Current.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\Crc16.cs" />
+    <Compile Include="Helpers\CsvResult.cs" />
+    <Compile Include="Helpers\DataKeys.cs" />
+    <Compile Include="Helpers\HtmlUtilities.cs" />
+    <Compile Include="Helpers\Inflector.cs" />
+    <Compile Include="Helpers\JsonpResult.cs" />
+    <Compile Include="Helpers\ModeratorOnlyAttribute.cs" />
+    <Compile Include="Helpers\PagedList.cs" />
+    <Compile Include="Helpers\PageNumber.cs" />
+    <Compile Include="Helpers\PageSizer.cs" />
+    <Compile Include="Helpers\ParsedQuery.cs" />
+    <Compile Include="Helpers\QueryViewTracker.cs" />
+    <Compile Include="Helpers\QueryResults.cs" />
+    <Compile Include="Helpers\RouteAttribute.cs" />
+    <Compile Include="Helpers\RoutePriority.cs" />
+    <Compile Include="Helpers\Util.cs" />
+    <Compile Include="Helpers\XSRFSafeAttribute.cs" />
+    <Compile Include="Models\DBContext.cs">
+      <DependentUpon>DBContext.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DBContext1.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DBContext.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Query.cs" />
+    <Compile Include="Models\SavedQuery.cs" />
+    <Compile Include="Models\SaveQueryMetadata.cs" />
+    <Compile Include="Models\Site.cs" />
+    <Compile Include="Models\TableInfo.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\VoteType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Helpers\QueryRunner.cs" />
+    <Compile Include="ViewModel\QueryExecutionViewData.cs" />
+    <Compile Include="ViewModel\QueryVoting.cs" />
+    <Compile Include="ViewModel\SubHeader.cs" />
+    <Compile Include="ViewModel\SubHeaderViewData.cs" />
+    <Compile Include="WebRole.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\codemirror\sqlcolors.css" />
+    <Content Include="Content\images\csv_ico.gif" />
+    <Content Include="Content\images\edgar.jpg" />
+    <Content Include="Content\images\grippie.png" />
+    <Content Include="Content\images\icon-odatafeed-14x14.png" />
+    <Content Include="Content\images\icon-odatafeed-24x24.png" />
+    <Content Include="Content\images\icon-odatafeed-28x28.png" />
+    <Content Include="Content\images\icon-odatafeed-32x32.png" />
+    <Content Include="Content\images\see_logo.png" />
+    <Content Include="Content\images\windows_azure_logo.png" />
+    <Content Include="Content\jquery.treeview.css" />
+    <Content Include="Content\packaged\editor.js" />
+    <Content Include="Content\packaged\sitecss.css" />
+    <Content Include="Content\packaged\viewer.js" />
+    <Content Include="Content\packaged\viewer_editor.css" />
+    <Content Include="Content\slickgrid\slick.grid.css" />
+    <Content Include="favicon.ico" />
+    <Content Include="Scripts\codemirror\codemirror.js" />
+    <Content Include="Scripts\codemirror\editor.js" />
+    <Content Include="Scripts\codemirror\highlight.js" />
+    <Content Include="Scripts\codemirror\mirrorframe.js" />
+    <Content Include="Scripts\codemirror\parsecss.js" />
+    <Content Include="Scripts\codemirror\parsedummy.js" />
+    <Content Include="Scripts\codemirror\parsehtmlmixed.js" />
+    <Content Include="Scripts\codemirror\parsejavascript.js" />
+    <Content Include="Scripts\codemirror\parsesparql.js" />
+    <Content Include="Scripts\codemirror\parsesql.js" />
+    <Content Include="Scripts\codemirror\parsexml.js" />
+    <Content Include="Scripts\codemirror\select.js" />
+    <Content Include="Scripts\codemirror\stringstream.js" />
+    <Content Include="Scripts\codemirror\tokenize.js" />
+    <Content Include="Scripts\codemirror\tokenizejavascript.js" />
+    <Content Include="Scripts\codemirror\undo.js" />
+    <Content Include="Scripts\codemirror\util.js" />
+    <Content Include="Scripts\jquery-ui-1.8.1.custom.min.js" />
+    <Content Include="Scripts\jquery.event.drag-1.5.js" />
+    <Content Include="Scripts\jquery.rule.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\query.js" />
+    <Content Include="Scripts\slick.grid.js" />
+    <Content Include="Content\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\smoothness\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Content\smoothness\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Content\smoothness\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\smoothness\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Content\smoothness\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Content\smoothness\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\smoothness\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Content\smoothness\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\smoothness\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\smoothness\images\ui-icons_454545_256x240.png" />
+    <Content Include="Content\smoothness\images\ui-icons_888888_256x240.png" />
+    <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\smoothness\jquery-ui-1.8.1.custom.css" />
+    <Content Include="Content\ui.jqgrid.css" />
+    <Content Include="Global.asax" />
+    <Content Include="Scripts\jquery-1.4.2.js" />
+    <Content Include="Scripts\jquery.textarearesizer.js" />
+    <Content Include="Scripts\jquery.treeview.js" />
+    <Content Include="Views\Admin\Index.aspx" />
+    <Content Include="Views\Error\PageNotFound.aspx" />
+    <Content Include="Views\Home\Faq.aspx" />
+    <Content Include="Views\Legal\ContentPolicy.aspx" />
+    <Content Include="Views\Legal\PrivacyPolicy.aspx" />
+    <Content Include="Views\Legal\TermsOfService.aspx" />
+    <Content Include="Views\Legal\TrademarkGuidance.aspx" />
+    <Content Include="Views\SavedQuery\Index.aspx" />
+    <Content Include="Views\SavedQuery\Show.aspx" />
+    <Content Include="Views\Shared\AboutSite.ascx" />
+    <Content Include="Views\Shared\GuessedUserId.ascx" />
+    <Content Include="Views\Shared\Menu.ascx" />
+    <Content Include="Views\Shared\PageNumbers.ascx" />
+    <Content Include="Views\Shared\PageSizer.ascx" />
+    <Content Include="Views\Shared\QueryVoting.ascx" />
+    <Content Include="Views\Shared\SubHeader.ascx" />
+    <Content Include="Views\Query\New.aspx" />
+    <Content Include="Views\Shared\TaglineWithOData.ascx" />
+    <Content Include="Views\Shared\User.ascx" />
+    <Content Include="Views\User\Edit.aspx" />
+    <Content Include="Views\User\Index.aspx" />
+    <Content Include="Views\User\Show.aspx" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Content\site.css" />
+    <Content Include="Scripts\MicrosoftAjax.js" />
+    <Content Include="Scripts\MicrosoftAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
+    <Content Include="Views\Account\LogIn.aspx" />
+    <Content Include="Views\Home\About.aspx" />
+    <Content Include="Views\Home\Index.aspx" />
+    <Content Include="Views\Shared\Error.aspx" />
+    <Content Include="Views\Shared\LogInUserControl.ascx" />
+    <Content Include="Views\Shared\Site.Master" />
+    <Content Include="Views\Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="Views\Site\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Models\DBContext.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>DBContext1.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Models\DBContext.dbml.views">
+      <DependentUpon>DBContext.dbml</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Models\DBContext.dbml.layout">
+      <DependentUpon>DBContext.dbml</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Models\DBContext.dbml.views_def.layout">
+      <DependentUpon>DBContext.dbml</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target> -->
+  <Target Name="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(ProjectDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>51051</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Debug goto :exit
+del /q $(ProjectDir)\Content\packaged\*.*
+$(SolutionDir)\..\Tools\AssetPackager.exe $(ProjectDir)
+:exit</PostBuildEvent>
+  </PropertyGroup>
+</Project>

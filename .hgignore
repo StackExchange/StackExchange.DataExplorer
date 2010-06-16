@@ -1,0 +1,6 @@
+glob:*/bin/*
+glob:*/obj/*
+glob:*.user
+glob:*.suo
+glob:Web.Release.config
+glob:Content/packaged/*

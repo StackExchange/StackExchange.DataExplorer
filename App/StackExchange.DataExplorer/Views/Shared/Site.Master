@@ -1,0 +1,86 @@
+﻿<%@ Master Language="C#" Inherits="System.Web.Mvc.ViewMasterPage" %>
+<%@ Import Namespace="StackExchange.DataExplorer" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+  <title>
+    <asp:ContentPlaceHolder ID="TitleContent" runat="server" />
+  </title>
+  <% StackExchange.DataExplorer.Models.Site site = StackExchange.DataExplorer.Current.Controller.Site; %>
+  <% if (site != null) { %>
+    <%= string.Format("<link rel=\"odata.service\" title=\"{0}\" href=\"{1}\"/>", site.Name, site.ODataEndpoint) %>
+  <% } %>
+  <%= AssetPackager.LinkCSS("sitecss")%>
+
+ 
+  
+  <asp:ContentPlaceHolder ID="AdditionalStyles" runat="server" />
+</head>
+<body>
+  <div class="page">
+    <div id="header">
+      <div id="topbar">
+        <div id="hlinks">
+          <% Html.RenderPartial("LogInUserControl"); %>
+          <span class="link-separator">|</span> <a href="/about">about</a>
+          <span class="link-separator">|</span> <a href="/faq">faq</a>
+        </div>
+      </div>
+      <div class="clear">
+      </div>
+      <div id="title">
+        <div id="hlogo">
+          <a href="/" alt="Stack Exchange Data Explorer">
+            <img src="/Content/images/see_logo.png" alt="Stack Exchange Data Explorer" width="318"
+              height="91" />
+          </a>
+        </div>
+        <% Html.RenderPartial("Menu", ViewData["Menu"]); %>
+      </div>
+      <div class="clear">
+      </div>
+    </div>
+    <% Html.RenderPartial("SubHeader", ViewData["Header"]); %>
+    <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+    <asp:ContentPlaceHolder ID="SecondaryContent" runat="server" />
+  </div>
+  <div id="footer">
+    <div class="footerwrap">
+      <div id="footer-menu">
+        <a href="/about">about</a> | <a href="/faq">faq</a> | <a href="http://blog.stackoverflow.com/">
+          blog</a> | <a href="http://itc.conversationsnetwork.org/series/stackoverflow.html">
+            podcast</a> | <a href="/legal">legal</a> | <a href="http://ads.stackoverflow.com/a.aspx?ZoneID=0&amp;BannerID=323&amp;AdvertiserID=5&amp;CampaignID=194&amp;Task=Click&amp;SiteID=1">
+              advertising info</a> | <b><a href="mailto:team@stackoverflow.com">contact us</a></b>
+        | <b><a href="http://meta.stackoverflow.com">feedback always welcome</a></b>
+        <div id="footer-sites">
+          <span style="color: rgb(254, 122, 21); font-size: 140%;">■</span>&nbsp;<a href="http://stackoverflow.com">stackoverflow.com</a>&nbsp;&nbsp;
+          <span style="color: rgb(254, 122, 21); font-size: 140%;">■</span>&nbsp;<a href="http://careers.stackoverflow.com">careers</a>&nbsp;&nbsp;
+          <span style="color: rgb(232, 39, 44); font-size: 140%;">■</span>&nbsp;<a href="http://serverfault.com">serverfault.com</a>&nbsp;&nbsp;
+          <span style="color: rgb(0, 175, 239); font-size: 140%;">■</span>&nbsp;<a href="http://superuser.com">superuser.com</a>&nbsp;&nbsp;
+          <span style="color: rgb(150, 150, 150); font-size: 140%;">■</span>&nbsp;<a href="http://meta.stackoverflow.com">meta</a>&nbsp;&nbsp;
+          <a href="http://www.howtogeek.com">howtogeek.com</a>&nbsp;&nbsp; <a href="http://doctype.com">
+            doctype.com</a>
+        </div>
+      </div>
+      <div id="footer-flair">
+        <img src="/Content/images/windows_azure_logo.png" alt="cc-wiki, Windows Azure" usemap="#footermap"
+          height="67" width="168">
+        <map name="footermap">
+          <area href="http://creativecommons.org/licenses/by-sa/2.5/" alt="cc-wiki" title="Creative Commons: Attribution - Share Alike"
+            coords="0,0,50,67">
+          <area href="http://www.microsoft.com/windowsazure/windowsazure/" alt="Windows Azure"
+            title="Windows Azure" coords="62,0,168,67">
+        </map>
+        <div id="svnrev">
+        </div>
+      </div>
+      <div id="copyright">
+        site design and logo is © 2010 stackoverflow.com llc; user contributed content licensed
+        under <a href="http://creativecommons.org/licenses/by-sa/2.5/" rel="license">cc-wiki</a>
+        with <a href="http://blog.stackoverflow.com/2009/06/attribution-required/" rel="license">
+          attribution required</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

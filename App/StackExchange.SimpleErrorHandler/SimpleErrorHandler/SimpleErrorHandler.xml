@@ -1,0 +1,538 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SimpleErrorHandler</name>
+    </assembly>
+    <members>
+        <member name="T:SimpleErrorHandler.ErrorPageBase">
+            <summary>
+            Provides the base implementation and layout for most pages that render HTML for the error log.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.ManifestResourceHandler">
+            <summary>
+            Reads a resource from the assembly manifest and returns its contents as the response entity.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.IXmlExportable">
+            <summary>
+            Defines methods to convert an object to and from its XML representation.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.IXmlExportable.FromXml(System.Xml.XmlReader)">
+            <summary>
+            Reads the object state from its XML representation.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.IXmlExportable.ToXml(System.Xml.XmlWriter)">
+            <summary>
+            Writes the XML representation of the object.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.SimpleServiceProviderFactory">
+            <summary>
+            A simple factory for creating instances of types specified in a section of the configuration file.
+            </summary>	
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorLogPageFactory">
+            <summary>
+            HTTP handler factory that dispenses handlers for rendering views and 
+            resources needed to display the error log.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogPageFactory.GetHandler(System.Web.HttpContext,System.String,System.String,System.String)">
+            <summary>
+            Returns an object that implements the <see cref="T:System.Web.IHttpHandler"/> interface and which is responsible for serving the request.
+            </summary>
+            <returns>
+            A new <see cref="T:System.Web.IHttpHandler"/> object that processes the request.
+            </returns>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogPageFactory.ReleaseHandler(System.Web.IHttpHandler)">
+            <summary>
+            Enables the factory to reuse an existing handler instance.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorLog">
+            <summary>
+            Represents an error log capable of storing and retrieving errors generated in an ASP.NET Web application.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLog.Log(SimpleErrorHandler.Error)">
+            <summary>
+            Logs an error in log for the application.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLog.GetError(System.String)">
+            <summary>
+            Retrieves a single application error from log given its identifier, or null if it does not exist.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLog.ProtectError(System.String)">
+            <summary>
+            Prevents error identfied by 'id' from being deleted when the error log is full.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLog.GetErrors(System.Int32,System.Int32,System.Collections.IList)">
+            <summary>
+            Retrieves a page of application errors from the log in descending order of logged time.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLog.Name">
+            <summary>
+            Get the name of this log.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLog.ApplicationName">
+            <summary>
+            Gets the name of the application to which the log is scoped.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLog.IgnoreRegex">
+            <summary>
+            Gets the list of exceptions to ignore specified in the configuration file
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLog.IgnoreExceptions">
+            <summary>
+            Gets the list of exceptions to ignore specified in the configuration file
+            
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLog.Default">
+            <summary>
+            Gets the default error log implementation specified in the configuration file, 
+            or the in-memory log implemention if none is configured.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorDetailPage">
+            <summary>
+            Renders an HTML page displaying details about an error from the error log.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorDetailPage.Matches(System.String,System.String)">
+            <summary>
+            returns true of the target is contained in the list;
+            presumes list is pipe delimited like |apples|oranges|pears|
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorHtmlPage">
+            <summary>
+            Renders an HTML page displaying the detailed host-generated (ASP.NET)
+            HTML recorded for an error from the error log.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.XmlErrorLog">
+            <summary>
+            An <see cref="T:SimpleErrorHandler.ErrorLog"/> implementation that uses XML files stored on disk as its backing store.
+            </summary>
+        </member>
+        <member name="F:SimpleErrorHandler.XmlErrorLog._ignoreSimilarExceptionsThreshold">
+            <summary>
+            When set in config, any new exceptions will be compared to existing exceptions within this time window.  If new exceptions match, they will be discarded.
+            Useful for when a deluge of errors comes down upon your head.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.XmlErrorLog.#ctor(System.Collections.IDictionary)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.ErrorLog"/> class
+            using a dictionary of configured settings.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.XmlErrorLog.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.ErrorLog"/> class to use a specific path to store/load XML files.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.XmlErrorLog.Log(SimpleErrorHandler.Error)">
+            <summary>
+            Logs an error to the database.
+            </summary>
+            <remarks>
+            Logs an error as a single XML file stored in a folder. XML files are named with a
+            sortable date and a unique identifier. Currently the XML files are stored indefinately.
+            As they are stored as files, they may be managed using standard scheduled jobs.
+            </remarks>
+        </member>
+        <member name="M:SimpleErrorHandler.XmlErrorLog.TryFindOriginalError(SimpleErrorHandler.Error,System.String,SimpleErrorHandler.Error@)">
+            <summary>
+            Answers the older exception that 'possibleDuplicate' matches, returning null if no match is found.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.XmlErrorLog.GetErrors(System.Int32,System.Int32,System.Collections.IList)">
+            <summary>
+            Returns a page of errors from the folder in descending order of logged time as defined by the sortable filenames.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.XmlErrorLog.GetError(System.String)">
+            <summary>
+            Returns the specified error from the filesystem, or throws an exception if it does not exist.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.XmlErrorLog.Name">
+            <summary>
+            Gets the name of this error log implementation.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorRssHandler">
+            <summary>
+            Renders a XML using the RSS 0.91 vocabulary that displays, at most,
+            the 15 most recent errors recorded in the error log.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorLogEntry">
+            <summary>
+            Binds an <see cref="P:SimpleErrorHandler.ErrorLogEntry.Error"/> instance with the <see cref="T:SimpleErrorHandler.ErrorLog"/> instance from where it was served.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogEntry.#ctor(SimpleErrorHandler.ErrorLog,System.String,SimpleErrorHandler.Error)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.ErrorLogEntry"/> class for a given unique error entry in an error log.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLogEntry.Log">
+            <summary>
+            Gets the <see cref="T:SimpleErrorHandler.ErrorLog"/> instance where this entry originated from.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLogEntry.Id">
+            <summary>
+            Gets the unique identifier that identifies the error entry in the log.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLogEntry.Error">
+            <summary>
+            Gets the <see cref="P:SimpleErrorHandler.ErrorLogEntry.Error"/> object held in the entry.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.Error">
+            <summary>
+            Represents a logical application error (as opposed to the actual exception it may be representing).
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.Error"/> class.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.#ctor(System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.Error"/> class from a given <see cref="P:SimpleErrorHandler.Error.Exception"/> instance.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.#ctor(System.Exception,System.Web.HttpContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.Error"/> class
+            from a given <see cref="P:SimpleErrorHandler.Error.Exception"/> instance and 
+            <see cref="T:System.Web.HttpContext"/> instance representing the HTTP 
+            context during the exception.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.ToString">
+            <summary>
+            Returns the value of the <see cref="P:SimpleErrorHandler.Error.Message"/> property.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.FromXml(System.Xml.XmlReader)">
+            <summary>
+            Loads the error object from its XML representation.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.ReadXmlAttributes(System.Xml.XmlReader)">
+            <summary>
+            Reads the error data in XML attributes.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.ReadInnerXml(System.Xml.XmlReader)">
+            <summary>
+            Reads the error data in child nodes.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.ToXml(System.Xml.XmlWriter)">
+            <summary>
+            Writes the error data to its XML representation.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.WriteXmlAttributes(System.Xml.XmlWriter)">
+            <summary>
+            Writes the error data that belongs in XML attributes.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.WriteInnerXml(System.Xml.XmlWriter)">
+            <summary>
+            Writes the error data that belongs in child nodes.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.Error.System#ICloneable#Clone">
+            <summary>
+            Creates a new object that is a copy of the current instance.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.IsProtected">
+            <summary>
+            For XmlErrorLog only - reflects the xml file's "Read Only" file attribute.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Exception">
+            <summary>
+            Get the <see cref="P:SimpleErrorHandler.Error.Exception"/> instance used to initialize this instance.
+            </summary>
+            <remarks>
+            This is a run-time property only that is not written or read 
+            during XML serialization via <see cref="M:SimpleErrorHandler.Error.FromXml(System.Xml.XmlReader)"/> and 
+            <see cref="M:SimpleErrorHandler.Error.ToXml(System.Xml.XmlWriter)"/>.
+            </remarks>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.ApplicationName">
+            <summary>
+            Gets or sets the name of application in which this error occurred.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.HostName">
+            <summary>
+            Gets or sets name of host machine where this error occurred.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Type">
+            <summary>
+            Get or sets the type, class or category of the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Source">
+            <summary>
+            Gets or sets the source that is the cause of the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Message">
+            <summary>
+            Gets or sets a brief text describing the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Detail">
+            <summary>
+            Gets or sets a detailed text describing the error, such as a
+            stack trace.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.User">
+            <summary>
+            Gets or sets the user logged into the application at the time of the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Time">
+            <summary>
+            Gets or sets the date and time (in local time) at which the error occurred.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.StatusCode">
+            <summary>
+            Gets or sets the HTTP status code of the output returned to the client for the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.WebHostHtmlMessage">
+            <summary>
+            Gets or sets the HTML message generated by the web host (ASP.NET) for the given error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.ServerVariables">
+            <summary>
+            Gets a collection representing the Web server variables captured as part of diagnostic data for the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.QueryString">
+            <summary>
+            Gets a collection representing the Web query string variables captured as part of diagnostic data for the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Form">
+            <summary>
+            Gets a collection representing the form variables captured as part of diagnostic data for the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.Cookies">
+            <summary>
+            Gets a collection representing the client cookies captured as part of diagnostic data for the error.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.Error.DuplicateCount">
+            <summary>
+            The number of newer Errors that have been discarded because they match this Error and fall within the configured 
+            "IgnoreSimilarExceptionsThreshold" TimeSpan value.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.HttpValuesCollection">
+            <summary>
+            A name-values collection implementation suitable for web-based collections 
+            (like server variables, query strings, forms and cookies) that can also
+            be written and read as XML.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ExtensionMethods.ToRelativeTimeSpan(System.DateTime)">
+            <summary>
+            returns a html span element with relative time elapsed since this event occurred, eg, "3 months ago" or "yesterday"; 
+            assumes time is *already* stored in UTC format!
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ExtensionMethods.ToRelativeTime(System.DateTime)">
+            <summary>
+            Returns a humanized string indicating how long ago something happened, eg "3 days ago".
+            For future dates, returns when this DateTime will occur from DateTime.UtcNow.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ExtensionMethods.Truncate(System.String,System.Int32)">
+            <summary>
+            force string to be maxlen or smaller
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ExtensionMethods.TruncateWithEllipsis(System.String,System.Int32)">
+            <summary>
+            If this String is over 'maxLength', answers a new String with Length = 'maxLength', with ...
+            as the final three characters.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ExtensionMethods.IsNullOrEmpty(System.String)">
+            <summary>
+            Answers true if this String is either null or empty.
+            </summary>
+            <remarks>I'm so tired of typing String.IsNullOrEmpty(s)</remarks>
+        </member>
+        <member name="M:SimpleErrorHandler.ExtensionMethods.HasValue(System.String)">
+            <summary>
+            Answers true if this String is neither null or empty.
+            </summary>
+            <remarks>I'm also tired of typing !String.IsNullOrEmpty(s)</remarks>
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorLogModule">
+            <summary>
+            HTTP module implementation that logs unhandled exceptions in an ASP.NET Web application to an error log.
+            </summary>   
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogModule.Init(System.Web.HttpApplication)">
+            <summary>
+            Initializes the module and prepares it to handle requests.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogModule.Dispose">
+            <summary>
+            Disposes of the resources (other than memory) used by the module.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogModule.IsDescendentOf(System.Type,System.String)">
+            <summary>
+            Returns true if t is of className, or descendent from className
+            </summary>
+            <param name="t"></param>
+            <param name="className"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogModule.OnError(System.Object,System.EventArgs)">
+            <summary>
+            The handler called when an unhandled exception bubbles up to the module.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogModule.LogException(System.Exception,System.Web.HttpContext)">
+            <summary>
+            Logs an exception and its context to the error log.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.ErrorLogModule.ErrorLog">
+            <summary>
+            Gets the <see cref="P:SimpleErrorHandler.ErrorLogModule.ErrorLog"/> instance to which the module will log exceptions.
+            </summary>        
+        </member>
+        <member name="T:SimpleErrorHandler.PoweredBy">
+            <summary>
+            Displays a "Powered-by" message that also contains the assembly
+            file version informatin and copyright notice.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.PoweredBy.RenderContents(System.Web.UI.HtmlTextWriter)">
+            <summary>
+            Renders the contents of the control into the specified writer
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.MemoryErrorLog">
+            <summary>
+            An <see cref="T:SimpleErrorHandler.ErrorLog"/> implementation that uses memory as its backing store. 
+            </summary>
+            <remarks>
+            All <see cref="T:SimpleErrorHandler.MemoryErrorLog"/> instances will share the same memory 
+            store that is bound to the application (not an instance of this class).
+            </remarks>
+        </member>
+        <member name="F:SimpleErrorHandler.MemoryErrorLog.MaximumSize">
+            <summary>
+            The maximum number of errors that will ever be allowed to be stored
+            in memory.
+            </summary>
+        </member>
+        <member name="F:SimpleErrorHandler.MemoryErrorLog.DefaultSize">
+            <summary>
+            The maximum number of errors that will be held in memory by default 
+            if no size is specified.
+            </summary>        
+        </member>
+        <member name="M:SimpleErrorHandler.MemoryErrorLog.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.MemoryErrorLog"/> class
+            with a default size for maximum recordable entries.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.MemoryErrorLog.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.MemoryErrorLog"/> class
+            with a specific size for maximum recordable entries.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.MemoryErrorLog.#ctor(System.Collections.IDictionary)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SimpleErrorHandler.MemoryErrorLog"/> class
+            using a dictionary of configured settings.
+            </summary>        
+        </member>
+        <member name="M:SimpleErrorHandler.MemoryErrorLog.Log(SimpleErrorHandler.Error)">
+            <summary>
+            Logs an error to the application memory.
+            </summary>
+            <remarks>
+            If the log is full then the oldest error entry is removed.
+            </remarks>
+        </member>
+        <member name="M:SimpleErrorHandler.MemoryErrorLog.GetError(System.String)">
+            <summary>
+            Returns the specified error from application memory, or null if it does not exist.
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.MemoryErrorLog.GetErrors(System.Int32,System.Int32,System.Collections.IList)">
+            <summary>
+            Returns a page of errors from the application memory in descending order of logged time.
+            </summary>
+        </member>
+        <member name="P:SimpleErrorHandler.MemoryErrorLog.Name">
+            <summary>
+            Gets the name of this error log implementation.
+            </summary>
+        </member>
+        <member name="T:SimpleErrorHandler.ErrorLogPage">
+            <summary>
+            Renders an HTML page displaying a page of errors from the error log.
+            </summary>
+        </member>
+        <member name="F:SimpleErrorHandler.ErrorLogPage.UnknownIP">
+            <summary>
+            When a client IP can't be determined
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogPage.IsPrivateIP(System.String)">
+            <summary>
+            returns true if this is a private network IP  
+            http://en.wikipedia.org/wiki/Private_network
+            </summary>
+        </member>
+        <member name="M:SimpleErrorHandler.ErrorLogPage.GetRemoteIP(System.Collections.Specialized.NameValueCollection)">
+            <summary>
+            retrieves the IP address of the current request -- handles proxies and private networks
+            </summary>
+        </member>
+    </members>
+</doc>
