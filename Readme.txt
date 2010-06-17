@@ -4,8 +4,23 @@ Quick Guide to Data Explorer:
 
 Pre-reqs: 
 
+- For Javascript hacking only: A web browser
+
+- For back end changes:
 - Visual Studio 2010
 - SQL Server Express or above
+
+
+The File layout
+
+- If you would like to hack on the grid or the SQL editor (change syntax highlighting, experiment with new javascript features) checkout the Static directory. 
+   The Static directory contains a single page with the grid and editor. It refrences the main js and css files in the project. 
+
+
+- The Lib directory contains all the 3rd party libraries we use
+- The Tools directory contains exes that help in the build process 
+- The App directory contains the actual SEDE app
+
 
 Configuring the databases:
 
