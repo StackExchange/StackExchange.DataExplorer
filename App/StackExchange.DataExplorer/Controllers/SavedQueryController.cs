@@ -31,7 +31,12 @@ namespace StackExchange.DataExplorer.Controllers
 
             SelectMenuItem("Queries");
 
-            var savedQuery = db.SavedQueries.First(q => q.Id == id);
+            var savedQuery = db.SavedQueries.FirstOrDefault(q => q.Id == id);
+
+            if (savedQuery == null) {
+                return this.PageNotFound();
+            }
+
             SetHeader(savedQuery.Title);
 
 
@@ -66,7 +71,9 @@ namespace StackExchange.DataExplorer.Controllers
             
             }
 
-
+            if (!IsSearchEngine()) {
+                QueryViewTracker.TrackQueryView(GetRemoteIP(), savedQuery.Query.Id);
+            }
 
             return View(savedQuery); 
         }

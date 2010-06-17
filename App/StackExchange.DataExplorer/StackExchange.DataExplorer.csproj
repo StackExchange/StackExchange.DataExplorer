@@ -109,7 +109,6 @@
     <Compile Include="Helpers\HtmlUtilities.cs" />
     <Compile Include="Helpers\Inflector.cs" />
     <Compile Include="Helpers\JsonpResult.cs" />
-    <Compile Include="Helpers\ModeratorOnlyAttribute.cs" />
     <Compile Include="Helpers\PagedList.cs" />
     <Compile Include="Helpers\PageNumber.cs" />
     <Compile Include="Helpers\PageSizer.cs" />
@@ -201,7 +200,7 @@
     <Content Include="Scripts\jquery-1.4.2.js" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
     <Content Include="Views\Admin\Index.aspx" />
-    <Content Include="Views\Error\PageNotFound.aspx" />
+    <Content Include="Views\Shared\PageNotFound.aspx" />
     <Content Include="Views\Home\Faq.aspx" />
     <Content Include="Views\Legal\ContentPolicy.aspx" />
     <Content Include="Views\Legal\PrivacyPolicy.aspx" />

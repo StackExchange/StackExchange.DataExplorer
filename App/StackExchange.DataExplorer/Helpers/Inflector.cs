@@ -1,5 +1,4 @@
-﻿
-// 
+﻿// 
 //   SubSonic - http://subsonicproject.com
 // 
 //   The contents of this file are subject to the New BSD

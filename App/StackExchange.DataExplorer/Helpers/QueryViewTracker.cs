@@ -9,7 +9,7 @@ namespace StackExchange.DataExplorer.Helpers {
 
         const int VIEW_EXPIRES_SECS = 15 * 60; // view information expires in 15 minutes
 
-        // TODO: batch this up 
+        // TODO: we may consider batching this up for performance sake
         public static void TrackQueryView(string ipAddress, int queryId) {
             if (IsNewView(ipAddress, queryId)) {
                 Current.DB.ExecuteCommand("update Queries set Views = Views + 1 where Id = " + queryId.ToString());

@@ -65,7 +65,11 @@ namespace StackExchange.DataExplorer.Controllers {
         [Route("users/{id}")]
         [Route("users/{id}/{ignore}")]
         public ActionResult Show(int id, object ignore, string order_by) {
-            var user = Current.DB.Users.First(row => row.Id == id);
+            var user = Current.DB.Users.FirstOrDefault(row => row.Id == id);
+            if (user == null) {
+                return PageNotFound();
+            }
+
             var db = Current.DB;
 
             SetHeader(user.Login);
