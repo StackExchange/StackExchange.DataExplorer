@@ -166,9 +166,25 @@ namespace StackExchange.DataExplorer.Controllers {
             ViewData["Queries"] = queriesArray;
             if (queriesArray.Length == 0) {
                 if (order_by == "recent") {
-                    ViewData["EmptyMessage"] = "You have never ran any queries!";
-                } else {
-                    ViewData["EmptyMessage"] = "You have no saved queries, you can save any query after you run it!";
+                    if (user.Id == CurrentUser.Id) {
+                        ViewData["EmptyMessage"] = "You have never ran any queries";
+                    } else {
+                        ViewData["EmptyMessage"] = "No queries ran recently";
+                    }
+                } else if (order_by == "favorite") {
+                    if (user.Id == CurrentUser.Id) {
+                        ViewData["EmptyMessage"] = "You have no favorite queries, click the star icon on a query to favorite it";
+                    } else {
+                        ViewData["EmptyMessage"] = "No favorites";
+                    }
+                } 
+                else 
+                {
+                    if (user.Id == CurrentUser.Id) {
+                        ViewData["EmptyMessage"] = "You have no saved queries, you can save any query after you run it";
+                    } else {
+                        ViewData["EmptyMessage"] = "No saved queries";
+                    }
                 }
             } 
             return View(user);
