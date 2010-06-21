@@ -20,12 +20,13 @@ The File layout
 - The Lib directory contains all the 3rd party libraries we use
 - The Tools directory contains exes that help in the build process 
 - The App directory contains the actual SEDE app
+- The Data directory contains a blank schema for a "Stack" site and the schema for data explorer.
 
 
 Configuring the databases:
 
-- Deploy the DataExplorer database project
-- Import data into the StackOverflow database (and any other databases you wish to query) 
+- Either: deploy the DataExplorer database project OR run the Data/dataexplorer.sql 
+- Import data into the StackOverflow database (and any other databases you wish to query) alternatively if a DB exists you can simple run queries that do not depend on data like "SELECT 1"  
 
 
 - Contributing Patches
