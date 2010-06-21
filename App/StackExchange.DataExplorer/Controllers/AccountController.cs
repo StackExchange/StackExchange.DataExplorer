@@ -21,13 +21,6 @@ namespace StackExchange.DataExplorer.Controllers {
 
         private static OpenIdRelyingParty openid = new OpenIdRelyingParty();
 
-		public ActionResult Index() {
-			if (!User.Identity.IsAuthenticated) {
-				Response.Redirect("~/account/login?ReturnUrl=Index");
-			}
-
-			return View("Index");
-		}
 
         [Helpers.Route("account/logout")]
 		public ActionResult Logout() {

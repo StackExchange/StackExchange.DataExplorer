@@ -79,7 +79,7 @@
               <div class="overlay">&nbsp;</div>
               <div class="dialog">
                 <label>Title</label>
-                <input type="text" name="title"" value="" class="title"/>
+                <input type="text" name="title" value="" class="title"/>
                 <textarea name="description" class="description" cols="80" rows="5"></textarea>
                 <div class="savePanel">
                   <input type="submit" class="save" name="saveButton" value="Save"/>

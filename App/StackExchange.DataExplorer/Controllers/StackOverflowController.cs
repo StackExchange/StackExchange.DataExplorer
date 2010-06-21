@@ -59,7 +59,8 @@ namespace StackExchange.DataExplorer.Controllers {
             watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 #endif
-
+           
+            
             Current.Controller = this; // allow code to easily find this controller
             ValidateRequest = false; // allow html/sql in form values - remember to validate!
             base.Initialize(requestContext);
@@ -187,14 +188,15 @@ namespace StackExchange.DataExplorer.Controllers {
             log.Debug("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " + watch.ElapsedMilliseconds.ToString());
             System.Diagnostics.Trace.WriteLine("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " + watch.ElapsedMilliseconds.ToString());
 #endif
-            base.OnActionExecuted(filterContext);
-        }
+            
+            var host = filterContext.HttpContext.Request.Headers["Host"];
 
-        /// <summary>
-        /// fires after a View has finished execution
-        /// </summary>
-        protected override void OnResultExecuted(ResultExecutedContext filterContext) {
-            base.OnResultExecuted(filterContext);
+            if (host != null && host.StartsWith("cloudexchange.cloudapp.net")) {
+                filterContext.Result = new RedirectPermanentResult("http://odata.stackexchange.com" + filterContext.HttpContext.Request.RawUrl);
+            } else
+            {
+                base.OnActionExecuted(filterContext);
+            }
         }
 
 
@@ -237,22 +239,6 @@ namespace StackExchange.DataExplorer.Controllers {
             return GetRemoteIP(Request.ServerVariables);
         }
 
-        /// <summary>
-        /// returns true only if this request came from an internal IP address
-        /// </summary>
-        public bool IsInternalIp() {
-#if DEBUG
-            if (Current.Tier == DeploymentTier.Local) return true;
-#endif
-            // TODO: **BEWARE** this shouldn't really be hard-coded, but in the sites db table!
-            string ip = GetRemoteIP();
-            if (ip.StartsWith("69.59")) return true;
-            if (ip.StartsWith("64.34.80")) return true;
-            if (ip.StartsWith("10.0.0.")) return true;   // local private server IP range
-            if (ip.StartsWith("127.0.0.1")) return true; // loopback IP on /scheduled/ tasks
-            return false;
-        }
-
 
         private User _currentUser;
         /// <summary>
@@ -265,13 +251,6 @@ namespace StackExchange.DataExplorer.Controllers {
             }
         }
 
-        /// <summary>
-        /// When creating the CurrentUser, determines if user preferences are loaded.
-        /// True by default, override to turn off (e.g. VotesController should override this property).
-        /// </summary>
-        protected virtual bool RequiresUserPreferences {
-            get { return true; }
-        }
 
         /// <summary>
         /// initializes current user based on the current Request's cookies/authentication status. This

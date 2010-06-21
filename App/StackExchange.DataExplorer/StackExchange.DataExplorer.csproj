@@ -115,6 +115,7 @@
     <Compile Include="Helpers\ParsedQuery.cs" />
     <Compile Include="Helpers\QueryViewTracker.cs" />
     <Compile Include="Helpers\QueryResults.cs" />
+    <Compile Include="Helpers\RedirectPermanentResult.cs" />
     <Compile Include="Helpers\RouteAttribute.cs" />
     <Compile Include="Helpers\RoutePriority.cs" />
     <Compile Include="Helpers\Util.cs" />

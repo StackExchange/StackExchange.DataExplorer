@@ -13,7 +13,7 @@ namespace StackExchange.DataExplorer.Helpers {
 
         public static string DefaultComment {
             get {
-                return string.Format("-- {0}\n-- {1}",DEFAULT_NAME, DEFAULT_DESCRIPTION);
+                return string.Format("-- {0}\n-- {1}\n\n",DEFAULT_NAME, DEFAULT_DESCRIPTION);
             }
         }
 

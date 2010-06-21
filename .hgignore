@@ -5,3 +5,4 @@ glob:*.suo
 glob:Web.Release.config
 glob:Content/packaged/*
 glob:App/StackExchange.DataExplorer.DB/sql/*
+glob:App/_ReSharper.DataExplorer/*
