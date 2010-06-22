@@ -30,7 +30,7 @@ namespace StackExchange.DataExplorer.Models {
         {
            get
            {
-            return "/" + Name.ToLower() + "/api";
+            return "/" + Name.ToLower() + "/atom";
            }
 
         }

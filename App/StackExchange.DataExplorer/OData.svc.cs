@@ -37,12 +37,12 @@ namespace StackExchange.DataExplorer
             UriTemplateMatch match = WebOperationContext.Current.IncomingRequest.UriTemplateMatch;
 
             UriBuilder builder = new UriBuilder(match.BaseUri);
-            builder.Path = builder.Path.Replace("OData.svc", siteName + "/o");
+            builder.Path = builder.Path.Replace("OData.svc", siteName + "/atom");
             var serviceUri = builder.Uri;
             OperationContext.Current.IncomingMessageProperties["MicrosoftDataServicesRootUri"] = serviceUri;
 
             builder = new UriBuilder(match.RequestUri);
-            builder.Path = builder.Path.Replace("odata.svc", siteName + "/o");
+            builder.Path = builder.Path.Replace("odata.svc", siteName + "/atom");
             builder.Host = serviceUri.Host;
             OperationContext.Current.IncomingMessageProperties["MicrosoftDataServicesRequestUri"] = builder.Uri; 
 
