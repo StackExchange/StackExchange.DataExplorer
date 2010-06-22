@@ -987,8 +987,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		private System.Nullable<System.DateTime> _LastPost;
 		
-		private string _ODataEndpoint;
-		
 		private EntitySet<SavedQuery> _SavedQueries;
 		
     #region Extensibility Method Definitions
@@ -1027,8 +1025,6 @@ namespace StackExchange.DataExplorer.Models
     partial void OnTotalTagsChanged();
     partial void OnLastPostChanging(System.Nullable<System.DateTime> value);
     partial void OnLastPostChanged();
-    partial void OnODataEndpointChanging(string value);
-    partial void OnODataEndpointChanged();
     #endregion
 		
 		public Site()
@@ -1353,26 +1349,6 @@ namespace StackExchange.DataExplorer.Models
 					this._LastPost = value;
 					this.SendPropertyChanged("LastPost");
 					this.OnLastPostChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ODataEndpoint", DbType="VarChar(MAX)")]
-		public string ODataEndpoint
-		{
-			get
-			{
-				return this._ODataEndpoint;
-			}
-			set
-			{
-				if ((this._ODataEndpoint != value))
-				{
-					this.OnODataEndpointChanging(value);
-					this.SendPropertyChanging();
-					this._ODataEndpoint = value;
-					this.SendPropertyChanged("ODataEndpoint");
-					this.OnODataEndpointChanged();
 				}
 			}
 		}

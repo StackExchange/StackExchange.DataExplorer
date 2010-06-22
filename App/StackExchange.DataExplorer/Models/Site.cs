@@ -26,6 +26,14 @@ namespace StackExchange.DataExplorer.Models {
             return new SqlConnection(ConnectionString);
         }
 
+        public string ODataEndpoint
+        {
+           get
+           {
+            return "/" + Name.ToLower() + "/api";
+           }
+
+        }
 
         public void UpdateStats() {
             using (var cnn = GetConnection()) {

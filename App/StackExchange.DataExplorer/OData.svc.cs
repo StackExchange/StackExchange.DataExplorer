@@ -29,7 +29,10 @@ namespace StackExchange.DataExplorer
 
         protected override Entities CreateDataSource() {
 
-            var siteName = HttpContext.Current.Request.ServerVariables["ODATA_SITE"].ToLower();
+            // var siteName = HttpContext.Current.Request.ServerVariables["ODATA_SITE"].ToLower();
+            // YES, server vars would be nicer, but unfourtunatly pushing them through with rewrite,
+            //   requires and edit to applicationHost.config, which is super duper hairy in azure.
+            var siteName = HttpContext.Current.Request.Params["5D6DA575E16342AEB6AF9177FF673569"];
 
             UriTemplateMatch match = WebOperationContext.Current.IncomingRequest.UriTemplateMatch;
 

@@ -15,13 +15,7 @@
        Have fun remixing and reusing; all we ask is for proper attribution.
     </p>
     <p>
-      We also offer <a href="http://www.odata.org/">OData</a> endpoints for the Trilogy-of-four:
-      <ul style="margin-left: 20px;">
-       <li>Stack Overflow: <a href="https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/StackOverflow">https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/StackOverflow</a></li>
-       <li>Server Fault: <a href="https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/ServerFault">https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/ServerFault</a></li>
-       <li>Super User: <a href="https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/SuperUser">https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/SuperUser </a></li>
-       <li>Meta Stack Overflow: <a href="https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/Meta">https://odata.sqlazurelabs.com/OData.svc/v0.1/rp1uiewita/Meta  </a></li>
-      </ul>  
+      We also offer <a href="http://www.odata.org/">OData</a> endpoints for all the Stack Sites. 
     </p>
     </div>
 </asp:Content>

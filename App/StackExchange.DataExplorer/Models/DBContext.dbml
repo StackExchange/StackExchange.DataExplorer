@@ -58,7 +58,6 @@
       <Column Name="TotalComments" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="TotalTags" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="LastPost" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="ODataEndpoint" Type="System.String" DbType="VarChar(MAX)" CanBeNull="true" />
       <Association Name="Site_SavedQuery" Member="SavedQueries" ThisKey="Id" OtherKey="SiteId" Type="SavedQuery" />
     </Type>
   </Table>
