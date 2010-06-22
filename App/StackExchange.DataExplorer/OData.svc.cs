@@ -5,10 +5,12 @@ using System.Data.Metadata.Edm;
 using System.Data.Services;
 using System.Data.Services.Common;
 using System.Linq;
+using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Web;
 using StackExchange.DataExplorer.Models.StackEntities;
 using System.Reflection;
+using System.Data.SqlClient;
 
 
 namespace StackExchange.DataExplorer
@@ -24,14 +26,29 @@ namespace StackExchange.DataExplorer
            config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
         }
 
-        protected override void HandleException(HandleExceptionArgs args) {
-            base.HandleException(args);
-        }
 
         protected override Entities CreateDataSource() {
-            var sqlConnection = Current.DB.Sites.First().GetConnection();
 
-            MetadataWorkspace workspace = new MetadataWorkspace(new string[] { "res://*/" }, new List<Assembly>() { this.GetType().Assembly });
+            var siteName = HttpContext.Current.Request.ServerVariables["ODATA_SITE"].ToLower();
+
+            UriTemplateMatch match = WebOperationContext.Current.IncomingRequest.UriTemplateMatch;
+
+            UriBuilder builder = new UriBuilder(match.BaseUri);
+            builder.Path = builder.Path.Replace("OData.svc", siteName + "/o");
+            var serviceUri = builder.Uri;
+            OperationContext.Current.IncomingMessageProperties["MicrosoftDataServicesRootUri"] = serviceUri;
+
+            builder = new UriBuilder(match.RequestUri);
+            builder.Path = builder.Path.Replace("odata.svc", siteName + "/o");
+            builder.Host = serviceUri.Host;
+            OperationContext.Current.IncomingMessageProperties["MicrosoftDataServicesRequestUri"] = builder.Uri; 
+
+            
+            SqlConnection sqlConnection = Current.DB.Sites.First(s => s.Name.ToLower() == siteName).GetConnection();
+
+            MetadataWorkspace workspace = new MetadataWorkspace(
+                new string[] { "res://*/" }, 
+                new List<Assembly>() { this.GetType().Assembly });
             EntityConnection connection = new EntityConnection(workspace, sqlConnection);
 
             Entities entities = new Entities(connection);
