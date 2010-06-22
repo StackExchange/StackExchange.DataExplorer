@@ -45,7 +45,7 @@
       <span class='actions'>
         <a id="hideSql" href="#">hide sql</a> 
         <a id="showSql" href="#" style="display: none;">show sql</a> 
-        <a id="editQuery" href="/<%= StackExchange.DataExplorer.Current.Controller.Site.Name.ToLower() %>/q/<%= Model.QueryId %>/<%= Model.Title.URLFriendly() %>?edit=<%=Model.Id %>">edit</a>
+        <a id="editQuery" href="/<%= StackExchange.DataExplorer.Current.Controller.Site.Name.ToLower() %>/q/<%= Model.QueryId %>/<%= Model.Title.URLFriendly() %>?edit=<%=Model.Id %>"><%= (Model.UserId == Current.User.Id || Current.User.IsAdmin) ? "edit" : "clone" %></a>
         <% if (Model.UserId == Current.User.Id || Current.User.IsAdmin) { %>
            <a id="deleteQuery" href="#"><%= Model.IsDeleted ?? false ? "undelete" : "delete"%></a>
         <% } %>

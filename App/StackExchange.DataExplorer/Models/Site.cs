@@ -8,12 +8,22 @@ using StackExchange.DataExplorer.Helpers;
 
 namespace StackExchange.DataExplorer.Models {
     public partial class Site {
-        public SqlConnection GetConnection() {
-            string connectionString = ConfigurationManager.ConnectionStrings["ReaderConnection"]
-                   .ConnectionString
-                   .Replace("!!DB!!", DatabaseName);
 
-            return new SqlConnection(connectionString);
+        public string ConnectionString
+        {
+            get
+            {
+                return ConfigurationManager.ConnectionStrings["ReaderConnection"]
+                    .ConnectionString
+                    .Replace("!!DB!!", DatabaseName);
+
+            }
+
+        }
+
+        public SqlConnection GetConnection() {
+
+            return new SqlConnection(ConnectionString);
         }
 
 

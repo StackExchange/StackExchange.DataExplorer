@@ -1,0 +1,431 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="MetaModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+        <EntityContainer Name="MetaModelStoreContainer">
+          <EntitySet Name="Badges" EntityType="MetaModel.Store.Badges" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="Comments" EntityType="MetaModel.Store.Comments" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="Posts" EntityType="MetaModel.Store.Posts" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="Tags" EntityType="MetaModel.Store.Tags" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="Users" EntityType="MetaModel.Store.Users" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="Votes" EntityType="MetaModel.Store.Votes" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="VoteTypes" EntityType="MetaModel.Store.VoteTypes" store:Type="Tables" Schema="dbo" />
+        </EntityContainer>
+        <EntityType Name="Badges">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="int" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Date" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Comments">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="PostId" Type="int" />
+          <Property Name="Score" Type="int" />
+          <Property Name="Text" Type="nvarchar(max)" />
+          <Property Name="CreationDate" Type="datetime" />
+          <Property Name="UserId" Type="int" />
+        </EntityType>
+        <EntityType Name="Posts">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="PostTypeId" Type="int" />
+          <Property Name="AcceptedAnswerId" Type="int" />
+          <Property Name="CreationDate" Type="datetime" />
+          <Property Name="Score" Type="int" />
+          <Property Name="ViewCount" Type="int" />
+          <Property Name="Body" Type="nvarchar(max)" />
+          <Property Name="OwnerUserId" Type="int" />
+          <Property Name="LastEditorUserId" Type="int" />
+          <Property Name="LastEditDate" Type="datetime" />
+          <Property Name="LastActivityDate" Type="datetime" />
+          <Property Name="Title" Type="nvarchar" MaxLength="250" />
+          <Property Name="Tags" Type="nvarchar" MaxLength="150" />
+          <Property Name="AnswerCount" Type="int" />
+          <Property Name="CommentCount" Type="int" />
+          <Property Name="FavoriteCount" Type="int" />
+          <Property Name="ClosedDate" Type="datetime" />
+          <Property Name="ParentId" Type="int" />
+          <Property Name="CommunityOwnedDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Tags">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="TagName" Type="varchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="Reputation" Type="int" />
+          <Property Name="EmailHash" Type="varchar" MaxLength="40" />
+          <Property Name="CreationDate" Type="datetime" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="40" />
+          <Property Name="LastAccessDate" Type="datetime" />
+          <Property Name="WebsiteUrl" Type="nvarchar" MaxLength="200" />
+          <Property Name="Location" Type="nvarchar" MaxLength="100" />
+          <Property Name="Age" Type="int" />
+          <Property Name="AboutMe" Type="nvarchar(max)" />
+          <Property Name="Views" Type="int" />
+          <Property Name="UpVotes" Type="int" />
+          <Property Name="DownVotes" Type="int" />
+        </EntityType>
+        <EntityType Name="Votes">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="PostId" Type="int" />
+          <Property Name="VoteTypeId" Type="int" />
+          <Property Name="CreationDate" Type="datetime" />
+          <Property Name="BountyAmount" Type="int" />
+          <Property Name="UserId" Type="int" />
+        </EntityType>
+        <EntityType Name="VoteTypes">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="40" />
+        </EntityType>
+        <!--Errors Found During Generation:
+      warning 6013: The table/view 'Meta.dbo.PostTags' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+      
+      <EntityType Name="PostTags">
+        <Property Name="PostId" Type="int" />
+        <Property Name="TagId" Type="int" />
+      </EntityType>-->
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="MetaModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Badges" EntityType="MetaModel.Badge" />
+          <EntitySet Name="Comments" EntityType="MetaModel.Comment" />
+          <EntitySet Name="Posts" EntityType="MetaModel.Post" />
+          <EntitySet Name="Tags" EntityType="MetaModel.Tag" />
+          <EntitySet Name="Users" EntityType="MetaModel.User" />
+          <EntitySet Name="Votes" EntityType="MetaModel.Vote" />
+          <EntitySet Name="VoteTypes" EntityType="MetaModel.VoteType" />
+          <AssociationSet Name="BadgeUser" Association="MetaModel.BadgeUser">
+            <End Role="Badge" EntitySet="Badges" />
+            <End Role="User" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="CommentPost" Association="MetaModel.CommentPost">
+            <End Role="Comment" EntitySet="Comments" />
+            <End Role="Post" EntitySet="Posts" />
+          </AssociationSet>
+          <AssociationSet Name="CommentUser" Association="MetaModel.CommentUser">
+            <End Role="Comment" EntitySet="Comments" />
+            <End Role="User" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="VoteVoteType" Association="MetaModel.VoteVoteType">
+            <End Role="Vote" EntitySet="Votes" />
+            <End Role="VoteType" EntitySet="VoteTypes" />
+          </AssociationSet>
+          <AssociationSet Name="PostPost" Association="MetaModel.PostPost">
+            <End Role="Post" EntitySet="Posts" />
+            <End Role="Post1" EntitySet="Posts" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Badge">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" />
+          <Property Name="Name" Type="String" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Date" Type="DateTime" />
+          <NavigationProperty Name="User" Relationship="MetaModel.BadgeUser" FromRole="Badge" ToRole="User" />
+        </EntityType>
+        <EntityType Name="Comment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="PostId" Type="Int32" />
+          <Property Name="Score" Type="Int32" />
+          <Property Name="Text" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="CreationDate" Type="DateTime" />
+          <Property Name="UserId" Type="Int32" />
+          <NavigationProperty Name="Post" Relationship="MetaModel.CommentPost" FromRole="Comment" ToRole="Post" />
+          <NavigationProperty Name="User" Relationship="MetaModel.CommentUser" FromRole="Comment" ToRole="User" />
+        </EntityType>
+        <EntityType Name="Post">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="PostTypeId" Type="Int32" />
+          <Property Name="AcceptedAnswerId" Type="Int32" />
+          <Property Name="CreationDate" Type="DateTime" />
+          <Property Name="Score" Type="Int32" />
+          <Property Name="ViewCount" Type="Int32" />
+          <Property Name="Body" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="OwnerUserId" Type="Int32" />
+          <Property Name="LastEditorUserId" Type="Int32" />
+          <Property Name="LastEditDate" Type="DateTime" />
+          <Property Name="LastActivityDate" Type="DateTime" />
+          <Property Name="Title" Type="String" MaxLength="250" Unicode="true" FixedLength="false" />
+          <Property Name="TagNames" Type="String" MaxLength="150" Unicode="true" FixedLength="false" />
+          <Property Name="AnswerCount" Type="Int32" />
+          <Property Name="CommentCount" Type="Int32" />
+          <Property Name="FavoriteCount" Type="Int32" />
+          <Property Name="ClosedDate" Type="DateTime" />
+          <Property Name="ParentId" Type="Int32" />
+          <Property Name="CommunityOwnedDate" Type="DateTime" />
+          <NavigationProperty Name="Comments" Relationship="MetaModel.CommentPost" FromRole="Post" ToRole="Comment" />
+          <NavigationProperty Name="Children" Relationship="MetaModel.PostPost" FromRole="Post" ToRole="Post1" />
+          <NavigationProperty Name="Parent" Relationship="MetaModel.PostPost" FromRole="Post1" ToRole="Post" />
+        </EntityType>
+        <EntityType Name="Tag">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TagName" Type="String" MaxLength="255" Unicode="false" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="Reputation" Type="Int32" />
+          <Property Name="EmailHash" Type="String" MaxLength="40" Unicode="false" FixedLength="false" />
+          <Property Name="CreationDate" Type="DateTime" />
+          <Property Name="DisplayName" Type="String" MaxLength="40" Unicode="true" FixedLength="false" />
+          <Property Name="LastAccessDate" Type="DateTime" />
+          <Property Name="WebsiteUrl" Type="String" MaxLength="200" Unicode="true" FixedLength="false" />
+          <Property Name="Location" Type="String" MaxLength="100" Unicode="true" FixedLength="false" />
+          <Property Name="Age" Type="Int32" />
+          <Property Name="AboutMe" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Views" Type="Int32" />
+          <Property Name="UpVotes" Type="Int32" />
+          <Property Name="DownVotes" Type="Int32" />
+          <NavigationProperty Name="Badges" Relationship="MetaModel.BadgeUser" FromRole="User" ToRole="Badge" />
+          <NavigationProperty Name="Comments" Relationship="MetaModel.CommentUser" FromRole="User" ToRole="Comment" />
+        </EntityType>
+        <EntityType Name="Vote">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="PostId" Type="Int32" />
+          <Property Name="VoteTypeId" Type="Int32" />
+          <Property Name="CreationDate" Type="DateTime" />
+          <Property Name="BountyAmount" Type="Int32" />
+          <Property Name="UserId" Type="Int32" />
+          <NavigationProperty Name="VoteType" Relationship="MetaModel.VoteVoteType" FromRole="Vote" ToRole="VoteType" />
+        </EntityType>
+        <EntityType Name="VoteType">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="40" Unicode="false" FixedLength="false" />
+          <NavigationProperty Name="Votes" Relationship="MetaModel.VoteVoteType" FromRole="VoteType" ToRole="Vote" />
+        </EntityType>
+        <Association Name="BadgeUser">
+          <End Type="MetaModel.Badge" Role="Badge" Multiplicity="*" />
+          <End Type="MetaModel.User" Role="User" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Badge">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="CommentPost">
+          <End Type="MetaModel.Comment" Role="Comment" Multiplicity="*" />
+          <End Type="MetaModel.Post" Role="Post" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Post">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Comment">
+              <PropertyRef Name="PostId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="CommentUser">
+          <End Type="MetaModel.Comment" Role="Comment" Multiplicity="*" />
+          <End Type="MetaModel.User" Role="User" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Comment">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="VoteVoteType">
+          <End Type="MetaModel.Vote" Role="Vote" Multiplicity="*" />
+          <End Type="MetaModel.VoteType" Role="VoteType" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="VoteType">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Vote">
+              <PropertyRef Name="VoteTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="PostPost">
+          <End Type="MetaModel.Post" Role="Post" Multiplicity="0..1" />
+          <End Type="MetaModel.Post" Role="Post1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Post">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Post1">
+              <PropertyRef Name="ParentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="MetaModelStoreContainer" CdmEntityContainer="Entities">
+          <EntitySetMapping Name="Comments"><EntityTypeMapping TypeName="MetaModel.Comment"><MappingFragment StoreEntitySet="Comments">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="PostId" ColumnName="PostId" />
+            <ScalarProperty Name="Score" ColumnName="Score" />
+            <ScalarProperty Name="Text" ColumnName="Text" />
+            <ScalarProperty Name="CreationDate" ColumnName="CreationDate" />
+            <ScalarProperty Name="UserId" ColumnName="UserId" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="Posts"><EntityTypeMapping TypeName="MetaModel.Post"><MappingFragment StoreEntitySet="Posts">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="PostTypeId" ColumnName="PostTypeId" />
+            <ScalarProperty Name="AcceptedAnswerId" ColumnName="AcceptedAnswerId" />
+            <ScalarProperty Name="CreationDate" ColumnName="CreationDate" />
+            <ScalarProperty Name="Score" ColumnName="Score" />
+            <ScalarProperty Name="ViewCount" ColumnName="ViewCount" />
+            <ScalarProperty Name="Body" ColumnName="Body" />
+            <ScalarProperty Name="OwnerUserId" ColumnName="OwnerUserId" />
+            <ScalarProperty Name="LastEditorUserId" ColumnName="LastEditorUserId" />
+            <ScalarProperty Name="LastEditDate" ColumnName="LastEditDate" />
+            <ScalarProperty Name="LastActivityDate" ColumnName="LastActivityDate" />
+            <ScalarProperty Name="Title" ColumnName="Title" />
+            <ScalarProperty Name="TagNames" ColumnName="Tags" />
+            <ScalarProperty Name="AnswerCount" ColumnName="AnswerCount" />
+            <ScalarProperty Name="CommentCount" ColumnName="CommentCount" />
+            <ScalarProperty Name="FavoriteCount" ColumnName="FavoriteCount" />
+            <ScalarProperty Name="ClosedDate" ColumnName="ClosedDate" />
+            <ScalarProperty Name="ParentId" ColumnName="ParentId" />
+            <ScalarProperty Name="CommunityOwnedDate" ColumnName="CommunityOwnedDate" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="Tags"><EntityTypeMapping TypeName="MetaModel.Tag"><MappingFragment StoreEntitySet="Tags">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="TagName" ColumnName="TagName" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="Users"><EntityTypeMapping TypeName="MetaModel.User"><MappingFragment StoreEntitySet="Users">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Reputation" ColumnName="Reputation" />
+            <ScalarProperty Name="EmailHash" ColumnName="EmailHash" />
+            <ScalarProperty Name="CreationDate" ColumnName="CreationDate" />
+            <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+            <ScalarProperty Name="LastAccessDate" ColumnName="LastAccessDate" />
+            <ScalarProperty Name="WebsiteUrl" ColumnName="WebsiteUrl" />
+            <ScalarProperty Name="Location" ColumnName="Location" />
+            <ScalarProperty Name="Age" ColumnName="Age" />
+            <ScalarProperty Name="AboutMe" ColumnName="AboutMe" />
+            <ScalarProperty Name="Views" ColumnName="Views" />
+            <ScalarProperty Name="UpVotes" ColumnName="UpVotes" />
+            <ScalarProperty Name="DownVotes" ColumnName="DownVotes" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="Votes"><EntityTypeMapping TypeName="MetaModel.Vote"><MappingFragment StoreEntitySet="Votes">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="PostId" ColumnName="PostId" />
+            <ScalarProperty Name="VoteTypeId" ColumnName="VoteTypeId" />
+            <ScalarProperty Name="CreationDate" ColumnName="CreationDate" />
+            <ScalarProperty Name="BountyAmount" ColumnName="BountyAmount" />
+            <ScalarProperty Name="UserId" ColumnName="UserId" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="VoteTypes"><EntityTypeMapping TypeName="MetaModel.VoteType"><MappingFragment StoreEntitySet="VoteTypes">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Name" ColumnName="Name" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="Badges">
+            <EntityTypeMapping TypeName="IsTypeOf(MetaModel.Badge)">
+              <MappingFragment StoreEntitySet="Badges">
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams>
+      <Diagram Name="StackExchangeData">
+        <EntityTypeShape EntityType="MetaModel.Badge" Width="1.5" PointX="1.75" PointY="0.5" Height="1.9802864583333335" IsExpanded="true" />
+        <EntityTypeShape EntityType="MetaModel.Comment" Width="1.5" PointX="3.5" PointY="1.875" Height="2.5571907552083326" IsExpanded="true" />
+        <EntityTypeShape EntityType="MetaModel.Post" Width="1.5" PointX="0.625" PointY="3" Height="4.8648079427083326" IsExpanded="true" />
+        <EntityTypeShape EntityType="MetaModel.Tag" Width="1.5" PointX="9.125" PointY="5.5" Height="1.4033821614583326" IsExpanded="true" />
+        <EntityTypeShape EntityType="MetaModel.User" Width="1.5" PointX="6.875" PointY="0.5" Height="3.5186979166666665" IsExpanded="true" />
+        <EntityTypeShape EntityType="MetaModel.Vote" Width="1.5" PointX="3.125" PointY="5.375" Height="2.1725878906249996" IsExpanded="true" />
+        <EntityTypeShape EntityType="MetaModel.VoteType" Width="1.5" PointX="6.125" PointY="5.5" Height="1.4033821614583331" IsExpanded="true" />
+        <AssociationConnector Association="MetaModel.BadgeUser">
+          <ConnectorPoint PointX="3.25" PointY="1.15625" />
+          <ConnectorPoint PointX="6.875" PointY="1.15625" />
+        </AssociationConnector>
+        <AssociationConnector Association="MetaModel.CommentPost">
+          <ConnectorPoint PointX="3.5" PointY="3.7160953776041663" />
+          <ConnectorPoint PointX="2.125" PointY="3.7160953776041663" />
+        </AssociationConnector>
+        <AssociationConnector Association="MetaModel.CommentUser">
+          <ConnectorPoint PointX="5" PointY="3.139150390625" />
+          <ConnectorPoint PointX="6.875" PointY="3.139150390625" />
+        </AssociationConnector>
+        <AssociationConnector Association="MetaModel.VoteVoteType">
+          <ConnectorPoint PointX="4.625" PointY="6.297841796875" />
+          <ConnectorPoint PointX="6.125" PointY="6.297841796875" />
+        </AssociationConnector>
+        <AssociationConnector Association="MetaModel.PostPost">
+          <ConnectorPoint PointX="1.1569230769230767" PointY="8.2494108072916656" />
+          <ConnectorPoint PointX="1.1569230769230767" PointY="8.4994108072916656" />
+          <ConnectorPoint PointX="1.6034615384615383" PointY="8.4994108072916656" />
+          <ConnectorPoint PointX="1.6034615384615383" PointY="8.2494108072916656" />
+        </AssociationConnector>
+      </Diagram>
+    </Diagrams>
+  </Designer>
+</edmx:Edmx>

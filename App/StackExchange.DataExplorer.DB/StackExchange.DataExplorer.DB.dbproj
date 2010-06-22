@@ -24,8 +24,10 @@
     <RootNamespace>CloudDb</RootNamespace>
     <DefaultSchema>dbo</DefaultSchema>
     <PreviousProjectVersion>4.0</PreviousProjectVersion>
-    <AllowServerObjects>False</AllowServerObjects>
+    <AllowServerObjects>True</AllowServerObjects>
     <AllowDatabaseObjects>True</AllowDatabaseObjects>
+    <DAC>True</DAC>
+    <DacApplicationGuid>{67cbc824-a49e-4e9b-a947-360f3dfe65c3}</DacApplicationGuid>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>.\sql\release\</OutputPath>
@@ -125,9 +127,9 @@
     </PropertiesFile>
     <PropertiesFile Include="Properties\Database.sqlcmdvars">
     </PropertiesFile>
-    <Build Include="Properties\Database.sqlpermissions">
+    <NotInBuild Include="Properties\Database.sqlpermissions">
       <ModelBuilderType>Permissions</ModelBuilderType>
-    </Build>
+    </NotInBuild>
     <PreDeploy Include="Scripts\Pre-Deployment\Script.PreDeployment.sql">
       <SubType>Code</SubType>
     </PreDeploy>
