@@ -37,12 +37,13 @@ namespace StackExchange.DataExplorer.Models {
 
         private string ToComment(string text) {
 
+            if (string.IsNullOrEmpty(text)) return "";
+            if (text != null) text = text.Trim();
+
             string rval = text.Replace("\r\n", "\n");
             rval = "-- " + rval;
             rval = rval.Replace("\n", "\n-- ");
-            if (rval.Contains("\n--")) {
-                rval = rval.Substring(0, rval.Length - 3);
-            }
+
             return rval;
         }
     }
