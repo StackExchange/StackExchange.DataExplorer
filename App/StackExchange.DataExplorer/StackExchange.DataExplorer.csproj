@@ -100,7 +100,6 @@
     <Compile Include="Controllers\StackOverflowController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QueryController.cs" />
-    <Compile Include="Controllers\SiteController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VoteController.cs" />
     <Compile Include="Current.cs" />
