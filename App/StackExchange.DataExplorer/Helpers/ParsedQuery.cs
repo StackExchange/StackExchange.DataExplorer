@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Collections.Specialized;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,7 +15,7 @@ namespace StackExchange.DataExplorer.Helpers {
             }
         }
 
-        static Regex paramsRegex = new Regex("##([a-zA-Z0-9]+)##");
+        static readonly Regex paramsRegex = new Regex("##([a-zA-Z0-9]+)##",RegexOptions.Compiled);
 
         public ParsedQuery(string sql, NameValueCollection requestParams) {
             Parse(sql, requestParams);
