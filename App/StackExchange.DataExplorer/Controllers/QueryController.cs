@@ -57,189 +57,145 @@ namespace StackExchange.DataExplorer.Controllers
             return rval;
         }
 
-        class ColumnInfo {
-            public string TableName { get; set; }
-            public string ColumnName { get; set; }
-            public string DataType { get; set; }
+       
 
-            public void SetDataType(string name, int? length) {
-                DataType = name;
-                if (length != null) {
-                    if (length == -1) {
-                        DataType += " (max)";
-                    } else {
-                        DataType += " (" + length.ToString() +")";
-                    }
-                }
+        [Route("{sitename}/csv/{queryId}", RoutePriority.Low)]
+        [Route("{sitename}/csv/{queryId}/{slug}", RoutePriority.Low)]
+        public ActionResult ShowCsv(string sitename, int queryId)
+        {
+            var query = FindQuery(queryId);
+            TrackQueryView(queryId);
+            var cachedResults = GetCachedResults(query);
+            return new CsvResult(cachedResults.Results);
+        }
+
+        [Route("{sitename}/qte/{savedQueryId}", RoutePriority.Low)]
+        [Route("{sitename}/qte/{savedQueryId}/{slug}", RoutePriority.Low)]
+        public ActionResult EditText(string sitename, int savedQueryId) {
+            var db = Current.DB;
+
+            SetCommonQueryViewData(sitename);
+            SetHeaderInfo(savedQueryId);
+
+            var savedQuery = FindSavedQuery(savedQueryId);
+            savedQuery.UpdateQueryBodyComment();
+
+            ViewData["query"] = savedQuery.Query;
+
+            var cachedResults = GetCachedResults(savedQuery.Query);
+    
+            if (cachedResults != null && cachedResults.Results != null) {
+                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
             }
+
+            ViewData["cached_results"] = cachedResults;
+
+            return View("New", Site);
+
+        }
+
+        [Route("{sitename}/qe/{savedQueryId}", RoutePriority.Low)]
+        [Route("{sitename}/qe/{savedQueryId}/{slug}", RoutePriority.Low)]
+        public ActionResult Edit(string sitename, int savedQueryId) {
+
+            SetCommonQueryViewData(sitename);
+            SetHeaderInfo(savedQueryId);
+
+            var savedQuery = FindSavedQuery(savedQueryId);
+            savedQuery.UpdateQueryBodyComment();
+
+            ViewData["query"] = savedQuery.Query;
+            ViewData["cached_results"]  = GetCachedResults(savedQuery.Query);
+
+            return View("New", Site);
         }
 
 
+        [Route("{sitename}/qt/{queryId}", RoutePriority.Low)]
+        [Route("{sitename}/qt/{queryId}/{slug}", RoutePriority.Low)]
+        public ActionResult ShowText(string sitename, int queryId)
+        {
+            SetCommonQueryViewData(sitename);
+
+
+            TrackQueryView(queryId);
+            var query = FindQuery(queryId);
+            ViewData["query"] = query;
+            var cachedResults =  GetCachedResults(query);
+            if (cachedResults != null && cachedResults.Results != null) {
+                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
+            }
+
+            ViewData["cached_results"] = cachedResults;
+            return View("New", Site);
+         
+        }
+
+        [Route("{sitename}/q/{queryId}", RoutePriority.Low)]
+        [Route("{sitename}/q/{queryId}/{slug}", RoutePriority.Low)]
+        public ActionResult Show(string sitename, int queryId)
+        {
+            SetCommonQueryViewData(sitename);
+            var query = FindQuery(queryId);
+            ViewData["query"] = query;
+            TrackQueryView(queryId);
+            ViewData["cached_results"]  = GetCachedResults(query);
+            return View("New", Site);
+
+        }
 
         [Route("{sitename}/query/new", RoutePriority.Low)]
-        [Route("{sitename}/q/{query_id}", RoutePriority.Low)]
-        [Route("{sitename}/q/{query_id}/{slug}", RoutePriority.Low)]
+       
+        public ActionResult New(string sitename) {
+            SetCommonQueryViewData(sitename);
+            return View(Site);
+        }
 
-        [Route("{sitename}/qt/{query_id}", RoutePriority.Low)]
-        [Route("{sitename}/csv/{query_id}", RoutePriority.Low)]
+        private void SetCommonQueryViewData(string sitename)
+        {
+            SetHeaderInfo();
+            Site = GetSite(sitename);
 
-        [Route("{sitename}/qt/{query_id}/{slug}", RoutePriority.Low)]
-        [Route("{sitename}/csv/{query_id}/{slug}", RoutePriority.Low)]
+            SelectMenuItem("Compose Query");
 
-        public ActionResult New(string sitename, int? query_id, int? edit) {
-            var db = Current.DB;
+            ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
+            ViewData["Tables"] = Site.GetTableInfos();
+            ViewData["Sites"] = Current.DB.Sites.ToList();
+        }
 
-            string format = "";
-            var searchLen = Math.Min(sitename.Length + 6, Request.Path.Length);
-            if (Request.Path.IndexOf("/csv/", 0 , searchLen) > 0) { 
-                format = "csv";
+        private void TrackQueryView(int id) {
+            if (!IsSearchEngine()) {
+                QueryViewTracker.TrackQueryView(GetRemoteIP(), id);
             }
+        }
 
-            if (Request.Path.IndexOf("/qt/", 0, searchLen) > 0) {
-                 format = "text";
-            }
-            SavedQuery savedQuery = null;
+     
+        private void SetHeaderInfo()
+        {
+            SetHeaderInfo(null);
+        }
 
-            if (edit != null) {
+        private Query FindQuery(int id)
+        {
+            return Current.DB.Queries.FirstOrDefault(q => q.Id == id);
+        }
+
+        private  SavedQuery FindSavedQuery(int id)
+        {
+            return Current.DB.SavedQueries.FirstOrDefault(s => s.Id == id);
+        }
+
+        private void SetHeaderInfo(int? edit)
+        {
+             if (edit != null) {
                 SetHeader("Editing Query");
                 ViewData["SavedQueryId"] = edit.Value;
-                savedQuery = db.SavedQueries.FirstOrDefault(s => s.Id == edit.Value);
-
             } else {
                 SetHeader("Compose Query");
             }
-
-            
-            var site = db.Sites.First(s => s.Name.ToLower() == sitename);
-            this.Site = site;
-            SelectMenuItem("Compose Query");
-
-            ViewData["GuessedUserId"] = site.GuessUserId(CurrentUser);
-
-            List<ColumnInfo> columns;
-
-            using (var cnn = site.GetConnection()) {
-                cnn.Open();
-                var sql = @"
-select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.Columns
-order by TABLE_NAME, ORDINAL_POSITION
-";
-                using (SqlCommand cmd = new SqlCommand(sql)) {
-                    cmd.Connection = cnn;
-                    using (var reader = cmd.ExecuteReader()) {
-                        columns = new List<ColumnInfo>();
-                        while (reader.Read()) {
-                            var info = new ColumnInfo();
-                            info.TableName = reader.GetString(0);
-                            info.ColumnName = reader.GetString(1);
-                            info.SetDataType(reader.GetString(2), reader.IsDBNull(3) ? null : (int?)reader.GetInt32(3));
-                            columns.Add(info);
-                        }
-                    }
-                }
-
-            }
-
-            var tables = new List<TableInfo>();
-            TableInfo tableInfo = null;
-
-            foreach (var column in columns) {
-                if (tableInfo == null || tableInfo.Name != column.TableName) {
-                    tableInfo = new TableInfo();
-                    tableInfo.Name = column.TableName;
-                    tables.Add(tableInfo);
-                }
-
-                tableInfo.ColumnNames.Add(column.ColumnName);
-                tableInfo.DataTypes.Add(column.DataType);
-            }
-
-            tables.Sort((l, r) =>
-            {
-                if (l.Name == "Posts") return -1;
-                if (r.Name == "Posts") return 1;
-                if (l.Name == "Users") return -1;
-                if (r.Name == "Users") return 1;
-                if (l.Name == "Comments") return -1;
-                if (r.Name == "Comments") return 1;
-                if (l.Name == "Badges") return -1;
-                if (r.Name == "Badges") return 1;
-                return l.Name.CompareTo(r.Name);
-            });
-
-            var serializer = new JavaScriptSerializer();
-            ViewData["Tables"] = tables;
-
-            ViewData["Sites"] = Current.DB.Sites.ToList();
-
-
-            CachedResult cachedResults = null;
-
-            if (query_id != null) {
-
-                if (!IsSearchEngine()) {
-                    QueryViewTracker.TrackQueryView(GetRemoteIP(), query_id.Value);
-                }
-
-                var query = db.Queries.Where(q => q.Id == query_id.Value).FirstOrDefault();
-                if (query != null) {
-                    if (savedQuery != null) {
-                        query.Name = savedQuery.Title;
-                        query.Description = savedQuery.Description;
-
-                        StringBuilder buffer = new StringBuilder();
-
-                        if (query.Name != null) {
-                            buffer.Append(ToComment(query.Name));
-                            buffer.Append("\n");
-                        }
-
-                        
-                        if (query.Description != null) {
-                            buffer.Append(ToComment(query.Description));
-                            buffer.Append("\n");
-                        }
-
-                        buffer.Append("\n");
-                        buffer.Append(query.BodyWithoutComments);
-
-                        query.QueryBody = buffer.ToString();
-
-                    }
-                    ViewData["query"] = query;
-
-                    cachedResults = GetCachedResults(query);
-                    if (cachedResults != null) {
-                        ViewData["cached_results"] = cachedResults;
-                    }
-
-                }
-            }
-
-            if (format == "csv") {
-                return new CsvResult(cachedResults.Results);
-            } else {
-                if (format == "text") {
-
-                    if (cachedResults != null && cachedResults.Results != null) {
-                        cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
-                    }
-                } 
-                return View(site);
-                
-            }
         }
 
-        private string ToComment(string text) {
-
-            string rval = text.Replace("\r\n", "\n");
-            rval = "-- " + rval;
-            rval = rval.Replace("\n", "\n-- ");
-            if (rval.Contains("\n--")) {
-                rval = rval.Substring(0, rval.Length - 3);
-            }
-            return rval;
-        }
+       
 
     }
 }

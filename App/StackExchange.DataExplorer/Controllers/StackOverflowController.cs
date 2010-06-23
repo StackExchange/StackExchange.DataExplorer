@@ -48,6 +48,11 @@ namespace StackExchange.DataExplorer.Controllers {
             }
         }
 
+        public Site GetSite(string sitename)
+        {
+            return Current.DB.Sites.First(s => s.Name.ToLower() == sitename);
+        }
+
 
 #if DEBUG
         System.Diagnostics.Stopwatch watch;
@@ -147,6 +152,8 @@ namespace StackExchange.DataExplorer.Controllers {
 
         protected CachedResult GetCachedResults(Query query) {
             CachedResult cachedResults = null;
+
+            if (query == null) return null;
 
             var db = Current.DB;
 

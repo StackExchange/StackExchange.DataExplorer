@@ -9,6 +9,23 @@ using StackExchange.DataExplorer.Helpers;
 namespace StackExchange.DataExplorer.Models {
     public partial class Site {
 
+        class ColumnInfo {
+            public string TableName { get; set; }
+            public string ColumnName { get; set; }
+            public string DataType { get; set; }
+
+            public void SetDataType(string name, int? length) {
+                DataType = name;
+                if (length != null) {
+                    if (length == -1) {
+                        DataType += " (max)";
+                    } else {
+                        DataType += " (" + length.ToString() + ")";
+                    }
+                }
+            }
+        }
+
         public string ConnectionString
         {
             get
@@ -100,5 +117,68 @@ namespace StackExchange.DataExplorer.Models {
             }
             return null;
         }
+
+
+        /// <summary>
+        /// Get the sites schema
+        /// </summary>
+        /// <returns></returns>
+        public List<TableInfo> GetTableInfos()
+        {
+            List<ColumnInfo> columns;
+            var tables = new List<TableInfo>();
+
+
+            using (var cnn = GetConnection()) {
+                cnn.Open();
+                var sql = @"
+select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.Columns
+order by TABLE_NAME, ORDINAL_POSITION
+";
+                using (SqlCommand cmd = new SqlCommand(sql)) {
+                    cmd.Connection = cnn;
+                    using (var reader = cmd.ExecuteReader()) {
+                        columns = new List<ColumnInfo>();
+                        while (reader.Read()) {
+                            var info = new ColumnInfo();
+                            info.TableName = reader.GetString(0);
+                            info.ColumnName = reader.GetString(1);
+                            info.SetDataType(reader.GetString(2), reader.IsDBNull(3) ? null : (int?)reader.GetInt32(3));
+                            columns.Add(info);
+                        }
+                    }
+                }
+
+            }
+
+            TableInfo tableInfo = null;
+
+            foreach (var column in columns) {
+                if (tableInfo == null || tableInfo.Name != column.TableName) {
+                    tableInfo = new TableInfo();
+                    tableInfo.Name = column.TableName;
+                    tables.Add(tableInfo);
+                }
+
+                tableInfo.ColumnNames.Add(column.ColumnName);
+                tableInfo.DataTypes.Add(column.DataType);
+            }
+
+            tables.Sort((l, r) =>
+            {
+                if (l.Name == "Posts") return -1;
+                if (r.Name == "Posts") return 1;
+                if (l.Name == "Users") return -1;
+                if (r.Name == "Users") return 1;
+                if (l.Name == "Comments") return -1;
+                if (r.Name == "Comments") return 1;
+                if (l.Name == "Badges") return -1;
+                if (r.Name == "Badges") return 1;
+                return l.Name.CompareTo(r.Name);
+            });
+
+            return tables;
+        }
+
     }
 }
