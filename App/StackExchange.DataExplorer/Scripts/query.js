@@ -113,7 +113,7 @@ function gotResults(results) {
     var currentLink = $("#permalink")[0];
 
     var linkId = results.queryId;
-    var slug = results.slug == null ? "/" : "/" + slug;
+    var slug = results.slug == null ? "/" : "/" + results.slug;
     var linkPath = results.textOnly ? "qt" : "q";
     if (window.queryId !== undefined) {
         linkId = queryId;
