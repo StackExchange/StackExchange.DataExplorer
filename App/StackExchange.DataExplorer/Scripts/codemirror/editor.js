@@ -435,13 +435,13 @@ var webkitLastLineHack = webkit ?
 
               /*
               addEventHandler(document, "mousedown", function () {
-                  //parent.focus();
-                  self.win.frameElement.CodeMirror.focus();
-                  self.win.focus();
-                  self.cursorPosition(1);
-                  //window.frameElement.CodeMirror.textareaHack.focus();
-                  //myWin.focus();
-                  //parent.forwardEvent("focus", this);
+              //parent.focus();
+              self.win.frameElement.CodeMirror.focus();
+              self.win.focus();
+              self.cursorPosition(1);
+              //window.frameElement.CodeMirror.textareaHack.focus();
+              //myWin.focus();
+              //parent.forwardEvent("focus", this);
               });
               */
 
@@ -814,13 +814,14 @@ var webkitLastLineHack = webkit ?
           // and prevent Opera from handling enter and tab anyway.
           keyPress: function (event) {
               var electric = Editor.Parser.electricChars, self = this;
+
+
               // Hack for Opera, and Firefox on OS X, in which stopping a
               // keydown event does not prevent the associated keypress event
               // from happening, so we have to cancel enter and tab again
               // here.
               if ((this.frozen && (!this.keyFilter || this.keyFilter(event.keyCode, event))) ||
-          event.code == 13 || (event.code == 9 && this.options.tabMode != "default") ||
-          (event.keyCode == 32 && event.shiftKey && this.options.tabMode == "default"))
+          event.code == 13 || (event.code == 9 && this.options.tabMode != "default"))
                   event.stop();
               else if (electric && electric.indexOf(event.character) != -1)
                   this.parent.setTimeout(function () { self.indentAtCursor(null); }, 0);

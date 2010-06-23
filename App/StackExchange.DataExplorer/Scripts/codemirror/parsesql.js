@@ -224,5 +224,6 @@ var SqlParser = Editor.Parser = (function() {
     return iter;
   }
 
-  return {make: parseSql, electricChars: ")"};
+  // electric chars are just confusing
+  return {make: parseSql, electricChars: ""};
 })();
