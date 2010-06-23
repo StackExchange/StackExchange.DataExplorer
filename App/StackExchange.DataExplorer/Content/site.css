@@ -538,6 +538,7 @@ ul.site-list .desc {
   list-style-type: none;
   float: right;
   display: block;
+  cursor: default;
 }
 
 #queryText .folder {
@@ -616,6 +617,7 @@ ul.site-list .desc {
 
 #grid {
   border: 1px solid #bbb;  
+  cursor: default;
 }
 
 p.tagline{
