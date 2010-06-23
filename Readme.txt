@@ -9,6 +9,7 @@ Pre-reqs:
 - For back end changes:
 - Visual Studio 2010
 - SQL Server Express or above
+- IIS7 and Url Rewrite 2.0 are required for odata endpoint support: http://www.iis.net/download/urlrewrite, if you do not require that support you can safely comment out the rewrite rule from web.config 
 
 
 The File layout
