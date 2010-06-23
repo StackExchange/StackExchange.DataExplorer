@@ -88,15 +88,15 @@
         <% } %>
         <div class="title">
           <h3>
-            <a title="<%= Html.Encode(query.Description) %>" href="<%= query.Url %>">
-              <%= Html.Encode(query.Name) %></a>
+            <a title="<%: query.Description %>" href="<%= query.Url %>">
+              <%: query.Name %></a>
           </h3>
         </div>
         <div class="user">
           <%= query.LastRun.ToRelativeTimeSpanMini()%>
           <% if (query.Creator != null) { %>
           <a href="/users/<%= query.Creator.Id %>">
-            <%= query.Creator.Login %></a>
+            <%: query.Creator.Login %></a>
           <% } %>
         </div>
         <div class="clear">

@@ -3,7 +3,7 @@
     if (Request.IsAuthenticated) {
 %>
         <a href="/users/<%= StackExchange.DataExplorer.Current.User.Id %>">
-          <%= Html.Encode(StackExchange.DataExplorer.Current.User.Login) %>
+          <%: StackExchange.DataExplorer.Current.User.Login %>
         </a>
         <span class="link-separator">|</span>
         <a href="/account/logout">logout</a>

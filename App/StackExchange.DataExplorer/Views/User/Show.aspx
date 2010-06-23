@@ -113,7 +113,7 @@
         <ul class="querylist">
           <% var queries = ViewData["Queries"] as IEnumerable<StackExchange.DataExplorer.ViewModel.QueryExecutionViewData>; %>
           <% foreach (var query in queries) { %>
-              <li> <a title="<%= Html.Encode(query.Description) %>" href="<%= query.Url %>"><%= Html.Encode(query.Name) %></a> </li> 
+              <li> <a title="<%: query.Description %>" href="<%= query.Url %>"><%= Html.Encode(query.Name) %></a> </li> 
            <% } %>
         </ul>
         <% if (ViewData["EmptyMessage"] != null) { %>

@@ -2,7 +2,7 @@
 <%@ Import Namespace="StackExchange.DataExplorer" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-	Query <%= Model.LongName %> - Stack Exchange Data Explorer
+	Query <%: Model.LongName %> - Stack Exchange Data Explorer
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="AdditionalStyles" runat="server">
@@ -15,14 +15,16 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
     <% 
-      string sql = "";
+      string sql;
       StackExchange.DataExplorer.Models.Query query = ViewData["query"] as StackExchange.DataExplorer.Models.Query;
       if (query != null) {
-        sql = Html.Encode(query.QueryBody);
+        sql = query.QueryBody;
       } else {
         sql = StackExchange.DataExplorer.Helpers.ParsedQuery.DefaultComment;
       }
 
+      sql = Html.Encode(sql);
+      
       StackExchange.DataExplorer.Models.CachedResult cached_results = ViewData["cached_results"] as StackExchange.DataExplorer.Models.CachedResult;
       %>
 

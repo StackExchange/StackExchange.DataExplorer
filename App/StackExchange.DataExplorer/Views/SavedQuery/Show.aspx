@@ -20,7 +20,7 @@
     <div class="clear">
   </div>
   </div>
-  <pre id="queryBodyText"><code><%= Html.Encode(Model.Query.BodyWithoutComments)%></code></pre>
+  <pre id="queryBodyText"><code><%: Model.Query.BodyWithoutComments%></code></pre>
   <div class="query">
     <form id="runQueryForm" action="/query/<%= Current.Controller.Site.Id %>" method="post">
     <p>
@@ -45,7 +45,12 @@
       <span class='actions'>
         <a id="hideSql" href="#">hide sql</a> 
         <a id="showSql" href="#" style="display: none;">show sql</a> 
-        <a id="editQuery" href="/<%= StackExchange.DataExplorer.Current.Controller.Site.Name.ToLower() %>/q/<%= Model.QueryId %>/<%= Model.Title.URLFriendly() %>?edit=<%=Model.Id %>"><%= (Model.UserId == Current.User.Id || Current.User.IsAdmin) ? "edit" : "clone" %></a>
+        <%
+          var editHref = string.Format("/{0}/qe/{1}/{2}", 
+            Current.Controller.Site.Name.ToLower(), 
+            Model.Id, Model.Title.URLFriendly());
+         %>
+        <a id="editQuery" href="<%=editHref%>"><%= (Model.UserId == Current.User.Id || Current.User.IsAdmin) ? "edit" : "clone" %></a>
         <% if (Model.UserId == Current.User.Id || Current.User.IsAdmin) { %>
            <a id="deleteQuery" href="#"><%= Model.IsDeleted ?? false ? "undelete" : "delete"%></a>
         <% } %>
