@@ -28,7 +28,7 @@ namespace StackExchange.DataExplorer.Controllers {
 
         [ValidateInput(false)]
         [HttpPost]
-        [Route("users/update/{id}", RoutePriority.High)]
+        [Route(@"users/update/{id:\d+}", RoutePriority.High)]
         public ActionResult Update(int id, User updatedUser) {
 
             var user = Current.DB.Users.First(u => u.Id == id);
@@ -48,7 +48,7 @@ namespace StackExchange.DataExplorer.Controllers {
         }
 
         [HttpGet]
-        [Route("users/edit/{id}", RoutePriority.High)]
+        [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id) {
 
             var user = Current.DB.Users.First(u => u.Id == id);
@@ -62,8 +62,7 @@ namespace StackExchange.DataExplorer.Controllers {
             }
         }
 
-        [Route("users/{id}")]
-        [Route("users/{id}/{ignore}")]
+        [Route(@"users/{id:\d+}/{ignore?}")]
         public ActionResult Show(int id, object ignore, string order_by) {
             var user = Current.DB.Users.FirstOrDefault(row => row.Id == id);
             if (user == null) {
@@ -73,7 +72,6 @@ namespace StackExchange.DataExplorer.Controllers {
             var db = Current.DB;
 
             SetHeader(user.Login);
-
             order_by = order_by ?? "saved";
 
             ViewData["UserQueryHeaders"] = new SubHeader()

@@ -13,45 +13,45 @@ namespace StackExchange.DataExplorer.Controllers
     public class SavedQueryController : StackOverflowController
     {
 
-        [Route("{sitename}/s/{id}")]
-        [Route("{sitename}/s/{id}/{slug}")]
-        [Route("{sitename}/st/{id}")]
-        [Route("{sitename}/st/{id}/{slug}")]
-        public ActionResult Show(int id, string sitename, string slug) {
+        [Route(@"{sitename}/st/{id:\d+}/{slug?}")]
+        public ActionResult ShowText(int id, string sitename)
+        {
+            return ProcessShow(id, sitename, "text");
+        }
+
+        [Route(@"{sitename}/s/{id:\d+}/{slug?}")] 
+        public ActionResult Show(int id, string sitename) {
+            return ProcessShow(id, sitename, "default");
+        }
+
+        private ActionResult ProcessShow(int id, string sitename, string format)
+        {
             var db = Current.DB;
-            var site = db.Sites.First(s => s.Name.ToLower() == sitename);
-            this.Site = site;
-            string format = "default";
 
-            if (Request.Path.IndexOf("/st/", 0, sitename.Length + 6) > 0) {
-                format = "text";
-            }
+            Site = GetSite(sitename);
 
-            ViewData["GuessedUserId"] = site.GuessUserId(CurrentUser);
-
+            ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
             SelectMenuItem("Queries");
 
             var savedQuery = db.SavedQueries.FirstOrDefault(q => q.Id == id);
-
             if (savedQuery == null) {
-                return this.PageNotFound();
+                return PageNotFound();
             }
 
             SetHeader(savedQuery.Title);
-
-
             var totalVotes = db.Votes.Where(v => v.SavedQueryId == id && v.VoteTypeId == (int)VoteType.Favorite).Count();
 
-            QueryVoting voting = new QueryVoting() { 
+            QueryVoting voting = new QueryVoting()
+            {
                 TotalVotes = totalVotes
-            }; 
+            };
 
             if (!Current.User.IsAnonymous) {
                 voting.HasVoted = (
-                db.Votes.FirstOrDefault(v => v.SavedQueryId == id 
-                && v.UserId == Current.User.Id 
+                db.Votes.FirstOrDefault(v => v.SavedQueryId == id
+                && v.UserId == Current.User.Id
                 && v.VoteTypeId == (int)VoteType.Favorite)
-                ) != null; 
+                ) != null;
             }
 
             ViewData["QueryVoting"] = voting;
@@ -64,18 +64,18 @@ namespace StackExchange.DataExplorer.Controllers
 
                 if (format == "text") {
 
-                    if (cachedResults != null && cachedResults.Results != null) {
+                    if (cachedResults.Results != null) {
                         cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
                     }
-                } 
-            
+                }
+
             }
 
             if (!IsSearchEngine()) {
                 QueryViewTracker.TrackQueryView(GetRemoteIP(), savedQuery.Query.Id);
             }
 
-            return View(savedQuery); 
+            return View("Show" , savedQuery); 
         }
 
         [Route("saved_query/delete", HttpVerbs.Post)]
@@ -150,7 +150,7 @@ namespace StackExchange.DataExplorer.Controllers
 
 
         [HttpPost]
-        [Route("feature_query/{id}")]
+        [Route(@"feature_query/{id:\d+}")]
         public ActionResult Feature(int id, bool feature) {
             if (Current.User.IsAdmin) {
                 Current.DB.SavedQueries.FirstOrDefault(q => q.Id == id).IsFeatured = feature;
@@ -161,7 +161,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpPost]
-        [Route("skip_query/{id}")]
+        [Route(@"skip_query/{id:\d+}")]
         public ActionResult Skip(int id, bool skip) {
             if (Current.User.IsAdmin) {
                 Current.DB.SavedQueries.FirstOrDefault(q => q.Id == id).IsSkipped = skip;

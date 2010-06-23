@@ -58,19 +58,22 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
        
-
-        [Route("{sitename}/csv/{queryId}", RoutePriority.Low)]
-        [Route("{sitename}/csv/{queryId}/{slug}", RoutePriority.Low)]
+        [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowCsv(string sitename, int queryId)
         {
             var query = FindQuery(queryId);
+
+            if(query == null)
+            {
+                return PageNotFound();
+            }
+
             TrackQueryView(queryId);
             var cachedResults = GetCachedResults(query);
             return new CsvResult(cachedResults.Results);
         }
 
-        [Route("{sitename}/qte/{savedQueryId}", RoutePriority.Low)]
-        [Route("{sitename}/qte/{savedQueryId}/{slug}", RoutePriority.Low)]
+        [Route(@"{sitename}/qte/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult EditText(string sitename, int savedQueryId) {
             var db = Current.DB;
 
@@ -78,6 +81,11 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeaderInfo(savedQueryId);
 
             var savedQuery = FindSavedQuery(savedQueryId);
+
+            if (savedQuery == null) {
+                return PageNotFound();
+            }
+
             savedQuery.UpdateQueryBodyComment();
 
             ViewData["query"] = savedQuery.Query;
@@ -94,14 +102,19 @@ namespace StackExchange.DataExplorer.Controllers
 
         }
 
-        [Route("{sitename}/qe/{savedQueryId}", RoutePriority.Low)]
-        [Route("{sitename}/qe/{savedQueryId}/{slug}", RoutePriority.Low)]
+        [Route(@"{sitename}/qe/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult Edit(string sitename, int savedQueryId) {
 
             SetCommonQueryViewData(sitename);
             SetHeaderInfo(savedQueryId);
 
             var savedQuery = FindSavedQuery(savedQueryId);
+
+            if (savedQuery == null)
+            {
+                return PageNotFound();
+            }
+
             savedQuery.UpdateQueryBodyComment();
 
             ViewData["query"] = savedQuery.Query;
@@ -111,15 +124,18 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
 
-        [Route("{sitename}/qt/{queryId}", RoutePriority.Low)]
-        [Route("{sitename}/qt/{queryId}/{slug}", RoutePriority.Low)]
+        [Route(@"{sitename}/qt/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowText(string sitename, int queryId)
         {
             SetCommonQueryViewData(sitename);
 
+            var query = FindQuery(queryId);
+            if (query == null) {
+                return PageNotFound();
+            }
 
             TrackQueryView(queryId);
-            var query = FindQuery(queryId);
+
             ViewData["query"] = query;
             var cachedResults =  GetCachedResults(query);
             if (cachedResults != null && cachedResults.Results != null) {
@@ -131,12 +147,16 @@ namespace StackExchange.DataExplorer.Controllers
          
         }
 
-        [Route("{sitename}/q/{queryId}", RoutePriority.Low)]
-        [Route("{sitename}/q/{queryId}/{slug}", RoutePriority.Low)]
+        [Route(@"{sitename}/q/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult Show(string sitename, int queryId)
         {
             SetCommonQueryViewData(sitename);
             var query = FindQuery(queryId);
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
             ViewData["query"] = query;
             TrackQueryView(queryId);
             ViewData["cached_results"]  = GetCachedResults(query);
