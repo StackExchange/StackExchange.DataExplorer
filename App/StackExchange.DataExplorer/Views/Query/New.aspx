@@ -68,8 +68,8 @@
                   <% foreach (var site in sites) { 
                         if (site.Id == Model.Id) continue;
                         %>
-                      <a class="otherPermalink" href="/<%= site.Name.ToLower() %>/q//" title="View results on <%= site.LongName %>">
-                      <img src="<%= site.IconUrl %>" alt="<%= site.LongName %>" /></a>     
+                      <a class="otherPermalink" href="/<%: site.Name.ToLower() %>/q//" title="View results on <%: site.LongName %>">
+                      <img src="<%= site.IconUrl %>" alt="<%: site.LongName %>" /></a>     
                   <% } %>
                 </span>
             </p>
@@ -102,11 +102,11 @@
         <ul class='treeview schema' style="display:none;">
           <% foreach (var table in (IEnumerable<StackExchange.DataExplorer.Models.TableInfo>)ViewData["Tables"]) { %>
             <li>
-              <span class="folder"><%= table.Name %></span>
+              <span class="folder"><%: table.Name %></span>
               <ul>
                 <% for (int i = 0; i < table.ColumnNames.Count; i++) { %>
                      
-                  <li title="<%= table.DataTypes[i] %>"><%= table.ColumnNames[i] %></li>
+                  <li title="<%= table.DataTypes[i] %>"><%: table.ColumnNames[i] %></li>
                 <% } %>
               </ul>
             </li>

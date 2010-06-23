@@ -15,7 +15,7 @@
 
 
     <div id="aboutSite" class="module">
-      <img src="<%= site.ImageUrl %>" alt="<%= site.LongName %>" class="site"/>
+      <img src="<%= site.ImageUrl %>" alt="<%: site.LongName %>" class="site"/>
       <p class="tagline">
         <%= site.Tagline%>
       </p>

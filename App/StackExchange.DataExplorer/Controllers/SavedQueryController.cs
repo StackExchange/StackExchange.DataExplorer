@@ -82,10 +82,10 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult Delete(int id) {
             var query = Current.DB.SavedQueries.FirstOrDefault(q => q.Id == id);
             if (query != null && (query.UserId == Current.User.Id || Current.User.IsAdmin)) {
-                query.IsDeleted = true;
                 if (query.IsFeatured ?? false) {
                     return Json("Query is featured, delete is not permitted");
                 }
+                query.IsDeleted = true;
                 Current.DB.SubmitChanges();
             }
 
@@ -132,13 +132,11 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             }
 
-            
-
-            query.CreationDate = query.LastEditDate = DateTime.UtcNow;
-            query.UserId = CurrentUser.Id;
 
             if (ModelState.IsValid) {
                 if (updateQuery == null) {
+                    query.CreationDate = query.LastEditDate = DateTime.UtcNow;
+                    query.UserId = CurrentUser.Id;
                     db.SavedQueries.InsertOnSubmit(query);
                 } 
                 db.SubmitChanges();

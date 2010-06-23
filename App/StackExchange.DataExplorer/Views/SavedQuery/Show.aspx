@@ -62,8 +62,8 @@
         <% foreach (var site in sites) {
              if (site.Id == Model.Id) continue;
         %>
-        <a class="otherPermalink" href="/<%= site.Name.ToLower() %>/q//" title="View results on <%= site.LongName %>">
-          <img src="<%= site.IconUrl %>" alt="<%= site.LongName %>" /></a>
+        <a class="otherPermalink" href="/<%: site.Name.ToLower() %>/q//" title="View results on <%: site.LongName %>">
+          <img src="<%= site.IconUrl %>" alt="<%: site.LongName %>" /></a>
         <% } %>
       </span>
     </p>

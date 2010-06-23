@@ -10,7 +10,8 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class VoteController : StackOverflowController
     {
-        [Route("vote/{id}")]
+        [HttpPost]
+        [Route(@"vote/{id:\d+}")]
         public ActionResult Vote(int id, string voteType) {
             if (Current.User.IsAnonymous) {
                 return new EmptyResult();
