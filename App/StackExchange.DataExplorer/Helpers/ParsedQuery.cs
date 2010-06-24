@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace StackExchange.DataExplorer.Helpers {
     public class ParsedQuery {
@@ -15,7 +16,9 @@ namespace StackExchange.DataExplorer.Helpers {
             }
         }
 
-        static readonly Regex paramsRegex = new Regex("##([a-zA-Z0-9]+)##",RegexOptions.Compiled);
+        static readonly Regex ParamsRegex = new Regex("##([a-zA-Z0-9]+):?([a-zA-Z]+)?##", RegexOptions.Compiled);
+        static readonly Regex ValidIntRegex = new Regex(@"\A[0-9]+\Z", RegexOptions.Compiled | RegexOptions.Multiline);
+        static readonly Regex ValidFloatRegex = new Regex(@"\A[0-9]+(\.[0-9]+)?\Z", RegexOptions.Compiled | RegexOptions.Multiline);
 
         public ParsedQuery(string sql, NameValueCollection requestParams) {
             Parse(sql, requestParams);
@@ -67,32 +70,107 @@ namespace StackExchange.DataExplorer.Helpers {
             RawSql = Normalize(rawSql);
             Sql = Normalize(sqlWithoutComment.ToString());
 
-            ExecutionSql = SubstituteParams(Sql, requestParams);
-            AllParamsSet = paramsRegex.Matches(ExecutionSql).Count == 0;
+            List<string> errors;
+            ExecutionSql = SubstituteParams(Sql, requestParams, out errors);
 
+            AllParamsSet = ParamsRegex.Matches(ExecutionSql).Count == 0 && errors.Count == 0;
+
+            if (errors.Count > 0)
+            {
+                ErrorMessage = string.Join("\n",errors);
+            }
+            
             ExecutionHash = Util.GetMD5(ExecutionSql);
             Hash = Util.GetMD5(Sql);
         }
 
-        private string SubstituteParams(string sql, NameValueCollection requestParams) {
+        private string SubstituteParams(string sql, NameValueCollection requestParams, out List<string> errorCollection) {
+
+            errorCollection = new List<string>();
 
             if (requestParams == null) {
                 return sql;
             }
 
-            var matches = paramsRegex.Matches(sql);
+            var matches = ParamsRegex.Matches(sql);
 
             foreach (Match match in matches) {
                 var name = match.Groups[1].Value;
+                var type = match.Groups[2].Value;
                 var subst = requestParams[name];
+                
                 if (string.IsNullOrEmpty(subst)) {
                     continue;
                 }
-                sql = sql.Replace("##" + name + "##", subst);
+
+                if (!CheckIfTypeIsKnown(type))
+                {
+                    errorCollection.Add(string.Format("Unknown parameter type {0}!", type));
+                    continue;
+                }
+
+                if (!ValidateType(type, subst))
+                {
+                    errorCollection.Add(string.Format("Expected {0} to be of type {1}!", name, type));
+                    continue;
+                }
+
+                subst = EncodeType(type, subst);
+
+                string param; 
+                if (string.IsNullOrEmpty(type))
+                {
+                    param = "##" + name + "##";
+                } else
+                {
+                    param = "##" + name + ":" + type + "##";
+                    
+                }
+                sql = sql.Replace(param, subst);
             }
 
             return sql;
         }
+
+
+        private class ParameterType
+        {
+            public ParameterType(string typeName, Func<string, bool> validator, Func<string, string> encoder)
+            {
+                TypeName = typeName;
+                Encoder = encoder;
+                Validator = validator;
+            }
+
+            public Func<string , bool> Validator { get; private set; }
+            public Func<string , string> Encoder { get; private set; }
+            public string TypeName { get; private set; }
+        }
+
+
+        static readonly ParameterType[] ParameterTypes = 
+            new ParameterType[] {
+                new ParameterType("", _ => true , _ => _ ),
+                new ParameterType("int", data => ValidIntRegex.IsMatch(data) , _ => _ ),
+                new ParameterType("string", _ => true , data => string.Format("'{0}'", data.Replace("'", "''"))),
+                new ParameterType("float", data => ValidFloatRegex.IsMatch(data) , _ => _ )                                                                           
+            };
+
+        private static bool CheckIfTypeIsKnown(string type)
+        {
+            return ParameterTypes.Any(p => p.TypeName == type);
+        }
+
+        private static bool ValidateType(string type, string data) {
+            var parameterType = ParameterTypes.First(p => p.TypeName == type);
+            return parameterType.Validator(data);
+        }
+
+        private static string EncodeType(string type, string data) {
+            var parameterType = ParameterTypes.First(p => p.TypeName == type);
+            return parameterType.Encoder(data);
+        }
+
 
         private string Normalize(string sql) {
             var buffer = new StringBuilder();
@@ -126,6 +204,8 @@ namespace StackExchange.DataExplorer.Helpers {
         public string Description { get; private set; }
 
         public bool AllParamsSet { get; private set; }
+
+        public string ErrorMessage { get; private set; }
 
 
         /// <summary>

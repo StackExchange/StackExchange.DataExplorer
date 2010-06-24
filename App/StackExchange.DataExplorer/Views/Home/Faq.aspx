@@ -22,6 +22,10 @@
   <h3>Do you support parameterized quries?</h3>
   <p><strong>Yes</strong> to get it to work name your params like ##this##.
   </p>
+     <p>There is also built in support for strongly typed parameters of type <strong>string</strong>, 
+       <strong>int</strong> and <strong>float</strong>. If you name your parameter ##bob:string## it will be treated as a 
+       string, this will result in both quoting and escaping of single quotes.
+  </p>
 
   <h3>How do I name and describe my queries?</h3>
   <p>

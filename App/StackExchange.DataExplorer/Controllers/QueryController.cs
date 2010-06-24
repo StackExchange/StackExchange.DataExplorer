@@ -32,7 +32,12 @@ namespace StackExchange.DataExplorer.Controllers
             var parsedQuery = new ParsedQuery(sql, Request.Params);
 
             try {
-                if (!parsedQuery.AllParamsSet) {
+                if (!parsedQuery.AllParamsSet)
+                {
+                    if (!string.IsNullOrEmpty(parsedQuery.ErrorMessage)) {
+                        throw new ApplicationException(parsedQuery.ErrorMessage);
+                    }
+
                     throw new ApplicationException("All parameters must be set!");
                 }
 
@@ -49,7 +54,7 @@ namespace StackExchange.DataExplorer.Controllers
                 if (sqlException != null) {
                     result["error"] = sqlException.Message;
                 } else {
-                    result["error"] = e.ToString();
+                    result["error"] = e.Message;
                 }
                 rval = Json( result ); 
             }

@@ -92,7 +92,7 @@
              </form>
           </div>
          
-          <div style="padding: 0pt 0.7em; display:none" class="ui-state-error ui-corner-all" id="queryErrorBox"> 
+          <div style="padding: 5px; display:none" class="ui-state-error ui-corner-all" id="queryErrorBox"> 
 					  <p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-alert"></span> 
 					  <strong>Error:</strong> <span id="queryError"> </span></p>
 				  </div>

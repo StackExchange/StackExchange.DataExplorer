@@ -243,7 +243,7 @@ function executeQuery(sql) {
 }
 
 function ensureAllParamsEntered(query) {
-    var pattern = /##[a-zA-Z0-9]+##/g;
+    var pattern = /##([a-zA-Z0-9]+):?([a-zA-Z]+)?##/g;
     var params = query.match(pattern);
     if (params == null) params = [];
 
@@ -253,6 +253,10 @@ function ensureAllParamsEntered(query) {
 
     for (var i = 0; i < params.length; i++) {
         params[i] = params[i].substring(2, params[i].length - 2);
+        var colonPos = params[i].indexOf(":");
+        if (colonPos > 0) {
+            params[i] = params[i].substring(0, colonPos); 
+        }
 
         var currentParam = div.find("input[name=" + params[i] + "]");
         if (currentParam.length == 0) {
