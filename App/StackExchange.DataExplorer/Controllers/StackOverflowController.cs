@@ -187,25 +187,18 @@ namespace StackExchange.DataExplorer.Controllers {
             PageNotFound().ExecuteResult(ControllerContext);
         }
 
+#if DEBUG
         /// <summary>
         /// fires after the controller finishes execution
         /// </summary>
         protected override void OnActionExecuted(ActionExecutedContext filterContext) {
-#if DEBUG
+
             log.Debug("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " + watch.ElapsedMilliseconds.ToString());
             System.Diagnostics.Trace.WriteLine("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " + watch.ElapsedMilliseconds.ToString());
-#endif
-            
-            var host = filterContext.HttpContext.Request.Headers["Host"];
 
-            if (host != null && host.StartsWith("cloudexchange.cloudapp.net")) {
-                filterContext.Result = new RedirectPermanentResult("http://odata.stackexchange.com" + filterContext.HttpContext.Request.RawUrl);
-            } else
-            {
-                base.OnActionExecuted(filterContext);
-            }
+            base.OnActionExecuted(filterContext);
         }
-
+#endif
 
         /// <summary>
         /// When a client IP can't be determined
