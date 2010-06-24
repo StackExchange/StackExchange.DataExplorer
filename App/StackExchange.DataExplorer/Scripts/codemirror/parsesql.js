@@ -38,7 +38,7 @@ var SqlParser = Editor.Parser = (function() {
     "or", "in", "not", "xor", "like", "using", "on", "order", "group", "by",
     "asc", "desc", "limit", "offset", "union", "all", "as", "distinct", "set",
     "commit", "rollback", "replace", "view", "database", "separator", "if",
-    "exists", "null", "truncate", "status", "show", "lock", "unique"
+    "exists", "null", "truncate", "status", "show", "lock", "unique", "having"
   ]);
 
   var types = wordRegexp([
@@ -47,7 +47,7 @@ var SqlParser = Editor.Parser = (function() {
     "int", "int1", "int2", "int3", "int4", "int8", "integer", "long", "longblob",
     "longtext", "mediumblob", "mediumint", "mediumtext", "middleint", "nchar",
     "numeric", "real", "set", "smallint", "text", "time", "timestamp", "tinyblob",
-    "tinyint", "tinytext", "varbinary", "varchar", "year"
+    "tinyint", "tinytext", "varbinary", "varchar", "year", "string" // <- this is an SEDE hack
   ]);
 
   var operators = wordRegexp([
