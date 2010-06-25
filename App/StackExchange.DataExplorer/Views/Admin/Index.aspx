@@ -10,7 +10,7 @@
     <li id="refreshStats"><span style="display:none;">refreshing ...</span> <a href="/admin/refresh_stats">Update site statistics</a> (will update front page stats)</li>
   </ul>
 
-  <%= AssetPackager.ScriptSrc("jquery") %>
+  <%=AssetPackager.ScriptSrc("jquery")%>
   <script type="text/javascript">
     $(document).ready(function () {
       $("#refreshStats a").click(function () {

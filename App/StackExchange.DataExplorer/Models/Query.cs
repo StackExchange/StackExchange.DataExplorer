@@ -1,30 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Text;
 using StackExchange.DataExplorer.Helpers;
-using System.Text;
 
-namespace StackExchange.DataExplorer.Models {
-    public partial class Query {
-
-        public string BodyWithoutComments { 
-            get {
-                ParsedQuery pq = new ParsedQuery(this.QueryBody, null);
+namespace StackExchange.DataExplorer.Models
+{
+    public partial class Query
+    {
+        public string BodyWithoutComments
+        {
+            get
+            {
+                var pq = new ParsedQuery(QueryBody, null);
                 return pq.ExecutionSql;
-            } 
+            }
         }
 
-        public void UpdateQueryBodyComment() {
-            StringBuilder buffer = new StringBuilder();
+        public void UpdateQueryBodyComment()
+        {
+            var buffer = new StringBuilder();
 
-            if (Name != null) {
+            if (Name != null)
+            {
                 buffer.Append(ToComment(Name));
                 buffer.Append("\n");
             }
 
 
-            if (Description != null) {
+            if (Description != null)
+            {
                 buffer.Append(ToComment(Description));
                 buffer.Append("\n");
             }
@@ -35,8 +37,8 @@ namespace StackExchange.DataExplorer.Models {
             QueryBody = buffer.ToString();
         }
 
-        private string ToComment(string text) {
-
+        private string ToComment(string text)
+        {
             if (string.IsNullOrEmpty(text)) return "";
             if (text != null) text = text.Trim();
 

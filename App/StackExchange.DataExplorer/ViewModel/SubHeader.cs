@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
-namespace StackExchange.DataExplorer.ViewModel {
-    public class SubHeader {
-
-        public SubHeader() { 
-        
+namespace StackExchange.DataExplorer.ViewModel
+{
+    public class SubHeader
+    {
+        public SubHeader()
+        {
         }
-        
-        public SubHeader(string title) {
-            this.Title = title;
+
+        public SubHeader(string title)
+        {
+            Title = title;
         }
 
         public string Title { get; set; }

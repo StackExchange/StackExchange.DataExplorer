@@ -46,7 +46,7 @@
   </div>
 
   <link rel="stylesheet" href="http://sstatic.net/so/openid.css"> 
-  <%= AssetPackager.ScriptSrc("jquery") %>
+  <%=AssetPackager.ScriptSrc("jquery")%>
   <script src="http://sstatic.net/so/Js/third-party/openid-jquery.js?v=2" type="text/javascript"></script>
 
   <script type="text/javascript">

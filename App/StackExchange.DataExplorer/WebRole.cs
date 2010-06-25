@@ -2,9 +2,12 @@ using System.Linq;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
-namespace StackExchange.DataExplorer {
-    public class WebRole : RoleEntryPoint {
-        public override bool OnStart() {
+namespace StackExchange.DataExplorer
+{
+    public class WebRole : RoleEntryPoint
+    {
+        public override bool OnStart()
+        {
             DiagnosticMonitor.Start("DiagnosticsConnectionString");
 
             // For information on handling configuration changes
@@ -14,9 +17,11 @@ namespace StackExchange.DataExplorer {
             return base.OnStart();
         }
 
-        private void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e) {
+        private void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e)
+        {
             // If a configuration setting is changing
-            if (e.Changes.Any(change => change is RoleEnvironmentConfigurationSettingChange)) {
+            if (e.Changes.Any(change => change is RoleEnvironmentConfigurationSettingChange))
+            {
                 // Set e.Cancel to true to restart this role instance
                 e.Cancel = true;
             }

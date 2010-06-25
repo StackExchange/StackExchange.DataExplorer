@@ -1,32 +1,33 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<StackExchange.DataExplorer.Models.SavedQuery>" %>
 <%@ Import Namespace="StackExchange.DataExplorer" %>
+<%@ Import Namespace="StackExchange.DataExplorer.Models" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-  <%= Html.Encode(Model.Title) %> - Stack Exchange Data Explorer
+  <%=Html.Encode(Model.Title)%> - Stack Exchange Data Explorer
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="AdditionalStyles" runat="server">
-  <%= AssetPackager.LinkCSS("viewer_editor")%>
+  <%=AssetPackager.LinkCss("viewer_editor")%>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
   <div id="savedQueryTitle">
-    <%= Html.Partial("QueryVoting", ViewData["QueryVoting"]) %>
-    <% StackExchange.DataExplorer.Models.CachedResult cached_results = ViewData["cached_results"] as StackExchange.DataExplorer.Models.CachedResult; %>
+    <%=Html.Partial("QueryVoting", ViewData["QueryVoting"])%>
+    <% var cached_results = ViewData["cached_results"] as CachedResult; %>
     <div class="error-notification supernovabg">
       <h2>
         Please <a href="/account/login">login or register</a> to vote for this query.</h2>
       (click on this box to dismiss)
     </div>
-    <div id="query-description"><%= Html.Encode(Model.Description).Replace("\n", "<br>") %></div>
-    <%= Html.Partial("AboutSite") %>
+    <div id="query-description"><%=Html.Encode(Model.Description).Replace("\n", "<br>")%></div>
+    <%=Html.Partial("AboutSite")%>
     <div class="clear">
   </div>
   </div>
-  <pre id="queryBodyText"><code><%: Model.Query.BodyWithoutComments%></code></pre>
+  <pre id="queryBodyText"><code><%:Model.Query.BodyWithoutComments%></code></pre>
   <div class="query">
-    <form id="runQueryForm" action="/query/<%= Current.Controller.Site.Id %>" method="post">
+    <form id="runQueryForm" action="/query/<%=Current.Controller.Site.Id%>" method="post">
     <p>
-      <input type="hidden" name="siteId" value="<%= Current.Controller.Site.Id %>" />
+      <input type="hidden" name="siteId" value="<%=Current.Controller.Site.Id%>" />
       <div id="sqlQueryWrapper" style="position: relative;">
-        <input type="hidden" id="sqlQuery" name="savedQueryId" value="<%=Model.Id %>" />
+        <input type="hidden" id="sqlQuery" name="savedQueryId" value="<%=Model.Id%>" />
       </div>
       <div class="clear">
       </div>
@@ -46,25 +47,32 @@
         <a id="hideSql" href="#">hide sql</a> 
         <a id="showSql" href="#" style="display: none;">show sql</a> 
         <%
-          var editHref = string.Format("/{0}/qe/{1}/{2}", 
-            Current.Controller.Site.Name.ToLower(), 
-            Model.Id, Model.Title.URLFriendly());
-         %>
-        <a id="editQuery" href="<%=editHref%>"><%= (Model.UserId == Current.User.Id || Current.User.IsAdmin) ? "edit" : "clone" %></a>
-        <% if (Model.UserId == Current.User.Id || Current.User.IsAdmin) { %>
-           <a id="deleteQuery" href="#"><%= Model.IsDeleted ?? false ? "undelete" : "delete"%></a>
-        <% } %>
+        string editHref = string.Format("/{0}/qe/{1}/{2}",
+                                        Current.Controller.Site.Name.ToLower(),
+                                        Model.Id, Model.Title.URLFriendly());
+%>
+        <a id="editQuery" href="<%=editHref%>"><%=(Model.UserId == Current.User.Id || Current.User.IsAdmin) ? "edit" : "clone"%></a>
+        <%
+        if (Model.UserId == Current.User.Id || Current.User.IsAdmin)
+        {%>
+           <a id="deleteQuery" href="#"><%=Model.IsDeleted ?? false ? "undelete" : "delete"%></a>
+        <%
+        }%>
       </span>
       <span id="permalinks" style="display: none">
         <a id="permalink" href="#">permalink to this query</a> 
         <a id="downloadCsv" href="#" title="download results as CSV">download results</a>
-        <% var sites = (IEnumerable<StackExchange.DataExplorer.Models.Site>)ViewData["Sites"]; %>
-        <% foreach (var site in sites) {
-             if (site.Id == Model.Id) continue;
-        %>
-        <a class="otherPermalink" href="/<%: site.Name.ToLower() %>/q//" title="View results on <%: site.LongName %>">
-          <img src="<%= site.IconUrl %>" alt="<%: site.LongName %>" /></a>
-        <% } %>
+        <%
+        var sites = (IEnumerable<Site>) ViewData["Sites"];%>
+        <%
+        foreach (Site site in sites)
+        {
+            if (site.Id == Model.Id) continue;
+%>
+        <a class="otherPermalink" href="/<%:site.Name.ToLower()%>/q//" title="View results on <%:site.LongName%>">
+          <img src="<%=site.IconUrl%>" alt="<%:site.LongName%>" /></a>
+        <%
+        }%>
       </span>
     </p>
     </form>
@@ -100,17 +108,17 @@
       </div>
     </div>
   </div>
-  <%= AssetPackager.ScriptSrc("jquery") %>
-  <%= AssetPackager.ScriptSrc("viewer") %>
+  <%=AssetPackager.ScriptSrc("jquery")%>
+  <%=AssetPackager.ScriptSrc("viewer")%>
   
   <script type="text/javascript">
     var inProgress = false;
-    var queryId = <%= Model.Id %>;
-    var loggedOn = <%= ViewData["LoggedOn"] %>;
+    var queryId = <%=Model.Id%>;
+    var loggedOn = <%=ViewData["LoggedOn"]%>;
     var queryText;
-    var querySlug = "<%= Model.Title.URLFriendly() %>";
+    var querySlug = "<%=Model.Title.URLFriendly()%>";
 
-    <%= Html.Partial("GuessedUserId") %>
+    <%=Html.Partial("GuessedUserId")%>
 
     $(document).ready(function () {
 
@@ -123,9 +131,12 @@
       populateParamsFromUrl();
 
 
-      <% if(cached_results != null) { %>
-       gotResults( <%= cached_results.Results %> ); 
-      <% } %>
+      <%
+        if (cached_results != null)
+        {%>
+       gotResults( <%=cached_results.Results%> ); 
+      <%
+        }%>
 
       codeBlock.text("");
       highlightText(queryText, codeBlock[0]);

@@ -3,10 +3,12 @@ using System.Web.Mvc;
 
 namespace StackExchange.DataExplorer.Helpers
 {
-    public class RedirectPermanentResult : ActionResult {
-
-        public RedirectPermanentResult(string url) {
-            if (String.IsNullOrEmpty(url)) {
+    public class RedirectPermanentResult : ActionResult
+    {
+        public RedirectPermanentResult(string url)
+        {
+            if (String.IsNullOrEmpty(url))
+            {
                 throw new ArgumentException("url should not be empty");
             }
 
@@ -14,16 +16,16 @@ namespace StackExchange.DataExplorer.Helpers
         }
 
 
-        public string Url {
-            get;
-            private set;
-        }
+        public string Url { get; private set; }
 
-        public override void ExecuteResult(ControllerContext context) {
-            if (context == null) {
+        public override void ExecuteResult(ControllerContext context)
+        {
+            if (context == null)
+            {
                 throw new ArgumentNullException("context");
             }
-            if (context.IsChildAction) {
+            if (context.IsChildAction)
+            {
                 throw new InvalidOperationException("You can not redirect in child actions");
             }
 
@@ -31,6 +33,5 @@ namespace StackExchange.DataExplorer.Helpers
             context.Controller.TempData.Keep();
             context.HttpContext.Response.RedirectPermanent(destinationUrl, false /* endResponse */);
         }
-
     }
 }

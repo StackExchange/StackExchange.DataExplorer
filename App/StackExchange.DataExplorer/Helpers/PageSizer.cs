@@ -1,28 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Web;
-using System.Web.UI;
-using System.Collections;
+﻿using System.Text;
 
 namespace StackExchange.DataExplorer.Helpers
 {
     public class PageSizer
     {
-        public int PageIndex { get; set; }
-        public string HRef { get; set; }
-        public int CurrentPageSize { get; set; }
-        public int PageCount { get; set; }
-        public string CssClass { get; set; }
-
-        public static int DefaultPageSize
-        {
-            get { return PageSizes[0]; }
-        }
-        private static int[] PageSizes = { 30, 50, 100 };
+        private static readonly int[] PageSizes = {30, 50, 100};
 
         public PageSizer(string href, int pageIndex, int currentPageSize, int pageCount, string cssClass)
         {
@@ -33,8 +15,19 @@ namespace StackExchange.DataExplorer.Helpers
             CssClass = cssClass;
         }
 
+        public int PageIndex { get; set; }
+        public string HRef { get; set; }
+        public int CurrentPageSize { get; set; }
+        public int PageCount { get; set; }
+        public string CssClass { get; set; }
+
+        public static int DefaultPageSize
+        {
+            get { return PageSizes[0]; }
+        }
+
         public override string ToString()
-        {            
+        {
             if (PageCount == 1)
                 return "";
 
@@ -47,7 +40,7 @@ namespace StackExchange.DataExplorer.Helpers
             foreach (int pageSize in PageSizes)
             {
                 sb.Append(@"<a href=""");
-                sb.Append(HRef.Replace("pagesize=-1", "pagesize=" + pageSize.ToString()));
+                sb.Append(HRef.Replace("pagesize=-1", "pagesize=" + pageSize));
                 sb.Append(@""" title=""");
                 sb.Append("show ");
                 sb.Append(pageSize);
@@ -56,7 +49,7 @@ namespace StackExchange.DataExplorer.Helpers
                     sb.Append(@" class=""current page-numbers""");
                 else
                     sb.Append(@" class=""page-numbers""");
-                sb.Append(">");                               
+                sb.Append(">");
                 sb.Append(pageSize);
                 sb.AppendLine("</a>");
             }

@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Web.UI;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace StackExchange.DataExplorer.Helpers
 {
     public class PageNumber
     {
-        public string HRef { get; set; }
-        public string CssClass { get; set; }
-        public string DivId { get; set; }
-        public int PageCount { get; set; }
-        public int PageCurrent  { get; set; }
-        public bool IsJQuery { get; set; }
-
         private const int _cellcount = 6;
         private const string _prev = "prev ";
         private const string _next = " next";
-        const string PAGER_DOTS = "&hellip;";
+        private const string PAGER_DOTS = "&hellip;";
 
         public PageNumber(string href, int pageCount, int pageCurrent, string cssClass)
         {
@@ -27,15 +17,23 @@ namespace StackExchange.DataExplorer.Helpers
             PageCount = pageCount;
             PageCurrent = pageCurrent;
         }
+
         public PageNumber(string href, int pageCount, int pageCurrent, string cssClass, string divId, bool isAjax)
         {
             HRef = href;
             CssClass = cssClass;
-            DivId = divId; 
+            DivId = divId;
             PageCount = pageCount;
             PageCurrent = pageCurrent;
             IsJQuery = isAjax;
         }
+
+        public string HRef { get; set; }
+        public string CssClass { get; set; }
+        public string DivId { get; set; }
+        public int PageCount { get; set; }
+        public int PageCurrent { get; set; }
+        public bool IsJQuery { get; set; }
 
         public override string ToString()
         {
@@ -59,7 +57,7 @@ namespace StackExchange.DataExplorer.Helpers
                         pages.Add(i.ToString());
                     pages.Add(PAGER_DOTS);
                     pages.Add(PageCount.ToString());
-                }                
+                }
                 else if (curPage > PageCount - _cellcount + 2)
                 {
                     // we're near the end
@@ -99,7 +97,7 @@ namespace StackExchange.DataExplorer.Helpers
                     sb.Append("\" ");
                 }
                 sb.AppendLine(">");
-            }            
+            }
 
             if (curPage > 1)
                 WriteCell(sb, _prev, "page-numbers");
@@ -112,8 +110,8 @@ namespace StackExchange.DataExplorer.Helpers
                 sb.AppendLine("</div>");
 
             return sb.ToString();
-        } 
-        
+        }
+
         private void WriteCell(StringBuilder sb, string pageText, string cssClass)
         {
             string linktext = pageText;

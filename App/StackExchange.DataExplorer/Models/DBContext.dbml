@@ -1,4 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Database Name="CloudDb" Class="DBContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Database Name="CloudDb" Class="DBContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
   <Connection Mode="WebSettings" ConnectionString="Data Source=localhost;Initial Catalog=DataExplorer;Integrated Security=True" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="AppConnection" Provider="System.Data.SqlClient" />
   <Table Name="dbo.CachedResults" Member="CachedResults">
     <Type Name="CachedResult">

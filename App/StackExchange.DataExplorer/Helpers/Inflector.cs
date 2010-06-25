@@ -23,10 +23,10 @@ namespace StackExchange.DataExplorer.Helpers
     /// </summary>
     public static class Inflector
     {
+        public const string UPPER_CASE = @"^[A-Z]+$";
         private static readonly List<InflectorRule> _plurals = new List<InflectorRule>();
         private static readonly List<InflectorRule> _singulars = new List<InflectorRule>();
         private static readonly List<string> _uncountables = new List<string>();
-        public const string UPPER_CASE = @"^[A-Z]+$";
 
         /// <summary>
         /// Initializes the <see cref="Inflector"/> class.
@@ -103,9 +103,9 @@ namespace StackExchange.DataExplorer.Helpers
         private static void AddIrregularRule(string singular, string plural)
         {
             AddPluralRule(String.Concat("(", singular[0], ")", singular.Substring(1), "$"),
-                String.Concat("$1", plural.Substring(1)));
+                          String.Concat("$1", plural.Substring(1)));
             AddSingularRule(String.Concat("(", plural[0], ")", plural.Substring(1), "$"),
-                String.Concat("$1", singular.Substring(1)));
+                            String.Concat("$1", singular.Substring(1)));
         }
 
         /// <summary>
@@ -166,12 +166,12 @@ namespace StackExchange.DataExplorer.Helpers
         private static string ApplyRules(IList<InflectorRule> rules, string word)
         {
             string result = word;
-            if(!_uncountables.Contains(word.ToLower()))
+            if (!_uncountables.Contains(word.ToLower()))
             {
-                for(int i = rules.Count - 1; i >= 0; i--)
+                for (int i = rules.Count - 1; i >= 0; i--)
                 {
                     string currentPass = rules[i].Apply(word);
-                    if(currentPass != null)
+                    if (currentPass != null)
                     {
                         result = currentPass;
                         break;
@@ -189,7 +189,7 @@ namespace StackExchange.DataExplorer.Helpers
         public static string ToTitleCase(this string word)
         {
             return Regex.Replace(ToHumanCase(AddUnderscores(word)), @"\b([a-z])",
-                match => match.Captures[0].Value.ToUpper());
+                                 match => match.Captures[0].Value.ToUpper());
         }
 
         /// <summary>
@@ -231,22 +231,22 @@ namespace StackExchange.DataExplorer.Helpers
         /// <returns></returns>
         public static string ToPascalCase(this string text, bool removeUnderscores)
         {
-            if(String.IsNullOrEmpty(text))
+            if (String.IsNullOrEmpty(text))
                 return text;
 
             text = text.Replace("_", " ");
             string joinString = removeUnderscores ? String.Empty : "_";
             string[] words = text.Split(' ');
-            if(words.Length > 1 || words[0].IsUpperCase())
+            if (words.Length > 1 || words[0].IsUpperCase())
             {
-                for(int i = 0; i < words.Length; i++)
+                for (int i = 0; i < words.Length; i++)
                 {
-                    if(words[i].Length > 0)
+                    if (words[i].Length > 0)
                     {
                         string word = words[i];
                         string restOfWord = word.Substring(1);
 
-                        if(restOfWord.IsUpperCase())
+                        if (restOfWord.IsUpperCase())
                             restOfWord = restOfWord.ToLower(CultureInfo.CurrentUICulture);
 
                         char firstChar = char.ToUpper(word[0], CultureInfo.CurrentUICulture);
@@ -278,7 +278,7 @@ namespace StackExchange.DataExplorer.Helpers
             return
                 Regex.Replace(
                     Regex.Replace(Regex.Replace(pascalCasedWord, @"([A-Z]+)([A-Z][a-z])", "$1_$2"), @"([a-z\d])([A-Z])",
-                        "$1_$2"), @"[-\s]", "_").ToLower();
+                                  "$1_$2"), @"[-\s]", "_").ToLower();
         }
 
         /// <summary>
@@ -308,15 +308,15 @@ namespace StackExchange.DataExplorer.Helpers
         /// <returns></returns>
         public static string AddOrdinalSuffix(this string number)
         {
-            if(number.IsStringNumeric())
+            if (number.IsStringNumeric())
             {
                 int n = int.Parse(number);
-                int nMod100 = n % 100;
+                int nMod100 = n%100;
 
-                if(nMod100 >= 11 && nMod100 <= 13)
+                if (nMod100 >= 11 && nMod100 <= 13)
                     return String.Concat(number, "th");
 
-                switch(n % 10)
+                switch (n%10)
                 {
                     case 1:
                         return String.Concat(number, "st");
@@ -331,12 +331,14 @@ namespace StackExchange.DataExplorer.Helpers
             return number;
         }
 
-        public static bool IsStringNumeric(this string str) {
+        public static bool IsStringNumeric(this string str)
+        {
             double result;
             return (double.TryParse(str, NumberStyles.Float, NumberFormatInfo.CurrentInfo, out result));
         }
 
-        public static bool IsUpperCase(this string inputString) {
+        public static bool IsUpperCase(this string inputString)
+        {
             return Regex.IsMatch(inputString, UPPER_CASE);
         }
 
@@ -349,7 +351,6 @@ namespace StackExchange.DataExplorer.Helpers
         {
             return underscoredWord.Replace('_', '-');
         }
-
 
         #region Nested type: InflectorRule
 
@@ -386,11 +387,11 @@ namespace StackExchange.DataExplorer.Helpers
             /// <returns></returns>
             public string Apply(string word)
             {
-                if(!regex.IsMatch(word))
+                if (!regex.IsMatch(word))
                     return null;
 
                 string replace = regex.Replace(word, replacement);
-                if(word == word.ToUpper())
+                if (word == word.ToUpper())
                     replace = replace.ToUpper();
 
                 return replace;

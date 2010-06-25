@@ -1,49 +1,56 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<StackExchange.DataExplorer.Models.Site>" %>
 <%@ Import Namespace="StackExchange.DataExplorer" %>
+<%@ Import Namespace="StackExchange.DataExplorer.Helpers" %>
+<%@ Import Namespace="StackExchange.DataExplorer.Models" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-	Query <%: Model.LongName %> - Stack Exchange Data Explorer
+	Query <%:Model.LongName%> - Stack Exchange Data Explorer
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="AdditionalStyles" runat="server">
-    <%= AssetPackager.LinkCSS("viewer_editor")%>
+    <%=AssetPackager.LinkCss("viewer_editor")%>
    <STYLE type="text/css">
-      <%= Model.TagCss %> 
+      <%=Model.TagCss%> 
    </STYLE>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <% 
-      string sql;
-      StackExchange.DataExplorer.Models.Query query = ViewData["query"] as StackExchange.DataExplorer.Models.Query;
-      if (query != null) {
-        sql = query.QueryBody;
-      } else {
-        sql = StackExchange.DataExplorer.Helpers.ParsedQuery.DefaultComment;
-      }
+    <%
+        string sql;
+        var query = ViewData["query"] as Query;
+        if (query != null)
+        {
+            sql = query.QueryBody;
+        }
+        else
+        {
+            sql = ParsedQuery.DefaultComment;
+        }
 
-      sql = Html.Encode(sql);
-      
-      StackExchange.DataExplorer.Models.CachedResult cached_results = ViewData["cached_results"] as StackExchange.DataExplorer.Models.CachedResult;
-      %>
+        sql = Html.Encode(sql);
+
+        var cached_results = ViewData["cached_results"] as CachedResult;
+%>
 
    
     <div id="queryText">
         <div>
           <div id="queryInfo">
-            <h2><%= (query != null && query.Name != null) ? query.Name : StackExchange.DataExplorer.Helpers.ParsedQuery.DEFAULT_NAME %></h2>
-            <p><%= (query != null && query.Description != null) ? query.Description : StackExchange.DataExplorer.Helpers.ParsedQuery.DEFAULT_DESCRIPTION %></p>
+            <h2><%:(query != null && query.Name != null) ? query.Name : ParsedQuery.DEFAULT_NAME%></h2>
+            <p><%:(query != null && query.Description != null)
+                                  ? query.Description
+                                  : ParsedQuery.DEFAULT_DESCRIPTION%></p>
           </div>
-          <%= Html.Partial("AboutSite", Model) %>
+          <%=Html.Partial("AboutSite", Model)%>
           <div class="clear"></div>
         </div>
         <div class="query" style="width:70%;">
-          <form id="runQueryForm" action="/query/<%= Model.Id %>" method="post"> 
+          <form id="runQueryForm" action="/query/<%=Model.Id%>" method="post"> 
             <p>
-              <input type="hidden" name="siteId" value="<%= Model.Id %>" />
+              <input type="hidden" name="siteId" value="<%=Model.Id%>" />
               <div id="sqlQueryWrapper" style="position:relative;">
-                <textarea id="sqlQuery" name="sql" rows="18"><%= sql %></textarea>
+                <textarea id="sqlQuery" name="sql" rows="18"><%=sql%></textarea>
               </div>
               <div class="clear"></div>
             </p>
@@ -64,20 +71,24 @@
                   <a id="permalink" href="#">permalink to this query</a> 
                   <a id="saveQuery" href="#">save query</a>
                   <a id="downloadCsv" href="#" title="download results as CSV">download results</a>
-                  <% var sites = (IEnumerable<StackExchange.DataExplorer.Models.Site>)ViewData["Sites"]; %> 
-                  <% foreach (var site in sites) { 
-                        if (site.Id == Model.Id) continue;
-                        %>
-                      <a class="otherPermalink" href="/<%: site.Name.ToLower() %>/q//" title="View results on <%: site.LongName %>">
-                      <img src="<%= site.IconUrl %>" alt="<%: site.LongName %>" /></a>     
-                  <% } %>
+                  <%
+        var sites = (IEnumerable<Site>) ViewData["Sites"];%> 
+                  <%
+        foreach (Site site in sites)
+        {
+            if (site.Id == Model.Id) continue;
+%>
+                      <a class="otherPermalink" href="/<%:site.Name.ToLower()%>/q//" title="View results on <%:site.LongName%>">
+                      <img src="<%=site.IconUrl%>" alt="<%:site.LongName%>" /></a>     
+                  <%
+        }%>
                 </span>
             </p>
           </form>
           <div class="clear"></div>
           <div id="saveDialog" style="position: relative; display: none;">
             <form id="saveQueryForm" action="#" method="post">
-              <input type="hidden" name="savedQueryId" class="savedQueryId" value="<%= ViewData["SavedQueryId"] %>" />
+              <input type="hidden" name="savedQueryId" class="savedQueryId" value="<%=ViewData["SavedQueryId"]%>" />
               <div class="overlay">&nbsp;</div>
               <div class="dialog">
                 <label>Title</label>
@@ -100,17 +111,23 @@
 
         </div>
         <ul class='treeview schema' style="display:none;">
-          <% foreach (var table in (IEnumerable<StackExchange.DataExplorer.Models.TableInfo>)ViewData["Tables"]) { %>
+          <%
+        foreach (TableInfo table in (IEnumerable<TableInfo>) ViewData["Tables"])
+        {%>
             <li>
-              <span class="folder"><%: table.Name %></span>
+              <span class="folder"><%:table.Name%></span>
               <ul>
-                <% for (int i = 0; i < table.ColumnNames.Count; i++) { %>
+                <%
+            for (int i = 0; i < table.ColumnNames.Count; i++)
+            {%>
                      
-                  <li title="<%= table.DataTypes[i] %>"><%: table.ColumnNames[i] %></li>
-                <% } %>
+                  <li title="<%=table.DataTypes[i]%>"><%:table.ColumnNames[i]%></li>
+                <%
+            }%>
               </ul>
             </li>
-          <% } %>
+          <%
+        }%>
         </ul>
         
     </div>
@@ -139,16 +156,16 @@
     </div>
 
    
-  <%= AssetPackager.ScriptSrc("jquery") %>
-  <%= AssetPackager.ScriptSrc("jquery.validate") %>
-  <%= AssetPackager.ScriptSrc("editor") %>
+  <%=AssetPackager.ScriptSrc("jquery")%>
+  <%=AssetPackager.ScriptSrc("jquery.validate")%>
+  <%=AssetPackager.ScriptSrc("editor")%>
 
   <script type="text/javascript">
 
-    var siteId = <%= Model.Id  %>;
-    var loggedOn = <%= (!Current.User.IsAnonymous).ToString().ToLower() %>;
+    var siteId = <%=Model.Id%>;
+    var loggedOn = <%=(!Current.User.IsAnonymous).ToString().ToLower()%>;
 
-    <%= Html.Partial("GuessedUserId") %>
+    <%=Html.Partial("GuessedUserId")%>
 
     var codemirror; 
 
@@ -319,9 +336,12 @@
       ensureAllParamsEntered(textarea.val());
       populateParamsFromUrl();
 
-      <% if(cached_results != null) { %>
-       gotResults( <%= cached_results.Results %> ); 
-      <% } %>
+      <%
+        if (cached_results != null)
+        {%>
+       gotResults( <%=cached_results.Results%> ); 
+      <%
+        }%>
 
       $('.schema').show();
 

@@ -1,119 +1,91 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using StackExchange.DataExplorer.Models;
 using System.Data.SqlClient;
-using System.Configuration;
-using System.Web.Script.Serialization;
+using System.Linq;
+using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
-using StackExchange.DataExplorer.ViewModel;
-using System.Text.RegularExpressions;
-using System.Text;
+using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.Controllers
 {
     public class QueryController : StackOverflowController
     {
-       
         [HttpPost]
         [Route("query/{siteId}")]
         public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId)
         {
-
-            var site = Current.DB.Sites.Where(s => s.Id == siteId).First();
+            Site site = Current.DB.Sites.Where(s => s.Id == siteId).First();
             ActionResult rval;
 
-            if (savedQueryId != null) {
+            if (savedQueryId != null)
+            {
                 sql = Current.DB.SavedQueries.First(q => q.Id == savedQueryId.Value).Query.QueryBody;
             }
 
             var parsedQuery = new ParsedQuery(sql, Request.Params);
 
-            try {
+            try
+            {
                 if (!parsedQuery.AllParamsSet)
                 {
-                    if (!string.IsNullOrEmpty(parsedQuery.ErrorMessage)) {
+                    if (!string.IsNullOrEmpty(parsedQuery.ErrorMessage))
+                    {
                         throw new ApplicationException(parsedQuery.ErrorMessage);
                     }
 
                     throw new ApplicationException("All parameters must be set!");
                 }
 
-                var json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
-                if (resultsToText == "true") {
+                string json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
+                if (resultsToText == "true")
+                {
                     json = QueryResults.FromJson(json).ToTextResults().ToJson();
                 }
 
                 rval = Content(json, "application/json");
                 QueryRunner.LogQueryExecution(CurrentUser, site, parsedQuery);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 var result = new Dictionary<string, string>();
                 var sqlException = e as SqlException;
-                if (sqlException != null) {
+                if (sqlException != null)
+                {
                     result["error"] = sqlException.Message;
-                } else {
+                }
+                else
+                {
                     result["error"] = e.Message;
                 }
-                rval = Json( result ); 
+                rval = Json(result);
             }
 
             return rval;
         }
 
-       
+
         [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowCsv(string sitename, int queryId)
         {
-            var query = FindQuery(queryId);
+            Query query = FindQuery(queryId);
 
-            if(query == null)
+            if (query == null)
             {
                 return PageNotFound();
             }
 
             TrackQueryView(queryId);
-            var cachedResults = GetCachedResults(query);
+            CachedResult cachedResults = GetCachedResults(query);
             return new CsvResult(cachedResults.Results);
         }
 
         [Route(@"{sitename}/qte/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult EditText(string sitename, int savedQueryId) {
-            var db = Current.DB;
-
+        public ActionResult EditText(string sitename, int savedQueryId)
+        {
             SetCommonQueryViewData(sitename);
             SetHeaderInfo(savedQueryId);
 
-            var savedQuery = FindSavedQuery(savedQueryId);
-
-            if (savedQuery == null) {
-                return PageNotFound();
-            }
-
-            savedQuery.UpdateQueryBodyComment();
-
-            ViewData["query"] = savedQuery.Query;
-
-            var cachedResults = GetCachedResults(savedQuery.Query);
-    
-            if (cachedResults != null && cachedResults.Results != null) {
-                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
-            }
-
-            ViewData["cached_results"] = cachedResults;
-
-            return View("New", Site);
-
-        }
-
-        [Route(@"{sitename}/qe/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult Edit(string sitename, int savedQueryId) {
-
-            SetCommonQueryViewData(sitename);
-            SetHeaderInfo(savedQueryId);
-
-            var savedQuery = FindSavedQuery(savedQueryId);
+            SavedQuery savedQuery = FindSavedQuery(savedQueryId);
 
             if (savedQuery == null)
             {
@@ -123,7 +95,36 @@ namespace StackExchange.DataExplorer.Controllers
             savedQuery.UpdateQueryBodyComment();
 
             ViewData["query"] = savedQuery.Query;
-            ViewData["cached_results"]  = GetCachedResults(savedQuery.Query);
+
+            CachedResult cachedResults = GetCachedResults(savedQuery.Query);
+
+            if (cachedResults != null && cachedResults.Results != null)
+            {
+                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
+            }
+
+            ViewData["cached_results"] = cachedResults;
+
+            return View("New", Site);
+        }
+
+        [Route(@"{sitename}/qe/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult Edit(string sitename, int savedQueryId)
+        {
+            SetCommonQueryViewData(sitename);
+            SetHeaderInfo(savedQueryId);
+
+            SavedQuery savedQuery = FindSavedQuery(savedQueryId);
+
+            if (savedQuery == null)
+            {
+                return PageNotFound();
+            }
+
+            savedQuery.UpdateQueryBodyComment();
+
+            ViewData["query"] = savedQuery.Query;
+            ViewData["cached_results"] = GetCachedResults(savedQuery.Query);
 
             return View("New", Site);
         }
@@ -134,29 +135,30 @@ namespace StackExchange.DataExplorer.Controllers
         {
             SetCommonQueryViewData(sitename);
 
-            var query = FindQuery(queryId);
-            if (query == null) {
+            Query query = FindQuery(queryId);
+            if (query == null)
+            {
                 return PageNotFound();
             }
 
             TrackQueryView(queryId);
 
             ViewData["query"] = query;
-            var cachedResults =  GetCachedResults(query);
-            if (cachedResults != null && cachedResults.Results != null) {
+            CachedResult cachedResults = GetCachedResults(query);
+            if (cachedResults != null && cachedResults.Results != null)
+            {
                 cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
             }
 
             ViewData["cached_results"] = cachedResults;
             return View("New", Site);
-         
         }
 
         [Route(@"{sitename}/q/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult Show(string sitename, int queryId)
         {
             SetCommonQueryViewData(sitename);
-            var query = FindQuery(queryId);
+            Query query = FindQuery(queryId);
             if (query == null)
             {
                 return PageNotFound();
@@ -164,14 +166,13 @@ namespace StackExchange.DataExplorer.Controllers
 
             ViewData["query"] = query;
             TrackQueryView(queryId);
-            ViewData["cached_results"]  = GetCachedResults(query);
+            ViewData["cached_results"] = GetCachedResults(query);
             return View("New", Site);
-
         }
 
         [Route("{sitename}/query/new", RoutePriority.Low)]
-       
-        public ActionResult New(string sitename) {
+        public ActionResult New(string sitename)
+        {
             SetCommonQueryViewData(sitename);
             return View(Site);
         }
@@ -188,13 +189,15 @@ namespace StackExchange.DataExplorer.Controllers
             ViewData["Sites"] = Current.DB.Sites.ToList();
         }
 
-        private void TrackQueryView(int id) {
-            if (!IsSearchEngine()) {
+        private void TrackQueryView(int id)
+        {
+            if (!IsSearchEngine())
+            {
                 QueryViewTracker.TrackQueryView(GetRemoteIP(), id);
             }
         }
 
-     
+
         private void SetHeaderInfo()
         {
             SetHeaderInfo(null);
@@ -205,22 +208,22 @@ namespace StackExchange.DataExplorer.Controllers
             return Current.DB.Queries.FirstOrDefault(q => q.Id == id);
         }
 
-        private  SavedQuery FindSavedQuery(int id)
+        private SavedQuery FindSavedQuery(int id)
         {
             return Current.DB.SavedQueries.FirstOrDefault(s => s.Id == id);
         }
 
         private void SetHeaderInfo(int? edit)
         {
-             if (edit != null) {
+            if (edit != null)
+            {
                 SetHeader("Editing Query");
                 ViewData["SavedQueryId"] = edit.Value;
-            } else {
+            }
+            else
+            {
                 SetHeader("Compose Query");
             }
         }
-
-       
-
     }
 }
