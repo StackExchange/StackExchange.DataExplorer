@@ -663,61 +663,6 @@ namespace StackExchange.DataExplorer
             return num.Value.ToString("#,##0");
         }
 
-        /// <summary>
-        /// renders a user control as a plain vanilla string
-        /// </summary>
-        public static string RenderControl(this Control control)
-        {
-            var sb = new StringBuilder();
-            using (var sw = new StringWriter(sb))
-            {
-                using (var textWriter = new HtmlTextWriter(sw))
-                {
-                    control.RenderControl(textWriter);
-                }
-            }
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// compresses UTF-8 string into byte[] using GZip
-        /// </summary>
-        public static byte[] Compress(string s)
-        {
-            byte[] b;
-
-            using (var ms = new MemoryStream())
-            using (var writer = new BinaryWriter(ms, Encoding.UTF8))
-            {
-                b = Encoding.UTF8.GetBytes(s);
-                // prepend the compressed data with the length of the uncompressed data (first 4 bytes)
-                writer.Write(b.Length);
-                using (var st = new DeflateStream(ms, CompressionMode.Compress))
-                {
-                    st.Write(b, 0, b.Length);
-                }
-                return ms.ToArray();
-            }
-        }
-
-        /// <summary>
-        /// decompress byte[] to UTF-8 string using GZip
-        /// </summary>
-        public static string Decompress(byte[] compressedbytes)
-        {
-            using (var ms = new MemoryStream(compressedbytes))
-            using (var reader = new BinaryReader(ms))
-            {
-                // read final uncompressed string size stored in first 4 bytes
-                int size = reader.ReadInt32();
-                using (var st = new DeflateStream(ms, CompressionMode.Decompress))
-                {
-                    var b = new byte[size];
-                    st.Read(b, 0, b.Length);
-                    return Encoding.UTF8.GetString(b);
-                }
-            }
-        }
 
         public static bool GuidTryParse(this string s, out Guid result)
         {

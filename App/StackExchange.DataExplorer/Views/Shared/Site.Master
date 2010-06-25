@@ -36,7 +36,7 @@
       </div>
       <div id="title">
         <div id="hlogo">
-          <a href="/" alt="Stack Exchange Data Explorer">
+          <a href="/" title="Stack Exchange Data Explorer">
             <img src="/Content/images/see_logo.png" alt="Stack Exchange Data Explorer" width="318"
               height="91" />
           </a>
@@ -72,12 +72,12 @@
       </div>
       <div id="footer-flair">
         <img src="/Content/images/windows_azure_logo.png" alt="cc-wiki, Windows Azure" usemap="#footermap"
-          height="67" width="168">
-        <map name="footermap">
+          height="67" width="168"/>
+        <map id="footermap">
           <area href="http://creativecommons.org/licenses/by-sa/2.5/" alt="cc-wiki" title="Creative Commons: Attribution - Share Alike"
-            coords="0,0,50,67">
+            coords="0,0,50,67"/>
           <area href="http://www.microsoft.com/windowsazure/windowsazure/" alt="Windows Azure"
-            title="Windows Azure" coords="62,0,168,67">
+            title="Windows Azure" coords="62,0,168,67"/>
         </map>
         <div id="svnrev">
         </div>

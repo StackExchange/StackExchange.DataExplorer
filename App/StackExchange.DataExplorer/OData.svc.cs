@@ -5,6 +5,7 @@ using System.Data.Metadata.Edm;
 using System.Data.Services;
 using System.Data.Services.Common;
 using System.Data.SqlClient;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
@@ -24,7 +25,8 @@ namespace StackExchange.DataExplorer
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
         }
 
-
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", 
+            Justification = "If we dispose our connection our data source will be hosed")]
         protected override Entities CreateDataSource()
         {
             // var siteName = HttpContext.Current.Request.ServerVariables["ODATA_SITE"].ToLower();

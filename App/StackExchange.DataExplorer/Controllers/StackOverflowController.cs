@@ -511,21 +511,5 @@ namespace StackExchange.DataExplorer.Controllers
             }
         }
 
-
-        /// <summary>
-        /// Render a Partial View (MVC User Control, .ascx) to a string using the given ViewData.
-        /// </summary>
-        public static string RenderPartialToString(string controlName, object viewData)
-        {
-            var vp = new ViewPage {ViewData = new ViewDataDictionary(viewData)};
-            vp.Controls.Add(vp.LoadControl(controlName));
-
-            var sb = new StringBuilder();
-            using (var sw = new StringWriter(sb))
-            using (var tw = new HtmlTextWriter(sw))
-                vp.RenderControl(tw);
-
-            return sb.ToString();
-        }
     }
 }

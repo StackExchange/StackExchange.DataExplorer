@@ -24,14 +24,14 @@
   <pre id="queryBodyText"><code><%:Model.Query.BodyWithoutComments%></code></pre>
   <div class="query">
     <form id="runQueryForm" action="/query/<%=Current.Controller.Site.Id%>" method="post">
-    <p>
+    <div>
       <input type="hidden" name="siteId" value="<%=Current.Controller.Site.Id%>" />
       <div id="sqlQueryWrapper" style="position: relative;">
         <input type="hidden" id="sqlQuery" name="savedQueryId" value="<%=Model.Id%>" />
       </div>
       <div class="clear">
       </div>
-    </p>
+    </div>
     <div id="queryParams" style="display: none;">
       <h3>
         Enter Parameters</h3>
@@ -89,7 +89,7 @@
     </div>
   </div>
   <p style="display: none" class="loading">
-    <img src="http://sstatic.net/so/img/ajax-loader.gif" /><span>Hold tight while we
+    <img src="http://sstatic.net/so/img/ajax-loader.gif" alt="running..." /><span>Hold tight while we
       fetch your results</span></p>
   <div id="queryResults" style="display: none">
     <div id="resultTabs" class="subheader">

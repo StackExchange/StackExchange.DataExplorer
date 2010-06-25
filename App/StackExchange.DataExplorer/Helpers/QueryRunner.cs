@@ -120,10 +120,14 @@ namespace StackExchange.DataExplorer.Helpers
 
                     foreach (string batch in parsedQuery.ExecutionSqlBatches)
                     {
-                        var command = new SqlCommand(batch, cnn);
-                        command.CommandTimeout = QUERY_TIMEOUT;
-                        PopulateResults(results, command, messages);
+                        using (var command = new SqlCommand(batch, cnn))
+                        {
+                            command.CommandTimeout = QUERY_TIMEOUT;
+                            PopulateResults(results, command, messages);
+                        }
+                        
                     }
+                
                 }
                 finally
                 {
@@ -249,7 +253,6 @@ namespace StackExchange.DataExplorer.Helpers
                     messages.AppendFormat("({0} row(s) affected)\n\n", resultSet.Rows.Count);
                 } while (reader.NextResult());
                 command.Cancel();
-                reader.Close();
             }
         }
 
