@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Security;
+using System.Security.Permissions;
 using System.Text;
 
 namespace StackExchange.DataExplorer
@@ -131,6 +133,7 @@ namespace StackExchange.DataExplorer
             PackAssets(rootPath, jsAssets, "js");
         }
 
+        [SecurityPermission(SecurityAction.Demand)]
         private static void PackAssets(string rootPath, Dictionary<string, AssetCollection> assets, string extension)
         {
             foreach (var asset in assets)
