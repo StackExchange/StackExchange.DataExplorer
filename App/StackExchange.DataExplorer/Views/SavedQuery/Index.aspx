@@ -91,15 +91,14 @@
             if (Current.User.IsAdmin)
             {%>
         <div class="admin" style="display: none;">
-          <span class="id" style="display: none;">
-            <%=query.Id%></span> <a class="feature <%=query.Featured ? "featured" : ""%>"
+          <span class="id" style="display: none;"><%=query.Id%></span> 
+          <a class="feature <%=query.Featured ? "featured" : ""%>"
               href="#">
-              <%=query.Featured ? "featured" : "feature"%></a> <a class="skip <%=query.Skipped ? "skipped" : ""%>"
-                href="#">
+              <%=query.Featured ? "featured" : "feature"%></a> 
+          <a class="skip <%=query.Skipped ? "skipped" : ""%>" href="#">
                 <%=query.Skipped ? "skipped" : "skip"%></a>
         </div>
-        <%
-            }%>
+          <%}%>
         <div class="title">
           <h3>
             <a title="<%:query.Description%>" href="<%=query.Url%>">
@@ -181,7 +180,7 @@
       $('.admin .skip').click(function () {
 
         var href = $(this);
-        var id = href.parent().find(".id").text();
+        var id = $.trim(href.parent().find(".id").text());
 
         var featured = $(this).hasClass("skipped");
 
@@ -206,7 +205,7 @@
       $('.admin .feature').click(function () {
 
         var href = $(this);
-        var id = href.parent().find(".id").text();
+        var id = $.trim(href.parent().find(".id").text());
 
         var featured = $(this).hasClass("featured");
 

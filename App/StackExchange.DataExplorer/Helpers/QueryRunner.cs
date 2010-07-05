@@ -90,6 +90,10 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Security", 
+            "CA2100:Review SQL queries for security vulnerabilities", 
+            Justification = "What else can I do, we are allowing users to run sql.")]
         public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
         {
             DBContext db = Current.DB;

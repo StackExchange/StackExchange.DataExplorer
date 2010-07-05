@@ -90,5 +90,8 @@
       </div>
     </div>
   </div>
+
+  <%= Current.GoogleAnalytics %>
+
 </body>
 </html>
