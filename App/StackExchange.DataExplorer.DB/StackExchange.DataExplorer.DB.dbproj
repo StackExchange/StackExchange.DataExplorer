@@ -174,5 +174,8 @@
     <Build Include="trSavedQuery.ddltrigger.sql">
       <SubType>Code</SubType>
     </Build>
+    <Build Include="OpenIdWhiteList.table.sql">
+      <SubType>Code</SubType>
+    </Build>
   </ItemGroup>
 </Project>

@@ -22,7 +22,7 @@ namespace StackExchange.DataExplorer.Models
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="CloudDb")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="DataExplorer")]
 	public partial class DBContext : System.Data.Linq.DataContext
 	{
 		
@@ -54,6 +54,9 @@ namespace StackExchange.DataExplorer.Models
     partial void InsertUserOpenId(UserOpenId instance);
     partial void UpdateUserOpenId(UserOpenId instance);
     partial void DeleteUserOpenId(UserOpenId instance);
+    partial void InsertOpenIdWhiteList(OpenIdWhiteList instance);
+    partial void UpdateOpenIdWhiteList(OpenIdWhiteList instance);
+    partial void DeleteOpenIdWhiteList(OpenIdWhiteList instance);
     #endregion
 		
 		public DBContext() : 
@@ -147,6 +150,14 @@ namespace StackExchange.DataExplorer.Models
 			get
 			{
 				return this.GetTable<UserOpenId>();
+			}
+		}
+		
+		public System.Data.Linq.Table<OpenIdWhiteList> OpenIdWhiteLists
+		{
+			get
+			{
+				return this.GetTable<OpenIdWhiteList>();
 			}
 		}
 	}
@@ -2479,6 +2490,92 @@ namespace StackExchange.DataExplorer.Models
 						this._UserId = default(Nullable<int>);
 					}
 					this.SendPropertyChanged("User");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.OpenIdWhiteList")]
+	public partial class OpenIdWhiteList : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _Id;
+		
+		private string _OpenId;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnOpenIdChanging(string value);
+    partial void OnOpenIdChanged();
+    #endregion
+		
+		public OpenIdWhiteList()
+		{
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_OpenId", DbType="NVarChar(450)")]
+		public string OpenId
+		{
+			get
+			{
+				return this._OpenId;
+			}
+			set
+			{
+				if ((this._OpenId != value))
+				{
+					this.OnOpenIdChanging(value);
+					this.SendPropertyChanging();
+					this._OpenId = value;
+					this.SendPropertyChanged("OpenId");
+					this.OnOpenIdChanged();
 				}
 			}
 		}

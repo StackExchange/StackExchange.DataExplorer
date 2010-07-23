@@ -310,7 +310,7 @@
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
           <IISAppRootUrl>http://localhost/</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>True</UseCustomServer>
+          <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>http://localhost/</CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>

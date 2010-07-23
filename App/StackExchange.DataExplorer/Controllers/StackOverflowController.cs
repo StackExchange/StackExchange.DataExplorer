@@ -77,11 +77,14 @@ namespace StackExchange.DataExplorer.Controllers
             watch = new Stopwatch();
             watch.Start();
 #endif
-
-
+           
             Current.Controller = this; // allow code to easily find this controller
             ValidateRequest = false; // allow html/sql in form values - remember to validate!
             base.Initialize(requestContext);
+
+            if (WhiteListEnabled && !(this is AccountController) && CurrentUser.IsAnonymous) {
+                requestContext.HttpContext.Response.Redirect("/account/login");
+            }
 
 
             if (!CurrentUser.IsAnonymous &&
@@ -511,5 +514,15 @@ namespace StackExchange.DataExplorer.Controllers
             }
         }
 
+
+        static bool? whiteListEnabled;
+        static public bool WhiteListEnabled { 
+            get {
+                if (whiteListEnabled == null) {
+                    whiteListEnabled = Current.DB.OpenIdWhiteLists.Count() > 0;
+                }
+                return whiteListEnabled.Value;
+            } 
+        }
     }
 }

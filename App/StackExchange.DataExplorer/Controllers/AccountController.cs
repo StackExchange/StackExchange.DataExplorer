@@ -44,6 +44,13 @@ namespace StackExchange.DataExplorer.Controllers
                 Identifier id;
                 if (Identifier.TryParse(Request.Form["openid_identifier"], out id))
                 {
+                    if (WhiteListEnabled) {
+                        if (Current.DB.OpenIdWhiteLists.FirstOrDefault(w => w.OpenId == id.OriginalString) == null) { 
+                            // not allowed in 
+                            return ContentError("Not in white list!");
+                        }
+                    } 
+
                     try
                     {
                         IAuthenticationRequest request = openid.CreateRequest(Request.Form["openid_identifier"]);
