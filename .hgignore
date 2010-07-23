@@ -7,3 +7,4 @@ glob:Content/packaged/*
 glob:App/StackExchange.DataExplorer.DB/sql/*
 glob:App/_ReSharper.DataExplorer/*
 glob:App/_ReSharper.DataExplorerFull/*
+glob:*.itrace.csdef
