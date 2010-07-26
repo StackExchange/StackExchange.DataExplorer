@@ -91,14 +91,13 @@ namespace StackExchange.DataExplorer.Models
         {
             if (!user.IsAnonymous && user.Email != null)
             {
-                string hash = Util.GravatarHash(user.Email);
                 using (SqlConnection cnn = GetConnection())
                 {
                     cnn.Open();
                     SqlCommand cmd = cnn.CreateCommand();
-                    cmd.CommandText = "select top 1 Id from Users where EmailHash = @EmailHash";
-                    SqlParameter p = cmd.Parameters.Add("@EmailHash", SqlDbType.NVarChar);
-                    p.Value = hash;
+                    cmd.CommandText = "select top 1 Id from Users where Email = @Email";
+                    SqlParameter p = cmd.Parameters.Add("@Email", SqlDbType.NVarChar);
+                    p.Value = user.Email;
                     return (int?) cmd.ExecuteScalar();
                 }
             }
@@ -121,7 +120,7 @@ namespace StackExchange.DataExplorer.Models
                 cnn.Open();
                 string sql =
                     @"
-select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.Columns
+select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
 order by TABLE_NAME, ORDINAL_POSITION
 ";
                 using (var cmd = new SqlCommand(sql))
