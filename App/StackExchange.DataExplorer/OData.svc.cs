@@ -12,11 +12,42 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Web;
 using StackExchange.DataExplorer.Models.StackEntities;
+using System.Collections.Specialized;
+using System.Text.RegularExpressions;
 
 namespace StackExchange.DataExplorer
 {
     public class OData : DataService<Entities>
     {
+
+        private static Regex _ipAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+
+        private static bool IsPrivateIP(string s) {
+            return (s.StartsWith("192.168.") || s.StartsWith("10.") || s.StartsWith("127.0.0."));
+        }
+
+        /// <summary>
+        /// retrieves the IP address of the current request -- handles proxies and private networks
+        /// </summary>
+        public static string GetRemoteIP(NameValueCollection ServerVariables) {
+            var ip = ServerVariables["REMOTE_ADDR"]; // could be a proxy -- beware
+            var ipForwarded = ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+            // check if we were forwarded from a proxy
+            if (ipForwarded.HasValue()) {
+                ipForwarded = _ipAddress.Match(ipForwarded).Value;
+                if (ipForwarded.HasValue() && !IsPrivateIP(ipForwarded))
+                    ip = ipForwarded;
+            }
+
+            return ip.HasValue() ? ip : "X.X.X.X";
+        }
+
+
+        public static string GetRemoteIP() {
+            return GetRemoteIP(HttpContext.Current.Request.ServerVariables);
+        }
+
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config)
         {
@@ -33,6 +64,22 @@ namespace StackExchange.DataExplorer
             // YES, server vars would be nicer, but unfourtunatly pushing them through with rewrite,
             //   requires and edit to applicationHost.config, which is super duper hairy in azure.
             string siteName = HttpContext.Current.Request.Params["5D6DA575E16342AEB6AF9177FF673569"];
+
+            if (siteName == null) {
+                return null;
+            }
+
+            // how about only 1 request per 5 seconds - people are hammering this stuff like there 
+            //  is no tomorrow
+
+            string cacheKey = GetRemoteIP() + "_last_odata";
+            DateTime? lastRequest = HttpContext.Current.Cache.Get(cacheKey) as DateTime?;
+
+            if (lastRequest != null && (DateTime.Now - lastRequest.Value).TotalMilliseconds < 1000) {
+                throw new InvalidOperationException("Sorry only one request per 1 seconds");
+            }
+
+            HttpContext.Current.Cache[cacheKey] = DateTime.Now;
 
             UriTemplateMatch match = WebOperationContext.Current.IncomingRequest.UriTemplateMatch;
 
@@ -55,9 +102,9 @@ namespace StackExchange.DataExplorer
             var connection = new EntityConnection(workspace, sqlConnection);
 
             var entities = new Entities(connection);
+            
             return entities;
         }
-
 
         protected override void OnStartProcessingRequest(ProcessRequestArgs args)
         {
@@ -72,6 +119,9 @@ namespace StackExchange.DataExplorer
             c.VaryByHeaders["Accept-Charset"] = true;
             c.VaryByHeaders["Accept-Encoding"] = true;
             c.VaryByParams["*"] = true;
+
+            // don't allow clients to mess with this. its valid period
+            c.SetValidUntilExpires(true);
         }
     }
 }
