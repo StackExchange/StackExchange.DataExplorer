@@ -177,5 +177,8 @@
     <Build Include="OpenIdWhiteList.table.sql">
       <SubType>Code</SubType>
     </Build>
+    <Build Include="spUpdateStats.proc.sql">
+      <SubType>Code</SubType>
+    </Build>
   </ItemGroup>
 </Project>
