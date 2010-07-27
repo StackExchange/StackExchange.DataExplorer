@@ -7,7 +7,11 @@
 <asp:Content ID="aboutContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="content-page"> 
     <p>
-        Stack Exchange data explorer allows you to run arbitrary queries on the Stack Exchange public data dumps. Hosting is kindly provided by <a href="http://www.microsoft.com/windowsazure/">Microsoft</a>.
+        Stack Exchange Data Explorer allows you to run arbitrary queries on the Stack Exchange public data dumps. Hosting is kindly provided by <a href="http://www.microsoft.com/windowsazure/">Microsoft</a>.
+    </p>
+    <p>
+     Stack Exchange Data Explorer is <b>Open Source</b>. 
+     If you would like to help us make it more awesome, <a href="http://code.google.com/p/stack-exchange-data-explorer/">check out the code</a>.
     </p>
     <p>
        The Stack Exchange trilogy data dumps are hosted at <a href="http://www.clearbits.net/torrents/1117-may-10">ClearBits!</a>. 

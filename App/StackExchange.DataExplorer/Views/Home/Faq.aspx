@@ -19,6 +19,11 @@
   All query results are cached, so sharing a link to a query will not result in the server going in to a tailspin.
   The query edit control is a slightly modified CodeMirror control, it gives up nice syntax highlighting for queries.
   </p>
+  <h3>Sounds good, where is the source code?</h3>
+  <p>
+    Stack Exchange Data Explorer is <b>Open Source</b>. 
+    If you would like to help us make it more awesome, <a href="http://code.google.com/p/stack-exchange-data-explorer/">check out the code</a>.
+  </p>
   <h3>Do you support parameterized quries?</h3>
   <p><strong>Yes</strong> to get it to work name your params like ##this##.
   </p>
