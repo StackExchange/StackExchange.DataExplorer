@@ -555,7 +555,10 @@ namespace StackExchange.DataExplorer
             rval = rval.Last() == '.' ? rval.Substring(0, rval.Length - 1) : rval;
 
             string suffix = "";
-            if (num > 999 && num < 1000000)
+            if (num < 1000) {
+                suffix = "";
+            }
+            else if (num > 999 && num < 1000000)
             {
                 suffix = "k";
             }

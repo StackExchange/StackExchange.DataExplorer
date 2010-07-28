@@ -13,15 +13,15 @@
     <form id="openid_form" action="/user/authenticate" method="post">       
             
             <div id="openid_choice"> 
-	            <p>Click your <a href="http://openid.net/what/">OpenID</a> account provider</p> 
-	            <div id="openid_btns"></div> 
+                <p>Click your <a href="http://openid.net/what/">OpenID</a> account provider</p> 
+                <div id="openid_btns"></div> 
             </div> 
-			
+            
             <div id="openid_input_area"> 
             </div> 
-	        
-	        <div> 
-	            <noscript> 
+            
+            <div> 
+                <noscript> 
                 <p>OpenID is a service that allows you to log on to many different websites using a single identity.
                 Find out <a href="http://openid.net/what/">more about OpenID</a> and <a href="http://openid.net/get/">how to get an OpenID enabled account</a>.</p> 
                 </noscript> 
@@ -33,7 +33,8 @@
                 <tr>            
                     <td class="vt large"><input id="openid_identifier" name="openid_identifier" 
                       class="openid-identifier" style="height:28px; width:500px;"  tabindex="100"></td> 
-                    <td class="vt large"><input id="submit-button" 
+                    <td class="vt large"><input id="submit-button" 
+
                       style="margin-left:5px; height:36px;" type="submit" value="Log in" tabindex="101"></td> 
                 </tr>                                
                 

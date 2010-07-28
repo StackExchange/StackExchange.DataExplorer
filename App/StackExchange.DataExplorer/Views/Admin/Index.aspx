@@ -8,6 +8,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
   <ul>
     <li id="refreshStats"><span style="display:none;">refreshing ...</span> <a href="/admin/refresh_stats">Update site statistics</a> (will update front page stats)</li>
+    <li><a href="/admin/whitelist">whitelist</a></li>
   </ul>
 
   <%=AssetPackager.ScriptSrc("jquery")%>

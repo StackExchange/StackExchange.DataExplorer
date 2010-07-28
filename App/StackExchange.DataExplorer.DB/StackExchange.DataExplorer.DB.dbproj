@@ -180,5 +180,8 @@
     <Build Include="spUpdateStats.proc.sql">
       <SubType>Code</SubType>
     </Build>
+    <Build Include="spGrantReadonly.proc.sql">
+      <SubType>Code</SubType>
+    </Build>
   </ItemGroup>
 </Project>

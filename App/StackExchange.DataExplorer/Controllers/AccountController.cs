@@ -44,12 +44,30 @@ namespace StackExchange.DataExplorer.Controllers
                 Identifier id;
                 if (Identifier.TryParse(Request.Form["openid_identifier"], out id))
                 {
-                    if (WhiteListEnabled) {
-                        if (Current.DB.OpenIdWhiteLists.FirstOrDefault(w => w.OpenId == id.OriginalString) == null) { 
+                    if (WhiteListEnabled)
+                    {
+                        var whiteListEntry = Current.DB.OpenIdWhiteLists.FirstOrDefault(w => w.OpenId.ToLower() == id.OriginalString.ToLower());
+                        if (whiteListEntry == null || !whiteListEntry.Approved)
+                        {
+                            if (whiteListEntry == null)
+                            {
+                                // add a non approved entry to the list
+                                whiteListEntry = new OpenIdWhiteList()
+                                {
+                                    Approved = false,
+                                    CreationDate = DateTime.UtcNow,
+                                    OpenId = id.OriginalString,
+                                    IpAddress = Request.UserHostAddress
+                                };
+
+                                Current.DB.OpenIdWhiteLists.InsertOnSubmit(whiteListEntry);
+                                Current.DB.SubmitChanges();
+                            }
+
                             // not allowed in 
-                            return ContentError("Not in white list!");
+                            return TextPlain("Not allowed");
                         }
-                    } 
+                    }
 
                     try
                     {

@@ -1,107 +1,104 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <publishData>
-  <publishProfile publishUrl="C:\Users\sam\Desktop\Publis" deleteExistingFiles="False" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="Profile1" publishMethod="FileSystem" replaceMatchingFiles="True" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
-    <file relUrl="bin/Microsoft.WindowsAzure.StorageClient.xml" publishTime="05/12/2010 14:13:04" />
-    <file relUrl="Content/packaged/sitecss.css" publishTime="07/23/2010 14:40:32" />
-    <file relUrl="Content/smoothness/images/ui-bg_glass_75_dadada_1x400.png" publishTime="06/16/2010 14:52:31" />
+  <publishProfile publishUrl="C:\Users\sam\Desktop\SEDE_LOCAL" deleteExistingFiles="False" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="Profile1" publishMethod="FileSystem" replaceMatchingFiles="True" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
+    <file relUrl="Content/packaged/sitecss.css" publishTime="07/28/2010 11:10:42" />
+    <file relUrl="Content/codemirror/sqlcolors.css" publishTime="06/23/2010 17:34:30" />
     <file relUrl="Content/smoothness/jquery-ui-1.8.1.custom.css" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Scripts/codemirror/tokenize.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="bin/StackExchange.DataExplorer.pdb" publishTime="07/23/2010 14:38:13" />
+    <file relUrl="Views/Admin/WhiteList.aspx" publishTime="07/28/2010 11:57:13" />
     <file relUrl="Views/Shared/GuessedUserId.ascx" publishTime="06/24/2010 23:07:55" />
+    <file relUrl="bin/StackExchange.DataExplorer.pdb" publishTime="07/28/2010 11:56:37" />
+    <file relUrl="Content/images/icon-odatafeed-24x24.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Content/smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Content/images/grippie.png" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/SavedQuery/Show.aspx" publishTime="06/25/2010 16:43:15" />
     <file relUrl="bin/System.Web.Mvc.dll" publishTime="02/17/2010 09:24:14" />
-    <file relUrl="Views/Legal/PrivacyPolicy.aspx" publishTime="06/18/2010 11:07:31" />
-    <file relUrl="Web.config" publishTime="06/25/2010 21:39:11" />
+    <file relUrl="Web.config" publishTime="06/25/2010 18:25:36" />
     <file relUrl="Views/Shared/Menu.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Scripts/jquery.textarearesizer.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Content/images/grippie.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Content/smoothness/images/ui-bg_glass_95_fef1ec_1x400.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Scripts/codemirror/tokenize.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Query/New.aspx" publishTime="06/25/2010 10:49:59" />
+    <file relUrl="bin/Newtonsoft.Json.dll" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Scripts/codemirror/select.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Scripts/codemirror/stringstream.js" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Views/Legal/PrivacyPolicy.aspx" publishTime="06/18/2010 11:07:31" />
     <file relUrl="Scripts/codemirror/tokenizejavascript.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Content/smoothness/images/ui-bg_glass_65_ffffff_1x400.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Content/images/icon-odatafeed-14x14.png" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Global.asax" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Views/Shared/PageSizer.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Views/Home/About.aspx" publishTime="06/22/2010 17:23:09" />
     <file relUrl="Content/images/windows_azure_logo.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Content/packaged/viewer_editor.css" publishTime="07/23/2010 14:40:32" />
+    <file relUrl="Scripts/jquery.event.drag-1.5.js" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Content/packaged/viewer_editor.css" publishTime="07/28/2010 11:10:42" />
     <file relUrl="Scripts/jquery.rule.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Home/Faq.aspx" publishTime="06/24/2010 12:15:10" />
     <file relUrl="bin/System.Web.Mvc.xml" publishTime="02/17/2010 09:22:24" />
     <file relUrl="Views/User/Edit.aspx" publishTime="06/24/2010 23:07:55" />
-    <file relUrl="Content/images/icon-odatafeed-14x14.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="bin/log4net.dll" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Scripts/codemirror/parsecss.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Views/Shared/PageNotFound.aspx" publishTime="06/24/2010 23:07:55" />
-    <file relUrl="Scripts/jquery.event.drag-1.5.js" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Views/Shared/PageNumbers.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Content/images/icon-odatafeed-28x28.png" publishTime="06/16/2010 14:52:31" />
     <file relUrl="bin/MarkdownSharp.dll" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Content/smoothness/images/ui-bg_flat_0_aaaaaa_40x100.png" publishTime="06/16/2010 14:52:31" />
     <file relUrl="bin/SimpleErrorHandler.dll" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Scripts/codemirror/parsejavascript.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Scripts/codemirror/parsesparql.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="bin/StackExchange.DataExplorer.dll" publishTime="07/23/2010 14:38:13" />
-    <file relUrl="OData.svc" publishTime="06/22/2010 12:14:41" />
+    <file relUrl="bin/StackExchange.DataExplorer.dll" publishTime="07/28/2010 11:56:37" />
+    <file relUrl="Scripts/codemirror/stringstream.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Scripts/codemirror/undo.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Content/smoothness/images/ui-bg_flat_75_ffffff_40x100.png" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/User/Show.aspx" publishTime="06/24/2010 23:07:55" />
-    <file relUrl="Views/Shared/PageNumbers.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Content/smoothness/images/ui-bg_glass_55_fbf9ee_1x400.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Scripts/codemirror/highlight.js" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Views/Admin/Index.aspx" publishTime="07/28/2010 11:36:39" />
     <file relUrl="Content/images/see_logo.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Scripts/codemirror/codemirror.js" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Content/smoothness/images/ui-bg_glass_75_dadada_1x400.png" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Scripts/codemirror/editor.js" publishTime="06/23/2010 14:34:06" />
+    <file relUrl="Views/Legal/ContentPolicy.aspx" publishTime="06/18/2010 11:07:25" />
     <file relUrl="Scripts/codemirror/parsehtmlmixed.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Content/images/icon-odatafeed-32x32.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Content/images/edgar.jpg" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Views/Home/Index.aspx" publishTime="06/24/2010 23:07:55" />
+    <file relUrl="Content/smoothness/images/ui-bg_glass_95_fef1ec_1x400.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Views/Home/Index.aspx" publishTime="07/28/2010 11:33:23" />
     <file relUrl="bin/DotNetOpenAuth.dll" publishTime="06/25/2010 16:38:59" />
     <file relUrl="Content/smoothness/images/ui-icons_454545_256x240.png" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Content/smoothness/images/ui-icons_888888_256x240.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Scripts/jquery-ui-1.8.1.custom.min.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="bin/log4net.dll" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Views/Shared/PageNotFound.aspx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Scripts/jquery-1.4.2.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Legal/TrademarkGuidance.aspx" publishTime="06/18/2010 11:07:43" />
-    <file relUrl="bin/Microsoft.WindowsAzure.Diagnostics.dll" publishTime="05/12/2010 16:06:58" />
-    <file relUrl="Content/smoothness/images/ui-icons_cd0a0a_256x240.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Scripts/codemirror/highlight.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Shared/Site.Master" publishTime="07/05/2010 16:39:58" />
-    <file relUrl="Views/User/Index.aspx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Content/slickgrid/slick.grid.css" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="bin/Newtonsoft.Json.dll" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Views/Account/LogIn.aspx" publishTime="06/24/2010 23:07:55" />
+    <file relUrl="Content/smoothness/images/ui-icons_cd0a0a_256x240.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Views/Account/LogIn.aspx" publishTime="07/28/2010 11:16:13" />
     <file relUrl="Content/smoothness/images/ui-icons_2e83ff_256x240.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Content/images/icon-odatafeed-24x24.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Views/User/Index.aspx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Views/Shared/Error.aspx" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Scripts/slick.grid.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Scripts/codemirror/parsesql.js" publishTime="06/24/2010 12:04:01" />
+    <file relUrl="Views/Shared/SubHeader.ascx" publishTime="06/24/2010 23:07:55" />
+    <file relUrl="Scripts/codemirror/codemirror.js" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Content/images/edgar.jpg" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Shared/TaglineWithOData.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Views/Shared/QueryVoting.ascx" publishTime="06/24/2010 23:07:55" />
-    <file relUrl="Views/Shared/SubHeader.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Views/Shared/LogInUserControl.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="favicon.ico" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Web.config" publishTime="06/24/2010 23:07:55" />
     <file relUrl="Scripts/query.js" publishTime="06/25/2010 17:58:00" />
-    <file relUrl="Content/site.css" publishTime="06/24/2010 12:16:51" />
-    <file relUrl="Views/Admin/Index.aspx" publishTime="06/24/2010 23:07:55" />
-    <file relUrl="Content/smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Content/site.css" publishTime="07/28/2010 11:47:57" />
+    <file relUrl="Scripts/slick.grid.js" publishTime="06/16/2010 14:52:31" />
+    <file relUrl="Scripts/codemirror/parsesql.js" publishTime="06/24/2010 12:04:01" />
     <file relUrl="Scripts/codemirror/parsedummy.js" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Content/codemirror/sqlcolors.css" publishTime="06/23/2010 17:34:30" />
     <file relUrl="Scripts/codemirror/util.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/SavedQuery/Index.aspx" publishTime="07/05/2010 16:44:47" />
-    <file relUrl="Views/Shared/AboutSite.ascx" publishTime="06/24/2010 23:07:55" />
+    <file relUrl="Views/Shared/PageSizer.ascx" publishTime="06/24/2010 23:07:55" />
     <file relUrl="robots.txt" publishTime="06/25/2010 16:40:30" />
     <file relUrl="Content/smoothness/images/ui-icons_222222_256x240.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Content/packaged/viewer.js" publishTime="07/23/2010 14:40:33" />
-    <file relUrl="bin/Microsoft.WindowsAzure.StorageClient.dll" publishTime="05/12/2010 16:07:02" />
+    <file relUrl="Content/packaged/viewer.js" publishTime="07/28/2010 11:10:44" />
     <file relUrl="Scripts/codemirror/parsexml.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Shared/User.ascx" publishTime="06/24/2010 23:07:55" />
+    <file relUrl="OData.svc" publishTime="06/22/2010 12:14:41" />
     <file relUrl="Content/smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="bin/Microsoft.WindowsAzure.Diagnostics.xml" publishTime="05/12/2010 14:13:02" />
+    <file relUrl="Scripts/jquery-ui-1.8.1.custom.min.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Scripts/codemirror/mirrorframe.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Views/Legal/TermsOfService.aspx" publishTime="06/18/2010 11:07:36" />
     <file relUrl="Scripts/jquery.validate.js" publishTime="06/16/2010 14:52:31" />
     <file relUrl="Content/images/csv_ico.gif" publishTime="06/16/2010 14:52:31" />
-    <file relUrl="Views/Legal/ContentPolicy.aspx" publishTime="06/18/2010 11:07:25" />
-    <file relUrl="Content/packaged/editor.js" publishTime="07/23/2010 14:40:34" />
+    <file relUrl="Views/Shared/AboutSite.ascx" publishTime="06/24/2010 23:07:55" />
+    <file relUrl="Content/packaged/editor.js" publishTime="07/28/2010 11:10:45" />
   </publishProfile>
 </publishData>

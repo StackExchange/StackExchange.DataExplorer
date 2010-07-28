@@ -1,11 +1,53 @@
 ﻿using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
+using System.Linq;
 
 namespace StackExchange.DataExplorer.Controllers
 {
     public class AdminController : StackOverflowController
     {
+
+        [Route("admin/whitelist/approve/{id:int}",HttpVerbs.Post)]
+        public ActionResult ApproveWhiteListEntry(int id) {
+            if (!Allowed())
+            {
+                return TextPlainNotFound();
+            }
+
+            Current.DB.OpenIdWhiteLists.First(w => w.Id == id).Approved = true;
+            Current.DB.SubmitChanges();
+
+            return Json("ok");
+        }
+
+        [Route("admin/whitelist/remove/{id:int}", HttpVerbs.Post)]
+        public ActionResult RemoveWhiteListEntry(int id)
+        {
+            if (!Allowed())
+            {
+                return TextPlainNotFound();
+            }
+
+            var entry = Current.DB.OpenIdWhiteLists.First(w => w.Id == id);
+            Current.DB.OpenIdWhiteLists.DeleteOnSubmit(entry);
+            Current.DB.SubmitChanges();
+
+            return Json("ok");
+        }
+
+        [Route("admin/whitelist")] 
+        public ActionResult WhiteList() {
+            if (!Allowed())
+            {
+                return TextPlainNotFound();
+            }
+
+            SetHeader("Open Id Whitelist");
+
+            return View(Current.DB.OpenIdWhiteLists);
+        }
+
         [Route("admin")]
         public ActionResult Index()
         {

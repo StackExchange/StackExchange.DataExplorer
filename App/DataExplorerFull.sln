@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "StackExchange.DataExplorer.Azure", "StackExchange.DataExplorer.Azure\StackExchange.DataExplorer.Azure.ccproj", "{BD1ECD31-0668-4F2F-A2FD-435346934092}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackExchange.DataExplorer", "StackExchange.DataExplorer\StackExchange.DataExplorer.csproj", "{E3A21146-D76B-487D-96A8-9D15222662FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackExchange.DataExplorer.Tests", "StackExchange.DataExplorer.Tests\StackExchange.DataExplorer.Tests.csproj", "{792E4739-E617-4DAD-8F36-A86CB17F22E8}"
@@ -19,16 +17,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{BD1ECD31-0668-4F2F-A2FD-435346934092}.Release|x86.ActiveCfg = Release|Any CPU
 		{E3A21146-D76B-487D-96A8-9D15222662FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E3A21146-D76B-487D-96A8-9D15222662FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3A21146-D76B-487D-96A8-9D15222662FE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

@@ -515,13 +515,10 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
 
-        static bool? whiteListEnabled;
+        // its true forever on this site
         static public bool WhiteListEnabled { 
             get {
-                if (whiteListEnabled == null) {
-                    whiteListEnabled = Current.DB.OpenIdWhiteLists.Count() > 0;
-                }
-                return whiteListEnabled.Value;
+                return true;
             } 
         }
     }
