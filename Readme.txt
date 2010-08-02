@@ -4,7 +4,7 @@ Quick Guide to Data Explorer:
 
 Pre-reqs: 
 
-- For Javascript hacking only: A web browser
+- For JavaScript hacking only: A web browser
 
 - For back end changes:
 - Visual Studio 2010
@@ -15,7 +15,7 @@ Pre-reqs:
 
 The File layout
 
-- If you would like to hack on the grid or the SQL editor (change syntax highlighting, experiment with new javascript features) checkout the Static directory. 
+- If you would like to hack on the grid or the SQL editor (change syntax highlighting, experiment with new JavaScript features) checkout the Static directory. 
    The Static directory contains a single page with the grid and editor. It references the main js and css files in the project. 
 
 
@@ -28,7 +28,7 @@ The File layout
 Configuring the databases:
 
 - Either: deploy the DataExplorer database project OR run the Data/dataexplorer.sql 
-- Import data into the StackOverflow database (and any other databases you wish to query) alternatively if a DB exists you can simple run queries that do not depend on data like "SELECT 1"  
+- Import data into the Stack Overflow database (and any other databases you wish to query) alternatively if a DB exists you can simple run queries that do not depend on data like "SELECT 1"  
 
 
 - Contributing Patches
