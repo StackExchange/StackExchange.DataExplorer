@@ -4,6 +4,9 @@ using System.Web;
 using System.Web.Caching;
 using StackExchange.DataExplorer.Controllers;
 using StackExchange.DataExplorer.Models;
+using System.Data.SqlClient;
+using System.Collections.Generic;
+using System.Data;
 
 namespace StackExchange.DataExplorer
 {
@@ -13,6 +16,44 @@ namespace StackExchange.DataExplorer
     public static class Current
     {
         private static DeploymentTier? _tier;
+
+
+        const string DISPOSE_CONNECTION_KEY = "dispose_connections";
+
+        public static void RegisterConnectionForDisposal(SqlConnection connection)
+        {
+            List<SqlConnection> connections = Context.Items[DISPOSE_CONNECTION_KEY] as List<SqlConnection>;
+            if (connections == null)
+            {
+                Context.Items[DISPOSE_CONNECTION_KEY] = connections  = new List<SqlConnection>();
+            }
+
+            connections.Add(connection);
+        }
+
+        public static void DisposeRegisteredConnections()
+        {
+            List<SqlConnection> connections = Context.Items[DISPOSE_CONNECTION_KEY] as List<SqlConnection>;
+            if (connections != null)
+            {
+                Context.Items[DISPOSE_CONNECTION_KEY] = null;
+
+                foreach (var connection in connections)
+                {
+                    try
+                    {
+                        if (connection.State != ConnectionState.Closed) {
+                            GlobalApplication.LogException("Connection was not in a closed state.");
+                        }
+
+                        connection.Dispose();
+                    }
+                    catch { 
+                        /* don't care, nothing we can do */
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Shortcut to HttpContext.Current.
@@ -133,7 +174,7 @@ namespace StackExchange.DataExplorer
         {
             object o = HttpRuntime.Cache[key];
             if (o == null) return 0;
-            return (int) o;
+            return (int)o;
         }
 
         /// <summary>
@@ -241,10 +282,12 @@ namespace StackExchange.DataExplorer
         }
 
 
-        public static string GoogleAnalytics {
-            get {
+        public static string GoogleAnalytics
+        {
+            get
+            {
 #if DEBUG
-                return "";       
+                return "";
 #else
    return @"<script type=""text/javascript"">
 

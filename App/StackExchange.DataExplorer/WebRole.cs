@@ -10,6 +10,8 @@ namespace StackExchange.DataExplorer
         public override bool OnStart()
         {
 
+            /*
+
             //Get the configuration object
             DiagnosticMonitorConfiguration diagObj = DiagnosticMonitor.GetDefaultInitialConfiguration();
 
@@ -21,7 +23,8 @@ namespace StackExchange.DataExplorer
             // For information on handling configuration changes
             // see the MSDN topic at http://go.microsoft.com/fwlink/?LinkId=166357.
             RoleEnvironment.Changing += RoleEnvironmentChanging;
-
+            */
+             
             return base.OnStart();
         }
 

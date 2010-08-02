@@ -60,6 +60,8 @@ namespace StackExchange.DataExplorer
             Justification = "If we dispose our connection our data source will be hosed")]
         protected override Entities CreateDataSource()
         {
+            //throw new NotImplementedException("OData has been disabled while diagnosing a resource leak should be up by the 15th of August!");
+
             // var siteName = HttpContext.Current.Request.ServerVariables["ODATA_SITE"].ToLower();
             // YES, server vars would be nicer, but unfourtunatly pushing them through with rewrite,
             //   requires and edit to applicationHost.config, which is super duper hairy in azure.
@@ -69,14 +71,14 @@ namespace StackExchange.DataExplorer
                 return null;
             }
 
-            // how about only 1 request per 5 seconds - people are hammering this stuff like there 
+            // how about only 1 request per 1 seconds - people are hammering this stuff like there 
             //  is no tomorrow
 
             string cacheKey = GetRemoteIP() + "_last_odata";
             DateTime? lastRequest = HttpContext.Current.Cache.Get(cacheKey) as DateTime?;
 
             if (lastRequest != null && (DateTime.Now - lastRequest.Value).TotalMilliseconds < 1000) {
-                throw new InvalidOperationException("Sorry only one request per 1 seconds");
+                throw new InvalidOperationException("Sorry only one request per 1 second");
             }
 
             HttpContext.Current.Cache[cacheKey] = DateTime.Now;
@@ -95,6 +97,7 @@ namespace StackExchange.DataExplorer
 
 
             SqlConnection sqlConnection = Current.DB.Sites.First(s => s.Name.ToLower() == siteName).GetConnection();
+            Current.RegisterConnectionForDisposal(sqlConnection);
 
             var workspace = new MetadataWorkspace(
                 new[] {"res://*/"},

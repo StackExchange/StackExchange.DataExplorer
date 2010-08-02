@@ -77,6 +77,7 @@ namespace StackExchange.DataExplorer
         protected void Application_EndRequest(object sender, EventArgs e)
         {
             Current.DisposeDB();
+            Current.DisposeRegisteredConnections();
         }
 
 
