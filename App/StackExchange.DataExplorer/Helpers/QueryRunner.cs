@@ -13,34 +13,33 @@ namespace StackExchange.DataExplorer.Helpers
         private const int QUERY_TIMEOUT = 120;
         private const int MAX_RESULTS = 2000;
 
-        private static readonly Dictionary<Type, ResultColumnType> ColumnTypeMap = new Dictionary
-            <Type, ResultColumnType>
-                                                                                       {
-                                                                                           {
-                                                                                               typeof (int),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (long),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (float),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (double),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (string),
-                                                                                               ResultColumnType.Text
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (DateTime),
-                                                                                               ResultColumnType.Date
-                                                                                               }
-                                                                                       };
+        private static readonly Dictionary<Type, ResultColumnType> ColumnTypeMap = new Dictionary<Type, ResultColumnType>
+        {
+            {
+                typeof (int),
+                ResultColumnType.Number
+                },
+            {
+                typeof (long),
+                ResultColumnType.Number
+                },
+            {
+                typeof (float),
+                ResultColumnType.Number
+                },
+            {
+                typeof (double),
+                ResultColumnType.Number
+                },
+            {
+                typeof (string),
+                ResultColumnType.Text
+                },
+            {
+                typeof (DateTime),
+                ResultColumnType.Date
+                }
+        };
 
         private static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> magic_columns
             = GetMagicColumns();
