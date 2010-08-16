@@ -30,6 +30,8 @@ namespace StackExchange.DataExplorer.Controllers
                 site.UpdateStats();
             }
 
+            Current.DB.ExecuteCommand("DELETE FROM CachedResults");
+
             return Content("sucess");
         }
 
