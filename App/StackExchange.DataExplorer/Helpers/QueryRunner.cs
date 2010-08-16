@@ -286,7 +286,8 @@ namespace StackExchange.DataExplorer.Helpers
 
             QueryResults results = ExecuteNonCached(parsedQuery, site, user);
 
-            json = results.ToJson();
+            // well there is an annoying XSS condition here 
+            json = results.ToJson().Replace("/","\\/");
             var cache = new CachedResult
                             {
                                 QueryHash = parsedQuery.ExecutionHash,

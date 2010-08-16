@@ -121,7 +121,7 @@ namespace StackExchange.DataExplorer.Models
                 cnn.Open();
                 string sql =
                     @"
-select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.Columns
+select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
 order by TABLE_NAME, ORDINAL_POSITION
 ";
                 using (var cmd = new SqlCommand(sql))
