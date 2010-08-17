@@ -513,7 +513,8 @@ namespace StackExchange.DataExplorer
 
         public static string Pluralize(this string word, int number)
         {
-           return (number == 1) ? word : word.MakePlural();
+            // http://meta.stackoverflow.com/questions/61380/inflector-net-not-correctly-attributed-to-andrew-peters-in-stack-exchange-data-ex
+            return (number == 1) ? word : word + "s";
         }
 
         public static string PrettyShort(this Int32? num)

@@ -113,7 +113,6 @@
     <Compile Include="Helpers\CsvResult.cs" />
     <Compile Include="Helpers\DataKeys.cs" />
     <Compile Include="Helpers\HtmlUtilities.cs" />
-    <Compile Include="Helpers\Inflector.cs" />
     <Compile Include="Helpers\JsonpResult.cs" />
     <Compile Include="Helpers\PagedList.cs" />
     <Compile Include="Helpers\PageNumber.cs" />
