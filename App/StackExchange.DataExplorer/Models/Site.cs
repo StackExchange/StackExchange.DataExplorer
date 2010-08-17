@@ -25,6 +25,11 @@ namespace StackExchange.DataExplorer.Models
             get { return "/" + Name.ToLower() + "/atom"; }
         }
 
+        public SqlConnection GetConnection(int maxPoolSize)
+        {
+            return new SqlConnection(ConnectionString + string.Format("Max Pool Size={0};",maxPoolSize));
+        }
+
         public SqlConnection GetConnection()
         {
             return new SqlConnection(ConnectionString);

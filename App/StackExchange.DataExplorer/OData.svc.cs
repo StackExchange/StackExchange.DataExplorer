@@ -19,6 +19,7 @@ namespace StackExchange.DataExplorer
 {
     public class OData : DataService<Entities>
     {
+        const int ConnectionPoolSize = 10;
 
         private static Regex _ipAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
@@ -96,7 +97,7 @@ namespace StackExchange.DataExplorer
             OperationContext.Current.IncomingMessageProperties["MicrosoftDataServicesRequestUri"] = builder.Uri;
 
 
-            SqlConnection sqlConnection = Current.DB.Sites.First(s => s.Name.ToLower() == siteName).GetConnection();
+            SqlConnection sqlConnection = Current.DB.Sites.First(s => s.Name.ToLower() == siteName).GetConnection(ConnectionPoolSize);
             Current.RegisterConnectionForDisposal(sqlConnection);
 
             var workspace = new MetadataWorkspace(
