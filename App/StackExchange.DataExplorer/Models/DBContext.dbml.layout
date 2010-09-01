@@ -2,10 +2,10 @@
 <ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 12.625, 12.125" name="CloudDb">
   <DataContextMoniker Name="/DBContext" />
   <nestedChildShapes>
-    <classShape Id="c9c616b7-e836-421a-bc05-12ae1f7baae3" absoluteBounds="4.375, 4.375, 2, 1.5785953776041666">
+    <classShape Id="c9c616b7-e836-421a-bc05-12ae1f7baae3" absoluteBounds="4.375, 4.375, 2, 1.7708968098958327">
       <DataClassMoniker Name="/DBContext/CachedResult" />
       <nestedChildShapes>
-        <elementListCompartment Id="778713d2-5992-495e-90c0-2ad0ed852155" absoluteBounds="4.39, 4.835, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="778713d2-5992-495e-90c0-2ad0ed852155" absoluteBounds="4.39, 4.835, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <classShape Id="a4292f52-e02d-47f1-aff9-1b0354bc248f" absoluteBounds="8.75, 9, 2, 2.1554996744791666">
@@ -45,14 +45,14 @@
         <elementListCompartment Id="b83b3e01-9317-4717-935b-4af384e1912d" absoluteBounds="1.0150000000000001, 9.085, 1.9700000000000002, 2.7493082682291665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(7.96875 : 4.50160970052083); (7.96875 : 11.5713525390625); (3 : 11.5713525390625)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(7.96875 : 4.50160970052083); (7.96875 : 11.5713525390625); (3 : 11.5713525390625)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/DBContext/User/User_SavedQuery" />
       <nodes>
         <classShapeMoniker Id="c878f3b9-c555-441b-bc21-a1536950d1e7" />
         <classShapeMoniker Id="dfbfb22e-3355-4123-9dbf-1a916cf20b3f" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(9.75 : 7.20115397135417); (8.05208333333333 : 7.20115397135417 : JumpStart); (7.88541666666667 : 7.20115397135417 : JumpEnd); (2.27083333333333 : 7.20115397135417 : JumpStart); (2.10416666666667 : 7.20115397135417 : JumpEnd); (1.15625 : 7.20115397135417); (1.15625 : 8.625)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(9.75 : 7.20115397135417); (8.05208333333333 : 7.20115397135417 : JumpStart); (7.88541666666667 : 7.20115397135417 : JumpEnd); (1.15625 : 7.20115397135417); (1.15625 : 8.625)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/DBContext/Site/Site_SavedQuery" />
       <nodes>
         <classShapeMoniker Id="1d2f0ba8-7800-4392-8385-7cd2666f76aa" />

@@ -5,14 +5,26 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
+using System.Text;
 
 namespace StackExchange.DataExplorer.Controllers
 {
     public class QueryController : StackOverflowController
     {
+
+        void AddBody(StringBuilder buffer, QueryResults results, Site site)
+        {
+            buffer.AppendLine(site.Name);
+            buffer.AppendLine("-------------------------------------------------");
+            buffer.AppendLine(results.Messages);
+            buffer.AppendLine();
+            buffer.AppendLine();
+            buffer.AppendLine();
+        }
+
         [HttpPost]
         [Route("query/{siteId}")]
-        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId)
+        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs)
         {
             Site site = Current.DB.Sites.Where(s => s.Id == siteId).First();
             ActionResult rval;
@@ -36,10 +48,37 @@ namespace StackExchange.DataExplorer.Controllers
                     throw new ApplicationException("All parameters must be set!");
                 }
 
-                string json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
-                if (resultsToText == "true")
+                string json = null;
+
+                if (allDBs == "true")
                 {
-                    json = QueryResults.FromJson(json).ToTextResults().ToJson();
+                    QueryResults results = null;
+                    StringBuilder buffer = new StringBuilder();
+                    foreach (var s in Current.DB.Sites)
+                    {
+                        json = QueryRunner.GetJson(parsedQuery, s, CurrentUser);
+                        if (results == null)
+                        {
+                            results = QueryResults.FromJson(json).ToTextResults();
+                            AddBody(buffer, results,s);
+                        }
+                        else
+                        {
+                            var tmp = QueryResults.FromJson(json).ToTextResults();
+                            results.ExecutionTime += tmp.ExecutionTime;
+                            AddBody(buffer, tmp, s);
+                        }
+                    }
+                    results.Messages = buffer.ToString();
+                    json = results.ToJson();
+                }
+                else
+                {
+                    json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
+                    if (resultsToText == "true")
+                    {
+                        json = QueryResults.FromJson(json).ToTextResults().ToJson();
+                    }
                 }
 
                 rval = Content(json, "application/json");

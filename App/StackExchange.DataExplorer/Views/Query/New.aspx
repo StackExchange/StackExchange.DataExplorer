@@ -61,11 +61,12 @@
             <p id="resultsToText">
               <input type="checkbox" name="resultsToText" value="true"/> 
               <label>Results to Text</label>
+              &nbsp;&nbsp;&nbsp;
+              <input type="checkbox" name="allDbs" value="true"/> 
+              <label>Run on all DBs</label>
             </p>
             <p id="toolbar">
                 <input type="submit" value="Run Query" />
-
-                
 
                 <span id="permalinks" style="display:none">
                   <a id="permalink" href="#">permalink to this query</a> 
