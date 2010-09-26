@@ -64,7 +64,7 @@ If you alias an id column with as [Post Link] it will automatically create a lin
 At the moment, admins have permission to feature interesting queries on <a href="/stackoverflow/queries">this page</a>, we are looking for better ways to manage the huge query list that is building up.
 </p>
 
-<h3>Why are my queries not showing up int the recent query list?</h3>
+<h3>Why are my queries not showing up in the recent query list?</h3>
 <p>
 The recent, featured and popular query lists only show saved queries. If you have a query you would like to share with the community be sure to save it. 
 </p>
