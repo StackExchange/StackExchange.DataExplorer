@@ -24,8 +24,8 @@
     Stack Exchange Data Explorer is <b>Open Source</b>. 
     If you would like to help us make it more awesome, <a href="http://code.google.com/p/stack-exchange-data-explorer/">check out the code</a>.
   </p>
-  <h3>Do you support parameterized quries?</h3>
-  <p><strong>Yes</strong> to get it to work name your params like ##this##.
+  <h3>Do you support parameterized queries?</h3>
+  <p><strong>Yes</strong> to get it to work name your parameters like ##this##.
   </p>
      <p>There is also built in support for strongly typed parameters of type <strong>string</strong>, 
        <strong>int</strong> and <strong>float</strong>. If you name your parameter ##bob:string## it will be treated as a 
