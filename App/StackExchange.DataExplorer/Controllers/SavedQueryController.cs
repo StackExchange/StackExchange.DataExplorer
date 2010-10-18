@@ -332,7 +332,7 @@ namespace StackExchange.DataExplorer.Controllers
             int currentPerPage = pagesize ?? 50;
             int currentPage = page ?? 1;
             string href = "/" + site.Name.ToLower() + "/queries?order_by=" + order_by;
-            ViewData["PageNumbers"] = new PageNumber(href + "&page=-1", (totalQueries/currentPerPage) + 1,
+            ViewData["PageNumbers"] = new PageNumber(href + "&page=-1", (totalQueries/currentPerPage) + 1, currentPerPage,
                                                      currentPage - 1, "pager");
 
             ViewData["PageSizer"] = new PageSizer(href + "&pagesize=-1", currentPage, currentPerPage, totalQueries,

@@ -18,7 +18,7 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeader("Users");
             SelectMenuItem("Users");
 
-            ViewData["PageNumbers"] = new PageNumber("/users?page=-1", (Current.DB.Users.Count()/35) + 1,
+            ViewData["PageNumbers"] = new PageNumber("/users?page=-1", (Current.DB.Users.Count()/35) + 1, 50,
                                                      currentPage - 1, "pager fr");
 
             PagedList<User> data = Current.DB.Users.OrderBy(u => u.Login).ToPagedList(page ?? 1, 35);
