@@ -1,32 +1,15 @@
-﻿
-(function ($) {
-
-    $.fn.tabs = function () {
-
-        var findContentDiv = function (aTag) {
-            return $("#" + aTag.href.split("#")[1]);
-        }
-
-        var tabDiv = this;
-
-        $.each($(this).children(), function () {
-            $(this).click(function () {
-                if (!$(this).hasClass("youarehere")) {
-                    $.each($(tabDiv).children(), function () {
-                        if ($(this).hasClass("youarehere")) {
-                            $(this).removeClass("youarehere");
-                            findContentDiv(this).hide();
-                        }
-                    });
-                    $(this).addClass("youarehere");
-                    findContentDiv(this).show();
-                }
-                return false;
-            });
-        });
-    };
-})(jQuery);
-
+﻿$.fn.tabs = function () {
+  $(this).delegate("a:not(.youarehere)", "click", function () {
+    $(this.hash).show();
+    $(this).addClass("youarehere")
+           .siblings(".youarehere")
+           .removeClass("youarehere").each(function () {
+             $(this.hash).hide();
+           });
+  }).delegate("a", "click", function () {
+    return false;
+  });
+};
 
 function encodeColumn(s) {
     if (s != null && s.replace != null) {
@@ -213,13 +196,13 @@ function gotResults(results) {
 
     scrollToResults();
 
+    $("#queryResults").insertAfter('.page:first').css({ 'padding': '0 30px', 'margin': '0 auto' });
+    $("#grid").resize();
 }
 
 function executeQuery(sql) {
 
-    $("#permalinks").hide();
-    $("#queryResults").hide();
-    $("#queryErrorBox").hide();
+    $("#permalinks, #queryResults, #queryErrorBox").hide();
 
     if (!ensureAllParamsEntered(sql)) {
         return false;
@@ -229,14 +212,14 @@ function executeQuery(sql) {
     $('#runQueryForm input[type=submit]', this).attr('disabled', 'disabled');
 
     $.ajax({
-        cache: false
-          , url: $('#runQueryForm')[0].action
-          , type: "POST"
-          , data: $("#runQueryForm").serialize()
-          , error: function () {
-              alert("Something is wrong with the server!");
-          }
-          , success: gotResults
+      cache: false,
+      url: $('#runQueryForm')[0].action,
+      type: "POST",
+      data: $("#runQueryForm").serialize(),
+      error: function () {
+        alert("Something is wrong with the server!");
+      },
+      success: gotResults
     });
 
     return false;
@@ -288,11 +271,7 @@ function ensureAllParamsEntered(query) {
         }
     });
 
-    if (params.length > 0) {
-        div.show();
-    } else {
-        div.hide();
-    }
+    div.toggle(params.length > 0);
 
     if (params.length > 0 && !allParamsHaveValues) {
         div.find('input:first').focus();
@@ -309,3 +288,17 @@ function forwardEvent(event, element) {
         $(".CodeMirror-wrapping").removeClass("focus");
     }
 }
+
+$(function () {
+  $("#grid").resize(function () {
+    var width = 0;
+    $(".slick-header-column").each(function () { width += $(this).outerWidth(); });
+    $.data(this, "width", width)
+  }).add(window).resize(function () {
+    var width = $("#grid").data("width"), docWidth = document.documentElement.clientWidth - 80;
+    if(width > docWidth) width = docWidth - 80;
+    if(width < 950) width = 950;
+    $("#queryResults").width(width + 20);
+    $("#gridStats").width(width + 10);
+  });
+});
