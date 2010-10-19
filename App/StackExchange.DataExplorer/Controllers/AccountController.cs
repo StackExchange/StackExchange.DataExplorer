@@ -28,7 +28,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("account/login", HttpVerbs.Get)]
         public ActionResult Login()
         {
-            SetHeader("Log in with OpenID");
+            SetHeader(CurrentUser.IsAnonymous ? "Log in with OpenID" : "Log in below to change your OpenID");
 
             return View("Login");
         }
@@ -89,7 +89,23 @@ namespace StackExchange.DataExplorer.Controllers
                         UserOpenId openId =
                             Current.DB.UserOpenIds.Where(o => o.OpenIdClaim == response.ClaimedIdentifier.OriginalString)
                                 .FirstOrDefault();
-                        if (openId == null)
+
+                        if (!CurrentUser.IsAnonymous)
+                        {
+                          if (openId.UserId != CurrentUser.Id) //Does another user have this OpenID
+                          {
+                            //TODO: Need to perform a user merge
+                            ViewData["Message"] = "Another user with this OpenID already exists, merging is not possible at this time.";
+                            SetHeader("Log in below to change your OpenID");
+                            return View("Login");
+                          }
+                          openId = CurrentUser.UserOpenIds.FirstOrDefault();
+                          openId.OpenIdClaim = response.ClaimedIdentifier.OriginalString;
+                          Current.DB.SubmitChanges();
+                          user = CurrentUser;
+                          returnUrl = "/user/" + user.Id;
+                        }
+                        else if (openId == null)
                         {
                             // create new user
                             string email = "";
