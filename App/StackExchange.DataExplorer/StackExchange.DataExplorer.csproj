@@ -150,6 +150,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\QueryRunner.cs" />
+    <Content Include="Content\Img\openid\openid-logos.png" />
     <Content Include="robots.txt" />
     <Compile Include="ViewModel\QueryExecutionViewData.cs" />
     <Compile Include="ViewModel\QueryVoting.cs" />

@@ -23,19 +23,6 @@
                                <%=Model.Gravatar(128)%>
                             </td>
                         </tr>
-
-                        <!--
-                        <tr>
-                            <td class="summaryinfo">
-                                <div class="summarycount">10,133</div>
-                                <div style="margin-top:5px; font-weight:bold">reputation</div>
-                            </td>
-                        </tr>
-
-                        <tr style="height:30px">
-                            <td class="summaryinfo" style="vertical-align:bottom">716 views</td>
-                        </tr>
-                        -->
                         
                     </table>
                 </td>
@@ -47,6 +34,10 @@
       {%>
                       <div style="float: right; margin-top: 19px; margin-right: 4px">
                         <a href="/users/edit/<%=Model.Id%>">edit</a> 
+                        <% if (isCurrentUser) {%>
+                        <span class="lsep">|</span>
+                        <a href="/account/login/?returnurl=/users/<%=Model.Id%>" title="overwrite your primary openid by logging in with a new openid">change openid</a>
+                        <%}%>
                       </div>
                     <%
       }%>
