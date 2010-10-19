@@ -160,7 +160,7 @@ if not exists(select * from Sites where Sites.Name = 'MetaSuperUser')
 	(5, 
 	'msu', 'MetaSuperUser', 'Meta Super User',
 	'http://meta.superuser.com', 'http://sstatic.net/superusermeta/img/logo.png','http://sstatic.net/superusermeta/img/favicon.ico',
-	'Meta',
+	'MetaSuperUser',
 	'Q&A about Super User',
 	'.post-tag  {
 background-color:#E7E7E7;
@@ -200,7 +200,7 @@ if not exists(select * from Sites where Sites.Name = 'MetaServerFault')
 	(6, 
 	'msf', 'MetaServerFault', 'Meta Server Fault',
 	'http://meta.serverfault.com', 'http://sstatic.net/serverfaultmeta/img//logo.png','http://sstatic.net/serverfaultmeta/img/favicon.ico',
-	'Meta',
+	'MetaServerFault',
 	'Q&A about Server Fault',
 	'.post-tag  {
 background-color:#E7E7E7;
@@ -238,7 +238,7 @@ text-decoration:none;}',
 	(7, 
 	'webapps', 'WebApps', 'Web Apps',
 	'http://webapps.stackexchange.com', 'http://sstatic.net/webapps/img/logo.png', 'http://sstatic.net/webapps/img/favicon.ico',
-	'Web Apps',
+	'WebApps',
 	'Q&A for power users of web applications', 
 	'.post-tag{
 background-color:#E0EAF1;
