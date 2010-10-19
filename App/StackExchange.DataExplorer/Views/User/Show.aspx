@@ -36,7 +36,7 @@
                         <a href="/users/edit/<%=Model.Id%>">edit</a> 
                         <% if (isCurrentUser) {%>
                         <span class="lsep">|</span>
-                        <a href="/account/login/?returnurl=/users/<%=Model.Id%>" title="overwrite your primary openid by logging in with a new openid">change openid</a>
+                        <a href="/account/login/" title="overwrite your primary openid by logging in with a new openid">change openid</a>
                         <%}%>
                       </div>
                     <%

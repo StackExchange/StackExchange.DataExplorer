@@ -92,10 +92,18 @@ namespace StackExchange.DataExplorer.Controllers
 
                         if (!CurrentUser.IsAnonymous)
                         {
+                          if (openId.UserId != CurrentUser.Id) //Does another user have this OpenID
+                          {
+                            //TODO: Need to perform a user merge
+                            ViewData["Message"] = "Another user with this OpenID already exists, merging is not possible at this time.";
+                            SetHeader("Log in below to change your OpenID");
+                            return View("Login");
+                          }
                           openId = CurrentUser.UserOpenIds.FirstOrDefault();
                           openId.OpenIdClaim = response.ClaimedIdentifier.OriginalString;
                           Current.DB.SubmitChanges();
                           user = CurrentUser;
+                          returnUrl = "/user/" + user.Id;
                         }
                         else if (openId == null)
                         {
