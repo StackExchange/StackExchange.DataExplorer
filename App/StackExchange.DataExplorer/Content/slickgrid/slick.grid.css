@@ -103,6 +103,10 @@
 	border-style: solid;
 }
 
+.slick-cell.text {
+    text-align: left;
+}
+
 .slick-cell:focus {
 	outline: none;
 }
