@@ -11,6 +11,7 @@
   });
 };
 
+
 function encodeColumn(s) {
     if (s != null && s.replace != null) {
         s = s.replace(/[\n\r]/g, " ")
@@ -192,7 +193,8 @@ function gotResults(results) {
         rowHeight: hasTags ? 35 : 25
     };
 
-    new Slick.Grid($("#grid"), rows, model, options);
+    var grid = new Slick.Grid($("#grid"), rows, model, options);
+    grid.onColumnsResized = function () { $("#grid").resize() };
 
     scrollToResults();
 
