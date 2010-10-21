@@ -11,17 +11,6 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class QueryController : StackOverflowController
     {
-
-        void AddBody(StringBuilder buffer, QueryResults results, Site site)
-        {
-            buffer.AppendLine(site.Name);
-            buffer.AppendLine("-------------------------------------------------");
-            buffer.AppendLine(results.Messages);
-            buffer.AppendLine();
-            buffer.AppendLine();
-            buffer.AppendLine();
-        }
-
         [HttpPost]
         [Route("query/{siteId}")]
         public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs)
@@ -52,25 +41,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                 if (allDBs == "true")
                 {
-                    QueryResults results = null;
-                    StringBuilder buffer = new StringBuilder();
-                    foreach (var s in Current.DB.Sites)
-                    {
-                        json = QueryRunner.GetJson(parsedQuery, s, CurrentUser);
-                        if (results == null)
-                        {
-                            results = QueryResults.FromJson(json).ToTextResults();
-                            AddBody(buffer, results,s);
-                        }
-                        else
-                        {
-                            var tmp = QueryResults.FromJson(json).ToTextResults();
-                            results.ExecutionTime += tmp.ExecutionTime;
-                            AddBody(buffer, tmp, s);
-                        }
-                    }
-                    results.Messages = buffer.ToString();
-                    json = results.ToJson();
+                    json = QueryRunner.GetMultiSiteJson(parsedQuery, CurrentUser);
                 }
                 else
                 {
@@ -103,6 +74,21 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
 
+        [Route(@"{sitename}/mcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowmCsv(string sitename, int queryId)
+        {
+            Query query = FindQuery(queryId);
+
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser);
+
+            return new CsvResult(json);
+        }
+      
         [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowCsv(string sitename, int queryId)
         {
