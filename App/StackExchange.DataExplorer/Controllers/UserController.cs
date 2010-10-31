@@ -33,6 +33,11 @@ namespace StackExchange.DataExplorer.Controllers
         {
             User user = Current.DB.Users.First(u => u.Id == id);
 
+            if (updatedUser.DOB < DateTime.Now.AddYears(-100) || updatedUser.DOB > DateTime.Now.AddYears(-6))
+            {
+                updatedUser.DOB = null;
+            }
+
             if (user.Id == updatedUser.Id && (updatedUser.Id == CurrentUser.Id || CurrentUser.IsAdmin))
             {
                 user.Login = HtmlUtilities.Safe(updatedUser.Login);
