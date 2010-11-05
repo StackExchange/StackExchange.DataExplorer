@@ -104,7 +104,14 @@ namespace StackExchange.DataExplorer.Models
                     cmd.CommandText = "select top 1 Id from Users where EmailHash = @EmailHash";
                     SqlParameter p = cmd.Parameters.Add("@EmailHash", SqlDbType.NVarChar);
                     p.Value = hash;
-                    return (int?) cmd.ExecuteScalar();
+                    try
+                    {
+                        return (int?)cmd.ExecuteScalar();
+                    }
+                    catch
+                    { 
+                        // allow this to fail, its not critical
+                    }
                 }
             }
             return null;

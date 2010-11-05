@@ -89,7 +89,7 @@
     </div>
   </div>
   <p style="display: none" class="loading">
-    <img src="http://sstatic.net/so/img/ajax-loader.gif" alt="running..." /><span>Hold tight while we
+    <img src="http://sstatic.net/stackoverflow/img/ajax-loader.gif" alt="running..." /><span>Hold tight while we
       fetch your results</span></p>
   <div id="queryResults" style="display: none">
     <div id="resultTabs" class="subheader">
