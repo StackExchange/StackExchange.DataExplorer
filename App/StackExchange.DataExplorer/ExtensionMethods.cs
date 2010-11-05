@@ -562,7 +562,7 @@ namespace StackExchange.DataExplorer
             }
             else if (num >= 1000000) 
             {
-                suffix = "M";
+                suffix = "m";
             }
 
             return string.Format("<span class=\"pretty-short\" title=\"{0}\">{1}{2}</span>", Pretty(num), rval, suffix);
