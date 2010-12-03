@@ -57,7 +57,7 @@ namespace StackExchange.DataExplorer.Helpers
             buffer.AppendLine();
         }
 
-        static void MergePivot(Site site, QueryResults current, QueryResults newResults)
+        public static void MergePivot(Site site, QueryResults current, QueryResults newResults)
         {
             int pivotIndex = -1;
             foreach (var info in newResults.ResultSets.First().Columns)
@@ -103,7 +103,7 @@ namespace StackExchange.DataExplorer.Helpers
                 Type = newResults.ResultSets.First().Columns[pivotIndex].Type
             });
 
-            var totalColumns = newResults.ResultSets.First().Columns.Count;
+            var totalColumns = current.ResultSets.First().Columns.Count;
 
             foreach (var row in current.ResultSets.First().Rows)
             {
@@ -113,13 +113,26 @@ namespace StackExchange.DataExplorer.Helpers
                 }
             }
 
-            // todo: missing rows
+            foreach (var row in newRows)
+            {
+                for (int i = pivotIndex+1; i < totalColumns; i++)
+                {
+                    row.Insert(pivotIndex, null);
+                }
+                current.ResultSets.First().Rows.Add(row);
+            }
         }
 
-        public static string GetMultiSiteJson(ParsedQuery parsedQuery, User currentUser)
+        public static string GetMultiSiteJson(ParsedQuery parsedQuery, User currentUser, bool excludeMetas)
         {
+            var sites = Current.DB.Sites.ToList();
+            if (excludeMetas)
+            { 
+                sites = sites.Where(s => !s.Url.Contains("meta.")).ToList();
+            }
 
-            var firstSite = Current.DB.Sites.First();
+
+            var firstSite = sites.First();
             string json = QueryRunner.GetJson(parsedQuery, firstSite, currentUser);
             QueryResults results = QueryResults.FromJson(json);
             StringBuilder buffer = new StringBuilder();
@@ -135,7 +148,7 @@ namespace StackExchange.DataExplorer.Helpers
                     }
                 }
 
-                foreach (var s in Current.DB.Sites.Skip(1))
+                foreach (var s in sites.Skip(1))
                 {
                     json = QueryRunner.GetJson(parsedQuery, s, currentUser);
                     var tmp = QueryResults.FromJson(json);
@@ -147,7 +160,7 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 results = results.ToTextResults();
                 AddBody(buffer, results, firstSite);
-                foreach (var s in Current.DB.Sites.Skip(1))
+                foreach (var s in sites.Skip(1))
                 {
                     json = QueryRunner.GetJson(parsedQuery, s, currentUser);
                     var tmp = QueryResults.FromJson(json).ToTextResults();
@@ -158,6 +171,7 @@ namespace StackExchange.DataExplorer.Helpers
             }
             results.Messages = buffer.ToString();
             results.MultiSite = true;
+            results.ExcludeMetas = excludeMetas;
             json = results.ToJson();
             return json;
         }

@@ -62,6 +62,7 @@
     <Compile Include="BaseTest.cs" />
     <Compile Include="Helpers\TestParsedQuery.cs" />
     <Compile Include="Helpers\TestQueryResults.cs" />
+    <Compile Include="Models\TestPivots.cs" />
     <Compile Include="Models\TestQueryExecutions.cs" />
     <Compile Include="Models\TestSavedQuery.cs" />
     <Compile Include="Models\TestUser.cs" />

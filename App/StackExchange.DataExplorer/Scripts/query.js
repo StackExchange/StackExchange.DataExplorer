@@ -123,7 +123,7 @@ function gotResults(results) {
 
     currentLink.href = "/" + results.siteName + "/"+ linkPath + "/" + linkId + slug + currentParams;
 
-    $("#downloadCsv")[0].href = "/" + results.siteName + "/" + (results.multiSite ? "m" : "") + "csv/" + results.queryId + currentParams;
+    $("#downloadCsv")[0].href = "/" + results.siteName + "/" + (results.excludeMetas ? "n" : "") + (results.multiSite ? "m" : "") + "csv/" + results.queryId + currentParams;
 
     $(".otherPermalink").each(function () {
         // slug

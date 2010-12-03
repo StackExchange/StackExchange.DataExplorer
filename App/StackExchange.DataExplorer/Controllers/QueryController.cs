@@ -13,7 +13,7 @@ namespace StackExchange.DataExplorer.Controllers
     {
         [HttpPost]
         [Route("query/{siteId}")]
-        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs)
+        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs, string excludeMetas)
         {
             Site site = Current.DB.Sites.Where(s => s.Id == siteId).First();
             ActionResult rval;
@@ -41,7 +41,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                 if (allDBs == "true")
                 {
-                    json = QueryRunner.GetMultiSiteJson(parsedQuery, CurrentUser);
+                    json = QueryRunner.GetMultiSiteJson(parsedQuery, CurrentUser, excludeMetas == "true");
                 }
                 else
                 {
@@ -84,10 +84,26 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser);
+            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, false);
 
             return new CsvResult(json);
         }
+
+        [Route(@"{sitename}/nmcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShownmCsv(string sitename, int queryId)
+        {
+            Query query = FindQuery(queryId);
+
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, true);
+
+            return new CsvResult(json);
+        }
+      
       
         [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowCsv(string sitename, int queryId)
