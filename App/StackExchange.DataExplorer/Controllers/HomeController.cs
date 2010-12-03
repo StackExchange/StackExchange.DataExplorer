@@ -13,7 +13,7 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeader("Choose a Site");
             SelectMenuItem("Home");
 
-            return View(Current.DB.Sites.ToList());
+            return View(Current.DB.Sites.OrderByDescending(s => s.TotalQuestions).ToList());
         }
 
         [Route("about")]

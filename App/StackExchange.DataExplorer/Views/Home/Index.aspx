@@ -39,12 +39,10 @@
             <%=site.LastPost.ToRelativeTimeSpanMicro()%>
           </span><span class="desc">most recent </span>
         </div>
-        <div class="odata">
-          <span class="title">
-            <a href="<%=site.ODataEndpoint%>" title="Open Data Protocol endpoint for <%=site.Name%>" alt="Open Data Protocol endpoint for <%=site.Name%>"><img src="/Content/images/icon-odatafeed-24x24.png" width="24" height="24"/></a>
-          </span>
+        <div class="latestPost">
+          <span class="title">&nbsp;</span>
           <span class="desc">
-            <a href="<%=site.ODataEndpoint%>" title="Open Data Protocol endpoint for <%=site.Name%>" alt="Open Data Protocol endpoint for <%=site.Name%>">OData</a>
+            <a href="<%=site.Url%>">visit site</a>
           </span>
         </div>
         <div class="clear">

@@ -11,38 +11,169 @@ namespace StackExchange.DataExplorer.Helpers
     public class QueryRunner
     {
         private const int QUERY_TIMEOUT = 120;
-        private const int MAX_RESULTS = 2000;
+        private const int MAX_RESULTS = 50000;
 
         private static readonly Dictionary<Type, ResultColumnType> ColumnTypeMap = new Dictionary<Type, ResultColumnType>
-        {
-            {
-                typeof (int),
-                ResultColumnType.Number
-                },
-            {
-                typeof (long),
-                ResultColumnType.Number
-                },
-            {
-                typeof (float),
-                ResultColumnType.Number
-                },
-            {
-                typeof (double),
-                ResultColumnType.Number
-                },
-            {
-                typeof (string),
-                ResultColumnType.Text
-                },
-            {
-                typeof (DateTime),
-                ResultColumnType.Date
-                }
-        };
+                                                                                       {
+                                                                                           {
+                                                                                               typeof (int),
+                                                                                               ResultColumnType.Number
+                                                                                               },
+                                                                                           {
+                                                                                               typeof (long),
+                                                                                               ResultColumnType.Number
+                                                                                               },
+                                                                                           {
+                                                                                               typeof (float),
+                                                                                               ResultColumnType.Number
+                                                                                               },
+                                                                                           {
+                                                                                               typeof (double),
+                                                                                               ResultColumnType.Number
+                                                                                               },
+                                                                                           {
+                                                                                               typeof (string),
+                                                                                               ResultColumnType.Text
+                                                                                               },
+                                                                                           {
+                                                                                               typeof (DateTime),
+                                                                                               ResultColumnType.Date
+                                                                                               }
+                                                                                       };
 
         private static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> magic_columns
             = GetMagicColumns();
+
+
+
+        static void AddBody(StringBuilder buffer, QueryResults results, Site site)
+        {
+            buffer.AppendLine(site.Name);
+            buffer.AppendLine("-------------------------------------------------");
+            buffer.AppendLine(results.Messages);
+            buffer.AppendLine();
+            buffer.AppendLine();
+            buffer.AppendLine();
+        }
+
+        public static void MergePivot(Site site, QueryResults current, QueryResults newResults)
+        {
+            int pivotIndex = -1;
+            foreach (var info in newResults.ResultSets.First().Columns)
+            {
+                pivotIndex++;
+                if (info.Name == "Pivot")
+                {
+                    break;
+                }
+            }
+
+            var map = current
+                .ResultSets
+                .First()
+                .Rows
+                .Select(columns => new
+                {
+                    key = string.Join("|||", columns.Where((c, i) => i != pivotIndex && i < newResults.ResultSets.First().Columns.Count)),
+                    cols = columns
+                })
+                .ToDictionary(r => r.key, r => r.cols);
+
+
+            var newRows = new List<List<object>>();
+
+            foreach (var row in newResults.ResultSets.First().Rows)
+            {
+
+                List<object> foundRow;
+                if (map.TryGetValue(string.Join("|||", row.Where((c, i) => i != pivotIndex)), out foundRow))
+                {
+                    foundRow.Add(row[pivotIndex]);
+                }
+                else
+                {
+                    newRows.Add(row);
+                }
+            }
+
+            current.ResultSets.First().Columns.Add(new ResultColumnInfo
+            {
+                Name = site.Name + " Pivot",
+                Type = newResults.ResultSets.First().Columns[pivotIndex].Type
+            });
+
+            var totalColumns = current.ResultSets.First().Columns.Count;
+
+            foreach (var row in current.ResultSets.First().Rows)
+            {
+                if (row.Count < totalColumns)
+                {
+                    row.Add(null);
+                }
+            }
+
+            foreach (var row in newRows)
+            {
+                for (int i = pivotIndex+1; i < totalColumns; i++)
+                {
+                    row.Insert(pivotIndex, null);
+                }
+                current.ResultSets.First().Rows.Add(row);
+            }
+        }
+
+        public static string GetMultiSiteJson(ParsedQuery parsedQuery, User currentUser, bool excludeMetas)
+        {
+            var sites = Current.DB.Sites.ToList();
+            if (excludeMetas)
+            { 
+                sites = sites.Where(s => !s.Url.Contains("meta.")).ToList();
+            }
+
+
+            var firstSite = sites.First();
+            string json = QueryRunner.GetJson(parsedQuery, firstSite, currentUser);
+            QueryResults results = QueryResults.FromJson(json);
+            StringBuilder buffer = new StringBuilder();
+
+            if (results.ResultSets.First().Columns.Where(c => c.Name == "Pivot").Any())
+            {
+                foreach (var info in results.ResultSets.First().Columns)
+                {
+                    if (info.Name == "Pivot")
+                    {
+                        info.Name = firstSite.Name + " Pivot";
+                        break;
+                    }
+                }
+
+                foreach (var s in sites.Skip(1))
+                {
+                    json = QueryRunner.GetJson(parsedQuery, s, currentUser);
+                    var tmp = QueryResults.FromJson(json);
+                    results.ExecutionTime += tmp.ExecutionTime;
+                    MergePivot(s, results, tmp);
+                }
+            }
+            else
+            {
+                results = results.ToTextResults();
+                AddBody(buffer, results, firstSite);
+                foreach (var s in sites.Skip(1))
+                {
+                    json = QueryRunner.GetJson(parsedQuery, s, currentUser);
+                    var tmp = QueryResults.FromJson(json).ToTextResults();
+                    results.ExecutionTime += tmp.ExecutionTime;
+                    AddBody(buffer, tmp, s);
+
+                }
+            }
+            results.Messages = buffer.ToString();
+            results.MultiSite = true;
+            results.ExcludeMetas = excludeMetas;
+            json = results.ToJson();
+            return json;
+        }
 
 
         public static string GetCachedResults(ParsedQuery query, Site site)

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
+using System.Text;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -12,7 +13,7 @@ namespace StackExchange.DataExplorer.Controllers
     {
         [HttpPost]
         [Route("query/{siteId}")]
-        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId)
+        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs, string excludeMetas)
         {
             Site site = Current.DB.Sites.Where(s => s.Id == siteId).First();
             ActionResult rval;
@@ -36,10 +37,19 @@ namespace StackExchange.DataExplorer.Controllers
                     throw new ApplicationException("All parameters must be set!");
                 }
 
-                string json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
-                if (resultsToText == "true")
+                string json = null;
+
+                if (allDBs == "true")
                 {
-                    json = QueryResults.FromJson(json).ToTextResults().ToJson();
+                    json = QueryRunner.GetMultiSiteJson(parsedQuery, CurrentUser, excludeMetas == "true");
+                }
+                else
+                {
+                    json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
+                    if (resultsToText == "true")
+                    {
+                        json = QueryResults.FromJson(json).ToTextResults().ToJson();
+                    }
                 }
 
                 rval = Content(json, "application/json");
@@ -64,6 +74,37 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
 
+        [Route(@"{sitename}/mcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowmCsv(string sitename, int queryId)
+        {
+            Query query = FindQuery(queryId);
+
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, false);
+
+            return new CsvResult(json);
+        }
+
+        [Route(@"{sitename}/nmcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShownmCsv(string sitename, int queryId)
+        {
+            Query query = FindQuery(queryId);
+
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, true);
+
+            return new CsvResult(json);
+        }
+      
+      
         [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowCsv(string sitename, int queryId)
         {

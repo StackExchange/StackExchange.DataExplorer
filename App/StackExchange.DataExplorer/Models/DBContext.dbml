@@ -2,10 +2,11 @@
   <Connection Mode="WebSettings" ConnectionString="Data Source=localhost;Initial Catalog=DataExplorer;Integrated Security=True" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="AppConnection" Provider="System.Data.SqlClient" />
   <Table Name="dbo.CachedResults" Member="CachedResults">
     <Type Name="CachedResult">
-      <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
       <Column Name="SiteId" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="Results" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
       <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="Id" Type="System.Int32" DbType="int" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
     </Type>
   </Table>
   <Table Name="dbo.QueryExecutions" Member="QueryExecutions">
@@ -117,6 +118,9 @@
     <Type Name="OpenIdWhiteList">
       <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="OpenId" Type="System.String" DbType="NVarChar(450)" CanBeNull="true" />
+      <Column Name="Approved" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="IpAddress" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
+      <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
     </Type>
   </Table>
 </Database>

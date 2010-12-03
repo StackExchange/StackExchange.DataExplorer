@@ -96,9 +96,10 @@ namespace StackExchange.DataExplorer.Models
         {
             if (!user.IsAnonymous && user.Email != null)
             {
-                string hash = Util.GravatarHash(user.Email);
+
                 using (SqlConnection cnn = GetConnection())
                 {
+                    string hash = Util.GravatarHash(user.Email);
                     cnn.Open();
                     SqlCommand cmd = cnn.CreateCommand();
                     cmd.CommandText = "select top 1 Id from Users where EmailHash = @EmailHash";

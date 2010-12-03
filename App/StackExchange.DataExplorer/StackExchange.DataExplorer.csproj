@@ -49,9 +49,6 @@
     <Reference Include="MarkdownSharp">
       <HintPath>..\..\Lib\MarkdownSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Diagnostics" />
-    <Reference Include="Microsoft.WindowsAzure.ServiceRuntime" />
-    <Reference Include="Microsoft.WindowsAzure.StorageClient" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Lib\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -157,7 +154,6 @@
     <Compile Include="ViewModel\QueryVoting.cs" />
     <Compile Include="ViewModel\SubHeader.cs" />
     <Compile Include="ViewModel\SubHeaderViewData.cs" />
-    <Compile Include="WebRole.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\codemirror\sqlcolors.css" />
@@ -217,6 +213,7 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\jquery-1.4.2.js" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
+    <Content Include="Views\Admin\WhiteList.aspx" />
     <Content Include="Views\Admin\Index.aspx" />
     <Content Include="Views\Shared\PageNotFound.aspx" />
     <Content Include="Views\Home\Faq.aspx" />

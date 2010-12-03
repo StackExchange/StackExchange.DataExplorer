@@ -176,6 +176,8 @@ namespace StackExchange.DataExplorer.Models
 		
 		private System.Nullable<System.DateTime> _CreationDate;
 		
+		private int _Id;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -188,6 +190,8 @@ namespace StackExchange.DataExplorer.Models
     partial void OnResultsChanged();
     partial void OnCreationDateChanging(System.Nullable<System.DateTime> value);
     partial void OnCreationDateChanged();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
     #endregion
 		
 		public CachedResult()
@@ -195,7 +199,7 @@ namespace StackExchange.DataExplorer.Models
 			OnCreated();
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_QueryHash", DbType="UniqueIdentifier NOT NULL", IsPrimaryKey=true)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_QueryHash", DbType="UniqueIdentifier NOT NULL")]
 		public System.Guid QueryHash
 		{
 			get
@@ -271,6 +275,26 @@ namespace StackExchange.DataExplorer.Models
 					this._CreationDate = value;
 					this.SendPropertyChanged("CreationDate");
 					this.OnCreationDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="int", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
 				}
 			}
 		}
@@ -2525,6 +2549,12 @@ namespace StackExchange.DataExplorer.Models
 		
 		private string _OpenId;
 		
+		private bool _Approved;
+		
+		private string _IpAddress;
+		
+		private System.Nullable<System.DateTime> _CreationDate;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -2533,6 +2563,12 @@ namespace StackExchange.DataExplorer.Models
     partial void OnIdChanged();
     partial void OnOpenIdChanging(string value);
     partial void OnOpenIdChanged();
+    partial void OnApprovedChanging(bool value);
+    partial void OnApprovedChanged();
+    partial void OnIpAddressChanging(string value);
+    partial void OnIpAddressChanged();
+    partial void OnCreationDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnCreationDateChanged();
     #endregion
 		
 		public OpenIdWhiteList()
@@ -2576,6 +2612,66 @@ namespace StackExchange.DataExplorer.Models
 					this._OpenId = value;
 					this.SendPropertyChanged("OpenId");
 					this.OnOpenIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Approved", DbType="Bit NOT NULL")]
+		public bool Approved
+		{
+			get
+			{
+				return this._Approved;
+			}
+			set
+			{
+				if ((this._Approved != value))
+				{
+					this.OnApprovedChanging(value);
+					this.SendPropertyChanging();
+					this._Approved = value;
+					this.SendPropertyChanged("Approved");
+					this.OnApprovedChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IpAddress", DbType="VarChar(20)")]
+		public string IpAddress
+		{
+			get
+			{
+				return this._IpAddress;
+			}
+			set
+			{
+				if ((this._IpAddress != value))
+				{
+					this.OnIpAddressChanging(value);
+					this.SendPropertyChanging();
+					this._IpAddress = value;
+					this.SendPropertyChanged("IpAddress");
+					this.OnIpAddressChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreationDate", DbType="DateTime")]
+		public System.Nullable<System.DateTime> CreationDate
+		{
+			get
+			{
+				return this._CreationDate;
+			}
+			set
+			{
+				if ((this._CreationDate != value))
+				{
+					this.OnCreationDateChanging(value);
+					this.SendPropertyChanging();
+					this._CreationDate = value;
+					this.SendPropertyChanged("CreationDate");
+					this.OnCreationDateChanged();
 				}
 			}
 		}
