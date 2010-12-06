@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 12.625, 12.125" name="CloudDb">
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 12.625, 14" name="CloudDb">
   <DataContextMoniker Name="/DBContext" />
   <nestedChildShapes>
     <classShape Id="c9c616b7-e836-421a-bc05-12ae1f7baae3" absoluteBounds="4.375, 4.375, 2, 1.7708968098958327">
@@ -89,6 +89,12 @@
       <DataClassMoniker Name="/DBContext/OpenIdWhiteList" />
       <nestedChildShapes>
         <elementListCompartment Id="2fcddbb0-80e9-42c6-a60c-5df8947ef8d1" absoluteBounds="5.265, 9.835, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9422ce5f-6945-41c4-a72d-ad2958c4172e" absoluteBounds="3.75, 12.375, 2, 1.3862939453125">
+      <DataClassMoniker Name="/DBContext/AppSetting" />
+      <nestedChildShapes>
+        <elementListCompartment Id="c5186faf-700b-49ff-984f-11d7df91d5a8" absoluteBounds="3.7649999999999997, 12.835, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>

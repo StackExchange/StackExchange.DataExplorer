@@ -44,7 +44,7 @@ namespace StackExchange.DataExplorer.Controllers
                 Identifier id;
                 if (Identifier.TryParse(Request.Form["openid_identifier"], out id))
                 {
-                    if (WhiteListEnabled)
+                    if (AppSettings.EnableWhiteList)
                     {
                         var whiteListEntry = Current.DB.OpenIdWhiteLists.FirstOrDefault(w => w.OpenId.ToLower() == id.OriginalString.ToLower());
                         if (whiteListEntry == null || !whiteListEntry.Approved)

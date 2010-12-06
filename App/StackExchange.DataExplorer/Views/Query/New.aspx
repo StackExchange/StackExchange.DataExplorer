@@ -61,12 +61,17 @@
             <p id="resultsToText">
               <input type="checkbox" name="resultsToText" value="true"/> 
               <label>Results to Text</label>
-              &nbsp;&nbsp;&nbsp;
-              <input type="checkbox" name="allDbs" value="true"/> 
-              <label>Run on all DBs</label>
-               &nbsp;&nbsp;&nbsp;
-              <input type="checkbox" name="excludeMetas" value="true"/> 
-              <label>Exclude Metas</label>
+              <% if (AppSettings.AllowRunOnAllDbsOption) { %>
+                  &nbsp;&nbsp;&nbsp;
+                  <input type="checkbox" name="allDbs" value="true"/> 
+                  <label>Run on all DBs</label>
+              <% } %>
+              
+              <% if (AppSettings.AllowExcludeMetaOption) { %>
+                   &nbsp;&nbsp;&nbsp;
+                  <input type="checkbox" name="excludeMetas" value="true"/> 
+                  <label>Exclude Metas</label>
+              <% } %>
             </p>
             <p id="toolbar">
                 <input type="submit" value="Run Query" />
@@ -138,7 +143,7 @@
 
     <div class="clear"></div>
 
-    <p style="display:none" class="loading"><img src="http://sstatic.net/mso/img/ajax-loader.gif"/><span>Hold tight while we fetch your results</span></p>
+    <p style="display:none" class="loading"><img src="http://sstatic.net/stackoverflow/img/ajax-loader.gif"/><span>Hold tight while we fetch your results</span></p>
 
     <div id="queryResults" style="display:none">
       <div id="resultTabs" class="subheader">

@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseTest.cs" />
+    <Compile Include="Helpers\TestAppSettings.cs" />
     <Compile Include="Helpers\TestParsedQuery.cs" />
     <Compile Include="Helpers\TestQueryResults.cs" />
     <Compile Include="Models\TestPivots.cs" />

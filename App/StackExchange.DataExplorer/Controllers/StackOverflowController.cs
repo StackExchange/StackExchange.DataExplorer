@@ -82,7 +82,7 @@ namespace StackExchange.DataExplorer.Controllers
             ValidateRequest = false; // allow html/sql in form values - remember to validate!
             base.Initialize(requestContext);
 
-            if (WhiteListEnabled && !(this is AccountController) && CurrentUser.IsAnonymous) {
+            if (AppSettings.EnableWhiteList && !(this is AccountController) && CurrentUser.IsAnonymous) {
                 requestContext.HttpContext.Response.Redirect("/account/login");
             }
 
@@ -512,14 +512,6 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return ex.GetType().Name;
             }
-        }
-
-
-        // its true forever on this site
-        static public bool WhiteListEnabled { 
-            get {
-                return true;
-            } 
         }
     }
 }

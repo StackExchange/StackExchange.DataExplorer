@@ -57,6 +57,9 @@ namespace StackExchange.DataExplorer.Models
     partial void InsertOpenIdWhiteList(OpenIdWhiteList instance);
     partial void UpdateOpenIdWhiteList(OpenIdWhiteList instance);
     partial void DeleteOpenIdWhiteList(OpenIdWhiteList instance);
+    partial void InsertAppSetting(AppSetting instance);
+    partial void UpdateAppSetting(AppSetting instance);
+    partial void DeleteAppSetting(AppSetting instance);
     #endregion
 		
 		public DBContext() : 
@@ -158,6 +161,14 @@ namespace StackExchange.DataExplorer.Models
 			get
 			{
 				return this.GetTable<OpenIdWhiteList>();
+			}
+		}
+		
+		public System.Data.Linq.Table<AppSetting> AppSettings
+		{
+			get
+			{
+				return this.GetTable<AppSetting>();
 			}
 		}
 	}
@@ -2672,6 +2683,116 @@ namespace StackExchange.DataExplorer.Models
 					this._CreationDate = value;
 					this.SendPropertyChanged("CreationDate");
 					this.OnCreationDateChanged();
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.AppSettings")]
+	public partial class AppSetting : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _Id;
+		
+		private string _Setting;
+		
+		private string _Value;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnSettingChanging(string value);
+    partial void OnSettingChanged();
+    partial void OnValueChanging(string value);
+    partial void OnValueChanged();
+    #endregion
+		
+		public AppSetting()
+		{
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Setting", DbType="VarChar(50) NOT NULL", CanBeNull=false)]
+		public string Setting
+		{
+			get
+			{
+				return this._Setting;
+			}
+			set
+			{
+				if ((this._Setting != value))
+				{
+					this.OnSettingChanging(value);
+					this.SendPropertyChanging();
+					this._Setting = value;
+					this.SendPropertyChanged("Setting");
+					this.OnSettingChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Value", DbType="NVarChar(MAX)")]
+		public string Value
+		{
+			get
+			{
+				return this._Value;
+			}
+			set
+			{
+				if ((this._Value != value))
+				{
+					this.OnValueChanging(value);
+					this.SendPropertyChanging();
+					this._Value = value;
+					this.SendPropertyChanged("Value");
+					this.OnValueChanged();
 				}
 			}
 		}

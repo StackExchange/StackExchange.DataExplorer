@@ -40,12 +40,17 @@
       <input type="checkbox" name="resultsToText" value="true" />
       <label>
         Results to Text</label>
-         &nbsp;&nbsp;&nbsp;
-        <input type="checkbox" name="allDbs" value="true"/> 
-        <label>Run on all DBs</label>
-        &nbsp;&nbsp;&nbsp;
-        <input type="checkbox" name="excludeMetas" value="true"/> 
-        <label>Exclude Metas</label>
+        <% if (AppSettings.AllowRunOnAllDbsOption) { %>
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="allDbs" value="true"/> 
+            <label>Run on all DBs</label>
+        <% } %>
+              
+        <% if (AppSettings.AllowExcludeMetaOption) { %>
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="excludeMetas" value="true"/> 
+            <label>Exclude Metas</label>
+        <% } %>
     </p>
     <p id="toolbar">
       <input type="submit" value="Run Query" />
