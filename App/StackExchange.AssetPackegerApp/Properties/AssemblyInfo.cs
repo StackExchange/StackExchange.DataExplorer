@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Packager")]
+[assembly: AssemblyTitle("AssetPackagerApp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Stack Exchange")]
-[assembly: AssemblyProduct("Packager")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("AssetPackagerApp")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9f832298-c665-4d16-9bfd-ca72e81800e9")]
+[assembly: Guid("54e745b9-1d05-4c56-843e-fe86527f31a8")]
 
 // Version information for an assembly consists of the following four values:
 //

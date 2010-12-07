@@ -5,22 +5,33 @@ using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
+using StackExchange.AssetPackager;
 
 namespace StackExchange.DataExplorer
 {
     /// <summary>
     /// This class handles all CSS and Javascript includes 
     /// </summary>
-    public static class AssetPackager
+    public class AssetPackager : Packager<AssetPackager>
     {
-        private static readonly Dictionary<string, AssetCollection> cssAssets;
-
-        private static readonly Dictionary<string, AssetCollection> jsAssets;
-        private static volatile string versionString;
-
-        static AssetPackager()
+        protected override bool CompressAssets
         {
-            cssAssets =
+            get 
+            {
+#if DEBUG 
+                return false;
+#else 
+                return true; 
+#endif 
+            }
+        }
+
+        protected override Dictionary<string, AssetCollection> CssAssets 
+        {
+            get 
+            {
+
+                return
                 new Dictionary<string, AssetCollection>
                     {
                         {"sitecss", new AssetCollection {"/Content/site.css"}},
@@ -33,9 +44,15 @@ namespace StackExchange.DataExplorer
                                                  }
                             }
                     };
+            }
+        }
 
 
-            jsAssets =
+        protected override Dictionary<string, AssetCollection> JsAssets
+        {
+            get
+            {
+                var jsAssets =
                 new Dictionary<string, AssetCollection>
                     {
                         {
@@ -64,125 +81,21 @@ namespace StackExchange.DataExplorer
                             }
                     };
 
-            jsAssets.Add("jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js")
+                jsAssets.Add("jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js")
                                        {
                                            "/Scripts/jquery-1.4.2.js"
                                        });
 
-            jsAssets.Add("jquery.validate",
-                         new AssetCollection(
-                             "http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.pack.js")
+                jsAssets.Add("jquery.validate",
+                     new AssetCollection(
+                         "http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.pack.js")
                              {
                                  "/Scripts/jquery.validate.js"
                              });
-        }
 
-        public static string VersionString
-        {
-            get
-            {
-                if (versionString == null)
-                {
-                    versionString = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                }
-                return versionString;
+                return jsAssets;
             }
         }
 
-        private static string GetInclude(string asset, Dictionary<string, AssetCollection> allAssets, string format,
-                                         string extension)
-        {
-            var buffer = new StringBuilder();
-
-#if DEBUG
-
-            foreach (string include in allAssets[asset])
-            {
-                buffer.AppendFormat(format,
-                                    include, "?v=" + VersionString);
-            }
-#else
-            if (allAssets[asset].ReleaseOverride != null) {
-                buffer.AppendFormat(format,
-                  allAssets[asset].ReleaseOverride, "");
-            } else {
-                buffer.AppendFormat(format, "/Content/packaged/" + asset + "." + extension, "?v=" + VersionString);
-            }
-#endif
-
-            return buffer.ToString();
-        }
-
-        public static string ScriptSrc(string asset)
-        {
-            return GetInclude(asset, jsAssets, @"<script src=""{0}{1}"" type=""text/javascript""></script>", "js");
-        }
-
-        public static string LinkCss(string asset)
-        {
-            return GetInclude(asset, cssAssets, @"<link href=""{0}{1}"" rel=""stylesheet"" type=""text/css"" />", "css");
-        }
-
-
-        /// <summary>
-        /// Packages up all our assets 
-        /// </summary>
-        public static void PackIt(string rootPath)
-        {
-            PackAssets(rootPath, cssAssets, "css");
-            PackAssets(rootPath, jsAssets, "js");
-        }
-
-        [SecurityPermission(SecurityAction.Demand)]
-        private static void PackAssets(string rootPath, Dictionary<string, AssetCollection> assets, string extension)
-        {
-            foreach (var asset in assets)
-            {
-                var buffer = new StringBuilder();
-                if (asset.Value.ReleaseOverride != null)
-                {
-                    continue;
-                }
-
-                foreach (string relativePath in asset.Value)
-                {
-                    string ResolvedRelativePath = relativePath.Replace('/', '\\').Substring(1);
-                    string path = Path.Combine(rootPath, ResolvedRelativePath);
-                    buffer.AppendLine(File.ReadAllText(path));
-                }
-
-                string target = Path.Combine(rootPath, "Content\\packaged\\" + asset.Key + "." + extension);
-                File.WriteAllText(target, buffer.ToString());
-
-                target = Path.GetFullPath(target);
-
-                var psi = new ProcessStartInfo();
-                psi.FileName = @"c:\windows\system32\java";
-                psi.WorkingDirectory = Path.GetFullPath(Path.Combine(rootPath, @"..\..\Lib"));
-                psi.Arguments = string.Format("-jar yuicompressor-2.4.2.jar {0} -o {1} ", target, target);
-                psi.WindowStyle = ProcessWindowStyle.Hidden;
-                Process p = Process.Start(psi);
-                p.WaitForExit();
-            }
-        }
-
-        #region Nested type: AssetCollection
-
-        private class AssetCollection : List<string>
-        {
-            public AssetCollection()
-                : this(null)
-            {
-            }
-
-            public AssetCollection(string releaseOverride)
-            {
-                ReleaseOverride = releaseOverride;
-            }
-
-            public string ReleaseOverride { get; private set; }
-        }
-
-        #endregion
     }
 }

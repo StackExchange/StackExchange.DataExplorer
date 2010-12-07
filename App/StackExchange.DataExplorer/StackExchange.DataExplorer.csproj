@@ -39,9 +39,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AssetPackager, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\AssetPackager.dll</HintPath>
+    </Reference>
     <Reference Include="DotNetOpenAuth, Version=3.4.4.10176, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\DotNetOpenAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="EcmaScript.NET.modified">
+      <HintPath>..\..\Lib\EcmaScript.NET.modified.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\..\Lib\log4net.dll</HintPath>
@@ -88,6 +95,9 @@
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Web.Mobile" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="Yahoo.Yui.Compressor">
+      <HintPath>..\..\Lib\Yahoo.Yui.Compressor.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppSettings.cs" />
@@ -320,7 +330,7 @@
   <PropertyGroup>
     <PostBuildEvent>if $(ConfigurationName) == Debug goto :exit
 del /q $(ProjectDir)\Content\packaged\*.*
-$(SolutionDir)\..\Tools\AssetPackager.exe $(ProjectDir)
+$(SolutionDir)\..\Lib\AssetPackagerApp.exe  $(TargetPath) $(ProjectDir)
 :exit</PostBuildEvent>
   </PropertyGroup>
 </Project>

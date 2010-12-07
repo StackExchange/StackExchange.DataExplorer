@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+  Expected parameters:
+    Configuration - Debug, Release 
+    OutputDirectory - c:\dev.stackoverflow.com
+-->
+<Project DefaultTargets="CompileWeb" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- SourceDirectory e.g. c:\builds\dev\source - MAKE SURE ccnet.config's project > workingDirectory is properly set! -->
+    <SourceDirectory>$(CCNetWorkingDirectory)</SourceDirectory>
+    <TargetsDirectory>$(CCNetWorkingDirectory)\Build\targets</TargetsDirectory>
+    <MSBuildCommunityTasksPath>$(CCNetWorkingDirectory)\Build\targets</MSBuildCommunityTasksPath>
+    <WebSourceDirectory>$(SourceDirectory)\App\StackExchange.DataExplorer</WebSourceDirectory>
+    <WebAssemblyInfoFile>$(WebSourceDirectory)\Properties\AssemblyInfo.cs</WebAssemblyInfoFile>
+    <TestBin>$(SourceDirectory)\App\StackExchange.DataExplorer.Tests\bin\$(Configuration)</TestBin>
+
+    <BackupDirectory>$(SourceDirectory)\..\backup</BackupDirectory>
+    <StagingDirectory>$(SourceDirectory)\..\staging</StagingDirectory>
+
+    <ErrorsBackupDirectory>$(BackupDirectory)\errors</ErrorsBackupDirectory>
+    <LogsBackupDirectory>$(BackupDirectory)\logs</LogsBackupDirectory>
+  </PropertyGroup>
+
+  <!-- For debugging purposes.. -->
+  <Target Name="WriteParameters">
+    <Message Text="Configuration = $(Configuration)"/>
+    <Message Text="OutputDirectory = $(OutputDirectory)"/>
+    <Message Text="SourceDirectory = $(SourceDirectory)"/>
+    <Message Text="CCNetLabel = $(CCNetLabel)"/>
+    <Message Text="TargetDatabase = $(TargetDatabase)"/>
+    <Message Text="BaseWebSiteAddress = $(BaseWebSiteAddress)"/> <!-- this will be without http:// e.g. stackoverflow.com, dev.serverfault.com -->
+  </Target>
+
+  <Target Name="MigrateDatabase" DependsOnTargets="WriteParameters" Condition="'$(BaseWebSiteAddress)' == 'meta.stackoverflow.com' Or '$(BaseWebSiteAddress)' == 'dev.su-sf-sa-so-mso-ex' Or '$(BaseWebSiteAddress)' == 'local.mso.com'">    
+    <Message Text="MigrateDatabase complete"/>
+  </Target>
+
+
+  <!-- Rebuilds both the web and test projects.. -->
+  <Target Name="CompileWeb">
+
+    <!-- this dependency is in reverse, it should be extracted, asset packeger will build data explorer -->
+    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
+             Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin;PostBuildEvent="
+             Targets="Build"/>
+
+    <Message Text="CompileWeb complete" />
+  </Target>
+
+
+  <PropertyGroup>
+    <DeployFiles-Exclude>*.cs *.csproj *.dbml* *.eps *.user</DeployFiles-Exclude>
+    <DeployFolders-Exclude>.svn obj</DeployFolders-Exclude>
+  </PropertyGroup>
+    
+
+  
+  <Target Name="TakeWebSiteOffline" DependsOnTargets="SiteSpecificContent">
+    <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe stop site $(BaseWebSiteAddress)" />
+    <Message Text="TakeWebSiteOffline complete"/>
+  </Target>
+
+
+  <!-- Ensures our output directory is purged of previous content.. -->
+  <Target Name="CleanWeb" DependsOnTargets="TakeWebSiteOffline">
+    <!-- Just going to delete files - leave dirs alone - yeah, this is nasty, but i don't feel like revisiting msbuild itemgroup syntax.. -->
+    <Exec Command="del $(OutputDirectory)\*.* /F /Q" />
+    <Exec Command="del $(OutputDirectory)\Content\*.* /F /Q /S" Condition="Exists('$(OutputDirectory)\Content')" />
+    <Exec Command="del $(OutputDirectory)\Views\*.* /F /Q /S" Condition="Exists('$(OutputDirectory)\Views')" />
+
+    <Message Text="CleanWeb complete"/>
+  </Target>
+  
+  <!--
+  <Target Name="DeployWeb" DependsOnTargets="PrepareStaticContent;DeployStaticContent">
+
+    <RoboCopy SourceFolder="$(StagingDirectory)" DestinationFolder="$(OutputDirectory)" RetryCount="5" AllSubdirectories="true" />
+    
+    <MakeDir Directories="$(OutputDirectory)\Errors" Condition="!Exists('$(OutputDirectory)\Errors')"/>
+
+
+    <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe start site $(BaseWebSiteAddress)" />
+
+    <Message Text="DeployWeb complete"/>
+  </Target>
+  -->
+
+</Project>
