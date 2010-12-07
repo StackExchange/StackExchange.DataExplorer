@@ -113,6 +113,12 @@ namespace StackExchange.AssetPackager
 
         private static void PackAssets(string rootPath, Dictionary<string, AssetCollection> assets, string extension)
         {
+            var packagedDir = Path.Combine(rootPath, "Content\\packaged");
+            if (!Directory.Exists(packagedDir))
+            {
+                Directory.CreateDirectory(packagedDir);
+            }
+
             foreach (var asset in assets)
             {
                 var buffer = new StringBuilder();
@@ -128,7 +134,7 @@ namespace StackExchange.AssetPackager
                     buffer.AppendLine(File.ReadAllText(path));
                 }
 
-                string target = Path.Combine(rootPath, "Content\\packaged\\" + asset.Key + "." + extension);
+                string target = Path.Combine(packagedDir, asset.Key + "." + extension);
 
                 var compressed = Yahoo.Yui.Compressor.YUICompressor.Compress(buffer.ToString(), 100);
 
