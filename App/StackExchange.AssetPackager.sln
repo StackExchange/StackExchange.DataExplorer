@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetPackagerApp", "StackExchange.AssetPackegerApp\AssetPackagerApp.csproj", "{9F868441-B5C4-4006-8764-63A32002583E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackExchange.AssetPackager", "StackExchange.AssetPackager\StackExchange.AssetPackager.csproj", "{60B61A1F-BA31-4B1F-AC32-598929A235BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetPackagerApp", "StackExchange.AssetPackagerApp\AssetPackagerApp.csproj", "{9F868441-B5C4-4006-8764-63A32002583E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,14 +11,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9F868441-B5C4-4006-8764-63A32002583E}.Debug|x86.ActiveCfg = Debug|x86
-		{9F868441-B5C4-4006-8764-63A32002583E}.Debug|x86.Build.0 = Debug|x86
-		{9F868441-B5C4-4006-8764-63A32002583E}.Release|x86.ActiveCfg = Release|x86
-		{9F868441-B5C4-4006-8764-63A32002583E}.Release|x86.Build.0 = Release|x86
 		{60B61A1F-BA31-4B1F-AC32-598929A235BA}.Debug|x86.ActiveCfg = Debug|x86
 		{60B61A1F-BA31-4B1F-AC32-598929A235BA}.Debug|x86.Build.0 = Debug|x86
 		{60B61A1F-BA31-4B1F-AC32-598929A235BA}.Release|x86.ActiveCfg = Release|x86
 		{60B61A1F-BA31-4B1F-AC32-598929A235BA}.Release|x86.Build.0 = Release|x86
+		{9F868441-B5C4-4006-8764-63A32002583E}.Debug|x86.ActiveCfg = Debug|x86
+		{9F868441-B5C4-4006-8764-63A32002583E}.Debug|x86.Build.0 = Debug|x86
+		{9F868441-B5C4-4006-8764-63A32002583E}.Release|x86.ActiveCfg = Release|x86
+		{9F868441-B5C4-4006-8764-63A32002583E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

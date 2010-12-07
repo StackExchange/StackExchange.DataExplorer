@@ -330,7 +330,7 @@
   <PropertyGroup>
     <PostBuildEvent>if $(ConfigurationName) == Debug goto :exit
 del /q $(ProjectDir)\Content\packaged\*.*
-$(SolutionDir)\..\Lib\AssetPackagerApp.exe  $(TargetPath) $(ProjectDir)
+$(ProjectDir)..\..\Lib\AssetPackagerApp.exe  $(TargetPath) $(ProjectDir)
 :exit</PostBuildEvent>
   </PropertyGroup>
 </Project>

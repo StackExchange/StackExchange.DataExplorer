@@ -5,13 +5,12 @@
     Configuration - Debug, Release 
     OutputDirectory - c:\dev.stackoverflow.com
 -->
-<Project DefaultTargets="CompileWeb" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="DeployWeb" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <!-- SourceDirectory e.g. c:\builds\dev\source - MAKE SURE ccnet.config's project > workingDirectory is properly set! -->
     <SourceDirectory>$(CCNetWorkingDirectory)</SourceDirectory>
-    <TargetsDirectory>$(CCNetWorkingDirectory)\Build\targets</TargetsDirectory>
-    <MSBuildCommunityTasksPath>$(CCNetWorkingDirectory)\Build\targets</MSBuildCommunityTasksPath>
+    <BuildDirectory>$(CCNetWorkingDirectory)\Build\targets</BuildDirectory>
     <WebSourceDirectory>$(SourceDirectory)\App\StackExchange.DataExplorer</WebSourceDirectory>
     <WebAssemblyInfoFile>$(WebSourceDirectory)\Properties\AssemblyInfo.cs</WebAssemblyInfoFile>
     <TestBin>$(SourceDirectory)\App\StackExchange.DataExplorer.Tests\bin\$(Configuration)</TestBin>
@@ -21,6 +20,8 @@
 
     <ErrorsBackupDirectory>$(BackupDirectory)\errors</ErrorsBackupDirectory>
     <LogsBackupDirectory>$(BackupDirectory)\logs</LogsBackupDirectory>
+    <DeployFiles-Exclude>*.cs *.csproj *.dbml* *.eps *.user</DeployFiles-Exclude>
+    <DeployFolders-Exclude>.svn obj</DeployFolders-Exclude>
   </PropertyGroup>
 
   <!-- For debugging purposes.. -->
@@ -30,34 +31,42 @@
     <Message Text="SourceDirectory = $(SourceDirectory)"/>
     <Message Text="CCNetLabel = $(CCNetLabel)"/>
     <Message Text="TargetDatabase = $(TargetDatabase)"/>
-    <Message Text="BaseWebSiteAddress = $(BaseWebSiteAddress)"/> <!-- this will be without http:// e.g. stackoverflow.com, dev.serverfault.com -->
+    <Message Text="BaseWebSiteAddress = $(BaseWebSiteAddress)"/> <!-- this will be without http:// e.g. data.stackexchange.com -->
   </Target>
 
-  <Target Name="MigrateDatabase" DependsOnTargets="WriteParameters" Condition="'$(BaseWebSiteAddress)' == 'meta.stackoverflow.com' Or '$(BaseWebSiteAddress)' == 'dev.su-sf-sa-so-mso-ex' Or '$(BaseWebSiteAddress)' == 'local.mso.com'">    
+  <Target Name="MigrateDatabase" DependsOnTargets="WriteParameters">    
     <Message Text="MigrateDatabase complete"/>
   </Target>
 
 
   <!-- Rebuilds both the web and test projects.. -->
-  <Target Name="CompileWeb">
-
-    <!-- this dependency is in reverse, it should be extracted, asset packeger will build data explorer -->
+  <Target Name="CompileWeb" DependsOnTargets="MigrateDatabase">
     <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
-             Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin;PostBuildEvent="
+             Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin"
+             Targets="Build"/>
+
+    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackagerApp\AssetPackagerApp.csproj"
+             Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin"
+             Targets="Build"/>
+    
+    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.DataExplorer\StackExchange.DataExplorer.csproj"
+             Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin"
              Targets="Build"/>
 
     <Message Text="CompileWeb complete" />
   </Target>
 
+  <Target Name="DeployWeb" DependsOnTargets="CompileWeb">
 
-  <PropertyGroup>
-    <DeployFiles-Exclude>*.cs *.csproj *.dbml* *.eps *.user</DeployFiles-Exclude>
-    <DeployFolders-Exclude>.svn obj</DeployFolders-Exclude>
-  </PropertyGroup>
-    
+    <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe stop site $(BaseWebSiteAddress)" />
+    <Exec IgnoreExitCode="true" Command="c:\windows\System32\robocopy /s $(WebSourceDirectory) $(OutputDirectory) /XF *.cs *.csproj *.dbml* *.eps *.user"/>
+    <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe start site $(BaseWebSiteAddress)" />
 
-  
-  <Target Name="TakeWebSiteOffline" DependsOnTargets="SiteSpecificContent">
+    <Message Text="DeployWeb complete"/>
+  </Target>
+
+
+  <Target Name="TakeWebSiteOffline">
     <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe stop site $(BaseWebSiteAddress)" />
     <Message Text="TakeWebSiteOffline complete"/>
   </Target>
@@ -73,18 +82,8 @@
     <Message Text="CleanWeb complete"/>
   </Target>
   
-  <!--
-  <Target Name="DeployWeb" DependsOnTargets="PrepareStaticContent;DeployStaticContent">
 
-    <RoboCopy SourceFolder="$(StagingDirectory)" DestinationFolder="$(OutputDirectory)" RetryCount="5" AllSubdirectories="true" />
-    
-    <MakeDir Directories="$(OutputDirectory)\Errors" Condition="!Exists('$(OutputDirectory)\Errors')"/>
+  
 
-
-    <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe start site $(BaseWebSiteAddress)" />
-
-    <Message Text="DeployWeb complete"/>
-  </Target>
-  -->
 
 </Project>
