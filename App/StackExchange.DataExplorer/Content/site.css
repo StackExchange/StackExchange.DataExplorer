@@ -484,6 +484,8 @@ ul.site-list .siteName {
 
 ul.site-list .siteName img {
   margin-bottom: 5px;  
+  max-width: 350px;
+  padding: 4px;
 }
 
 ul.site-list .totalQuestions, ul.site-list .totalAnswers, ul.site-list .totalComments, ul.site-list .totalTags,  ul.site-list .latestPost, ul.site-list .odata {

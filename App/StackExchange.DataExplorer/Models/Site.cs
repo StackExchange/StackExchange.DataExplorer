@@ -10,6 +10,21 @@ namespace StackExchange.DataExplorer.Models
 {
     public partial class Site
     {
+        public string ImageCss
+        {
+            get
+            {
+                if (ImageBackgroundColor != null)
+                {
+                    return "background-color: #" + ImageBackgroundColor; 
+                }
+                else
+                {
+                    return "";
+                }
+            }
+        }
+
         public string ConnectionString
         {
             get

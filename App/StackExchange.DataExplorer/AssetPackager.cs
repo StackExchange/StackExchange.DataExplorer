@@ -16,19 +16,19 @@ namespace StackExchange.DataExplorer
     {
         protected override bool CompressAssets
         {
-            get 
+            get
             {
 #if DEBUG 
                 return false;
-#else 
-                return true; 
-#endif 
+#else
+                return true;
+#endif
             }
         }
 
-        protected override Dictionary<string, AssetCollection> CssAssets 
+        protected override Dictionary<string, AssetCollection> CssAssets
         {
-            get 
+            get
             {
 
                 return
@@ -52,7 +52,7 @@ namespace StackExchange.DataExplorer
         {
             get
             {
-                var jsAssets =
+                return
                 new Dictionary<string, AssetCollection>
                     {
                         {
@@ -78,22 +78,24 @@ namespace StackExchange.DataExplorer
                                               "/Scripts/codemirror/codemirror.js",
                                               "/Scripts/query.js"
                                           }
-                            }
-                    };
-
-                jsAssets.Add("jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js")
+                            },
+                            
+                            { "jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js")
                                        {
                                            "/Scripts/jquery-1.4.2.js"
-                                       });
-
-                jsAssets.Add("jquery.validate",
+                                       }
+                            },
+ 
+                            {"jquery.validate",
                      new AssetCollection(
                          "http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.pack.js")
                              {
                                  "/Scripts/jquery.validate.js"
-                             });
+                             }
+                        }
+                    
+                    };
 
-                return jsAssets;
             }
         }
 

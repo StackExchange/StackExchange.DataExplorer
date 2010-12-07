@@ -1033,6 +1033,8 @@ namespace StackExchange.DataExplorer.Models
 		
 		private System.Nullable<System.DateTime> _LastPost;
 		
+		private string _ImageBackgroundColor;
+		
 		private EntitySet<SavedQuery> _SavedQueries;
 		
     #region Extensibility Method Definitions
@@ -1071,6 +1073,8 @@ namespace StackExchange.DataExplorer.Models
     partial void OnTotalTagsChanged();
     partial void OnLastPostChanging(System.Nullable<System.DateTime> value);
     partial void OnLastPostChanged();
+    partial void OnImageBackgroundColorChanging(string value);
+    partial void OnImageBackgroundColorChanged();
     #endregion
 		
 		public Site()
@@ -1395,6 +1399,26 @@ namespace StackExchange.DataExplorer.Models
 					this._LastPost = value;
 					this.SendPropertyChanged("LastPost");
 					this.OnLastPostChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ImageBackgroundColor", DbType="varchar(6)", UpdateCheck=UpdateCheck.Never)]
+		public string ImageBackgroundColor
+		{
+			get
+			{
+				return this._ImageBackgroundColor;
+			}
+			set
+			{
+				if ((this._ImageBackgroundColor != value))
+				{
+					this.OnImageBackgroundColorChanging(value);
+					this.SendPropertyChanging();
+					this._ImageBackgroundColor = value;
+					this.SendPropertyChanged("ImageBackgroundColor");
+					this.OnImageBackgroundColorChanged();
 				}
 			}
 		}

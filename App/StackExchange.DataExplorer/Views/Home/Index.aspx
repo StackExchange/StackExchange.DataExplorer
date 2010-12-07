@@ -13,7 +13,7 @@
       <li>
         <div class="siteName">
           <a href="<%=site.Name.ToLower()%>/queries">
-            <img src="<%=site.ImageUrl%>" alt="<%=site.Name%>" class="site"></img></a>
+            <img src="<%=site.ImageUrl%>" alt="<%=site.Name%>" class="site" style="<%= site.ImageCss %>"></img></a>
           <p class="tagline">
             <%=site.Tagline%>
           </p>
