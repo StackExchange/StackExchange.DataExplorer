@@ -58,11 +58,22 @@ INCLUDE ([Id],[ParentId])')
 
 exec ('create index [EmailHashIdx] on [' + @targetDB + '].dbo.Users(EmailHash)')
  
+
+exec (' use [' + @targetDB + '] 
+select Id, Name, [Count] 
+into dbo.Tags
+from [' + @sourceDB + '].dbo.Tags
+where [Count] > 0
+
+create unique clustered index idxId on dbo.Tags(Id)
+create unique  index idxName on dbo.Tags(Name)
+
+select distinct pt.PostId, t.Id as TagId 
+into [dbo].[PostTags]
+from [' + @sourceDB + '].dbo.Tags t
+join [' + @sourceDB + '].dbo.PostTags pt on pt.Tag = t.Name')
+ 
 exec('
- CREATE TABLE [' + @targetDB + '].[dbo].[PostTags] (
-	PostId int, 
-	TagId int
-)
 
 create unique clustered index PostTagsIndex on [' + @targetDB + '].dbo.PostTags (PostId,TagId)
 create unique index PostTagsTagPostIndex on [' + @targetDB + '].dbo.PostTags (TagId, PostId)')
