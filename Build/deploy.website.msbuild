@@ -37,6 +37,10 @@
 </configuration>]]></WebReleaseConfig>
   </PropertyGroup>
 
+  <UsingTask TaskName="TransformXml"
+           AssemblyFile="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\Web\Microsoft.Web.Publishing.Tasks.dll"/>
+
+  
   <!-- For debugging purposes.. -->
   <Target Name="WriteParameters">
     <Message Text="Configuration = $(Configuration)"/>
@@ -58,6 +62,10 @@
     <WriteLinesToFile File="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
       Overwrite="true" Lines="$(WebReleaseConfig)"                  
     />
+
+    <TransformXml Source="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.config"
+                 Transform="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
+                 Destination="$(TransformOutputFile)"/>
 
     <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
              Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin"
