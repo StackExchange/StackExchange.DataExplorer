@@ -65,9 +65,7 @@
 
     <TransformXml Source="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.config"
                  Transform="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
-                 Destination="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web1.config"/>
-
-    <Copy SourceFiles="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web1.config" DestinationFiles="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.config"  />
+                 Destination="$(WebSourceDirectory)\..\StackExchange.DataExplorer\WebRelease.config"/>
 
     <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
              Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin"
@@ -88,6 +86,9 @@
 
     <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe stop site $(BaseWebSiteAddress)" />
     <Exec IgnoreExitCode="true" Command="c:\windows\System32\robocopy /s $(WebSourceDirectory) $(OutputDirectory) /XF *.cs *.csproj *.dbml* *.eps *.user"/>
+
+    <Copy SourceFiles="$(WebSourceDirectory)\..\StackExchange.DataExplorer\WebRelease.config" DestinationFiles="$(OutputDirectory)\Web.config"  />
+
     <Exec Command="c:\Windows\System32\inetsrv\appcmd.exe start site $(BaseWebSiteAddress)" />
 
     <Message Text="DeployWeb complete"/>
