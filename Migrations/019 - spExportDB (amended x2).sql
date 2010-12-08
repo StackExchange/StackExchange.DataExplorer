@@ -1,4 +1,24 @@
-﻿-- used to export a live SE db to a new database for DataExplorer Reasons
+﻿if OBJECT_ID('spExportTable') is not null 
+begin
+	drop proc spExportTable
+end
+go 
+
+create proc spExportTable
+	@sourceDB nvarchar(100),
+	@targetDB nvarchar(100),
+	@sourceTable nvarchar(100), 
+	@targetTable nvarchar(100) 
+as
+
+	exec('select top 0 Id as Id1, * into [' + @targetDB + '].dbo.' + @targetTable + ' from [' + @sourceDB + '].dbo.' + @sourceTable)
+	exec('alter table [' + @targetDB + '].dbo.' + @targetTable + ' drop Column Id1')
+	exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.' + @targetTable + ' (Id)')
+	exec('use [' + @targetDB + '] 
+	insert dbo.' + @targetTable + ' select * from  [' + @sourceDB + '].dbo.' + @sourceTable )
+go
+
+-- used to export a live SE db to a new database for DataExplorer Reasons
 if OBJECT_ID('spExportDB') is not null
 begin
 	drop proc spExportDB
@@ -31,24 +51,15 @@ end
 exec ('create database [' + @targetDB +']')
 
 exec('select *, cast(SUBSTRING(master.sys.fn_varbintohexstr(HashBytes(''MD5'',ltrim(rtrim(cast(Email as varchar(100)))))),3,32) as varchar(32)) as EmailHash into [' + @targetDB + '].dbo.Users from [' + @sourceDB + '].dbo.vExportUsers')
-
 exec('alter table [' + @targetDB + '].dbo.Users drop column Email')
 
-
-exec('select * into [' + @targetDB + '].dbo.Posts from [' + @sourceDB + '].dbo.vExportPosts')
-exec('select * into [' + @targetDB + '].dbo.PostHistory from [' + @sourceDB + '].dbo.vExportPostHistory')
-exec('select * into [' + @targetDB + '].dbo.Votes from [' + @sourceDB + '].dbo.vExportVotes')
-exec('select * into [' + @targetDB + '].dbo.Badges from [' + @sourceDB + '].dbo.vExportBadges')
-exec('select * into [' + @targetDB + '].dbo.Comments from [' + @sourceDB + '].dbo.vExportComments')
-
+exec spExportTable @sourceDB, @targetDB, 'vExportPosts', 'Posts'
+exec spExportTable @sourceDB, @targetDB, 'vExportPostHistory', 'PostHistory'
+exec spExportTable @sourceDB, @targetDB, 'vExportVotes', 'Votes'
+exec spExportTable @sourceDB, @targetDB, 'vExportBadges', 'Badges'
+exec spExportTable @sourceDB, @targetDB, 'vExportComments', 'Comments'
 
 exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.Users (Id)')
-exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.Posts (Id)')
-exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.PostHistory (Id)')
-exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.Votes (Id)')
-exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.Badges (Id)')
-exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.Comments (Id)')
-
 
 exec('create index ParentIdIdx on [' + @targetDB + '].dbo.Posts (ParentId)')
 
