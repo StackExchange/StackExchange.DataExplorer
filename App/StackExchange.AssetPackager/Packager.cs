@@ -136,7 +136,15 @@ namespace StackExchange.AssetPackager
 
                 string target = Path.Combine(packagedDir, asset.Key + "." + extension);
 
-                var compressed = Yahoo.Yui.Compressor.YUICompressor.Compress(buffer.ToString(), 100);
+                string compressed;
+                if (extension.ToLower() == "js")
+                {
+                    compressed = Yahoo.Yui.Compressor.JavaScriptCompressor.Compress(buffer.ToString());
+                }
+                else
+                {
+                    compressed = Yahoo.Yui.Compressor.YUICompressor.Compress(buffer.ToString(), 200);
+                }
 
                 File.WriteAllText(target, compressed);
             }
