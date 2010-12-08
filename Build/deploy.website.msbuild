@@ -31,7 +31,7 @@
 
   <connectionStrings>
     <add name="AppConnection" connectionString="Server=$(TargetDatabaseServer)%3bDatabase=$(TargetDatabase)%3bUser ID=$(DatabaseUser)%3bPassword=$(DatabasePassword)%3bTrusted_Connection=False" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
-    <add name="ReaderConnection" connectionString="Server=$(TargetDatabaseServer)%3bDatabase=!!DB!!%3bUser ID=$(DatabaseUser)%3bPassword=$(DatabasePassword)%3bTrusted_Connection=False" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
+    <add name="ReaderConnection" connectionString="Server=$(TargetDatabaseServer)%3bDatabase=!!DB!!%3bUser ID=$(DatabaseReadonlyUser)%3bPassword=$(DatabaseReadonlyPassword)%3bTrusted_Connection=False" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
   </connectionStrings>
 
 </configuration>]]></WebReleaseConfig>
