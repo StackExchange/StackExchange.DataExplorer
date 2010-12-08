@@ -10,10 +10,12 @@
   <PropertyGroup>
     <!-- SourceDirectory e.g. c:\builds\dev\source - MAKE SURE ccnet.config's project > workingDirectory is properly set! -->
     <SourceDirectory>$(CCNetWorkingDirectory)</SourceDirectory>
+    <MigrationsDirectory>$(SourceDirectory)\Migrations</MigrationsDirectory>
     <BuildDirectory>$(CCNetWorkingDirectory)\Build\targets</BuildDirectory>
     <WebSourceDirectory>$(SourceDirectory)\App\StackExchange.DataExplorer</WebSourceDirectory>
     <WebAssemblyInfoFile>$(WebSourceDirectory)\Properties\AssemblyInfo.cs</WebAssemblyInfoFile>
     <TestBin>$(SourceDirectory)\App\StackExchange.DataExplorer.Tests\bin\$(Configuration)</TestBin>
+    <MigrateBin>$(SourceDirectory)\Build\Migrator.exe --connection="Server=$(TargetDatabaseServer);Database=$(TargetDatabase);User ID=$(DatabaseUser);Password=$(DatabasePassword);Trusted_Connection=False"</MigrateBin>
 
     <BackupDirectory>$(SourceDirectory)\..\backup</BackupDirectory>
     <StagingDirectory>$(SourceDirectory)\..\staging</StagingDirectory>
@@ -22,6 +24,17 @@
     <LogsBackupDirectory>$(BackupDirectory)\logs</LogsBackupDirectory>
     <DeployFiles-Exclude>*.cs *.csproj *.dbml* *.eps *.user</DeployFiles-Exclude>
     <DeployFolders-Exclude>.svn obj</DeployFolders-Exclude>
+
+    <WebReleaseConfig>
+      <![CDATA[<?xml version="1.0"?>
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+
+  <connectionStrings>
+    <add name="AppConnection" connectionString="Server=$(TargetDatabaseServer);Database=$(TargetDatabase);User ID=$(DatabaseUser);Password=$(DatabasePassword);Trusted_Connection=False" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
+    <add name="ReaderConnection" connectionString="Server=$(TargetDatabaseServer);Database=!!DB!!;User ID=$(DatabaseUser);Password=$(DatabasePassword);Trusted_Connection=False" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
+  </connectionStrings>
+
+</configuration>]]></WebReleaseConfig>
   </PropertyGroup>
 
   <!-- For debugging purposes.. -->
@@ -34,13 +47,18 @@
     <Message Text="BaseWebSiteAddress = $(BaseWebSiteAddress)"/> <!-- this will be without http:// e.g. data.stackexchange.com -->
   </Target>
 
-  <Target Name="MigrateDatabase" DependsOnTargets="WriteParameters">    
+  <Target Name="MigrateDatabase" DependsOnTargets="WriteParameters">
+    <Exec Command="$(MigrateBin)" WorkingDirectory="$(MigrationsDirectory)" />
     <Message Text="MigrateDatabase complete"/>
   </Target>
 
 
-  <!-- Rebuilds both the web and test projects.. -->
   <Target Name="CompileWeb" DependsOnTargets="MigrateDatabase">
+
+    <WriteLinesToFile File="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
+      Overwrite="true" Lines="$(WebReleaseConfig)"                  
+    />
+
     <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
              Properties="Configuration=$(Configuration);ReferencePath=$(WebSourceDirectory)\bin"
              Targets="Build"/>
@@ -78,7 +96,7 @@
     <Exec Command="del $(OutputDirectory)\*.* /F /Q" />
     <Exec Command="del $(OutputDirectory)\Content\*.* /F /Q /S" Condition="Exists('$(OutputDirectory)\Content')" />
     <Exec Command="del $(OutputDirectory)\Views\*.* /F /Q /S" Condition="Exists('$(OutputDirectory)\Views')" />
-
+    
     <Message Text="CleanWeb complete"/>
   </Target>
   
