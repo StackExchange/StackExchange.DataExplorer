@@ -52,6 +52,9 @@ exec ('create database [' + @targetDB +']')
 
 exec('select *, cast(SUBSTRING(master.sys.fn_varbintohexstr(HashBytes(''MD5'',ltrim(rtrim(cast(Email as varchar(100)))))),3,32) as varchar(32)) as EmailHash into [' + @targetDB + '].dbo.Users from [' + @sourceDB + '].dbo.vExportUsers')
 exec('alter table [' + @targetDB + '].dbo.Users drop column Email')
+exec('alter table [' + @targetDB + '].dbo.Users add Age int null')
+exec('update [' + @targetDB + '].dbo.Users set Age = DATEDIFF(yy, Birthday, getdate())')
+exec('alter table [' + @targetDB + '].dbo.Users drop column Birthday')
 
 exec spExportTable @sourceDB, @targetDB, 'vExportPosts', 'Posts'
 exec spExportTable @sourceDB, @targetDB, 'vExportPostHistory', 'PostHistory'
@@ -77,7 +80,7 @@ from [' + @sourceDB + '].dbo.Tags
 where [Count] > 0
 
 create unique clustered index idxId on dbo.Tags(Id)
-create unique  index idxName on dbo.Tags(Name)
+create unique  index idxName on dbo.Tags(TagName)
 
 select distinct pt.PostId, t.Id as TagId 
 into [dbo].[PostTags]
