@@ -7,7 +7,7 @@
 <asp:Content ID="aboutContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="content-page"> 
     <p>
-        Stack Exchange Data Explorer allows you to run arbitrary queries on the Stack Exchange public data dumps. Hosting is kindly provided by <a href="http://www.microsoft.com/windowsazure/">Microsoft</a>.
+        Stack Exchange Data Explorer allows you to run arbitrary queries on the Stack Exchange public data dumps.
     </p>
     <p>
      Stack Exchange Data Explorer is <b>Open Source</b>. 

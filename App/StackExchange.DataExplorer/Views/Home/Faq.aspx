@@ -12,7 +12,7 @@
   </p>
   <h3>Sounds interesting can you share some technical details?</h3>
   <p>
-  Stack Exchange Data Explorer is hosted on the Windows Azure platform, the database is hosted on SQL Azure. SQL Azure supports most of the TSQL commands, except that you have no tempdb access or cross database access which means no per-connection temp tables. (Table vars are supported though)
+  Stack Exchange Data Explorer is hosted on SQL Server 2008 R2, the connections to the DB are readonly, you may not alter any tables.
   </p>
   <p>
   The controls used are jQuery based, the grid is SlickGrid.
@@ -74,7 +74,7 @@ The recent, featured and popular query lists only show saved queries. If you hav
 </p>
 
 <h3>How frequently is Stack Exchange Data Explorer updated?</h3>
-<p>At the moment it is updated shortly after every Stack Exchange <a href="http://blog.stackoverflow.com/category/cc-wiki-dump/">Creative Commons Data Dump</a>. We plan to update the data of SEDE weekly or even bi-weekly some time in the future.</p>
+<p>At the moment it is updated shortly after every Stack Exchange <a href="http://blog.stackoverflow.com/category/cc-wiki-dump/">Creative Commons Data Dump</a>.</p>
 
 </div>
 </asp:Content>
