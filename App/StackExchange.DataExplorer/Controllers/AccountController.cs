@@ -125,15 +125,32 @@ namespace StackExchange.DataExplorer.Controllers
                         }
                         else if (openId == null)
                         {
-                            // create new user
-                            string email = "";
-                            string login = "";
-                            if (sreg != null)
+
+                            if (sreg != null && IsVerifiedEmailProvider(response.ClaimedIdentifier.OriginalString))
                             {
-                                email = sreg.Email;
-                                login = sreg.Nickname;
+                                user = Current.DB.Users.FirstOrDefault(u => u.Email == sreg.Email);
+                                if (user != null)
+                                {
+                                    var o = new UserOpenId();
+                                    o.OpenIdClaim = response.ClaimedIdentifier.OriginalString;
+                                    o.User = user;
+                                    Current.DB.UserOpenIds.InsertOnSubmit(o);
+                                    Current.DB.SubmitChanges();
+                                }
                             }
-                            user = Models.User.CreateUser(login, email, response.ClaimedIdentifier.OriginalString);
+
+                            if (user == null)
+                            {
+                                // create new user
+                                string email = "";
+                                string login = "";
+                                if (sreg != null)
+                                {
+                                    email = sreg.Email;
+                                    login = sreg.Nickname;
+                                }
+                                user = Models.User.CreateUser(login, email, response.ClaimedIdentifier.OriginalString);
+                            }
                         }
                         else
                         {
@@ -174,6 +191,16 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             }
             return new EmptyResult();
+        }
+
+        private bool IsVerifiedEmailProvider(string identifier)
+        {
+            identifier = identifier.ToLowerInvariant();
+            if (identifier.StartsWith(@"https://www.google.com/accounts/o8/id")) return true;
+            if (identifier.StartsWith(@"https://me.yahoo.com")) return true;
+            if (identifier.Contains(@"//www.google.com/profiles/")) return true;
+            if (identifier.StartsWith(@"http://stackauth.com/")) return true;
+            return false;
         }
     }
 }

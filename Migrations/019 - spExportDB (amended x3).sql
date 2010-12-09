@@ -71,7 +71,7 @@ exec ('create index [EmailHashIdx] on [' + @targetDB + '].dbo.Users(EmailHash)')
  
 
 exec (' use [' + @targetDB + '] 
-select Id, Name, [Count] 
+select Id, Name as [TagName], [Count] 
 into dbo.Tags
 from [' + @sourceDB + '].dbo.Tags
 where [Count] > 0
