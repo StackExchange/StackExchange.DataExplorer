@@ -24,11 +24,11 @@ namespace StackExchange.DataExplorer.Helpers
                                           results.ResultSets[0].Columns.Select(col => col.Name).ToArray()));
                 sb.Append(String.Join(Environment.NewLine,
                                       results.ResultSets[0].Rows.Select(
-                                          row => String.Join(",",
+                                          row => "\"" + String.Join("\",\"",
                                                              row.ToArray().Select(
-                                                                 c => c == null ? "" : c.ToString()
+                                                                 c => c == null ? "" : c.ToString().Replace("\"", "\"\"")
                                                                  ).ToArray()
-                                                     )
+                                                     ) + "\""
                                           ).ToArray()
                               ));
 
