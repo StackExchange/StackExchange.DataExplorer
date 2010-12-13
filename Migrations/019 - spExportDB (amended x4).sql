@@ -138,3 +138,57 @@ EXEC
 		UNION ALL
 		SELECT 3, ''Tag Wiki''
 ')
+
+EXEC
+('
+	CREATE TABLE [' + @targetDB + '].dbo.PostHistoryTypes
+	(
+		Id int PRIMARY KEY,
+		Name varchar(40)
+	)
+	
+	INSERT INTO [' + @targetDB + '].dbo.PostHistoryTypes
+		SELECT 1, ''Initial Title''
+		UNION ALL
+		SELECT 2, ''Initial Body''
+		UNION ALL
+		SELECT 3, ''Initial Tags''
+		UNION ALL
+		SELECT 4, ''Edit Title''
+		UNION ALL
+		SELECT 5, ''Edit Body''
+		UNION ALL
+		SELECT 6, ''Edit Tags''
+		UNION ALL
+		SELECT 7, ''Rollback Title''
+		UNION ALL
+		SELECT 8, ''Rollback Body''
+		UNION ALL
+		SELECT 9, ''Rollback Tags''
+		UNION ALL
+		SELECT 10, ''Post Closed''
+		UNION ALL
+		SELECT 11, ''Post Reopened''
+		UNION ALL
+		SELECT 12, ''Post Deleted''
+		UNION ALL
+		SELECT 13, ''Post Undeleted''
+		UNION ALL
+		SELECT 14, ''Post Locked''
+		UNION ALL
+		SELECT 15, ''Post Unlocked''
+		UNION ALL
+		SELECT 16, ''Community Owned''
+		UNION ALL
+		SELECT 17, ''Post Migrated''
+		UNION ALL
+		SELECT 18, ''Question Merged''
+		UNION ALL
+		SELECT 19, ''Question Protected''
+		UNION ALL
+		SELECT 20, ''Question Unprotected''
+		UNION ALL
+		SELECT 21, ''Post Dissociated''
+		UNION ALL
+		SELECT 22, ''Question Unmerged''
+')
