@@ -50,3 +50,4 @@ Full list of all third party software used to build Data Explorer:
 - DotNetOpenAuth: http://james.newtonking.com/projects/json-net.aspx
 - YUI Compressor: http://developer.yahoo.com/yui/compressor/
 - Slick Grid: http://github.com/mleibman/SlickGrid
+- Simple Error Handler is derived off: http://code.google.com/p/elmah/
