@@ -122,3 +122,19 @@ union all select
 union all select
 13, ''InformModerator''
 ')
+
+EXEC
+('
+	CREATE TABLE [' + @targetDB + '].dbo.PostTypes
+	(
+		Id int PRIMARY KEY,
+		Name varchar(40)
+	)
+
+	INSERT INTO [' + @targetDB + '].dbo.PostTypes
+		SELECT 1, ''Question''
+		UNION ALL
+		SELECT 2, ''Answer''
+		UNION ALL
+		SELECT 3, ''Tag Wiki''
+')
