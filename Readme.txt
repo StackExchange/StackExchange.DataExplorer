@@ -8,6 +8,7 @@ Pre-reqs:
 
 - For back end changes:
 - Visual Studio 2010
+- .NET Framework 4.0
 - SQL Server Express or above
 - IIS7 and Url Rewrite 2.0 are required for odata endpoint support: http://www.iis.net/download/urlrewrite, if you do not require that support you can safely comment out the rewrite rule from web.config 
 - If you want to compile release make sure "java" is in your path, java is used to bundle the js files. 
@@ -27,7 +28,7 @@ The File layout
 
 Configuring the databases:
 
-- Run migrate.local.bat in the migration directory, then import some data about the sites from the Data/sites.sql script. It assumes the DB is called "DataExplorer", if you name it differently or have a named instance, you will have to edit the batch file. 
+- Run migrate.local.bat in the migration directory, then import some data about the sites from the SeedData/sites.sql script. It assumes the DB is called "DataExplorer", if you name it differently or have a named instance, you will have to edit the batch file. 
 - Import data into the Stack Overflow database (and any other databases you wish to query) alternatively if a DB exists you can simple run queries that do not depend on data like "SELECT 1"  
 
 
