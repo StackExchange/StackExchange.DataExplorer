@@ -1,4 +1,13 @@
-﻿namespace SimpleErrorHandler
+﻿/*
+ This file is derived off ELMAH:
+
+http://code.google.com/p/elmah/
+
+http://www.apache.org/licenses/LICENSE-2.0
+ 
+ */
+
+namespace SimpleErrorHandler
 {
     using System;
     using System.Web;

@@ -1,3 +1,12 @@
+/*
+ This file is derived off ELMAH:
+
+http://code.google.com/p/elmah/
+
+http://www.apache.org/licenses/LICENSE-2.0
+ 
+ */
+
 using System.Reflection;
 
 [assembly: AssemblyTitle("SimpleErrorHandler")]
