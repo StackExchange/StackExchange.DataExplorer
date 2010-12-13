@@ -46,6 +46,7 @@
         </span><span class="desc">most recent </span>
       </div>
 
+      <!--
       <div class="module odata">
         <span class="desc image">
           <a href="<%=site.ODataEndpoint%>" title="Open Data Protocol endpoint for <%=site.Name%>" alt="Open Data Protocol endpoint for <%=site.Name%>"><img src="/Content/images/icon-odatafeed-32x32.png" width="32" height="32"/></a>
@@ -54,6 +55,7 @@
           <a href="<%=site.ODataEndpoint%>" title="Open Data Protocol endpoint for <%=site.Name%>" alt="Open Data Protocol endpoint for <%=site.Name%>">OData</a>
         </span>
       </div>
+      -->
 
   </div>
 </asp:Content>
