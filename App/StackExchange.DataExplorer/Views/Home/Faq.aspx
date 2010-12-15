@@ -69,11 +69,11 @@ At the moment, admins have permission to feature interesting queries on <a href=
 The recent, featured and popular query lists only show saved queries. If you have a query you would like to share with the community be sure to save it. 
 </p>
 
-<!--
+
 <h3>Do you offer Open Data protocol endpoints to the Stack Exchange sites? </h3>
-<p> Yes, on the <a href="/">front page</a> there are links to the <a href="http://www.odata.org/">OData</a> endpoints.
+<p> Yes, there are links to the <a href="http://www.odata.org/">OData</a> endpoints as soon as you click through on the site.
 </p>
--->
+
 
 <h3>How frequently is Stack Exchange Data Explorer updated?</h3>
 <p>At the moment it is updated shortly after every Stack Exchange <a href="http://blog.stackoverflow.com/category/cc-wiki-dump/">Creative Commons Data Dump</a>.</p>

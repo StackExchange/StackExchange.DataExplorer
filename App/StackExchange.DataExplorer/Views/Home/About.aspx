@@ -19,7 +19,7 @@
        Have fun remixing and reusing; all we ask is for proper attribution.
     </p>
     <p>
-      We also offer <a href="http://www.odata.org/">OData</a> endpoints for all the Stack Sites. 
+      We also offer <a href="http://www.odata.org/">OData</a> endpoints for all the Stack Exchange Sites. 
     </p>
     </div>
 </asp:Content>

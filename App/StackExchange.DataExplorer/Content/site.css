@@ -1235,3 +1235,21 @@ a.odata {
   margin-right: 8px; 
   margin-top: 0px;  
 }
+
+a.cc-wiki-link 
+{
+    background-image: url(http://sstatic.net/stackoverflow/img/sprites.png?v=2);
+    background-repeat: no-repeat;
+    overflow: hidden;
+    background-position: 0px -70px;
+    height: 67px;
+    width: 50px;
+    display: inline-block;
+    text-indent: -999999em;
+    vertical-align: top;
+}
+
+#footer-sites
+{
+    width: 880px;    
+}
