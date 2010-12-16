@@ -55,7 +55,7 @@ namespace StackExchange.DataExplorer
             config.SetEntitySetAccessRule("*", EntitySetRights.AllRead);
             config.SetEntitySetPageSize("*", 50);
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
-            config.UseVerboseErrors = true;
+           // config.UseVerboseErrors = true;
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", 
