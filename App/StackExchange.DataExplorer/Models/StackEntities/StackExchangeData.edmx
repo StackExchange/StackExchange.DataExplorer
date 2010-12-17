@@ -170,7 +170,7 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" />
-          <Property Name="PostTypeId" Type="Int32" />
+          <Property Name="PostTypeId" Type="Byte" />
           <Property Name="AcceptedAnswerId" Type="Int32" />
           <Property Name="CreationDate" Type="DateTime" />
           <Property Name="Score" Type="Int32" />

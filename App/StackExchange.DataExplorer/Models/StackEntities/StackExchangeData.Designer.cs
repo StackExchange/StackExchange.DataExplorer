@@ -731,7 +731,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         /// </summary>
         [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=true)]
         [DataMemberAttribute()]
-        public Nullable<global::System.Int32> PostTypeId
+        public Nullable<global::System.Byte> PostTypeId
         {
             get
             {
@@ -746,8 +746,8 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 OnPostTypeIdChanged();
             }
         }
-        private Nullable<global::System.Int32> _PostTypeId;
-        partial void OnPostTypeIdChanging(Nullable<global::System.Int32> value);
+        private Nullable<global::System.Byte> _PostTypeId;
+        partial void OnPostTypeIdChanging(Nullable<global::System.Byte> value);
         partial void OnPostTypeIdChanged();
     
         /// <summary>
