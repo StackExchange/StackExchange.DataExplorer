@@ -4,9 +4,7 @@
     if (Request.IsAuthenticated)
     {
 %>
-        <a href="/users/<%=Current.User.Id%>">
-          <%:Current.User.Login%>
-        </a>
+        <a href="/users/<%=Current.User.Id%>"><%:Current.User.Login%></a>
         <span class="link-separator">|</span>
         <a href="/account/logout">logout</a>
 <%
