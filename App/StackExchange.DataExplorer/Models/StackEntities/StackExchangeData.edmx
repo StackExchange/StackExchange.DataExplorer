@@ -181,7 +181,7 @@
           <Property Name="LastEditDate" Type="DateTime" />
           <Property Name="LastActivityDate" Type="DateTime" />
           <Property Name="Title" Type="String" MaxLength="250" Unicode="true" FixedLength="false" />
-          <Property Name="TagNames" Type="String" MaxLength="150" Unicode="true" FixedLength="false" />
+          <Property Name="Tags" Type="String" MaxLength="150" Unicode="true" FixedLength="false" />
           <Property Name="AnswerCount" Type="Int32" />
           <Property Name="CommentCount" Type="Int32" />
           <Property Name="FavoriteCount" Type="Int32" />
@@ -326,7 +326,7 @@
             <ScalarProperty Name="LastEditDate" ColumnName="LastEditDate" />
             <ScalarProperty Name="LastActivityDate" ColumnName="LastActivityDate" />
             <ScalarProperty Name="Title" ColumnName="Title" />
-            <ScalarProperty Name="TagNames" ColumnName="Tags" />
+            <ScalarProperty Name="Tags" ColumnName="Tags" />
             <ScalarProperty Name="AnswerCount" ColumnName="AnswerCount" />
             <ScalarProperty Name="CommentCount" ColumnName="CommentCount" />
             <ScalarProperty Name="FavoriteCount" ColumnName="FavoriteCount" />

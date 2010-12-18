@@ -995,24 +995,24 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         /// </summary>
         [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=true)]
         [DataMemberAttribute()]
-        public global::System.String TagNames
+        public global::System.String Tags
         {
             get
             {
-                return _TagNames;
+                return _Tags;
             }
             set
             {
-                OnTagNamesChanging(value);
-                ReportPropertyChanging("TagNames");
-                _TagNames = StructuralObject.SetValidValue(value, true);
-                ReportPropertyChanged("TagNames");
-                OnTagNamesChanged();
+                OnTagsChanging(value);
+                ReportPropertyChanging("Tags");
+                _Tags = StructuralObject.SetValidValue(value, true);
+                ReportPropertyChanged("Tags");
+                OnTagsChanged();
             }
         }
-        private global::System.String _TagNames;
-        partial void OnTagNamesChanging(global::System.String value);
-        partial void OnTagNamesChanged();
+        private global::System.String _Tags;
+        partial void OnTagsChanging(global::System.String value);
+        partial void OnTagsChanged();
     
         /// <summary>
         /// No Metadata Documentation available.
