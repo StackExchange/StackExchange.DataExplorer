@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.Linq;
 using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
@@ -28,8 +29,8 @@ namespace StackExchange.DataExplorer.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        [Route(@"users/update/{id:\d+}", RoutePriority.High)]
-        public ActionResult Update(int id, User updatedUser)
+        [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
+        public ActionResult Edit(int id, User updatedUser)
         {
             User user = Current.DB.Users.First(u => u.Id == id);
 
@@ -40,14 +41,28 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (user.Id == updatedUser.Id && (updatedUser.Id == CurrentUser.Id || CurrentUser.IsAdmin))
             {
-                user.Login = HtmlUtilities.Safe(updatedUser.Login);
-                user.AboutMe = updatedUser.AboutMe;
-                user.DOB = updatedUser.DOB;
-                user.Email = HtmlUtilities.Safe(updatedUser.Email);
-                user.Website = HtmlUtilities.Safe(updatedUser.Website);
-                user.Location = HtmlUtilities.Safe(updatedUser.Location);
-                Current.DB.SubmitChanges();
-                return Redirect("/users/" + user.Id);
+                var violations = updatedUser.GetBusinessRuleViolations(ChangeAction.Update);
+
+                if (violations.Count == 0)
+                {
+                    user.Login = HtmlUtilities.Safe(updatedUser.Login);
+                    user.AboutMe = updatedUser.AboutMe;
+                    user.DOB = updatedUser.DOB;
+                    user.Email = HtmlUtilities.Safe(updatedUser.Email);
+                    user.Website = HtmlUtilities.Safe(updatedUser.Website);
+                    user.Location = HtmlUtilities.Safe(updatedUser.Location);
+
+                    Current.DB.SubmitChanges();
+
+                    return Redirect("/users/" + user.Id);
+                }
+                else
+                {
+                    foreach (var violation in violations)
+                        ModelState.AddModelError(violation.PropertyName, violation.ErrorMessage);
+
+                    return Edit(user.Id);
+                }
             }
             else
             {

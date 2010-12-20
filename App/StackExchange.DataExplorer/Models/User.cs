@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Linq;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text.RegularExpressions;
 using StackExchange.DataExplorer.Helpers;
 
@@ -34,29 +36,47 @@ namespace StackExchange.DataExplorer.Models
             }
         }
 
+        public bool IsValid(ChangeAction action)
+        {
+            return (GetBusinessRuleViolations(action).Count == 0);
+        }
+
+        partial void OnValidate(ChangeAction action)
+        {
+            if (!IsValid(action))
+                throw new ApplicationException("User object not in a valid state.");
+        }
+
+        public IList<BusinessRuleViolation> GetBusinessRuleViolations(ChangeAction action)
+        {
+            var violations = new List<BusinessRuleViolation>();
+
+            if (Login.IsNullOrEmpty())
+                violations.Add(new BusinessRuleViolation("Login name is required.", "Login"));
+
+            if ((action == ChangeAction.Insert) || (action == ChangeAction.Update))
+            {
+                if (Current.DB.Users.Any<User>(u => (u.Login == Login) && (u.Id != Id)))
+                    violations.Add(new BusinessRuleViolation("Login name must be unique.", "Login"));
+            }
+
+            return violations;
+        }
+
         public static User CreateUser(string login, string email, string openIdClaim)
         {
             var u = new User();
             u.CreationDate = DateTime.UtcNow;
 
-            if (login == null)
-            {
-                login = "";
-            }
-
-            login = CleanLogin(login);
+            login = CleanLogin(login ?? string.Empty);
 
             if (login.Length == 0)
             {
                 if (email != null)
-                {
                     login = CleanLogin(email.Split('@')[0]);
-                }
 
                 if (login.Length == 0)
-                {
                     login = "jon.doe";
-                }
             }
 
             u.Login = login;
@@ -67,28 +87,22 @@ namespace StackExchange.DataExplorer.Models
 
             while (!success)
             {
-                Current.DB.Users.InsertOnSubmit(u);
-                try
-                {
-                    Current.DB.SubmitChanges();
+                IList<BusinessRuleViolation> violations = u.GetBusinessRuleViolations(ChangeAction.Insert);
+
+                if (violations.Any(v => v.PropertyName == "Login"))
+                    u.Login = u.Login + (++retries);
+                else if (violations.Count > 0)
+                    throw new NotImplementedException("The User isn't valid, and we can't compensate for it right now.");
+                else
                     success = true;
-                }
-                catch (Exception e)
-                {
-                    var sqlException = e as SqlException;
-                    if (!(
-                             e is DuplicateKeyException ||
-                             // primary key violation
-                             (sqlException != null && sqlException.Number == 0xa43)
-                         )) throw;
-                    retries++;
-                    u.Login = login + retries;
-                }
             }
+
+            Current.DB.Users.InsertOnSubmit(u);
 
             var o = new UserOpenId();
             o.OpenIdClaim = openIdClaim;
             o.User = u;
+
             Current.DB.UserOpenIds.InsertOnSubmit(o);
             Current.DB.SubmitChanges();
             return u;
@@ -100,7 +114,6 @@ namespace StackExchange.DataExplorer.Models
             login = Regex.Replace(login, "[^\\.a-zA-Z0-9]", "");
             return login;
         }
-
 
         public string Gravatar(int width)
         {

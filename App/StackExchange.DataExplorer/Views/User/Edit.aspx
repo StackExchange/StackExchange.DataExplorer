@@ -16,7 +16,7 @@
         <td style="vertical-align: top;">
           <h2>
             Registered User</h2>
-          <form action="/users/update/<%=Model.Id%>" method="post">
+          <form action="/users/edit/<%=Model.Id%>" method="post">
           <%=Html.ValidationSummary(true)%>
           <table style="width: 600px;">
             <tbody>
