@@ -4,51 +4,46 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-  <title>
-    <asp:ContentPlaceHolder ID="TitleContent" runat="server" />
-  </title>
+  <title><asp:ContentPlaceHolder ID="TitleContent" runat="server" /></title>
   <% Site site = Current.Controller.Site; %>
-  <%
-      if (site != null)
-      {%>
-    <%=string.Format("<link rel=\"odata.service\" title=\"{0}\" href=\"{1}\"/>", site.Name,
-                                          site.ODataEndpoint)%>
-  <%
-      }%>
+  <% if (site != null) { %>
+    <%= string.Format("<link rel=\"odata.service\" title=\"{0}\" href=\"{1}\"/>", site.Name, site.ODataEndpoint) %>
+  <% } %>
   <%=AssetPackager.LinkCss("sitecss")%>
-
- 
-  
   <asp:ContentPlaceHolder ID="AdditionalStyles" runat="server" />
 </head>
 <body>
   <div class="page">
     <div id="header">
       <div id="topbar">
-        <div id="hlinks">
-          <%
-              Html.RenderPartial("LogInUserControl");%>
+        <span id="hlinks">
+          <% Html.RenderPartial("LogInUserControl"); %>
           <span class="link-separator">|</span> <a href="/about">about</a>
           <span class="link-separator">|</span> <a href="/faq">faq</a>
-        </div>
+        </span>
+        <% Site site = Current.Controller.Site; %>
+        <% if (site != null) { %>
+        <span id="search">
+            <form method="get" action="/<%= site.Name.ToLower() %>/queries">
+                <%= Html.TextBox("s", "search", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, onfocus = "if (this.value == 'search') this.value = ''", onblur = "if (this.value == '') this.value = 'search'"}) %>
+            </form>
+        </span>
+        <% } %>
       </div>
       <div class="clear">
       </div>
       <div id="title">
         <div id="hlogo">
           <a href="/" title="Stack Exchange Data Explorer">
-            <img src="/Content/images/see_logo.png" alt="Stack Exchange Data Explorer" width="318"
-              height="91" />
+            <img src="/Content/images/see_logo.png" alt="Stack Exchange Data Explorer" width="318" height="91" />
           </a>
         </div>
-        <%
-              Html.RenderPartial("Menu", ViewData["Menu"]);%>
+        <% Html.RenderPartial("Menu", ViewData["Menu"]);%>
       </div>
       <div class="clear">
       </div>
     </div>
-    <%
-              Html.RenderPartial("SubHeader", ViewData["Header"]);%>
+    <% Html.RenderPartial("SubHeader", ViewData["Header"]);%>
     <asp:ContentPlaceHolder ID="MainContent" runat="server" />
     <asp:ContentPlaceHolder ID="SecondaryContent" runat="server" />
   </div>
@@ -98,8 +93,6 @@
       </div>
     </div>
   </div>
-
   <%= Current.GoogleAnalytics %>
-
 </body>
 </html>

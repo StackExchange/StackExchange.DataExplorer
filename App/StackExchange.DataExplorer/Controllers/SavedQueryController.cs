@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
+
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
@@ -192,13 +194,18 @@ namespace StackExchange.DataExplorer.Controllers
 
 
         [Route("{sitename}/queries")]
-        public ActionResult Index(string sitename, string order_by, int? page, int? pagesize)
+        public ActionResult Index(string sitename, string order_by, string s, int? page, int? pagesize)
         {
-            Site site = Current.DB.Sites.First(s => s.Name.ToLower() == sitename);
+            Site site = Current.DB.Sites.First(si => si.Name.ToLower() == sitename);
+
+            QuerySearchCriteria searchCriteria = new QuerySearchCriteria(s);
 
             if (string.IsNullOrEmpty(order_by))
             {
-                order_by = "featured";
+                if (searchCriteria.IsValid)
+                    order_by = searchCriteria.IsFeatured ? "featured" : "recent";
+                else
+                    order_by = "featured";
             }
 
             Site = site;
@@ -253,20 +260,22 @@ namespace StackExchange.DataExplorer.Controllers
             if (order_by != "everything")
             {
                 query = from q in query
-                        join s in db.SavedQueries on q.Query.Id equals s.QueryId
-                        where s.IsFirst
-                        select new {q.Query, Saved = s};
+                        join sq in db.SavedQueries on q.Query.Id equals sq.QueryId
+                        where sq.IsFirst
+                        select new {q.Query, Saved = sq};
             }
 
             if (order_by == "featured")
-            {
                 query = query.Where(q => q.Saved.IsFeatured == true);
-            }
 
             if (order_by != "everything")
             {
                 query = query.Where(q => !(q.Saved.IsDeleted ?? false));
+
+                if (searchCriteria.IsValid)
+                    query = query.Where(q => (q.Saved.Title.Contains(searchCriteria.SearchTerm) || q.Saved.Description.Contains(searchCriteria.SearchTerm)));
             }
+
 
 
             IQueryable<QueryExecutionViewData> transformed = query.Select(q => new QueryExecutionViewData
