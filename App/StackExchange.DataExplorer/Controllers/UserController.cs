@@ -98,7 +98,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             DBContext db = Current.DB;
 
-            SetHeader(user.Login);
+            SetHeader(HtmlUtilities.Encode(user.Login));
             order_by = order_by ?? "saved";
 
             ViewData["UserQueryHeaders"] = new SubHeader
