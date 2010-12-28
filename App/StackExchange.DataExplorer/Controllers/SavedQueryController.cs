@@ -38,7 +38,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            SetHeader(savedQuery.Title);
+            SetHeader(HtmlUtilities.Encode(savedQuery.Title));
             int totalVotes =
                 db.Votes.Where(v => v.SavedQueryId == id && v.VoteTypeId == (int) VoteType.Favorite).Count();
 
