@@ -318,7 +318,7 @@ namespace StackExchange.DataExplorer.Controllers
 
 
             int totalQueries = transformed.Count();
-            ViewData["TotalQueries"] = string.Format("{0:n0}", totalQueries);
+            ViewData["TotalQueries"] = totalQueries;
             int currentPerPage = pagesize ?? 50;
             int currentPage = page ?? 1;
             string href = "/" + site.Name.ToLower() + "/queries?order_by=" + order_by;

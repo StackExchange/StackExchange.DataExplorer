@@ -13,8 +13,9 @@
         var site = ViewData["Site"] as Site;%>
 
     <div class="module">
-        <div class="summarycount al"><%=ViewData["TotalQueries"]%></div>
-        <p>queries</p>
+        <% int totalQueries = (int)ViewData["TotalQueries"]; %>
+        <div class="summarycount al"><%= string.Format("{0:n0}", totalQueries) %></div>
+        <p><%= (totalQueries == 1) ? "query" : "queries" %></p>
     </div>
 
     <%
