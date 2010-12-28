@@ -211,6 +211,12 @@ img {
     margin: 0 2px;
 }
 
+.search-highlight {
+    background-color: #FFFFCC;
+    color: #333333;
+    font-weight: bold;
+}
+
 #main
 { 
     padding-top: 20px;

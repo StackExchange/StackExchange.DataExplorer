@@ -1,7 +1,8 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<StackExchange.DataExplorer.ViewModel.QueryExecutionViewData>>" %>
 <%@ Import Namespace="StackExchange.DataExplorer" %>
-<%@ Import Namespace="StackExchange.DataExplorer.ViewModel" %>
+<%@ Import Namespace="StackExchange.DataExplorer.Helpers" %>
 <%@ Import Namespace="StackExchange.DataExplorer.Models" %>
+<%@ Import Namespace="StackExchange.DataExplorer.ViewModel" %>
 
 <asp:Content ID="aboutTitle" ContentPlaceHolderID="TitleContent" runat="server">
   Browse Queries - Stack Exchange Data Explorer
@@ -11,10 +12,24 @@
     <%
         var site = ViewData["Site"] as Site;%>
 
-     <div class="module">
+    <div class="module">
         <div class="summarycount al"><%=ViewData["TotalQueries"]%></div>
         <p>queries</p>
     </div>
+
+    <%
+        var qsc = ViewData["SearchCriteria"] as QuerySearchCriteria;
+        if (qsc.IsValid) { %>
+    <div class="module">
+        <p>
+            containing <span class="search-highlight"><%= HtmlUtilities.Encode(qsc.SearchTerm) %></span>
+            <% if (qsc.IsFeatured) { %>
+            <br />
+            in featured queries
+            <% } %>
+        </p>
+    </div>
+    <% } %>
 
 
     <div id="aboutSite" class="module">

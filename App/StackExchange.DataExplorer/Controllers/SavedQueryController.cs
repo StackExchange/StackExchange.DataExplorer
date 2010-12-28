@@ -194,11 +194,11 @@ namespace StackExchange.DataExplorer.Controllers
 
 
         [Route("{sitename}/queries")]
-        public ActionResult Index(string sitename, string order_by, string s, int? page, int? pagesize)
+        public ActionResult Index(string sitename, string order_by, string q, int? page, int? pagesize)
         {
             Site site = Current.DB.Sites.First(si => si.Name.ToLower() == sitename);
 
-            QuerySearchCriteria searchCriteria = new QuerySearchCriteria(s);
+            QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);
 
             if (string.IsNullOrEmpty(order_by))
             {
@@ -254,71 +254,52 @@ namespace StackExchange.DataExplorer.Controllers
 
             DBContext db = Current.DB;
 
-            var query = db.Queries.Select(q => new {Query = q, Saved = (SavedQuery) null});
+            var query = db.Queries.Select(qu => new {Query = qu, Saved = (SavedQuery) null});
 
 
             if (order_by != "everything")
             {
-                query = from q in query
-                        join sq in db.SavedQueries on q.Query.Id equals sq.QueryId
+                query = from qu in query
+                        join sq in db.SavedQueries on qu.Query.Id equals sq.QueryId
                         where sq.IsFirst
-                        select new {q.Query, Saved = sq};
+                        select new {qu.Query, Saved = sq};
             }
 
             if (order_by == "featured")
-                query = query.Where(q => q.Saved.IsFeatured == true);
+                query = query.Where(qu => qu.Saved.IsFeatured == true);
 
             if (order_by != "everything")
             {
-                query = query.Where(q => !(q.Saved.IsDeleted ?? false));
+                query = query.Where(qu => !(qu.Saved.IsDeleted ?? false));
 
                 if (searchCriteria.IsValid)
-                    query = query.Where(q => (q.Saved.Title.Contains(searchCriteria.SearchTerm) || q.Saved.Description.Contains(searchCriteria.SearchTerm)));
+                    query = query.Where(qu => (qu.Saved.Title.Contains(searchCriteria.SearchTerm) || qu.Saved.Description.Contains(searchCriteria.SearchTerm)));
             }
 
+            ViewData["SearchCriteria"] = searchCriteria;
 
 
-            IQueryable<QueryExecutionViewData> transformed = query.Select(q => new QueryExecutionViewData
-                                                                                   {
-                                                                                       Id =
-                                                                                           q.Saved == null
-                                                                                               ? q.Query.Id
-                                                                                               : q.Saved.Id,
-                                                                                       SQL = q.Query.QueryBody,
-                                                                                       Name =
-                                                                                           q.Saved == null
-                                                                                               ? q.Query.Name
-                                                                                               : q.Saved.Title,
-                                                                                       Description =
-                                                                                           q.Saved == null
-                                                                                               ? q.Query.Description
-                                                                                               : q.Saved.Description,
-                                                                                       SiteName = site.Name.ToLower(),
-                                                                                       LastRun =
-                                                                                           q.Query.FirstRun ??
-                                                                                           DateTime.Now,
-                                                                                       Views = q.Query.Views ?? 1,
-                                                                                       Creator =
-                                                                                           q.Saved == null
-                                                                                               ? q.Query.User
-                                                                                               : q.Saved.User,
-                                                                                       Featured =
-                                                                                           q.Saved == null
-                                                                                               ? false
-                                                                                               : q.Saved.IsFeatured ??
-                                                                                                 false,
-                                                                                       Skipped =
-                                                                                           q.Saved == null
-                                                                                               ? false
-                                                                                               : q.Saved.IsSkipped ??
-                                                                                                 false,
-                                                                                       FavoriteCount =
-                                                                                           q.Saved == null
-                                                                                               ? 0
-                                                                                               : q.Saved.FavoriteCount,
-                                                                                       UrlPrefix =
-                                                                                           q.Saved == null ? "q" : "s"
-                                                                                   });
+
+            IQueryable<QueryExecutionViewData> transformed =
+                query.Select
+                (
+                    qu =>
+                        new QueryExecutionViewData
+                        {
+                            Id = (qu.Saved == null) ? qu.Query.Id : qu.Saved.Id,
+                            SQL = qu.Query.QueryBody,
+                            Name = (qu.Saved == null) ? qu.Query.Name : qu.Saved.Title,
+                            Description = (qu.Saved == null) ? qu.Query.Description : qu.Saved.Description,
+                            SiteName = site.Name.ToLower(),
+                            LastRun = qu.Query.FirstRun ?? DateTime.Now,
+                            Views = qu.Query.Views ?? 1,
+                            Creator = (qu.Saved == null) ? qu.Query.User : qu.Saved.User,
+                            Featured = (qu.Saved == null) ? false : (qu.Saved.IsFeatured ?? false),
+                            Skipped = (qu.Saved == null) ? false : (qu.Saved.IsSkipped ?? false),
+                            FavoriteCount = (qu.Saved == null) ? 0 : qu.Saved.FavoriteCount,
+                            UrlPrefix = (qu.Saved == null) ? "q" : "s"
+                        }
+                );
 
             if (order_by == "popular")
             {
