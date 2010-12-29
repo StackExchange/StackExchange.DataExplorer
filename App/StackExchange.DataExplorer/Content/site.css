@@ -203,6 +203,10 @@ img {
   color:#0077CC;
 }
 
+#hlinks-content {
+    float: left;    
+}
+
 #hlinks a {
   font-weight:bold;
 }
@@ -389,6 +393,7 @@ div#title
     display:block;
     float:left;
     text-align:left;
+    margin-top: -20px;
 }
 
 #logindisplay

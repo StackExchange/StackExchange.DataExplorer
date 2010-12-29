@@ -26,19 +26,22 @@
     <div id="header">
       <div id="topbar">
         <div id="hlinks">
-          <%
-              Html.RenderPartial("LogInUserControl");%>
-          <span class="link-separator">|</span> <a href="/about">about</a>
-          <span class="link-separator">|</span> <a href="/faq">faq</a>
-        </span>
-        <% Site site = Current.Controller.Site; %>
-        <% if (site != null) { %>
-        <span id="search">
-            <form method="get" action="/<%= site.Name.ToLower() %>/queries">
-                <%= Html.TextBox("q", "search", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, onfocus = "if (this.value == 'search') this.value = ''", onblur = "if (this.value == '') this.value = 'search'"}) %>
-            </form>
-        </span>
-        <% } %>      </div>
+            <div id="hlinks-content">
+                <% Html.RenderPartial("LogInUserControl");%>
+                <span class="link-separator">|</span> <a href="/about">about</a>
+                <span class="link-separator">|</span> <a href="/faq">faq</a>
+            </div>
+            <% Site site = Current.Controller.Site; %>
+            <% if (site != null) { %>
+            <span id="search">
+                <form method="get" action="/<%= site.Name.ToLower() %>/queries">
+                    <%= Html.TextBox("q", "search", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, onfocus = "if (this.value == 'search') this.value = ''", onblur = "if (this.value == '') this.value = 'search'"}) %>
+                </form>
+            </span>
+            <div class="clear"></div>
+        <% } %>      
+        </div>
+      </div>
       <div class="clear">
       </div>
       <div id="title">
