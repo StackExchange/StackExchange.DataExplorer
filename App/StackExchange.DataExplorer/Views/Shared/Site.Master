@@ -4,12 +4,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-  <title><asp:ContentPlaceHolder ID="TitleContent" runat="server" /></title>
+  <title>
+    <asp:ContentPlaceHolder ID="TitleContent" runat="server" />
+  </title>
   <% Site site = Current.Controller.Site; %>
-  <% if (site != null) { %>
-    <%= string.Format("<link rel=\"odata.service\" title=\"{0}\" href=\"{1}\"/>", site.Name, site.ODataEndpoint) %>
-  <% } %>
+  <%
+      if (site != null)
+      {%>
+    <%=string.Format("<link rel=\"odata.service\" title=\"{0}\" href=\"{1}\"/>", site.Name,
+                                          site.ODataEndpoint)%>
+  <%
+      }%>
   <%=AssetPackager.LinkCss("sitecss")%>
+
+ 
+  
   <asp:ContentPlaceHolder ID="AdditionalStyles" runat="server" />
 </head>
 <body>
@@ -28,71 +37,58 @@
                 <%= Html.TextBox("q", "search", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, onfocus = "if (this.value == 'search') this.value = ''", onblur = "if (this.value == '') this.value = 'search'"}) %>
             </form>
         </span>
-        <% } %>
-      </div>
+        <% } %>      </div>
       <div class="clear">
       </div>
       <div id="title">
         <div id="hlogo">
           <a href="/" title="Stack Exchange Data Explorer">
-            <img src="/Content/images/see_logo.png" alt="Stack Exchange Data Explorer" width="318" height="91" />
+            <img src="/Content/images/see_logo.png" alt="Stack Exchange Data Explorer" width="318"
+              height="91" />
           </a>
         </div>
-        <% Html.RenderPartial("Menu", ViewData["Menu"]);%>
+        <%
+              Html.RenderPartial("Menu", ViewData["Menu"]);%>
       </div>
       <div class="clear">
       </div>
     </div>
-    <% Html.RenderPartial("SubHeader", ViewData["Header"]);%>
+    <%
+              Html.RenderPartial("SubHeader", ViewData["Header"]);%>
     <asp:ContentPlaceHolder ID="MainContent" runat="server" />
     <asp:ContentPlaceHolder ID="SecondaryContent" runat="server" />
   </div>
-  <div id="footer">
-    <div class="footerwrap">
-      <div id="footer-menu">
-        <a href="/about">about</a> | <a href="/faq">faq</a> | <a href="http://blog.stackoverflow.com/">
-          blog</a> | <a href="http://itc.conversationsnetwork.org/series/stackoverflow.html">
-            podcast</a> | <a href="/legal">legal</a> | <a href="http://ads.stackoverflow.com/a.aspx?ZoneID=0&amp;BannerID=323&amp;AdvertiserID=5&amp;CampaignID=194&amp;Task=Click&amp;SiteID=1">
-              advertising info</a> | <b><a href="mailto:team@stackoverflow.com">contact us</a></b>
-        | <b><a href="http://meta.stackoverflow.com">feedback always welcome</a></b>
-        <div id="footer-sites">
-           <span style="color:#FE7A15;font-size:140%">&#9632;</span>&nbsp;<a href="http://stackoverflow.com">stackoverflow.com</a>&nbsp;
-           <span style="color:#FE7A15;font-size:140%">&#9632;</span>&nbsp;<a href="http://stackapps.com">api/apps</a>&nbsp;
-           <span style="color:#FE7A15;font-size:140%">&#9632;</span>&nbsp;<a href="http://careers.stackoverflow.com">careers</a>&nbsp;
-           <span style="color:#E8272C;font-size:140%">&#9632;</span>&nbsp;<a href="http://serverfault.com">serverfault.com</a>&nbsp;
-           <span style="color:#00AFEF;font-size:140%">&#9632;</span>&nbsp;<a href="http://superuser.com">superuser.com</a>&nbsp;
-           <span style="color:#969696;font-size:140%">&#9632;</span>&nbsp;<a href="http://meta.stackoverflow.com">meta</a>&nbsp;
-           <span style="color:#46937D;font-size:140%">&#9632;</span>&nbsp;<a href="http://area51.stackexchange.com">area&nbsp;51</a>&nbsp;
-           <span style="color:#C0D0DC;font-size:140%">&#9632;</span>&nbsp;<a href="http://webapps.stackexchange.com">webapps</a>&nbsp;
-           <span style="color:#000000;font-size:140%">&#9632;</span>&nbsp;<a href="http://gaming.stackexchange.com">gaming</a>&nbsp;
-           <span style="color:#dd4814;font-size:140%">&#9632;</span>&nbsp;<a href="http://askubuntu.com">ubuntu</a>&nbsp;
-           <span style="color:#9ce4fe;font-size:140%">&#9632;</span>&nbsp;<a href="http://webmasters.stackexchange.com">webmasters</a>&nbsp;
-           <span style="color:#cf4d3f;font-size:140%">&#9632;</span>&nbsp;<a href="http://cooking.stackexchange.com">cooking</a>&nbsp;
-           <span style="color:#f4f28d;font-size:140%">&#9632;</span>&nbsp;<a href="http://gamedev.stackexchange.com">game development</a>&nbsp;
-           <span style="color:#0f3559;font-size:140%">&#9632;</span>&nbsp;<a href="http://math.stackexchange.com">math</a>&nbsp;
-           <span style="color:#f2f2f2;font-size:140%">&#9632;</span>&nbsp;<a href="http://photo.stackexchange.com">photography</a>&nbsp;
-           <span style="color:#037187;font-size:140%">&#9632;</span>&nbsp;<a href="http://stats.stackexchange.com">stats</a>&nbsp;
-           <span style="color:#f1e7cc;font-size:140%">&#9632;</span>&nbsp;<a href="http://tex.stackexchange.com">tex</a>&nbsp;
-           <span style="color:#e1cdae;font-size:140%">&#9632;</span>&nbsp;<a href="http://english.stackexchange.com">english</a>&nbsp;
-           <span style="color:#a2d9f6;font-size:140%">&#9632;</span>&nbsp;<a href="http://cstheory.stackexchange.com">theoretical cs</a>&nbsp;
-           <span style="color:#1b3e6c;font-size:140%">&#9632;</span>&nbsp;<a href="http://programmers.stackexchange.com">programmers</a>
+   <div id="footer">
+        <div class="footerwrap">
+            <div id="footer-menu">
+                <a href="/about">about</a> |
+                <a href="/faq">faq</a> |
+                <a href="http://blog.stackexchange.com">blog</a> |
+                <a href="http://data.stackexchange.com">data</a> |
+                <a href="http://itc.conversationsnetwork.org/series/stackoverflow.html">podcast</a> |
+                <a href="/legal">legal</a> |
+                <b><a href="mailto:team@stackoverflow.com">contact us</a></b>
+                <div id="footer-sites">
+                    <span style="color:#FE7A15;font-size:140%">■</span>&nbsp;<a href="http://stackoverflow.com">stackoverflow.com</a>&nbsp; <span style="color:#FE7A15;font-size:140%">■</span>&nbsp;<a href="http://stackapps.com">api/apps</a>&nbsp; <span style="color:#FE7A15;font-size:140%">■</span>&nbsp;<a href="http://careers.stackoverflow.com">careers</a>&nbsp; <span style="color:#E8272C;font-size:140%">■</span>&nbsp;<a href="http://serverfault.com">serverfault.com</a>&nbsp; <span style="color:#00AFEF;font-size:140%">■</span>&nbsp;<a href="http://superuser.com">superuser.com</a>&nbsp; <span style="color:#969696;font-size:140%">■</span>
+                    <a href="http://meta.stackoverflow.com">meta</a>&nbsp; <span style="color:#46937D;font-size:140%">■</span>&nbsp;<a href="http://area51.stackexchange.com">area&nbsp;51</a>&nbsp; <span style="color:#C0D0DC;font-size:140%">■</span>&nbsp;<a href="http://webapps.stackexchange.com">webapps</a>&nbsp; <span style="color:#000;font-size:140%">■</span>&nbsp;<a href="http://gaming.stackexchange.com">gaming</a>&nbsp; <span style="color:#dd4814;font-size:140%">■</span>&nbsp;<a href="http://askubuntu.com">ubuntu</a>&nbsp; <span style="color:#9ce4fe;font-size:140%">■</span>&nbsp;<a href="http://webmasters.stackexchange.com">webmasters</a>&nbsp; <span style="color:#cf4d3f;font-size:140%">■</span>&nbsp;<a href="http://cooking.stackexchange.com">cooking</a>&nbsp; <span style="color:#f4f28d;font-size:140%">■</span>&nbsp;<a href="http://gamedev.stackexchange.com">game development</a>&nbsp; <span style="color:#0f3559;font-size:140%">■</span>&nbsp;<a href="http://math.stackexchange.com">math</a>&nbsp; <span style="color:#f2f2f2;font-size:140%">■</span>&nbsp;<a href="http://photo.stackexchange.com">photography</a>&nbsp; <span style="color:#037187;font-size:140%">■</span>&nbsp;<a href="http://stats.stackexchange.com">stats</a>&nbsp; <span style="color:#f1e7cc;font-size:140%">■</span>&nbsp;<a href="http://tex.stackexchange.com">tex</a>&nbsp; <span style="color:#e1cdae;font-size:140%">■</span>&nbsp;<a href="http://english.stackexchange.com">english</a>&nbsp; <span style="color:#a2d9f6;font-size:140%">■</span>&nbsp;<a href="http://cstheory.stackexchange.com">theoretical cs</a>
+                </div>
+            </div>
+            <div id="footer-flair">
+                <a href="http://creativecommons.org/licenses/by-sa/2.5/" class="cc-wiki-link"></a>         
+            </div>
+            <div id="copyright">
+                site design / logo &copy; <%= DateTime.UtcNow.Year %> stack overflow internet services, inc; 
+                <a href="/questions-all">user contributions</a> licensed under <a href="http://creativecommons.org/licenses/by-sa/2.5/" rel="license">cc-wiki</a> with <a href="http://blog.stackoverflow.com/2009/06/attribution-required/" rel="license">attribution required</a>
+            </div>
         </div>
-      </div>
-      <div id="footer-flair">
-        <a href="http://creativecommons.org/licenses/by-sa/2.5/" alt="cc-wiki" title="Creative Commons: Attribution - Share Alike">
-        <img src="/Content/images/ccwiki.png" alt="cc-wiki" usemap="#footermap"
-          height="67" width="50"/>
-        </a>
-        <div id="svnrev"> </div>
-      </div>
-      <div id="copyright">
-        site design / logo is © 2010 stack overflow internet services, inc; user contributed content licensed
-        under <a href="http://creativecommons.org/licenses/by-sa/2.5/" rel="license">cc-wiki</a>
-        with <a href="http://blog.stackoverflow.com/2009/06/attribution-required/" rel="license">
-          attribution required</a>
-      </div>
     </div>
-  </div>
+    
+    <noscript>
+        <div id="noscript-warning">Data Explorer works best with JavaScript enabled</div>
+    </noscript>    
+
+
   <%= Current.GoogleAnalytics %>
+
 </body>
 </html>
