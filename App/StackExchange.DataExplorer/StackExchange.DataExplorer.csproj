@@ -118,6 +118,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\BusinessRuleViolation.cs" />
     <Compile Include="Helpers\Crc16.cs" />
     <Compile Include="Helpers\CsvResult.cs" />
     <Compile Include="Helpers\DataKeys.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Helpers\PageNumber.cs" />
     <Compile Include="Helpers\PageSizer.cs" />
     <Compile Include="Helpers\ParsedQuery.cs" />
+    <Compile Include="Helpers\QuerySearchCriteria.cs" />
     <Compile Include="Helpers\QueryViewTracker.cs" />
     <Compile Include="Helpers\QueryResults.cs" />
     <Compile Include="Helpers\RedirectPermanentResult.cs" />

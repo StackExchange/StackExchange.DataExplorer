@@ -186,8 +186,17 @@ img {
   float:right;
   height:30px;
   line-height:22px;
-  padding:3px 10px 0;
+  padding:4px 10px 0;
   width:auto;
+}
+
+#header #search {
+    float: right;
+    padding: 0 3px 0 20px;
+}
+
+#header #search #searchtext {
+    margin-top: 0px;
 }
 
 #header #topbar a:visited {
@@ -196,6 +205,16 @@ img {
 
 #hlinks a {
   font-weight:bold;
+}
+
+.link-separator {
+    margin: 0 2px;
+}
+
+.search-highlight {
+    background-color: #FFFFCC;
+    color: #333333;
+    font-weight: bold;
 }
 
 #main

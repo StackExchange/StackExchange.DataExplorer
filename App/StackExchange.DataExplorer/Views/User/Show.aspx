@@ -1,9 +1,10 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<StackExchange.DataExplorer.Models.User>" %>
 <%@ Import Namespace="StackExchange.DataExplorer" %>
+<%@ Import Namespace="StackExchange.DataExplorer.Helpers" %>
 <%@ Import Namespace="StackExchange.DataExplorer.ViewModel" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-   User <%=Model.Login%> - Stack Exchange Data Explorer
+   User <%= HtmlUtilities.Encode(Model.Login) %> - Stack Exchange Data Explorer
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="AdditionalStyles" runat="server">
@@ -46,7 +47,7 @@
                         <tr>
 
                             <td style="width:120px">login</td>
-                            <td style="width:230px" class="fn nickname"><b><%=Model.Login%></b></td>
+                            <td style="width:230px" class="fn nickname"><b><%= HtmlUtilities.Encode(Model.Login) %></b></td>
                         </tr>
                         <tr>
                             <td>member for</td>
@@ -75,7 +76,7 @@
                         <tr>
                             <td>website</td>
                             <td>
-                                <div class="no-overflow"><a href="http://<% =Model.Website%>" rel="me" class="url"><%=Model.Website%></a></div>                                
+                                <div class="no-overflow"><a href="http://<%= Model.Website %>" rel="me" class="url"><%= HtmlUtilities.Encode(Model.Website) %></a></div>                                
                             </td>
                         </tr>
                         <%
@@ -85,7 +86,7 @@
 
                             <td>location</td>
                             <td class="label adr">
-                                <%=Model.Location%>
+                                <%= HtmlUtilities.Encode(Model.Location) %>
                             </td>
                         </tr>
                         <tr>

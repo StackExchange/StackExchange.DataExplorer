@@ -8,27 +8,27 @@ var SqlParser = Editor.Parser = (function() {
     "abs", "acos", "adddate", "aes_encrypt", "aes_decrypt", "ascii",
     "asin", "atan", "atan2", "avg", "benchmark", "bin", "bit_and",
     "bit_count", "bit_length", "bit_or", "cast", "ceil", "ceiling",
-    "char_length", "character_length", "coalesce", "concat", "concat_ws",
+    "char_length", "character_length", "checksum_agg", "coalesce", "concat", "concat_ws",
     "connection_id", "conv", "convert", "cos", "cot", "count", "curdate",
     "current_date", "current_time", "current_timestamp", "current_user",
-    "curtime", "database", "date_add", "date_format", "date_sub",
-    "dayname", "dayofmonth", "dayofweek", "dayofyear", "decode", "degrees",
+    "curtime", "database", "dateadd", "datediff", "datename", "datepart",
+    "day", "dayofmonth", "dayofweek", "dayofyear", "decode", "degrees", "dense_rank",
     "des_encrypt", "des_decrypt", "elt", "encode", "encrypt", "exp",
     "export_set", "extract", "field", "find_in_set", "floor", "format",
-    "found_rows", "from_days", "from_unixtime", "get_lock", "greatest",
-    "group_unique_users", "hex", "ifnull", "inet_aton", "inet_ntoa", "instr",
+    "found_rows", "from_days", "from_unixtime", "get_lock", "getdate", "getutcdate", "greatest",
+    "group_unique_users", "grouping", "hex", "ifnull", "inet_aton", "inet_ntoa", "instr",
     "interval", "is_free_lock", "isnull", "last_insert_id", "lcase", "least",
     "left", "length", "ln", "load_file", "locate", "log", "log2", "log10",
     "lower", "lpad", "ltrim", "make_set", "master_pos_wait", "max", "md5",
-    "mid", "min", "mod", "monthname", "now", "nullif", "oct", "octet_length",
+    "mid", "min", "mod", "month", "now", "ntile", "nullif", "oct", "octet_length",
     "ord", "password", "period_add", "period_diff", "pi", "position",
-    "pow", "power", "quarter", "quote", "radians", "rand", "release_lock",
-    "repeat", "reverse", "right", "round", "rpad", "rtrim", "sec_to_time",
+    "pow", "power", "quarter", "quote", "radians", "rand", "rank", "release_lock",
+    "repeat", "reverse", "right", "round", "row_number", "rpad", "rtrim", "sec_to_time",
     "session_user", "sha", "sha1", "sign", "sin", "soundex", "space", "sqrt",
-    "std", "stddev", "strcmp", "subdate", "substring", "substring_index",
+    "std", "stdev", "stdevp", "strcmp", "subdate", "substring", "substring_index",
     "sum", "sysdate", "system_user", "tan", "time_format", "time_to_sec",
     "to_days", "trim", "ucase", "unique_users", "unix_timestamp", "upper",
-    "user", "version", "week", "weekday", "yearweek"
+    "user", "var", "varp", "version", "week", "weekday", "year", "yearweek"
   ]);
 
   var keywords = wordRegexp([
@@ -36,6 +36,7 @@ var SqlParser = Editor.Parser = (function() {
     "transaction", "select", "update", "insert", "delete", "create", "describe",
     "from", "into", "values", "where", "join", "inner", "left", "natural", "and",
     "or", "in", "not", "xor", "like", "using", "on", "order", "group", "by",
+    "case", "when", "then", "else", "end", "with", "rollup", "cube", "over", "partition",
     "asc", "desc", "limit", "offset", "union", "all", "as", "distinct", "set",
     "commit", "rollback", "replace", "view", "database", "separator", "if",
     "exists", "null", "truncate", "status", "show", "lock", "unique", "having"
@@ -47,7 +48,7 @@ var SqlParser = Editor.Parser = (function() {
     "int", "int1", "int2", "int3", "int4", "int8", "integer", "long", "longblob",
     "longtext", "mediumblob", "mediumint", "mediumtext", "middleint", "nchar",
     "numeric", "real", "set", "smallint", "text", "time", "timestamp", "tinyblob",
-    "tinyint", "tinytext", "varbinary", "varchar", "year", "string" // <- this is an SEDE hack
+    "tinyint", "tinytext", "varbinary", "varchar", "string" // <- this is an SEDE hack
   ]);
 
   var operators = wordRegexp([
