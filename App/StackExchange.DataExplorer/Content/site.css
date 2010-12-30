@@ -1044,6 +1044,18 @@ table#userList td {
   height: 45px;
 }
 
+table#userList .user .user-gravatar {
+    float: left;
+}
+
+table#userList .user .user-details {
+    float: left;
+    margin-left: 5px;
+    margin-top: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .fr  {
   float:right;
 }

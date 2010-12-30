@@ -2,8 +2,6 @@
 <%@ Import Namespace="StackExchange.DataExplorer.Helpers" %>
 
 <div class="user">
-  <%=Model.Gravatar(32)%>
-  <a href='/users/<%=Model.Id%>'><%= HtmlUtilities.Encode(Model.Login) %></a>
+    <div class="user-gravatar"><a href="/users/<%= Model.Id %>"><%= Model.Gravatar(32) %></a></div>
+    <div class="user-details"><a href="/users/<%= Model.Id %>"><%= HtmlUtilities.Encode(Model.Login) %></a></div>
 </div>
- 
-      

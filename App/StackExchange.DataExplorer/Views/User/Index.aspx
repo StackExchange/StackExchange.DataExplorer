@@ -6,24 +6,15 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="MainContent" runat="server">
   <table id="userList">
     <tbody>
-        <%
-            foreach (var row in Model.ToRows(7))
-            {%>
+        <% foreach (var row in Model.ToRows(7)) { %>
           <tr>
-            <%
-                foreach (User user in row)
-                {%> 
-                 <td><%
-                    Html.RenderPartial("User", user);%></td>
-            <%
-                }%>
+            <% foreach (User user in row) { %> 
+              <td><% Html.RenderPartial("User", user); %></td>
+            <% } %>
           </tr>
-        <%
-            }%>
+        <% } %>
     </tbody>
   </table>
 
-  <%
-            Html.RenderPartial("PageNumbers", ViewData["PageNumbers"]);%>
- 
-</asp:Content>
+  <% Html.RenderPartial("PageNumbers", ViewData["PageNumbers"]); %>
+ </asp:Content>
