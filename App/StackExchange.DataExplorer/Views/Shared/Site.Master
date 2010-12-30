@@ -38,8 +38,7 @@
                     <%= Html.TextBox("q", "search", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, onfocus = "if (this.value == 'search') this.value = ''", onblur = "if (this.value == '') this.value = 'search'"}) %>
                 </form>
             </span>
-            <div class="clear"></div>
-        <% } %>      
+            <% } %>      
         </div>
       </div>
       <div class="clear">
