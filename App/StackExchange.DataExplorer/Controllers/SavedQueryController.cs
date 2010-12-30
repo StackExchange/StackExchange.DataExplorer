@@ -319,10 +319,11 @@ namespace StackExchange.DataExplorer.Controllers
 
             int totalQueries = transformed.Count();
             ViewData["TotalQueries"] = totalQueries;
-            int currentPerPage = pagesize ?? 50;
-            int currentPage = page ?? 1;
+            int currentPerPage = Math.Max(pagesize ?? 50, 1);
+            int currentPage = Math.Max(page ?? 1, 1);
             string href = "/" + site.Name.ToLower() + "/queries?order_by=" + order_by;
-            ViewData["PageNumbers"] = new PageNumber(href + "&page=-1", (totalQueries/currentPerPage) + 1, currentPerPage,
+
+            ViewData["PageNumbers"] = new PageNumber(href + "&page=-1", Convert.ToInt32(Math.Ceiling(totalQueries / (decimal)currentPerPage)), currentPerPage,
                                                      currentPage - 1, "pager");
 
             ViewData["PageSizer"] = new PageSizer(href + "&pagesize=-1", currentPage, currentPerPage, totalQueries,

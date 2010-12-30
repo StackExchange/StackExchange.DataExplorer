@@ -14,15 +14,15 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("users")]
         public ActionResult Index(int? page)
         {
-            int currentPage = page ?? 1;
+            int currentPage = Math.Max(page ?? 1, 1);
 
             SetHeader("Users");
             SelectMenuItem("Users");
 
-            ViewData["PageNumbers"] = new PageNumber("/users?page=-1", (Current.DB.Users.Count()/35) + 1, 50,
+            ViewData["PageNumbers"] = new PageNumber("/users?page=-1", Convert.ToInt32(Math.Ceiling(Current.DB.Users.Count() / 35m)), 50,
                                                      currentPage - 1, "pager fr");
 
-            PagedList<User> data = Current.DB.Users.OrderBy(u => u.Login).ToPagedList(page ?? 1, 35);
+            PagedList<User> data = Current.DB.Users.OrderBy(u => u.Login).ToPagedList(currentPage, 35);
             return View(data);
         }
 
