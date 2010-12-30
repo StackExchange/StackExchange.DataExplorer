@@ -323,6 +323,9 @@ namespace StackExchange.DataExplorer.Controllers
             int currentPage = Math.Max(page ?? 1, 1);
             string href = "/" + site.Name.ToLower() + "/queries?order_by=" + order_by;
 
+            if (searchCriteria.IsValid)
+                href += "&q=" + searchCriteria.RawInput;
+
             ViewData["PageNumbers"] = new PageNumber(href + "&page=-1", Convert.ToInt32(Math.Ceiling(totalQueries / (decimal)currentPerPage)), currentPerPage,
                                                      currentPage - 1, "pager");
 
