@@ -79,6 +79,8 @@ namespace StackExchange.DataExplorer.Controllers
             if (user.Id == CurrentUser.Id || CurrentUser.IsAdmin)
             {
                 SetHeader(user.Login + " - Edit");
+                SelectMenuItem("Users");
+
                 return View(user);
             }
             else
@@ -99,6 +101,8 @@ namespace StackExchange.DataExplorer.Controllers
             DBContext db = Current.DB;
 
             SetHeader(HtmlUtilities.Encode(user.Login));
+            SelectMenuItem("Users");
+
             order_by = order_by ?? "saved";
 
             ViewData["UserQueryHeaders"] = new SubHeader
