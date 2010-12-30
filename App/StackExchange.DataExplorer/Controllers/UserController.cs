@@ -78,7 +78,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (user.Id == CurrentUser.Id || CurrentUser.IsAdmin)
             {
-                SetHeader(user.Login + " - Edit");
+                SetHeader(HtmlUtilities.Encode(user.Login) + " - Edit");
                 SelectMenuItem("Users");
 
                 return View(user);
