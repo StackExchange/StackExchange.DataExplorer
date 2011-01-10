@@ -32,13 +32,13 @@ var SqlParser = Editor.Parser = (function() {
   ]);
 
   var keywords = wordRegexp([
-    "alter", "grant", "revoke", "primary", "key", "table", "start", "top",
-    "transaction", "select", "update", "insert", "delete", "create", "describe",
-    "from", "into", "values", "where", "join", "inner", "left", "natural", "and",
+    "alter", "grant", "revoke", "primary", "key", "clustered", "nonclustered", "table", "start", "top",
+    "begin", "tran", "transaction", "select", "update", "insert", "delete", "merge", "create", "describe", "declare",
+    "from", "into", "values", "where", "join", "inner", "left", "outer", "natural", "cross", "apply", "except", "and",
     "or", "in", "not", "xor", "like", "using", "on", "order", "group", "by",
     "case", "when", "then", "else", "end", "with", "rollup", "cube", "over", "partition",
     "asc", "desc", "limit", "offset", "union", "all", "as", "distinct", "set",
-    "commit", "rollback", "replace", "view", "database", "separator", "if",
+    "commit", "rollback", "replace", "view", "database", "separator", "if", "for", "while",
     "exists", "null", "truncate", "status", "show", "lock", "unique", "having"
   ]);
 
@@ -48,7 +48,7 @@ var SqlParser = Editor.Parser = (function() {
     "int", "int1", "int2", "int3", "int4", "int8", "integer", "long", "longblob",
     "longtext", "mediumblob", "mediumint", "mediumtext", "middleint", "nchar",
     "numeric", "real", "set", "smallint", "text", "time", "timestamp", "tinyblob",
-    "tinyint", "tinytext", "varbinary", "varchar", "string" // <- this is an SEDE hack
+    "tinyint", "tinytext", "varbinary", "varchar", "nvarchar", "xml", "string" // <- this is an SEDE hack
   ]);
 
   var operators = wordRegexp([
