@@ -143,7 +143,7 @@
 
     <div class="clear"></div>
 
-    <p style="display:none" class="loading"><img src="http://sstatic.net/stackoverflow/img/ajax-loader.gif"/><span>Hold tight while we fetch your results</span></p>
+    <p style="display:none" class="loading"><img src="http://sstatic.net/img/progress-dots.gif"/><span>Hold tight while we fetch your results</span></p>
 
     <div id="queryResults" style="display:none">
       <div id="resultTabs" class="subheader">

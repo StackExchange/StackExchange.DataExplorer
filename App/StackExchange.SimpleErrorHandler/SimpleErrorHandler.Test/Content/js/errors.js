@@ -1,8 +1,8 @@
 ﻿/// <reference path="third-party/jquery-1.3.2-vsdoc2.js"/>
 
 $(function() {
-    
-    var loader = '<img class="ajax-loader" src="http://sstatic.net/so/img/ajax-loader.gif" title="loading..." alt="loading..." width="11" height="11" />';
+
+    var loader = '<img class="ajax-loader" src="http://sstatic.net/img/progress-dots.gif" title="loading..." alt="loading..." width="11" height="11" />';
     var removeLoader = function() { $('.ajax-loader').fadeOut('fast'); };
     
     // update title on main error log page to show count
