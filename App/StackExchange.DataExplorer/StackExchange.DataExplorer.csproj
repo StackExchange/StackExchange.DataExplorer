@@ -162,6 +162,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\QueryRunner.cs" />
     <Content Include="Content\Img\openid\openid-logos.png" />
+    <Content Include="Content\slickgrid\images\sort-asc.gif" />
+    <Content Include="Content\slickgrid\images\sort-desc.gif" />
     <Content Include="Scripts\openid-jquery.js" />
     <Content Include="robots.txt" />
     <Compile Include="ViewModel\QueryExecutionViewData.cs" />
@@ -227,6 +229,7 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\jquery-1.4.2.js" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
+    <Content Include="Scripts\slick.model.js" />
     <Content Include="Views\Admin\WhiteList.aspx" />
     <Content Include="Views\Admin\Index.aspx" />
     <Content Include="Views\Shared\PageNotFound.aspx" />

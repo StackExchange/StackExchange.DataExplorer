@@ -140,6 +140,7 @@ function gotResults(results) {
             cssClass: (results.resultSets[0].columns[c].type == "Number" ? "number" : "text"),
             id: results.resultSets[0].columns[c].name,
             name: results.resultSets[0].columns[c].name,
+            sortable: true,
             field: c
         });
         maxWidths.push(results.resultSets[0].columns[c].name.length);
@@ -150,7 +151,7 @@ function gotResults(results) {
     var hasTags = false;
 
     for (var i = 0; i < results.resultSets[0].rows.length; i++) {
-        var row = {};
+        var row = {id: i};
         var data = null;
         for (var c = 0; c < results.resultSets[0].columns.length; c++) {
             var col = results.resultSets[0].rows[i][c];
@@ -193,8 +194,21 @@ function gotResults(results) {
         rowHeight: hasTags ? 35 : 25
     };
 
-    var grid = new Slick.Grid($("#grid"), rows, model, options);
+    var dataView = new Slick.Data.DataView();
+    dataView.beginUpdate();
+    dataView.setItems(rows);
+    dataView.endUpdate();
+
+    var grid = new Slick.Grid($("#grid"), dataView.rows, model, options);
     grid.onColumnsResized = function () { $("#grid").resize() };
+    grid.onSort = function (col, asc) {
+        dataView.fastSort(col.field, asc);
+    };
+
+    dataView.onRowsChanged.subscribe(function (rows) {
+        grid.removeRows(rows);
+        grid.render();
+    });
 
     scrollToResults();
 
