@@ -5,6 +5,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using StackExchange.DataExplorer.Models;
+using System.Collections.Concurrent;
+using System.Web;
+using System.Web.Caching;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -220,6 +223,8 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
+        public static ConcurrentDictionary<string, int> throttle = new ConcurrentDictionary<string, int>();
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security", 
             "CA2100:Review SQL queries for security vulnerabilities", 
@@ -227,6 +232,37 @@ namespace StackExchange.DataExplorer.Helpers
         public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
         {
             DBContext db = Current.DB;
+
+            var remoteIP = OData.GetRemoteIP(); 
+            var key = "total-" + remoteIP;
+            var currentCount = (int?)HttpRuntime.Cache.Get(key) ?? 0;
+            currentCount++;
+            HttpRuntime.Cache.Add
+                   (key,
+                   currentCount,
+                   null,
+                   System.Web.Caching.Cache.NoAbsoluteExpiration,
+                   new TimeSpan(1,0,0),
+                   System.Web.Caching.CacheItemPriority.Default,
+                   null);
+
+            if (currentCount > 130)
+            {
+                // clearly a robot, auto black list 
+                var b = new BlackList { CreationDate = DateTime.UtcNow, IPAddress = remoteIP };
+            }
+
+            if (currentCount > 100)
+            {
+                throw new Exception("You can not run any new queries for another hour, you have exceeded your limit!");
+            }
+
+            if (db.ExecuteQuery<int>("select count(*) from BlackList where IPAddress = {0}", remoteIP).First() > 0)
+            {
+                System.Threading.Thread.Sleep(2000);
+                throw new Exception("You have been blacklisted due to abuse!");
+            }
+
             var results = new QueryResults();
 
             results.Url = site.Url;
