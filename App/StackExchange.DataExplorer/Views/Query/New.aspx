@@ -59,8 +59,10 @@
               <h3>Enter Parameters</h3>
             </div>
             <p id="resultsToText">
-              <input type="checkbox" name="resultsToText" value="true"/> 
+              <input type="checkbox" name="resultsToText" value="true"/>
               <label>Results to Text</label>
+              <input type="checkbox" name="showExecutionPlan" value="true"/> 
+              <label>Include execution plan</label>
               <% if (AppSettings.AllowRunOnAllDbsOption) { %>
                   &nbsp;&nbsp;&nbsp;
                   <input type="checkbox" name="allDbs" value="true"/> 
@@ -150,12 +152,16 @@
         <div class="miniTabs">
           <a href="#grid" class="youarehere">Results</a>
           <a href="#messages">Messages</a>
+          <a href="#executionPlan">Execution Plan</a>
         </div>
        </div>
       <div id="grid"></div> 
       <div id="messages" style="display:none; ">
         <pre><code></code></pre>
-      </div> 
+      </div>
+      <div id="executionPlan" style="display:none;">
+        <pre><code></code></pre>
+      </div>
      
       <div id="gridStats" class= "ui-widget-header">
         <span class="duration"></span>

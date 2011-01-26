@@ -120,6 +120,14 @@ function gotResults(results) {
 
     $("#gridStats .duration").text("Duration: " + results.executionTime + "ms");
 
+    var executionPlans = "";
+    if (results.executionPlans) {
+        for (var i = 0; i < results.executionPlans.length; i++) {
+            executionPlans += results.executionPlans[i] + "\r\n";
+        }
+    }
+    $("#executionPlan pre code").text(executionPlans);
+
     if (results.textOnly || results.resultSets.length == 0) {
         $("#resultTabs").hide();
         $("#messages").show();

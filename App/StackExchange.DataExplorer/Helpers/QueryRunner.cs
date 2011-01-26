@@ -225,11 +225,16 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static ConcurrentDictionary<string, int> throttle = new ConcurrentDictionary<string, int>();
 
+        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
+        {
+            return ExecuteNonCached(parsedQuery, site, user);
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security", 
             "CA2100:Review SQL queries for security vulnerabilities", 
             Justification = "What else can I do, we are allowing users to run sql.")]
-        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
+        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
         {
             DBContext db = Current.DB;
 
@@ -288,16 +293,22 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     cnn.InfoMessage += infoHandler;
 
+                    if (IncludeExecutionPlan)
+                    {
+                        using (var command = new SqlCommand("SET STATISTICS XML ON", cnn))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                    }
+
                     foreach (string batch in parsedQuery.ExecutionSqlBatches)
                     {
                         using (var command = new SqlCommand(batch, cnn))
                         {
                             command.CommandTimeout = QUERY_TIMEOUT;
-                            PopulateResults(results, command, messages);
+                            PopulateResults(results, command, messages, IncludeExecutionPlan);
                         }
-                        
                     }
-                
                 }
                 finally
                 {
@@ -353,117 +364,163 @@ namespace StackExchange.DataExplorer.Helpers
             return results;
         }
 
+        /// <summary>
+        /// Executes an SQL query and populates a given <see cref="QueryResults" /> instance with the results.
+        /// </summary>
+        /// <param name="results"><see cref="QueryResults" /> instance to populate with results.</param>
+        /// <param name="command">SQL command to execute.</param>
+        /// <param name="messages"><see cref="StringBuilder" /> instance to which to append messages.</param>
         private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages)
         {
+            PopulateResults(results, command, messages, false);
+        }
+
+        /// <summary>
+        /// Executes an SQL query and populates a given <see cref="QueryResults" /> instance with the results.
+        /// </summary>
+        /// <param name="results"><see cref="QueryResults" /> instance to populate with results.</param>
+        /// <param name="command">SQL command to execute.</param>
+        /// <param name="messages"><see cref="StringBuilder" /> instance to which to append messages.</param>
+        /// <param name="ExecutionPlansIncluded">If true indciates that the query execution plans are expected to be contained
+        /// in the results sets; otherwise, false.</param>
+        private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages, bool ExecutionPlansIncluded)
+        {
+            // TODO: Refactor this method
             using (SqlDataReader reader = command.ExecuteReader())
             {
+                int x = 0;
                 do
                 {
-                    if (reader.FieldCount == 0)
+                    // with STATISTICS XML ON every other result set is the execution plan for the previous result set.
+                    if (ExecutionPlansIncluded && (x % 2 == 1))
                     {
+                        if (reader.Read())
+                        {
+                            results.ExecutionPlans.Add(reader[0].ToString());
+                        }
+                    }
+                    else
+                    {
+                        if (reader.FieldCount == 0)
+                        {
+                            if (reader.RecordsAffected >= 0)
+                            {
+                                messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
+                            }
+                            continue;
+                        }
+
+                        var resultSet = new ResultSet();
+                        resultSet.MessagePosition = messages.Length;
+                        results.ResultSets.Add(resultSet);
+
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            var columnInfo = new ResultColumnInfo();
+                            columnInfo.Name = reader.GetName(i);
+                            ResultColumnType colType;
+                            if (ColumnTypeMap.TryGetValue(reader.GetFieldType(i), out colType))
+                            {
+                                columnInfo.Type = colType;
+                            }
+
+                            resultSet.Columns.Add(columnInfo);
+                        }
+
+                        int currentRow = 0;
+                        while (reader.Read())
+                        {
+                            if (currentRow++ >= MAX_RESULTS)
+                            {
+                                results.Truncated = true;
+                                results.MaxResults = MAX_RESULTS;
+                                break;
+                            }
+                            var row = new List<object>();
+                            resultSet.Rows.Add(row);
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                object col = reader.GetValue(i);
+                                if (col is DateTime)
+                                {
+                                    var date = (DateTime)col;
+                                    col = date.ToString("yyyy-MM-dd H:mm:ss");
+                                }
+                                row.Add(col);
+                            }
+                        }
+                        if (results.Truncated)
+                        {
+                            // next result would force ado.net to fast forward
+                            //  through the result set, which is way too slow
+                            break;
+                        }
+
                         if (reader.RecordsAffected >= 0)
                         {
                             messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
                         }
-                        continue;
+
+                        messages.AppendFormat("({0} row(s) affected)\n\n", resultSet.Rows.Count);
                     }
-
-                    var resultSet = new ResultSet();
-                    resultSet.MessagePosition = messages.Length;
-                    results.ResultSets.Add(resultSet);
-
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        var columnInfo = new ResultColumnInfo();
-                        columnInfo.Name = reader.GetName(i);
-                        ResultColumnType colType;
-                        if (ColumnTypeMap.TryGetValue(reader.GetFieldType(i), out colType))
-                        {
-                            columnInfo.Type = colType;
-                        }
-
-                        resultSet.Columns.Add(columnInfo);
-                    }
-
-                    int currentRow = 0;
-                    while (reader.Read())
-                    {
-                        if (currentRow++ >= MAX_RESULTS)
-                        {
-                            results.Truncated = true;
-                            results.MaxResults = MAX_RESULTS;
-                            break;
-                        }
-                        var row = new List<object>();
-                        resultSet.Rows.Add(row);
-
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            object col = reader.GetValue(i);
-                            if (col is DateTime)
-                            {
-                                var date = (DateTime) col;
-                                col = date.ToString("yyyy-MM-dd H:mm:ss");
-                            }
-                            row.Add(col);
-                        }
-                    }
-                    if (results.Truncated)
-                    {
-                        // next result would force ado.net to fast forward
-                        //  through the result set, which is way too slow
-                        break;
-                    }
-
-                    if (reader.RecordsAffected >= 0)
-                    {
-                        messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
-                    }
-
-                    messages.AppendFormat("({0} row(s) affected)\n\n", resultSet.Rows.Count);
+                    x++;
                 } while (reader.NextResult());
                 command.Cancel();
             }
         }
 
-        public static string GetJson(ParsedQuery parsedQuery, Site site, User user)
+        public static string GetJson(ParsedQuery parsedQuery, Site site, User CurrentUser)
+        {
+            return GetJson(parsedQuery, site, CurrentUser, false);
+        }
+
+        public static string GetJson(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
         {
             string json = null;
             DBContext db = Current.DB;
 
-            json = GetCachedResults(parsedQuery, site);
-            if (json != null)
+            // Execution plans are not saved in the cache
+            if (!IncludeExecutionPlan)
             {
-                // update the query if its not anon
-                if (!user.IsAnonymous)
+                json = GetCachedResults(parsedQuery, site);
+                if (json != null)
                 {
-                    Query query = db.Queries
-                        .Where(q => q.QueryHash == parsedQuery.Hash)
-                        .FirstOrDefault();
-                    if (query != null)
+                    // update the query if its not anon
+                    if (!user.IsAnonymous)
                     {
-                        query.Description = parsedQuery.Description;
-                        query.Name = parsedQuery.Name;
-                        query.QueryBody = parsedQuery.RawSql;
-                        db.SubmitChanges();
+                        Query query = db.Queries
+                            .Where(q => q.QueryHash == parsedQuery.Hash)
+                            .FirstOrDefault();
+                        if (query != null)
+                        {
+                            query.Description = parsedQuery.Description;
+                            query.Name = parsedQuery.Name;
+                            query.QueryBody = parsedQuery.RawSql;
+                            db.SubmitChanges();
+                        }
                     }
+                    return json;
                 }
-                return json;
             }
 
-            QueryResults results = ExecuteNonCached(parsedQuery, site, user);
+            QueryResults results = ExecuteNonCached(parsedQuery, site, user, IncludeExecutionPlan);
 
             // well there is an annoying XSS condition here 
-            json = results.ToJson().Replace("/","\\/");
-            var cache = new CachedResult
-                            {
-                                QueryHash = parsedQuery.ExecutionHash,
-                                SiteId = site.Id,
-                                Results = json,
-                                CreationDate = DateTime.UtcNow
-                            };
+            json =  results.ToJson().Replace("/","\\/");
 
-            db.CachedResults.InsertOnSubmit(cache);
+            // Dont include execution plans in the cache - they are large and usually not needed
+            if (!IncludeExecutionPlan)
+            {
+                var cache = new CachedResult
+                {
+                    QueryHash = parsedQuery.ExecutionHash,
+                    SiteId = site.Id,
+                    Results = json,
+                    CreationDate = DateTime.UtcNow
+                };
+                db.CachedResults.InsertOnSubmit(cache);
+            }
             db.SubmitChanges();
 
             return json;

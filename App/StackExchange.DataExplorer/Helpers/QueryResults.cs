@@ -61,11 +61,17 @@ namespace StackExchange.DataExplorer.Helpers
         public QueryResults()
         {
             ResultSets = new List<ResultSet>();
+            this.ExecutionPlans = new List<string>();
             FirstRun = DateTime.UtcNow.ToString("MMM %d yyyy");
             Messages = "";
         }
 
         public List<ResultSet> ResultSets { get; set; }
+
+        /// <summary>
+        /// Gets and sets a list of query execution plans associated with the query results.
+        /// </summary>
+        public List<string> ExecutionPlans { get; set; }
 
         public bool MultiSite { get; set; }
         public bool ExcludeMetas { get; set; }

@@ -13,7 +13,7 @@ namespace StackExchange.DataExplorer.Controllers
     {
         [HttpPost]
         [Route("query/{siteId}")]
-        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs, string excludeMetas)
+        public ActionResult Execute(string sql, int siteId, string resultsToText, string showExecutionPlan, int? savedQueryId, string allDBs, string excludeMetas)
         {
             Site site = Current.DB.Sites.Where(s => s.Id == siteId).First();
             ActionResult rval;
@@ -45,7 +45,7 @@ namespace StackExchange.DataExplorer.Controllers
                 }
                 else
                 {
-                    json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
+                    json = QueryRunner.GetJson(parsedQuery, site, CurrentUser, showExecutionPlan == "true");
                     if (resultsToText == "true")
                     {
                         json = QueryResults.FromJson(json).ToTextResults().ToJson();
