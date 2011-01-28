@@ -5,6 +5,7 @@
 	padding: 2px;
 	border: 1px solid black;
 	font-size: 11px;
+	line-height: normal;
 }
 .qp-label
 {
@@ -27,6 +28,7 @@ div[class|='qp-icon']
 	background-color: #FFFFEE;
 	padding: 2px;
 	font-family: Sans-Serif;
+	text-align: left;
 }
 .qp-tt table
 {
@@ -35,7 +37,12 @@ div[class|='qp-icon']
 	margin-top: 10px;
 	margin-bottom: 10px;
 	width: 100%;
+}
+.qp-tt td, .qp-tt th
+{
 	font-size: 11px;
+	border-bottom: solid 1px Black;
+	padding: 1px;
 }
 .qp-tt td
 {
@@ -45,10 +52,6 @@ div[class|='qp-icon']
 .qp-tt th
 {
 	text-align: left;
-}
-.qp-tt td, .qp-tt th
-{
-	border-bottom: solid 1px Black;
 }
 .qp-bold, .qp-tt-header
 {
@@ -162,6 +165,7 @@ div.qp-node:hover .qp-tt
 .qp-td
 {
 	display: table-cell;
+	padding-left: 15px;
 }
 /* TODO: Make qp specific */
 li
