@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using StackExchange.DataExplorer.Models;
-using System.Collections.Concurrent;
 using System.Web;
-using System.Web.Caching;
+using StackExchange.DataExplorer.Models;
+using System.Xml;
+using System.Xml.Xsl;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -396,7 +397,7 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         if (reader.Read())
                         {
-                            results.ExecutionPlans.Add(reader[0].ToString());
+                            results.ExecutionPlans.Add(TransformPlan(reader[0].ToString()));
                         }
                     }
                     else
@@ -468,6 +469,32 @@ namespace StackExchange.DataExplorer.Helpers
                 } while (reader.NextResult());
                 command.Cancel();
             }
+        }
+
+        /// <summary>
+        /// Transforms an XSLT execution plan into a HTML representation.
+        /// </summary>
+        /// <param name="plan">XML query plan as a string</param>
+        /// <returns>HTML query plan as a string</returns>
+        private static string TransformPlan(string plan)
+        {
+            if (string.IsNullOrEmpty(plan))
+            {
+                return null;
+            }
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(plan);
+
+            XslCompiledTransform t = new XslCompiledTransform();
+            t.Load(@"C:\Users\Justin\Projects\SEDE\src\main\App\StackExchange.DataExplorer\Content\qp\qp.xslt");
+
+            StringBuilder returnValue = new StringBuilder();
+            using (XmlWriter writer = XmlWriter.Create(returnValue, t.OutputSettings))
+            {
+                t.Transform(doc, writer);
+            }
+            return returnValue.ToString();
         }
 
         public static string GetJson(ParsedQuery parsedQuery, Site site, User CurrentUser)

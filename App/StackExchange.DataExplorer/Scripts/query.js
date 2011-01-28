@@ -126,7 +126,8 @@ function gotResults(results) {
             executionPlans += results.executionPlans[i] + "\r\n";
         }
     }
-    $("#executionPlan pre code").text(executionPlans);
+    $("#executionPlan > ul").html(executionPlans);
+    drawQueryPlanLines();
 
     if (results.textOnly || results.resultSets.length == 0) {
         $("#resultTabs").hide();
@@ -224,8 +225,11 @@ function gotResults(results) {
     $("#grid").resize();
 }
 
-function executeQuery(sql) {
+function drawQueryPlanLines() {
+    qp_drawLines($("#qp-canvas"), $("#executionPlan > ul"));
+}
 
+function executeQuery(sql) {
     $("#permalinks, #queryResults, #queryErrorBox").hide();
 
     if (!ensureAllParamsEntered(sql)) {

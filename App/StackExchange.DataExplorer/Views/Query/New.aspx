@@ -152,15 +152,16 @@
         <div class="miniTabs">
           <a href="#grid" class="youarehere">Results</a>
           <a href="#messages">Messages</a>
-          <a href="#executionPlan">Execution Plan</a>
+          <a href="#executionPlan" onclick="drawQueryPlanLines();">Execution Plan</a>
         </div>
        </div>
       <div id="grid"></div> 
       <div id="messages" style="display:none; ">
         <pre><code></code></pre>
       </div>
-      <div id="executionPlan" style="display:none;">
-        <pre><code></code></pre>
+      <div id="executionPlan" style="display:none; height: 400px;">
+        <ul style="position: absolute; z-index 1;"></ul>
+        <canvas id="qp-canvas" style="position: absolute; z-index: -1;"></canvas>
       </div>
      
       <div id="gridStats" class= "ui-widget-header">

@@ -115,7 +115,8 @@
       <pre><code></code></pre>
     </div>
     <div id="executionPlan" style="display:none;">
-      <pre><code></code></pre>
+      <ul style="position: absolute; z-index 1;"></ul>
+      <canvas id="qp-canvas" style="position: absolute;"></canvas>
     </div>
 
     <div id="gridStats" class="ui-widget-header">
