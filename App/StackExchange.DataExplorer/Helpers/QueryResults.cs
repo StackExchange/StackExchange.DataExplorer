@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
+using System.Linq;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using System.Xml.Xsl;
+using System.Web;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -122,6 +125,28 @@ namespace StackExchange.DataExplorer.Helpers
             return results;
         }
 
+        public QueryResults TransformQueryPlan()
+        {
+            var returnValue = new QueryResults();
+            returnValue.ExecutionTime = this.ExecutionTime;
+            returnValue.FirstRun = this.FirstRun;
+            returnValue.MaxResults = this.MaxResults;
+            returnValue.QueryId = this.QueryId;
+            returnValue.SiteId = this.SiteId;
+            returnValue.SiteName = this.SiteName;
+            returnValue.TextOnly = this.TextOnly;
+            returnValue.Truncated = this.Truncated;
+            returnValue.Url = this.Url;
+            returnValue.Slug = this.Slug;
+            returnValue.MultiSite = this.MultiSite;
+            returnValue.ExcludeMetas = this.ExcludeMetas;
+            returnValue.ResultSets = this.ResultSets;
+
+            returnValue.ExecutionPlans = this.ExecutionPlans.ConvertAll<string>(plan => TransformPlan(plan));
+
+            return returnValue;
+        }
+
         private static string FormatTextResults(string messages, List<ResultSet> resultSets)
         {
             var buffer = new StringBuilder();
@@ -148,6 +173,32 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             return buffer.ToString();
+        }
+
+        /// <summary>
+        /// Transforms an xml execution plan into html.
+        /// </summary>
+        /// <param name="plan">Xml query plan as a string.</param>
+        /// <returns>Html query plan as a string.</returns>
+        private static string TransformPlan(string plan)
+        {
+            if (string.IsNullOrEmpty(plan))
+            {
+                return null;
+            }
+
+            var doc = new System.Xml.XmlDocument();
+            doc.LoadXml(plan);
+
+            XslCompiledTransform t = new XslCompiledTransform(true);
+            t.Load(HttpContext.Current.Server.MapPath(@"~/Content/qp/qp.xslt"));
+
+            StringBuilder returnValue = new StringBuilder();
+            using (var writer = System.Xml.XmlWriter.Create(returnValue, t.OutputSettings))
+            {
+                t.Transform(doc, writer);
+            }
+            return returnValue.ToString();
         }
 
         private static string FormatResultSet(ResultSet resultSet)

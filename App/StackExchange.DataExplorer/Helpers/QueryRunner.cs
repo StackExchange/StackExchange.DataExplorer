@@ -7,8 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using StackExchange.DataExplorer.Models;
-using System.Xml;
-using System.Xml.Xsl;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -397,7 +395,7 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         if (reader.Read())
                         {
-                            results.ExecutionPlans.Add(TransformPlan(reader[0].ToString()));
+                            results.ExecutionPlans.Add(reader[0].ToString());
                         }
                     }
                     else
@@ -471,32 +469,6 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        /// <summary>
-        /// Transforms an XSLT execution plan into a HTML representation.
-        /// </summary>
-        /// <param name="plan">XML query plan as a string</param>
-        /// <returns>HTML query plan as a string</returns>
-        private static string TransformPlan(string plan)
-        {
-            if (string.IsNullOrEmpty(plan))
-            {
-                return null;
-            }
-
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(plan);
-
-            XslCompiledTransform t = new XslCompiledTransform();
-            t.Load(@"C:\Users\Justin\Projects\SEDE\src\main\App\StackExchange.DataExplorer\Content\qp\qp.xslt");
-
-            StringBuilder returnValue = new StringBuilder();
-            using (XmlWriter writer = XmlWriter.Create(returnValue, t.OutputSettings))
-            {
-                t.Transform(doc, writer);
-            }
-            return returnValue.ToString();
-        }
-
         public static string GetJson(ParsedQuery parsedQuery, Site site, User CurrentUser)
         {
             return GetJson(parsedQuery, site, CurrentUser, false);
@@ -507,7 +479,7 @@ namespace StackExchange.DataExplorer.Helpers
             string json = null;
             DBContext db = Current.DB;
 
-            // Execution plans are not saved in the cache
+            // TODO: Execution plans are sometimes cached
             if (!IncludeExecutionPlan)
             {
                 json = GetCachedResults(parsedQuery, site);
@@ -536,18 +508,14 @@ namespace StackExchange.DataExplorer.Helpers
             // well there is an annoying XSS condition here 
             json =  results.ToJson().Replace("/","\\/");
 
-            // Dont include execution plans in the cache - they are large and usually not needed
-            if (!IncludeExecutionPlan)
+            var cache = new CachedResult
             {
-                var cache = new CachedResult
-                {
-                    QueryHash = parsedQuery.ExecutionHash,
-                    SiteId = site.Id,
-                    Results = json,
-                    CreationDate = DateTime.UtcNow
-                };
-                db.CachedResults.InsertOnSubmit(cache);
-            }
+                QueryHash = parsedQuery.ExecutionHash,
+                SiteId = site.Id,
+                Results = json,
+                CreationDate = DateTime.UtcNow
+            };
+            db.CachedResults.InsertOnSubmit(cache);
             db.SubmitChanges();
 
             return json;

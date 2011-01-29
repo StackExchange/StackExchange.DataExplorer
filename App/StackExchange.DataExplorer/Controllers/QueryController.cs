@@ -50,6 +50,11 @@ namespace StackExchange.DataExplorer.Controllers
                     {
                         json = QueryResults.FromJson(json).ToTextResults().ToJson();
                     }
+					// Execution plans are cached as XML
+                    if (showExecutionPlan == "true")
+                    {
+                        json = QueryResults.FromJson(json).TransformQueryPlan().ToJson();
+                    }
                 }
 
                 rval = Content(json, "application/json");
@@ -209,6 +214,27 @@ namespace StackExchange.DataExplorer.Controllers
             TrackQueryView(queryId);
             ViewData["cached_results"] = GetCachedResults(query);
             return View("New", Site);
+        }
+
+        [Route(@"{sitename}/plan/{queryId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowPlan(string sitename, int queryId)
+        {
+            Query query = FindQuery(queryId);
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            TrackQueryView(queryId);
+
+            CachedResult cachedResults = GetCachedResults(query);
+            if (cachedResults == null)
+            {
+                return PageNotFound();
+            }
+
+            // TODO: The cached result may not contain a plan
+            return new QueryPlanResult(cachedResults.Results);
         }
 
         [Route("{sitename}/query/new", RoutePriority.Low)]

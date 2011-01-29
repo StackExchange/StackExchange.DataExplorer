@@ -127,6 +127,7 @@ function gotResults(results) {
         }
     }
     $("#executionPlan > ul").html(executionPlans);
+    $("#downloadPlan")[0].href = "/" + results.siteName + "/" + (results.excludeMetas ? "n" : "") + (results.multiSite ? "m" : "") + "plan/" + results.queryId + currentParams;
     drawQueryPlanLines();
 
     if (results.textOnly || results.resultSets.length == 0) {
