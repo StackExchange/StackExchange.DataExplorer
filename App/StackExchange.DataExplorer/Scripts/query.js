@@ -120,24 +120,40 @@ function gotResults(results) {
 
     $("#gridStats .duration").text("Duration: " + results.executionTime + "ms");
 
-    var executionPlans = "";
-    if (results.executionPlans) {
+    if (results.executionPlans && results.executionPlans.length > 0) {
+        $("#planTabButton").show();
+
+        var executionPlans = "";
         for (var i = 0; i < results.executionPlans.length; i++) {
             executionPlans += results.executionPlans[i] + "\r\n";
         }
+        $("#executionPlan > ul").html(executionPlans);
+        drawQueryPlanLines();
+        
+        $("#downloadPlan")[0].href = "/" + results.siteName + "/" + (results.excludeMetas ? "n" : "") + (results.multiSite ? "m" : "") + "plan/" + results.queryId + currentParams;
+        $("#downloadPlan").show();
     }
-    $("#executionPlan > ul").html(executionPlans);
-    $("#downloadPlan")[0].href = "/" + results.siteName + "/" + (results.excludeMetas ? "n" : "") + (results.multiSite ? "m" : "") + "plan/" + results.queryId + currentParams;
-    drawQueryPlanLines();
+    else {
+        $("#planTabButton").hide();
+        $("#downloadPlan").hide();
+    }
 
     if (results.textOnly || results.resultSets.length == 0) {
-        $("#resultTabs").hide();
-        $("#messages").show();
+        $("#messagesTabButton").click();
+        $("#resultsTabButton").hide();
+
         $("#queryResults").show();
-        $("#grid").hide();
+
+        if ($("#resultTabs a:visible").length > 1) {
+            $("#resultTabs").show();
+        } else {
+            $("#resultTabs").hide();
+        }
         return;
     }
 
+    $("#resultsTabButton").show();
+    $("#resultsTabButton").click();
     $("#grid").show();
     $("#resultTabs").show();
     $("#messages").hide();

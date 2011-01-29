@@ -119,6 +119,7 @@ namespace StackExchange.DataExplorer.Helpers
             results.Slug = Slug;
             results.MultiSite = MultiSite;
             results.ExcludeMetas = ExcludeMetas;
+            results.ExecutionPlans = this.ExecutionPlans;
 
             results.Messages = FormatTextResults(Messages, ResultSets);
 
@@ -141,6 +142,7 @@ namespace StackExchange.DataExplorer.Helpers
             returnValue.MultiSite = this.MultiSite;
             returnValue.ExcludeMetas = this.ExcludeMetas;
             returnValue.ResultSets = this.ResultSets;
+            returnValue.Messages = this.Messages;
 
             returnValue.ExecutionPlans = this.ExecutionPlans.ConvertAll<string>(plan => TransformPlan(plan));
 

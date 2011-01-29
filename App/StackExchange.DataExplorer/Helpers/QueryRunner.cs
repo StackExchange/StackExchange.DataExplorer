@@ -380,18 +380,18 @@ namespace StackExchange.DataExplorer.Helpers
         /// <param name="results"><see cref="QueryResults" /> instance to populate with results.</param>
         /// <param name="command">SQL command to execute.</param>
         /// <param name="messages"><see cref="StringBuilder" /> instance to which to append messages.</param>
-        /// <param name="ExecutionPlansIncluded">If true indciates that the query execution plans are expected to be contained
+        /// <param name="IncludeExecutionPlan">If true indciates that the query execution plans are expected to be contained
         /// in the results sets; otherwise, false.</param>
-        private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages, bool ExecutionPlansIncluded)
+        private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages, bool IncludeExecutionPlan)
         {
             // TODO: Refactor this method
             using (SqlDataReader reader = command.ExecuteReader())
             {
-                int x = 0;
                 do
                 {
-                    // with STATISTICS XML ON every other result set is the execution plan for the previous result set.
-                    if (ExecutionPlansIncluded && (x % 2 == 1))
+                    // Check to see if the resultset is an execution plan
+                    // TODO: There is definitely a security vulnerability here somewhere
+                    if (IncludeExecutionPlan && reader.FieldCount == 1 && reader.GetName(0) == "Microsoft SQL Server 2005 XML Showplan")
                     {
                         if (reader.Read())
                         {
@@ -463,7 +463,6 @@ namespace StackExchange.DataExplorer.Helpers
 
                         messages.AppendFormat("({0} row(s) affected)\n\n", resultSet.Rows.Count);
                     }
-                    x++;
                 } while (reader.NextResult());
                 command.Cancel();
             }
@@ -479,7 +478,7 @@ namespace StackExchange.DataExplorer.Helpers
             string json = null;
             DBContext db = Current.DB;
 
-            // TODO: Execution plans are sometimes cached
+            // TODO: Execution plans are sometimes cached - need to store them in a different cache
             if (!IncludeExecutionPlan)
             {
                 json = GetCachedResults(parsedQuery, site);

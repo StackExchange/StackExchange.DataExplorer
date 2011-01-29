@@ -151,9 +151,9 @@
     <div id="queryResults" style="display:none">
       <div id="resultTabs" class="subheader">
         <div class="miniTabs">
-          <a href="#grid" class="youarehere">Results</a>
-          <a href="#messages">Messages</a>
-          <a href="#executionPlan" onclick="drawQueryPlanLines();">Execution Plan</a>
+          <a id="resultsTabButton" href="#grid" class="youarehere">Results</a>
+          <a id="messagesTabButton" href="#messages">Messages</a>
+          <a id="planTabButton" href="#executionPlan" onclick="drawQueryPlanLines();">Execution Plan</a>
         </div>
        </div>
       <div id="grid"></div> 
