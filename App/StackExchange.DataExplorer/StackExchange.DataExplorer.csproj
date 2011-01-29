@@ -400,7 +400,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>51051</DevelopmentServerPort>
+          <DevelopmentServerPort>2519</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/DataExplorer</IISUrl>
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>

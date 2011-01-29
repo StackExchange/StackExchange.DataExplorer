@@ -478,7 +478,7 @@ namespace StackExchange.DataExplorer.Helpers
             string json = null;
             DBContext db = Current.DB;
 
-            // TODO: Execution plans are sometimes cached - need to store them in a different cache
+            // TODO: Execution plan may be cached
             if (!IncludeExecutionPlan)
             {
                 json = GetCachedResults(parsedQuery, site);
@@ -506,7 +506,9 @@ namespace StackExchange.DataExplorer.Helpers
 
             // well there is an annoying XSS condition here 
             json =  results.ToJson().Replace("/","\\/");
-
+            
+            // TODO: Handle the case where the result is already cached
+            // TODO: Avoid caching the execution plan
             var cache = new CachedResult
             {
                 QueryHash = parsedQuery.ExecutionHash,
@@ -515,8 +517,21 @@ namespace StackExchange.DataExplorer.Helpers
                 CreationDate = DateTime.UtcNow
             };
             db.CachedResults.InsertOnSubmit(cache);
-            db.SubmitChanges();
 
+            if (IncludeExecutionPlan)
+            {
+                var cachedPlan = new CachedPlan()
+                {
+                    QueryHash = parsedQuery.ExecutionHash,
+                    SiteId = site.Id,
+                    // TODO: Only the first plan is cached
+                    Plan = results.ExecutionPlans[0],
+                    CreationDate = DateTime.UtcNow,
+                };
+                db.CachedPlans.InsertOnSubmit(cachedPlan);
+            }
+
+            db.SubmitChanges();
             return json;
         }
 

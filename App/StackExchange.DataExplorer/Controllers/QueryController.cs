@@ -225,16 +225,13 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            TrackQueryView(queryId);
-
-            CachedResult cachedResults = GetCachedResults(query);
-            if (cachedResults == null)
+            CachedPlan cachedPlan = GetCachedPlan(query);
+            if (cachedPlan == null)
             {
                 return PageNotFound();
             }
 
-            // TODO: The cached result may not contain a plan
-            return new QueryPlanResult(cachedResults.Results);
+            return new QueryPlanResult(cachedPlan.Plan);
         }
 
         [Route("{sitename}/query/new", RoutePriority.Low)]

@@ -5,20 +5,11 @@ namespace StackExchange.DataExplorer.Helpers
 {
     internal class QueryPlanResult : ActionResult
     {
-        private readonly QueryResults results;
+        private readonly string plan;
 
-        public QueryPlanResult(string json)
+        public QueryPlanResult(string plan)
         {
-            results = QueryResults.FromJson(json);
-        }
-
-        private string PanlXml
-        {
-            get
-            {
-                // TODO: This only returns the first plan
-                return this.results.ExecutionPlans.Count == 0 ? null : results.ExecutionPlans[0];
-            }
+            this.plan = plan;
         }
 
         public override void ExecuteResult(ControllerContext context)
@@ -31,7 +22,7 @@ namespace StackExchange.DataExplorer.Helpers
             response.ContentType = "text/xml";
             response.AddHeader("content-disposition", attachment);
             response.AddHeader("Pragma", "public");
-            response.Write(this.PanlXml);
+            response.Write(plan);
             response.Flush();
             response.Close();
         }
