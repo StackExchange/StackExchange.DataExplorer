@@ -1,2 +1,2 @@
-..\Build\Migrator --force --connection="Data Source=.;Initial Catalog=DataExplorer;Integrated Security=True"
+..\Build\Migrator --force --connection="Data Source=.\SQLExpress;Initial Catalog=DataExplorer;Integrated Security=True"
 PAUSE
