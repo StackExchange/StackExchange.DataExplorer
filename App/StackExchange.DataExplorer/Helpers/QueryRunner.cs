@@ -300,6 +300,7 @@ namespace StackExchange.DataExplorer.Helpers
                         }
                     }
 
+                    var plan = new QueryPlan();
                     foreach (string batch in parsedQuery.ExecutionSqlBatches)
                     {
                         using (var command = new SqlCommand(batch, cnn))
@@ -307,7 +308,13 @@ namespace StackExchange.DataExplorer.Helpers
                             command.CommandTimeout = QUERY_TIMEOUT;
                             PopulateResults(results, command, messages, IncludeExecutionPlan);
                         }
+                        if (IncludeExecutionPlan)
+                        {
+                            plan.AppendBatchPlan(results.ExecutionPlan);
+                            results.ExecutionPlan = null;
+                        }
                     }
+                    results.ExecutionPlan = plan.PlanXml;
                 }
                 finally
                 {
@@ -384,7 +391,7 @@ namespace StackExchange.DataExplorer.Helpers
         /// in the results sets; otherwise, false.</param>
         private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages, bool IncludeExecutionPlan)
         {
-            // TODO: Refactor this method
+            QueryPlan plan = new QueryPlan();
             using (SqlDataReader reader = command.ExecuteReader())
             {
                 do
@@ -395,7 +402,7 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         if (reader.Read())
                         {
-                            results.ExecutionPlans.Add(reader[0].ToString());
+                            plan.AppendStatementPlan(reader[0].ToString());
                         }
                     }
                     else
@@ -466,6 +473,7 @@ namespace StackExchange.DataExplorer.Helpers
                 } while (reader.NextResult());
                 command.Cancel();
             }
+            results.ExecutionPlan = plan.PlanXml;
         }
 
         public static string GetJson(ParsedQuery parsedQuery, Site site, User CurrentUser)
@@ -524,8 +532,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     QueryHash = parsedQuery.ExecutionHash,
                     SiteId = site.Id,
-                    // TODO: Only the first plan is cached
-                    Plan = results.ExecutionPlans[0],
+                    Plan = results.ExecutionPlan,
                     CreationDate = DateTime.UtcNow,
                 };
                 db.CachedPlans.InsertOnSubmit(cachedPlan);

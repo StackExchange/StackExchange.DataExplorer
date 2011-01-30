@@ -128,6 +128,7 @@
     <Compile Include="Helpers\PageNumber.cs" />
     <Compile Include="Helpers\PageSizer.cs" />
     <Compile Include="Helpers\ParsedQuery.cs" />
+    <Compile Include="Helpers\QueryPlan.cs" />
     <Compile Include="Helpers\QueryPlanResult.cs" />
     <Compile Include="Helpers\QuerySearchCriteria.cs" />
     <Compile Include="Helpers\QueryViewTracker.cs" />

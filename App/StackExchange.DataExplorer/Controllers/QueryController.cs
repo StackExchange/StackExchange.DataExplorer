@@ -5,7 +5,6 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
-using System.Text;
 
 namespace StackExchange.DataExplorer.Controllers
 {

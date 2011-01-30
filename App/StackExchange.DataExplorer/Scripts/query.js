@@ -120,14 +120,10 @@ function gotResults(results) {
 
     $("#gridStats .duration").text("Duration: " + results.executionTime + "ms");
 
-    if (results.executionPlans && results.executionPlans.length > 0) {
+    if (results.executionPlan && results.executionPlan.length > 0) {
         $("#planTabButton").show();
 
-        var executionPlans = "";
-        for (var i = 0; i < results.executionPlans.length; i++) {
-            executionPlans += results.executionPlans[i] + "\r\n";
-        }
-        $("#executionPlan > ul").html(executionPlans);
+        $("#executionPlan > ul").html(results.executionPlan);
         drawQueryPlanLines();
         
         $("#downloadPlan")[0].href = "/" + results.siteName + "/" + (results.excludeMetas ? "n" : "") + (results.multiSite ? "m" : "") + "plan/" + results.queryId + currentParams;

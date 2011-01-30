@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Web;
+using System.Xml.Xsl;
 using Newtonsoft.Json;
-using System.Linq;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using System.Xml.Xsl;
-using System.Web;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -64,7 +63,6 @@ namespace StackExchange.DataExplorer.Helpers
         public QueryResults()
         {
             ResultSets = new List<ResultSet>();
-            this.ExecutionPlans = new List<string>();
             FirstRun = DateTime.UtcNow.ToString("MMM %d yyyy");
             Messages = "";
         }
@@ -72,9 +70,9 @@ namespace StackExchange.DataExplorer.Helpers
         public List<ResultSet> ResultSets { get; set; }
 
         /// <summary>
-        /// Gets and sets a list of query execution plans associated with the query results.
+        /// Gets and sets the xml query execution plan associated with the query results.
         /// </summary>
-        public List<string> ExecutionPlans { get; set; }
+        public string ExecutionPlan { get; set; }
 
         public bool MultiSite { get; set; }
         public bool ExcludeMetas { get; set; }
@@ -119,7 +117,7 @@ namespace StackExchange.DataExplorer.Helpers
             results.Slug = Slug;
             results.MultiSite = MultiSite;
             results.ExcludeMetas = ExcludeMetas;
-            results.ExecutionPlans = this.ExecutionPlans;
+            results.ExecutionPlan = this.ExecutionPlan;
 
             results.Messages = FormatTextResults(Messages, ResultSets);
 
@@ -144,7 +142,7 @@ namespace StackExchange.DataExplorer.Helpers
             returnValue.ResultSets = this.ResultSets;
             returnValue.Messages = this.Messages;
 
-            returnValue.ExecutionPlans = this.ExecutionPlans.ConvertAll<string>(plan => TransformPlan(plan));
+            returnValue.ExecutionPlan = TransformPlan(this.ExecutionPlan);
 
             return returnValue;
         }
