@@ -139,19 +139,12 @@ function gotResults(results) {
         $("#resultsTabButton").hide();
 
         $("#queryResults").show();
-
-        if ($("#resultTabs a:visible").length > 1) {
-            $("#resultTabs").show();
-        } else {
-            $("#resultTabs").hide();
-        }
         return;
     }
 
     $("#resultsTabButton").show();
     $("#resultsTabButton").click();
     $("#grid").show();
-    $("#resultTabs").show();
     $("#messages").hide();
 
     var model = [];

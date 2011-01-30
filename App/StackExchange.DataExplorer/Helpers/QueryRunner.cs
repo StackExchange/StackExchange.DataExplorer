@@ -191,6 +191,20 @@ namespace StackExchange.DataExplorer.Helpers
             return results;
         }
 
+        /// <summary>
+        /// Retrieves a cached execution plan.
+        /// </summary>
+        /// <param name="query">The parsed query to return the execution plan for.</param>
+        /// <param name="site">The site to return the execution plan for.</param>
+        /// <returns>Cached execution plan, or null if there is no cached plan.</returns>
+        public static string GetCachedPlan(ParsedQuery query, Site site)
+        {
+            var returnValue = Current.DB.CachedPlans
+                .Where(plan => plan.QueryHash == query.ExecutionHash && plan.SiteId == site.Id)
+                .FirstOrDefault();
+            return returnValue == null ? null : returnValue.Plan;
+        }
+
         public static void LogQueryExecution(User user, Site site, ParsedQuery parsedQuery)
         {
             if (user.IsAnonymous) return;
@@ -483,14 +497,38 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static string GetJson(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
         {
-            string json = null;
             DBContext db = Current.DB;
 
-            // TODO: Execution plan may be cached
-            if (!IncludeExecutionPlan)
+            // TODO: This is awful!
+            var cachedJson = GetCachedResults(parsedQuery, site);
+            if (cachedJson != null)
             {
-                json = GetCachedResults(parsedQuery, site);
-                if (json != null)
+                if (IncludeExecutionPlan)
+                {
+                    var plan = GetCachedPlan(parsedQuery, site);
+                    if (plan != null)
+                    {
+                        // update the query if its not anon
+                        if (!user.IsAnonymous)
+                        {
+                            Query query = db.Queries
+                                .Where(q => q.QueryHash == parsedQuery.Hash)
+                                .FirstOrDefault();
+                            if (query != null)
+                            {
+                                query.Description = parsedQuery.Description;
+                                query.Name = parsedQuery.Name;
+                                query.QueryBody = parsedQuery.RawSql;
+                                db.SubmitChanges();
+                            }
+                        }
+
+                        var queryResults = QueryResults.FromJson(cachedJson);
+                        queryResults.ExecutionPlan = plan;
+                        return queryResults.ToJson();
+                    }
+                }
+                else
                 {
                     // update the query if its not anon
                     if (!user.IsAnonymous)
@@ -506,36 +544,44 @@ namespace StackExchange.DataExplorer.Helpers
                             db.SubmitChanges();
                         }
                     }
-                    return json;
-                }
+                    return cachedJson;
+                }   
             }
 
             QueryResults results = ExecuteNonCached(parsedQuery, site, user, IncludeExecutionPlan);
 
             // well there is an annoying XSS condition here 
-            json =  results.ToJson().Replace("/","\\/");
+            string json =  results.ToJson().Replace("/","\\/");
             
-            // TODO: Handle the case where the result is already cached
-            // TODO: Avoid caching the execution plan
-            var cache = new CachedResult
+            // TODO: This is awful!
+            if (cachedJson == null)
             {
-                QueryHash = parsedQuery.ExecutionHash,
-                SiteId = site.Id,
-                Results = json,
-                CreationDate = DateTime.UtcNow
-            };
-            db.CachedResults.InsertOnSubmit(cache);
+                var jsonToCache = json;
+                if (IncludeExecutionPlan)
+                {
+                    var queryResults = QueryResults.FromJson(json);
+                    queryResults.ExecutionPlan = null;
+                    jsonToCache = queryResults.ToJson();
+                }
+                var cache = new CachedResult
+                {
+                    QueryHash = parsedQuery.ExecutionHash,
+                    SiteId = site.Id,
+                    Results = jsonToCache,
+                    CreationDate = DateTime.UtcNow
+                };
+                db.CachedResults.InsertOnSubmit(cache);
+            }
 
             if (IncludeExecutionPlan)
             {
-                var cachedPlan = new CachedPlan()
+                db.CachedPlans.InsertOnSubmit(new CachedPlan()
                 {
                     QueryHash = parsedQuery.ExecutionHash,
                     SiteId = site.Id,
                     Plan = results.ExecutionPlan,
                     CreationDate = DateTime.UtcNow,
-                };
-                db.CachedPlans.InsertOnSubmit(cachedPlan);
+                });
             }
 
             db.SubmitChanges();
