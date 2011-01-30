@@ -147,8 +147,15 @@ function gotResults(results) {
     $("#grid").show();
     $("#messages").hide();
 
-    var model = [];
-    var maxWidths = [];
+    var model = [{
+        width: 5,
+        cssClass: "id",
+        name: "",
+        sortable: true,
+        field: -1
+    }];
+
+    var maxWidths = [0];
     for (var c = 0; c < results.resultSets[0].columns.length; c++) {
         model.push({
             width: 60, 
@@ -161,14 +168,15 @@ function gotResults(results) {
         maxWidths.push(results.resultSets[0].columns[c].name.length);
     }
 
-
     var rows = [];
     var hasTags = false;
 
     for (var i = 0; i < results.resultSets[0].rows.length; i++) {
         var row = {id: i};
-        var data = null;
+        row[-1] = i + 1;
+
         for (var c = 0; c < results.resultSets[0].columns.length; c++) {
+            var data = null;
             var col = results.resultSets[0].rows[i][c];
             if (col != null && col.title != null && col.id != null) {
                 var isUser = (results.resultSets[0].columns[c].type == "User");
@@ -192,7 +200,6 @@ function gotResults(results) {
             row[c] = data;
         }
         rows.push(row);
-
     }
 
     for (var i = 0; i < model.length; i++) {

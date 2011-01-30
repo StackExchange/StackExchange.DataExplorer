@@ -1039,6 +1039,11 @@ pre {
   text-align: right;  
 }
 
+.slick-cell.id {
+  text-align: right;  
+  background-color: #E6E6E6;
+}
+
 table#userList td {
   width: 185px;   
   height: 45px;
