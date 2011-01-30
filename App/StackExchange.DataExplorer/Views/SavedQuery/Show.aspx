@@ -105,18 +105,18 @@
   <div id="queryResults" style="display: none">
     <div id="resultTabs" class="subheader">
       <div class="miniTabs">
-        <a href="#grid" class="youarehere">Results</a> <a href="#messages">Messages</a>
-        <a href="#executionPlan">Execution Plans</a>
+        <a id="resultsTabButton" href="#grid" class="youarehere">Results</a>
+        <a id="messagesTabButton" href="#messages">Messages</a>
+        <a id="planTabButton" href="#executionPlan" onclick="drawQueryPlanLines();">Execution Plan</a>
       </div>
     </div>
-    <div id="grid">
-    </div>
-    <div id="messages" style="display: none;">
+    <div id="grid"></div>
+    <div id="messages" style="display:none;">
       <pre><code></code></pre>
     </div>
-    <div id="executionPlan" style="display:none;">
-      <ul style="position: absolute; z-index 1;"></ul>
+    <div id="executionPlan" style="display:none; height: 400px; text-align: left;">
       <canvas id="qp-canvas" style="position: absolute;"></canvas>
+      <ul style="position: absolute;"></ul>
     </div>
 
     <div id="gridStats" class="ui-widget-header">

@@ -160,9 +160,9 @@
       <div id="messages" style="display:none; ">
         <pre><code></code></pre>
       </div>
-      <div id="executionPlan" style="display:none; height: 400px;">
-        <ul style="position: absolute; z-index 1;"></ul>
-        <canvas id="qp-canvas" style="position: absolute; z-index: -1;"></canvas>
+      <div id="executionPlan" style="display:none; height: 400px; text-align: left;">
+        <canvas id="qp-canvas" style="position: absolute;"></canvas>
+        <ul style="position: absolute;"></ul>
       </div>
      
       <div id="gridStats" class= "ui-widget-header">

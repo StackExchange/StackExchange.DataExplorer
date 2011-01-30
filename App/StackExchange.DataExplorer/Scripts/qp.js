@@ -4,25 +4,28 @@
 canjas - The canvas jQuery object on which to draw lines
 root - The document jQuery object in which the diagram is contained */
 function qp_drawLines(canvas, root) {
-    // TODO: A better workaround than this
-    window.setTimeout(function () {
-        var canvasElm = canvas[0];
-        canvasElm.width = root.outerWidth(true);
-        canvasElm.height = root.outerHeight(true);
+    var canvasElm = canvas[0];
+    if (canvasElm.getContext) {
+        // TODO: A better workaround than this
+        window.setTimeout(function () {
+            canvasElm.width = root.outerWidth(true);
+            canvasElm.height = root.outerHeight(true);
 
-        var context = canvasElm.getContext("2d");
-        var canvasOffset = canvas.offset();
 
-        $(".qp-node", root).each(function () {
-            var from = $(this);
-            // TODO: This is horrible and needs fixing pronto!
-            $("> ul > li > div > div", $(this).parent().parent()).each(function () {
-                qp_line(context, canvasOffset, from, $(this));
+            var context = canvasElm.getContext("2d");
+            var canvasOffset = canvas.offset();
+
+            $(".qp-node", root).each(function () {
+                var from = $(this);
+                // TODO: This is horrible and needs fixing pronto!
+                $("> ul > li > div > div", $(this).parent().parent()).each(function () {
+                    qp_line(context, canvasOffset, from, $(this));
+                });
             });
-        });
 
-        context.stroke();
-    }, 100);
+            context.stroke();
+        }, 100);
+    }
 }
 
 /* Draws a line between two nodes 
