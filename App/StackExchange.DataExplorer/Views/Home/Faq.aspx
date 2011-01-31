@@ -74,9 +74,14 @@ The recent, featured and popular query lists only show saved queries. If you hav
 <p> Yes, there are links to the <a href="http://www.odata.org/">OData</a> endpoints as soon as you click through on the site.
 </p>
 
-
 <h3>How frequently is Stack Exchange Data Explorer updated?</h3>
-<p>At the moment it is updated shortly after every Stack Exchange <a href="http://blog.stackoverflow.com/category/cc-wiki-dump/">Creative Commons Data Dump</a>.</p>
+<p>Data is updated monthly.</p>
+
+<h3>Which sites are included?</h3>
+<p>All public Stack Exchange websites are included. Sites that are in public or private beta are excluded.</p>
+
+<h3>Our site has just exited the public beta stage, when will it be included?</h3>
+<p>On our monthly update cycle we add any new sites that have launched.</p>
 
 </div>
 </asp:Content>
