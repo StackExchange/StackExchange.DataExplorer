@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Web;
+using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Xsl;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -187,18 +190,27 @@ namespace StackExchange.DataExplorer.Helpers
                 return null;
             }
 
-            var doc = new System.Xml.XmlDocument();
-            doc.LoadXml(plan);
+            var schema = new XmlSchemaSet();
+            schema.Add("http://schemas.microsoft.com/sqlserver/2004/07/showplan", HttpContext.Current.Server.MapPath(@"~/Content/qp/showplanxml.xsd"));
 
-            XslCompiledTransform t = new XslCompiledTransform(true);
-            t.Load(HttpContext.Current.Server.MapPath(@"~/Content/qp/qp.xslt"));
-
-            StringBuilder returnValue = new StringBuilder();
-            using (var writer = System.Xml.XmlWriter.Create(returnValue, t.OutputSettings))
+            var settings = new XmlReaderSettings()
             {
-                t.Transform(doc, writer);
+                ValidationType = ValidationType.Schema,
+                Schemas = schema,
+            };
+
+            using (var reader = System.Xml.XmlReader.Create(new StringReader(plan), settings))
+            {
+                XslCompiledTransform t = new XslCompiledTransform(true);
+                t.Load(HttpContext.Current.Server.MapPath(@"~/Content/qp/qp.xslt"));
+
+                StringBuilder returnValue = new StringBuilder();
+                using (var writer = System.Xml.XmlWriter.Create(returnValue, t.OutputSettings))
+                {
+                    t.Transform(reader, writer);
+                }
+                return returnValue.ToString();
             }
-            return returnValue.ToString();
         }
 
         private static string FormatResultSet(ResultSet resultSet)
@@ -295,9 +307,9 @@ namespace StackExchange.DataExplorer.Helpers
             return
                 JsonConvert.SerializeObject(
                     this,
-                    Formatting.Indented,
+                    Newtonsoft.Json.Formatting.Indented,
                     GetSettings()
-                    );
+                );
         }
     }
 }

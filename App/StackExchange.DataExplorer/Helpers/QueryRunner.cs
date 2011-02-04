@@ -411,7 +411,6 @@ namespace StackExchange.DataExplorer.Helpers
                 do
                 {
                     // Check to see if the resultset is an execution plan
-                    // TODO: There is definitely a security vulnerability here somewhere
                     if (IncludeExecutionPlan && reader.FieldCount == 1 && reader.GetName(0) == "Microsoft SQL Server 2005 XML Showplan")
                     {
                         if (reader.Read())
