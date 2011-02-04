@@ -73,6 +73,11 @@ namespace StackExchange.DataExplorer.Helpers
         /// </remarks>
         public void AppendBatchPlan(string xml)
         {
+            if (string.IsNullOrEmpty(xml))
+            {
+                return;
+            }
+
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
 
