@@ -123,8 +123,8 @@ function gotResults(results) {
     if (results.executionPlan && results.executionPlan.length > 0) {
         $("#planTabButton").show();
 
-        $("#executionPlan > ul").html(results.executionPlan);
-        drawQueryPlanLines();
+        $("#executionPlan").html(results.executionPlan);
+        QP.drawLines();
         
         $("#downloadPlan")[0].href = "/" + results.siteName + "/" + (results.excludeMetas ? "n" : "") + (results.multiSite ? "m" : "") + "plan/" + results.queryId + currentParams;
         $("#downloadPlan").show();
@@ -236,10 +236,6 @@ function gotResults(results) {
 
     $("#queryResults").insertAfter('.page:first').css({ 'padding': '0 30px', 'margin': '0 auto' });
     $("#grid").resize();
-}
-
-function drawQueryPlanLines() {
-    qp_drawLines($("#qp-canvas"), $("#executionPlan > ul"));
 }
 
 function executeQuery(sql) {

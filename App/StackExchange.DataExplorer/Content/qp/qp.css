@@ -7,7 +7,7 @@
 	font-size: 11px;
 	line-height: normal;
 }
-.qp-label
+.qp-node > div:not(.qp-tt)
 {
 	font-family: Monospace;
 	text-align: center;
@@ -78,26 +78,26 @@ div[class|='qp-icon']
 .qp-icon-Concatenation{background-image:url('images/concatenation.gif')}
 .qp-icon-ConstantScan{background-image:url('images/constant_scan.gif')}
 .qp-icon-Convert{background-image:url('images/convert.gif')}
-.qp-icon-CursorCatchall{background-image:url('images/cursor_catchall.gif')}
+.qp-icon-CursorCatchall{background-image:url('images/bitmap.gif')}
 .qp-icon-Declare{background-image:url('images/declare.gif')}
-.qp-icon-Delete{background-image:url('images/delete.gif')}
+.qp-icon-Delete{background-image:url('images/table_delete.gif')}
 .qp-icon-DistributeStreams{background-image:url('images/distribute_streams.gif')}
 .qp-icon-Dynamic{background-image:url('images/dynamic.gif')}
-.qp-icon-EagerSpool{background-image:url('images/eager_spool.gif')}
+.qp-icon-EagerSpool{background-image:url('images/spool.gif')}
 .qp-icon-FetchQuery{background-image:url('images/fetch_query.gif')}
 .qp-icon-Filter{background-image:url('images/filter.gif')}
 .qp-icon-GatherStreams{background-image:url('images/gather_streams.gif')}
 .qp-icon-HashMatch{background-image:url('images/hash_match.gif')}
-.qp-icon-HashMatchRoot{background-image:url('images/hash_match_root.gif')}
-.qp-icon-HashMatchTeam{background-image:url('images/hash_match_team.gif')}
+.qp-icon-HashMatchRoot{background-image:url('images/hash_match.gif')}
+.qp-icon-HashMatchTeam{background-image:url('images/hash_match.gif')}
 .qp-icon-If{background-image:url('images/if.gif')}
-.qp-icon-Insert{background-image:url('images/insert.gif')}
+.qp-icon-Insert{background-image:url('images/table_insert.gif')}
 .qp-icon-InsertedScan{background-image:url('images/inserted_scan.gif')}
 .qp-icon-Intrinsic{background-image:url('images/intrinsic.gif')}
-.qp-icon-IteratorCatchall{background-image:url('images/iterator_catchall.gif')}
+.qp-icon-IteratorCatchall{background-image:url('images/bitmap.gif')}
 .qp-icon-Keyset{background-image:url('images/keyset.gif')}
-.qp-icon-LanguageElementCatchall{background-image:url('images/language_element_catchall.gif')}
-.qp-icon-LazySpool{background-image:url('images/lazy_spool.gif')}
+.qp-icon-LanguageElementCatchall{background-image:url('images/bitmap.gif')}
+.qp-icon-LazySpool{background-image:url('images/spool.gif')}
 .qp-icon-LogRowScan{background-image:url('images/log_row_scan.gif')}
 .qp-icon-MergeInterval{background-image:url('images/merge_interval.gif')}
 .qp-icon-MergeJoin{background-image:url('images/merge_join.gif')}
@@ -139,8 +139,8 @@ div[class|='qp-icon']
 .qp-icon-TableValuedFunction{background-image:url('images/table_valued_function.gif')}
 .qp-icon-Top{background-image:url('images/top.gif')}
 .qp-icon-Udx{background-image:url('images/udx.gif')}
-.qp-icon-Update{background-image:url('images/update.gif')}
-.qp-icon-Write{background-image:url('images/write.gif')}
+.qp-icon-Update{background-image:url('images/table_update.gif.gif')}
+.qp-icon-While{background-image:url('images/while.gif')}
 
 /* Layout - can't touch this */
 .qp-tt
@@ -163,14 +163,12 @@ div.qp-node:hover .qp-tt
 	position: relative;
 	white-space: nowrap;
 }
-.qp-td
+.qp-tr
+{
+	display: table;
+}
+.qp-tr > div
 {
 	display: table-cell;
 	padding-left: 15px;
-}
-/* TODO: Make qp specific */
-li
-{
-	list-style: none;
-	display: table;
 }

@@ -107,17 +107,14 @@
       <div class="miniTabs">
         <a id="resultsTabButton" href="#grid" class="youarehere">Results</a>
         <a id="messagesTabButton" href="#messages">Messages</a>
-        <a id="planTabButton" href="#executionPlan" onclick="drawQueryPlanLines();">Execution Plan</a>
+        <a id="planTabButton" href="#executionPlan" onclick="QP.drawLines();">Execution Plan</a>
       </div>
     </div>
     <div id="grid"></div>
     <div id="messages" style="display:none;">
       <pre><code></code></pre>
     </div>
-    <div id="executionPlan" style="display:none; height: 400px; text-align: left;">
-      <canvas id="qp-canvas" style="position: absolute;"></canvas>
-      <ul style="position: absolute;"></ul>
-    </div>
+    <div id="executionPlan" style="display:none; height: 400px; text-align: left; position: relative;"></div>
 
     <div id="gridStats" class="ui-widget-header">
       <span class="duration"></span><span class="rows"></span>

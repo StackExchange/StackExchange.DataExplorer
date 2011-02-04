@@ -182,6 +182,7 @@
     <Content Include="Content\qp\images\cursor_catchall.gif" />
     <Content Include="Content\qp\images\declare.gif" />
     <Content Include="Content\qp\images\delete.gif" />
+    <Content Include="Content\qp\images\deleted_scan.gif" />
     <Content Include="Content\qp\images\distribute_streams.gif" />
     <Content Include="Content\qp\images\dynamic.gif" />
     <Content Include="Content\qp\images\eager_spool.gif" />
@@ -225,10 +226,12 @@
     <Content Include="Content\qp\images\segment.gif" />
     <Content Include="Content\qp\images\sequence.gif" />
     <Content Include="Content\qp\images\sequenceproject.gif" />
+    <Content Include="Content\qp\images\sequence_project.gif" />
     <Content Include="Content\qp\images\snapshot.gif" />
     <Content Include="Content\qp\images\sort.gif" />
     <Content Include="Content\qp\images\split.gif" />
     <Content Include="Content\qp\images\spool.gif" />
+    <Content Include="Content\qp\images\sqeuence.gif" />
     <Content Include="Content\qp\images\stream_aggregate.gif" />
     <Content Include="Content\qp\images\switch.gif" />
     <Content Include="Content\qp\images\table_delete.gif" />
@@ -240,6 +243,7 @@
     <Content Include="Content\qp\images\top.gif" />
     <Content Include="Content\qp\images\udx.gif" />
     <Content Include="Content\qp\images\update.gif" />
+    <Content Include="Content\qp\images\while.gif" />
     <Content Include="Content\qp\images\write.gif" />
     <Content Include="Content\qp\qp.css" />
     <Content Include="Content\qp\qp.xslt" />
