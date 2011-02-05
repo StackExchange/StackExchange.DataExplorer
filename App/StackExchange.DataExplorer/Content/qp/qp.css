@@ -7,7 +7,7 @@
 	font-size: 11px;
 	line-height: normal;
 }
-.qp-node > div:not(.qp-tt)
+.qp-node > div
 {
 	font-family: Monospace;
 	text-align: center;
@@ -27,6 +27,9 @@ div[class|='qp-icon']
 	border: 1px solid black;
 	background-color: #FFFFEE;
 	padding: 2px;
+}
+.qp-tt div, .qp-tt table
+{
 	font-family: Sans-Serif;
 	text-align: left;
 }
