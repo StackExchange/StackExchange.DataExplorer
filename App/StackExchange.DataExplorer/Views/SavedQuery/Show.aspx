@@ -114,7 +114,7 @@
     <div id="messages" style="display:none;">
       <pre><code></code></pre>
     </div>
-    <div id="executionPlan" style="display:none; height: 400px; text-align: left; position: relative;"></div>
+    <div id="executionPlan" style="display:none;"></div>
 
     <div id="gridStats" class="ui-widget-header">
       <span class="duration"></span><span class="rows"></span>

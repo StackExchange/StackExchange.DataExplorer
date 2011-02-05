@@ -1031,6 +1031,18 @@ pre {
   height:500px;  
 }
 
+#executionPlan {
+  width: 100%;
+  height: 500px;
+  text-align: left; 
+  position: relative;
+  overflow: auto;
+}
+
+#executionPlan > div {
+  padding-bottom: 300px;
+}
+
 #resultsToText label {
   margin-left: 5px; 
 }
