@@ -67,7 +67,6 @@ namespace StackExchange.DataExplorer
                                               "/Scripts/jquery.rule.js",
                                               "/Scripts/jquery.event.drag-1.5.js",
                                               "/Scripts/slick.grid.js",
-                                              "/Scripts/slick.model.js",
                                               "/Scripts/qp.js",
                                           }
                             },
@@ -78,7 +77,6 @@ namespace StackExchange.DataExplorer
                                               "/Scripts/jquery.textarearesizer.js",
                                               "/Scripts/jquery.event.drag-1.5.js",
                                               "/Scripts/slick.grid.js",
-                                              "/Scripts/slick.model.js",
                                               "/Scripts/codemirror/codemirror.js",
                                               "/Scripts/query.js",
                                               "/Scripts/qp.js",
