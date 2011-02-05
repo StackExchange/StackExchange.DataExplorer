@@ -215,6 +215,9 @@ namespace StackExchange.DataExplorer.Controllers
             return View("New", Site);
         }
 
+        /// <summary>
+        /// Download a query execution plan as xml.
+        /// </summary>
         [Route(@"{sitename}/plan/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowPlan(string sitename, int queryId)
         {

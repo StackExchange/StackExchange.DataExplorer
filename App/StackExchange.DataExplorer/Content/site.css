@@ -1039,8 +1039,9 @@ pre {
   overflow: auto;
 }
 
+// Workaround for execution plan tool tips
 #executionPlan > div {
-  padding-bottom: 300px;
+  padding-bottom: 250px;
 }
 
 #resultsToText label {
@@ -1049,11 +1050,7 @@ pre {
 
 .slick-cell.number {
   text-align: right;  
-}
 
-.slick-cell.id {
-  text-align: right;  
-  background-color: #E6E6E6;
 }
 
 table#userList td {
