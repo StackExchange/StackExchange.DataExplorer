@@ -74,6 +74,7 @@
       <span id="permalinks" style="display: none">
         <a id="permalink" href="#">permalink to this query</a> 
         <a id="downloadCsv" href="#" title="download results as CSV">download results</a>
+        <a id="downloadPlan" href="#" title="download execution plan as XML">download execution plan</a>
         <%
         var sites = (IEnumerable<Site>) ViewData["Sites"];%>
         <%
