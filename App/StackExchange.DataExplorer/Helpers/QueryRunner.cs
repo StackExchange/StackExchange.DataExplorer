@@ -241,7 +241,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
         {
-            return ExecuteNonCached(parsedQuery, site, user);
+            return ExecuteNonCached(parsedQuery, site, user, false);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
