@@ -123,6 +123,8 @@ union all select
 13, ''InformModerator''
 union all select
 15, ''ModeratorReview''
+union all select
+16, ''PendingEditRepBonus''
 ')
 
 EXEC
