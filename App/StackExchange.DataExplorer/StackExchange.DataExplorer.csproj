@@ -255,7 +255,6 @@
     <Content Include="Content\images\icon-odatafeed-28x28.png" />
     <Content Include="Content\images\icon-odatafeed-32x32.png" />
     <Content Include="Content\images\see_logo.png" />
-    <Content Include="Content\images\windows_azure_logo.png" />
     <Content Include="Content\packaged\editor.js" />
     <Content Include="Content\packaged\sitecss.css" />
     <Content Include="Content\packaged\viewer.js" />

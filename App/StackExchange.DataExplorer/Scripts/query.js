@@ -71,6 +71,14 @@ function displayCaptcha() {
     $('form input[type=submit]').hide();
     $('#captcha').show();
 
+    $("#recaptcha_response_field").keydown(function (key) {
+        if (key.keyCode == 13) {
+            $("#btn-captcha").click();
+            return false;
+        }
+        return true;
+    }).focus();
+
     var captcha = function () {
         $(this).unbind("click");
         $.ajax({
@@ -81,10 +89,13 @@ function displayCaptcha() {
                 if (data.success) {
                     $('form input[type=submit]').show();
                     $('#captcha').hide();
+                    $('#captcha').closest('form').submit();
                 } else {
                     $("#captcha-error").fadeIn();
                     $("#btn-captcha").click(captcha);
-                    $("#recaptcha_response_field").unbind("keydown").keydown(function () { $("#captcha-error").fadeOut(); });
+                    var text = $("#recaptcha_response_field");
+                    var once = function () { $("#captcha-error").fadeOut(); text.unbind("keydown", once) };
+                    text.keydown(once);
                 }
             },
             dataType: "json"
