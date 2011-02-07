@@ -223,8 +223,6 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        public static ConcurrentDictionary<string, int> throttle = new ConcurrentDictionary<string, int>();
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security", 
             "CA2100:Review SQL queries for security vulnerabilities", 
@@ -235,16 +233,9 @@ namespace StackExchange.DataExplorer.Helpers
 
             var remoteIP = OData.GetRemoteIP(); 
             var key = "total-" + remoteIP;
-            var currentCount = (int?)HttpRuntime.Cache.Get(key) ?? 0;
+            var currentCount = (int?)Current.GetCachedObject(key) ?? 0;
             currentCount++;
-            HttpRuntime.Cache.Add
-                   (key,
-                   currentCount,
-                   null,
-                   System.Web.Caching.Cache.NoAbsoluteExpiration,
-                   new TimeSpan(1,0,0),
-                   System.Web.Caching.CacheItemPriority.Default,
-                   null);
+            Current.SetCachedObjectSliding(key, currentCount, 60 * 60);
 
             if (currentCount > 130)
             {

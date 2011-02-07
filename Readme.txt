@@ -52,3 +52,4 @@ Full list of all third party software used to build Data Explorer:
 - YUI Compressor: http://developer.yahoo.com/yui/compressor/
 - Slick Grid: http://github.com/mleibman/SlickGrid
 - Simple Error Handler is derived off: http://code.google.com/p/elmah/
+- Recaptcha.dll is licensed under MIT see: http://www.opensource.org/licenses/mit-license.php ... code is available here: http://code.google.com/p/recaptcha/

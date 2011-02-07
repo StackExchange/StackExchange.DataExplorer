@@ -59,6 +59,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Lib\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Recaptcha">
+      <HintPath>..\..\Lib\Recaptcha.dll</HintPath>
+    </Reference>
     <Reference Include="SimpleErrorHandler">
       <HintPath>..\..\Lib\SimpleErrorHandler.dll</HintPath>
     </Reference>
@@ -104,6 +107,7 @@
     <Compile Include="AssetPackager.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\SavedQueryController.cs" />
@@ -229,6 +233,7 @@
     <Content Include="Scripts\jquery.textarearesizer.js" />
     <Content Include="Views\Admin\WhiteList.aspx" />
     <Content Include="Views\Admin\Index.aspx" />
+    <Content Include="Views\Shared\Captcha.ascx" />
     <Content Include="Views\Shared\PageNotFound.aspx" />
     <Content Include="Views\Home\Faq.aspx" />
     <Content Include="Views\Legal\ContentPolicy.aspx" />

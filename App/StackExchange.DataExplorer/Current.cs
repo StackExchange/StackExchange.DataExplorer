@@ -17,8 +17,18 @@ namespace StackExchange.DataExplorer
     {
         private static DeploymentTier? _tier;
 
-
         const string DISPOSE_CONNECTION_KEY = "dispose_connections";
+
+        public static Recaptcha.RecaptchaControl NewRecaptchControl()
+        {
+
+            Recaptcha.RecaptchaControl control = new Recaptcha.RecaptchaControl();
+            control.PrivateKey = AppSettings.RecaptchaPrivateKey;
+            control.PublicKey = AppSettings.RecaptchaPublicKey;
+            control.Theme = "clean";
+
+            return control;
+        }
 
         public static void RegisterConnectionForDisposal(SqlConnection connection)
         {

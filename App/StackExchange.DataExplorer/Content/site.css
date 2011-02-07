@@ -1289,3 +1289,8 @@ a.cc-wiki-link
 {
     width: 880px;    
 }
+
+#captcha h4
+{
+    margin-bottom: 10px;
+}

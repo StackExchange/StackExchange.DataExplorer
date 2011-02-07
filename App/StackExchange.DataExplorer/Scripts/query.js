@@ -67,11 +67,45 @@ function populateParamsFromUrl() {
     });
 }
 
-function gotResults(results) {
-    current_results = results;
+function displayCaptcha() {
+    $('form input[type=submit]').hide();
+    $('#captcha').show();
 
-    $('form input[type=submit]').attr('disabled', null);
+    var captcha = function () {
+        $(this).unbind("click");
+        $.ajax({
+            url: '/captcha',
+            data: $('#captcha').closest('form').serialize(),
+            type: 'POST',
+            success: function (data) {
+                if (data.success) {
+                    $('form input[type=submit]').show();
+                    $('#captcha').hide();
+                } else {
+                    $("#captcha-error").fadeIn();
+                    $("#btn-captcha").click(captcha);
+                    $("#recaptcha_response_field").unbind("keydown").keydown(function () { $("#captcha-error").fadeOut(); });
+                }
+            },
+            dataType: "json"
+        });
+
+    };
+
+    $("#btn-captcha").click(captcha);
+}
+
+function gotResults(results) {
+
     $(".loading").hide();
+    $('form input[type=submit]').attr('disabled', null);
+
+    if (results && results.captcha) {
+        displayCaptcha();
+        return;
+    }
+
+    current_results = results;
 
     if (results.error != null) {
         $("#queryErrorBox").show();

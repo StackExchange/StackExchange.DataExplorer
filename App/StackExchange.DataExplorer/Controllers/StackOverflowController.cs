@@ -513,5 +513,6 @@ namespace StackExchange.DataExplorer.Controllers
                 return ex.GetType().Name;
             }
         }
+
     }
 }

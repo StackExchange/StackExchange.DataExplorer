@@ -15,6 +15,12 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("query/{siteId}")]
         public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs, string excludeMetas)
         {
+
+            if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
+            {
+                return Json(new { captcha = true });
+            }
+
             Site site = Current.DB.Sites.Where(s => s.Id == siteId).First();
             ActionResult rval;
 

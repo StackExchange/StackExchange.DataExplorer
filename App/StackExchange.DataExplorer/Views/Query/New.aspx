@@ -73,6 +73,11 @@
                   <label>Exclude Metas</label>
               <% } %>
             </p>
+
+            <% if (Current.User.IsAnonymous) { %>
+            <%= Html.Partial("Captcha", Current.NewRecaptchControl()) %>
+            <% } %>
+
             <p id="toolbar">
                 <input type="submit" value="Run Query" />
 

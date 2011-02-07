@@ -20,6 +20,12 @@ namespace StackExchange.DataExplorer
         [Default(false)]
         public static bool AllowRunOnAllDbsOption { get; private set; }
 
+        [Default("")]
+        public static string RecaptchaPublicKey { get; private set; }
+
+        [Default("")]
+        public static string RecaptchaPrivateKey { get; private set; }
+
         public static void Refresh()
         {
             var data = Current.DB.AppSettings.ToDictionary(v => v.Setting, v => v.Value);
@@ -35,6 +41,12 @@ namespace StackExchange.DataExplorer
                         Boolean.TryParse(overrideData, out parsed);
                         property.SetValue(null, parsed, null);
                     }
+
+                    if (property.PropertyType == typeof(string))
+                    {
+                        property.SetValue(null, overrideData, null);
+                    }
+
                 }
                 else
                 {
