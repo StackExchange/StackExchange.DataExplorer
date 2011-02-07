@@ -121,6 +121,8 @@ union all select
 12, ''Spam''
 union all select
 13, ''InformModerator''
+union all select
+15, ''ModeratorReview''
 ')
 
 EXEC
