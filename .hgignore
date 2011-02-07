@@ -9,3 +9,5 @@ glob:App/_ReSharper.DataExplorer/*
 glob:App/_ReSharper.DataExplorerFull/*
 glob:*.itrace.csdef
 glob:App/StackExchange.DataExplorer.Azure/ServiceConfiguration.cscfg
+glob:App/TestResults/
+glob:*.orig

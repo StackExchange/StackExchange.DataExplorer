@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using StackExchange.DataExplorer.Models;
-using System.Collections.Concurrent;
 using System.Web;
-using System.Web.Caching;
+using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -178,7 +177,6 @@ namespace StackExchange.DataExplorer.Helpers
             return json;
         }
 
-
         public static string GetCachedResults(ParsedQuery query, Site site)
         {
             CachedResult row = Current.DB.CachedResults
@@ -190,6 +188,22 @@ namespace StackExchange.DataExplorer.Helpers
                 results = row.Results;
             }
             return results;
+        }
+
+        /// <summary>
+        /// Retrieves a cached execution plan.
+        /// </summary>
+        /// <param name="query">The parsed query to return the execution plan for.</param>
+        /// <param name="site">The site to return the execution plan for.</param>
+        /// <returns>Cached execution plan, or null if there is no cached plan entry.</returns>
+        /// <remarks>
+        /// Note that a null return value is different from a cached plan entry with a null cache.
+        /// </remarks>
+        public static CachedPlan GetCachedPlan(ParsedQuery query, Site site)
+        {
+            return Current.DB.CachedPlans
+                .Where(plan => plan.QueryHash == query.ExecutionHash && plan.SiteId == site.Id)
+                .FirstOrDefault();
         }
 
         public static void LogQueryExecution(User user, Site site, ParsedQuery parsedQuery)
@@ -223,11 +237,16 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
+        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
+        {
+            return ExecuteNonCached(parsedQuery, site, user, false);
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security", 
             "CA2100:Review SQL queries for security vulnerabilities", 
             Justification = "What else can I do, we are allowing users to run sql.")]
-        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
+        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
         {
             DBContext db = Current.DB;
 
@@ -279,16 +298,29 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     cnn.InfoMessage += infoHandler;
 
+                    if (IncludeExecutionPlan)
+                    {
+                        using (var command = new SqlCommand("SET STATISTICS XML ON", cnn))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                    }
+
+                    var plan = new QueryPlan();
                     foreach (string batch in parsedQuery.ExecutionSqlBatches)
                     {
                         using (var command = new SqlCommand(batch, cnn))
                         {
                             command.CommandTimeout = QUERY_TIMEOUT;
-                            PopulateResults(results, command, messages);
+                            PopulateResults(results, command, messages, IncludeExecutionPlan);
                         }
-                        
+                        if (IncludeExecutionPlan)
+                        {
+                            plan.AppendBatchPlan(results.ExecutionPlan);
+                            results.ExecutionPlan = null;
+                        }
                     }
-                
+                    results.ExecutionPlan = plan.PlanXml;
                 }
                 finally
                 {
@@ -344,120 +376,210 @@ namespace StackExchange.DataExplorer.Helpers
             return results;
         }
 
+        /// <summary>
+        /// Executes an SQL query and populates a given <see cref="QueryResults" /> instance with the results.
+        /// </summary>
+        /// <param name="results"><see cref="QueryResults" /> instance to populate with results.</param>
+        /// <param name="command">SQL command to execute.</param>
+        /// <param name="messages"><see cref="StringBuilder" /> instance to which to append messages.</param>
         private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages)
         {
+            PopulateResults(results, command, messages, false);
+        }
+
+        /// <summary>
+        /// Executes an SQL query and populates a given <see cref="QueryResults" /> instance with the results.
+        /// </summary>
+        /// <param name="results"><see cref="QueryResults" /> instance to populate with results.</param>
+        /// <param name="command">SQL command to execute.</param>
+        /// <param name="messages"><see cref="StringBuilder" /> instance to which to append messages.</param>
+        /// <param name="IncludeExecutionPlan">If true indciates that the query execution plans are expected to be contained
+        /// in the results sets; otherwise, false.</param>
+        private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages, bool IncludeExecutionPlan)
+        {
+            QueryPlan plan = new QueryPlan();
             using (SqlDataReader reader = command.ExecuteReader())
             {
                 do
                 {
-                    if (reader.FieldCount == 0)
+                    // Check to see if the resultset is an execution plan
+                    if (IncludeExecutionPlan && reader.FieldCount == 1 && reader.GetName(0) == "Microsoft SQL Server 2005 XML Showplan")
                     {
+                        if (reader.Read())
+                        {
+                            plan.AppendStatementPlan(reader[0].ToString());
+                        }
+                    }
+                    else
+                    {
+                        if (reader.FieldCount == 0)
+                        {
+                            if (reader.RecordsAffected >= 0)
+                            {
+                                messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
+                            }
+                            continue;
+                        }
+
+                        var resultSet = new ResultSet();
+                        resultSet.MessagePosition = messages.Length;
+                        results.ResultSets.Add(resultSet);
+
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            var columnInfo = new ResultColumnInfo();
+                            columnInfo.Name = reader.GetName(i);
+                            ResultColumnType colType;
+                            if (ColumnTypeMap.TryGetValue(reader.GetFieldType(i), out colType))
+                            {
+                                columnInfo.Type = colType;
+                            }
+
+                            resultSet.Columns.Add(columnInfo);
+                        }
+
+                        int currentRow = 0;
+                        while (reader.Read())
+                        {
+                            if (currentRow++ >= MAX_RESULTS)
+                            {
+                                results.Truncated = true;
+                                results.MaxResults = MAX_RESULTS;
+                                break;
+                            }
+                            var row = new List<object>();
+                            resultSet.Rows.Add(row);
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                object col = reader.GetValue(i);
+                                if (col is DateTime)
+                                {
+                                    var date = (DateTime)col;
+                                    col = date.ToString("yyyy-MM-dd H:mm:ss");
+                                }
+                                row.Add(col);
+                            }
+                        }
+                        if (results.Truncated)
+                        {
+                            // next result would force ado.net to fast forward
+                            //  through the result set, which is way too slow
+                            break;
+                        }
+
                         if (reader.RecordsAffected >= 0)
                         {
                             messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
                         }
-                        continue;
+
+                        messages.AppendFormat("({0} row(s) affected)\n\n", resultSet.Rows.Count);
                     }
-
-                    var resultSet = new ResultSet();
-                    resultSet.MessagePosition = messages.Length;
-                    results.ResultSets.Add(resultSet);
-
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        var columnInfo = new ResultColumnInfo();
-                        columnInfo.Name = reader.GetName(i);
-                        ResultColumnType colType;
-                        if (ColumnTypeMap.TryGetValue(reader.GetFieldType(i), out colType))
-                        {
-                            columnInfo.Type = colType;
-                        }
-
-                        resultSet.Columns.Add(columnInfo);
-                    }
-
-                    int currentRow = 0;
-                    while (reader.Read())
-                    {
-                        if (currentRow++ >= MAX_RESULTS)
-                        {
-                            results.Truncated = true;
-                            results.MaxResults = MAX_RESULTS;
-                            break;
-                        }
-                        var row = new List<object>();
-                        resultSet.Rows.Add(row);
-
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            object col = reader.GetValue(i);
-                            if (col is DateTime)
-                            {
-                                var date = (DateTime) col;
-                                col = date.ToString("yyyy-MM-dd H:mm:ss");
-                            }
-                            row.Add(col);
-                        }
-                    }
-                    if (results.Truncated)
-                    {
-                        // next result would force ado.net to fast forward
-                        //  through the result set, which is way too slow
-                        break;
-                    }
-
-                    if (reader.RecordsAffected >= 0)
-                    {
-                        messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
-                    }
-
-                    messages.AppendFormat("({0} row(s) affected)\n\n", resultSet.Rows.Count);
                 } while (reader.NextResult());
                 command.Cancel();
             }
+            results.ExecutionPlan = plan.PlanXml;
         }
 
-        public static string GetJson(ParsedQuery parsedQuery, Site site, User user)
+        public static string GetJson(ParsedQuery parsedQuery, Site site, User CurrentUser)
         {
-            string json = null;
-            DBContext db = Current.DB;
+            return GetJson(parsedQuery, site, CurrentUser, false);
+        }
 
-            json = GetCachedResults(parsedQuery, site);
-            if (json != null)
+        public static string GetJson(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
+        {
+            DBContext db = Current.DB;
+            UpdateSavedQuery(user, parsedQuery);
+
+            var cachedJson = GetCachedResults(parsedQuery, site);
+            if (cachedJson != null)
             {
-                // update the query if its not anon
-                if (!user.IsAnonymous)
+                if (!IncludeExecutionPlan)
                 {
-                    Query query = db.Queries
-                        .Where(q => q.QueryHash == parsedQuery.Hash)
-                        .FirstOrDefault();
-                    if (query != null)
+                    return cachedJson;
+                }
+                else
+                {
+                    var plan = GetCachedPlan(parsedQuery, site);
+                    if (plan != null)
                     {
-                        query.Description = parsedQuery.Description;
-                        query.Name = parsedQuery.Name;
-                        query.QueryBody = parsedQuery.RawSql;
-                        db.SubmitChanges();
+                        var queryResults = QueryResults.FromJson(cachedJson);
+                        queryResults.ExecutionPlan = plan.Plan;
+                        return queryResults.ToJson();
                     }
                 }
-                return json;
             }
 
-            QueryResults results = ExecuteNonCached(parsedQuery, site, user);
+            QueryResults results = ExecuteNonCached(parsedQuery, site, user, IncludeExecutionPlan);
 
-            // well there is an annoying XSS condition here 
-            json = results.ToJson().Replace("/","\\/");
-            var cache = new CachedResult
-                            {
-                                QueryHash = parsedQuery.ExecutionHash,
-                                SiteId = site.Id,
-                                Results = json,
-                                CreationDate = DateTime.UtcNow
-                            };
+            string json = results.ToJson();
+            if (cachedJson == null)
+            {
+                AddResultToCache(json, parsedQuery, site, db, IncludeExecutionPlan);
+            }
+            if (IncludeExecutionPlan)
+            {
+                db.CachedPlans.InsertOnSubmit(new CachedPlan()
+                {
+                    QueryHash = parsedQuery.ExecutionHash,
+                    SiteId = site.Id,
+                    Plan = results.ExecutionPlan,
+                    CreationDate = DateTime.UtcNow,
+                });
+            }
 
-            db.CachedResults.InsertOnSubmit(cache);
             db.SubmitChanges();
 
-            return json;
+            // well there is an annoying XSS condition here 
+            return json.Replace("/", "\\/");
+        }
+
+        /// <summary>
+        /// Adds a query result to the cache.
+        /// </summary>
+        /// <param name="json">Query results to add to the cache.</param>
+        /// <param name="IncludeExecutionPlan">If true indicates that the result set includes a query
+        /// execution plan; otherwise, false.</param>
+        private static void AddResultToCache(string json, ParsedQuery parsedQuery, Site site, DBContext db, bool IncludeExecutionPlan)
+        {
+            if (IncludeExecutionPlan)
+            {
+                var queryResults = QueryResults.FromJson(json);
+                queryResults.ExecutionPlan = null;
+                json = queryResults.ToJson();
+            }
+            var cache = new CachedResult
+            {
+                QueryHash = parsedQuery.ExecutionHash,
+                SiteId = site.Id,
+                // well there is an annoying XSS condition here
+                Results = json.Replace("/", "\\/"),
+                CreationDate = DateTime.UtcNow
+            };
+            db.CachedResults.InsertOnSubmit(cache);
+        }
+
+        /// <summary>
+        /// Updates a saved query if it exists and the user is not anonymous.
+        /// </summary>
+        private static void UpdateSavedQuery(User user, ParsedQuery parsedQuery)
+        {
+            DBContext db = Current.DB;
+
+            // update the query if its not anon
+            if (!user.IsAnonymous)
+            {
+                Query query = db.Queries
+                    .Where(q => q.QueryHash == parsedQuery.Hash)
+                    .FirstOrDefault();
+                if (query != null)
+                {
+                    query.Description = parsedQuery.Description;
+                    query.Name = parsedQuery.Name;
+                    query.QueryBody = parsedQuery.RawSql;
+                    db.SubmitChanges();
+                }
+            }
         }
 
         private static void ProcessMagicColumns(QueryResults results, SqlConnection cnn)

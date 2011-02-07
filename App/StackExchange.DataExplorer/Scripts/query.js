@@ -154,20 +154,36 @@ function gotResults(results) {
 
     $("#gridStats .duration").text("Duration: " + results.executionTime + "ms");
 
+    if (results.executionPlan && results.executionPlan.length > 0) {
+        $("#planTabButton").show();
+
+        $("#executionPlan").html(results.executionPlan);
+        QP.drawLines();
+        
+        $("#downloadPlan")[0].href = "/" + results.siteName + "/" + (results.excludeMetas ? "n" : "") + (results.multiSite ? "m" : "") + "plan/" + results.queryId + currentParams;
+        $("#downloadPlan").show();
+    }
+    else {
+        $("#planTabButton").hide();
+        $("#downloadPlan").hide();
+    }
+
     if (results.textOnly || results.resultSets.length == 0) {
-        $("#resultTabs").hide();
-        $("#messages").show();
+        $("#messagesTabButton").click();
+        $("#resultsTabButton").hide();
+
         $("#queryResults").show();
-        $("#grid").hide();
         return;
     }
 
+    $("#resultsTabButton").show();
+    $("#resultsTabButton").click();
     $("#grid").show();
-    $("#resultTabs").show();
     $("#messages").hide();
 
     var model = [];
     var maxWidths = [];
+
     for (var c = 0; c < results.resultSets[0].columns.length; c++) {
         model.push({
             width: 60, 
@@ -179,14 +195,14 @@ function gotResults(results) {
         maxWidths.push(results.resultSets[0].columns[c].name.length);
     }
 
-
     var rows = [];
     var hasTags = false;
 
     for (var i = 0; i < results.resultSets[0].rows.length; i++) {
         var row = {};
-        var data = null;
+
         for (var c = 0; c < results.resultSets[0].columns.length; c++) {
+            var data = null;
             var col = results.resultSets[0].rows[i][c];
             if (col != null && col.title != null && col.id != null) {
                 var isUser = (results.resultSets[0].columns[c].type == "User");
@@ -210,7 +226,6 @@ function gotResults(results) {
             row[c] = data;
         }
         rows.push(row);
-
     }
 
     for (var i = 0; i < model.length; i++) {
@@ -237,7 +252,6 @@ function gotResults(results) {
 }
 
 function executeQuery(sql) {
-
     $("#permalinks, #queryResults, #queryErrorBox").hide();
 
     if (!ensureAllParamsEntered(sql)) {

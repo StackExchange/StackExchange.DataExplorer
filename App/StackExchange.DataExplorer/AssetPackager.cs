@@ -40,7 +40,8 @@ namespace StackExchange.DataExplorer
                                                  {
                                                      "/Content/smoothness/jquery-ui-1.8.1.custom.css",
                                                      "/Content/slickgrid/slick.grid.css",
-                                                     "/Content/codemirror/sqlcolors.css"
+                                                     "/Content/codemirror/sqlcolors.css",
+                                                     "/Content/qp/qp.css",
                                                  }
                             }
                     };
@@ -66,6 +67,7 @@ namespace StackExchange.DataExplorer
                                               "/Scripts/jquery.rule.js",
                                               "/Scripts/jquery.event.drag-1.5.js",
                                               "/Scripts/slick.grid.js",
+                                              "/Scripts/qp.js",
                                           }
                             },
                         {
@@ -76,7 +78,8 @@ namespace StackExchange.DataExplorer
                                               "/Scripts/jquery.event.drag-1.5.js",
                                               "/Scripts/slick.grid.js",
                                               "/Scripts/codemirror/codemirror.js",
-                                              "/Scripts/query.js"
+                                              "/Scripts/query.js",
+                                              "/Scripts/qp.js",
                                           }
                             },
                             

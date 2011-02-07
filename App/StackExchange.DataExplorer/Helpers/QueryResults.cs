@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Web;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Xsl;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -67,6 +72,11 @@ namespace StackExchange.DataExplorer.Helpers
 
         public List<ResultSet> ResultSets { get; set; }
 
+        /// <summary>
+        /// Gets and sets the xml query execution plan associated with the query results.
+        /// </summary>
+        public string ExecutionPlan { get; set; }
+
         public bool MultiSite { get; set; }
         public bool ExcludeMetas { get; set; }
         public string Messages { get; set; }
@@ -110,10 +120,34 @@ namespace StackExchange.DataExplorer.Helpers
             results.Slug = Slug;
             results.MultiSite = MultiSite;
             results.ExcludeMetas = ExcludeMetas;
+            results.ExecutionPlan = this.ExecutionPlan;
 
             results.Messages = FormatTextResults(Messages, ResultSets);
 
             return results;
+        }
+
+        public QueryResults TransformQueryPlan()
+        {
+            var returnValue = new QueryResults();
+            returnValue.ExecutionTime = this.ExecutionTime;
+            returnValue.FirstRun = this.FirstRun;
+            returnValue.MaxResults = this.MaxResults;
+            returnValue.QueryId = this.QueryId;
+            returnValue.SiteId = this.SiteId;
+            returnValue.SiteName = this.SiteName;
+            returnValue.TextOnly = this.TextOnly;
+            returnValue.Truncated = this.Truncated;
+            returnValue.Url = this.Url;
+            returnValue.Slug = this.Slug;
+            returnValue.MultiSite = this.MultiSite;
+            returnValue.ExcludeMetas = this.ExcludeMetas;
+            returnValue.ResultSets = this.ResultSets;
+            returnValue.Messages = this.Messages;
+
+            returnValue.ExecutionPlan = TransformPlan(this.ExecutionPlan);
+
+            return returnValue;
         }
 
         private static string FormatTextResults(string messages, List<ResultSet> resultSets)
@@ -142,6 +176,41 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             return buffer.ToString();
+        }
+
+        /// <summary>
+        /// Transforms an xml execution plan into html.
+        /// </summary>
+        /// <param name="plan">Xml query plan as a string.</param>
+        /// <returns>Html query plan as a string.</returns>
+        private static string TransformPlan(string plan)
+        {
+            if (string.IsNullOrEmpty(plan))
+            {
+                return null;
+            }
+
+            var schema = new XmlSchemaSet();
+            schema.Add("http://schemas.microsoft.com/sqlserver/2004/07/showplan", HttpContext.Current.Server.MapPath(@"~/Content/qp/showplanxml.xsd"));
+
+            var settings = new XmlReaderSettings()
+            {
+                ValidationType = ValidationType.Schema,
+                Schemas = schema,
+            };
+
+            using (var reader = System.Xml.XmlReader.Create(new StringReader(plan), settings))
+            {
+                XslCompiledTransform t = new XslCompiledTransform(true);
+                t.Load(HttpContext.Current.Server.MapPath(@"~/Content/qp/qp.xslt"));
+
+                StringBuilder returnValue = new StringBuilder();
+                using (var writer = System.Xml.XmlWriter.Create(returnValue, t.OutputSettings))
+                {
+                    t.Transform(reader, writer);
+                }
+                return returnValue.ToString();
+            }
         }
 
         private static string FormatResultSet(ResultSet resultSet)
@@ -238,9 +307,9 @@ namespace StackExchange.DataExplorer.Helpers
             return
                 JsonConvert.SerializeObject(
                     this,
-                    Formatting.Indented,
+                    Newtonsoft.Json.Formatting.Indented,
                     GetSettings()
-                    );
+                );
         }
     }
 }

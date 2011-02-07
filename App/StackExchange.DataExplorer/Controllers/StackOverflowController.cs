@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -11,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Security;
-using System.Web.UI;
 using log4net;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
@@ -189,6 +187,29 @@ namespace StackExchange.DataExplorer.Controllers
                     .FirstOrDefault();
             }
             return cachedResults;
+        }
+
+        /// <summary>
+        /// Retrieves a cached execution plan for a query
+        /// </summary>
+        /// <param name="query">Query to retrieve the cached plan for.</param>
+        /// <returns>Cached execution plan, or null if no plan exists in the cache.</returns>
+        protected CachedPlan GetCachedPlan(Query query)
+        {
+            if (query == null)
+            {
+                return null;
+            }
+
+            DBContext db = Current.DB;
+            var p = new ParsedQuery(query.QueryBody, Request.Params);
+            if (p.AllParamsSet)
+            {
+                return db.CachedPlans
+                    .Where(r => r.QueryHash == p.ExecutionHash && r.SiteId == Site.Id)
+                    .FirstOrDefault();
+            }
+            return null;
         }
 
         /// <summary>

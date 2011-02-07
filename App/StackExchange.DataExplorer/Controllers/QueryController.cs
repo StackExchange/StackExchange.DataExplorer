@@ -5,7 +5,6 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
-using System.Text;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -13,7 +12,7 @@ namespace StackExchange.DataExplorer.Controllers
     {
         [HttpPost]
         [Route("query/{siteId}")]
-        public ActionResult Execute(string sql, int siteId, string resultsToText, int? savedQueryId, string allDBs, string excludeMetas)
+        public ActionResult Execute(string sql, int siteId, string resultsToText, string showExecutionPlan, int? savedQueryId, string allDBs, string excludeMetas)
         {
 
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
@@ -51,10 +50,15 @@ namespace StackExchange.DataExplorer.Controllers
                 }
                 else
                 {
-                    json = QueryRunner.GetJson(parsedQuery, site, CurrentUser);
+                    json = QueryRunner.GetJson(parsedQuery, site, CurrentUser, showExecutionPlan == "true");
                     if (resultsToText == "true")
                     {
                         json = QueryResults.FromJson(json).ToTextResults().ToJson();
+                    }
+					// Execution plans are cached as XML
+                    if (showExecutionPlan == "true")
+                    {
+                        json = QueryResults.FromJson(json).TransformQueryPlan().ToJson();
                     }
                 }
 
@@ -215,6 +219,27 @@ namespace StackExchange.DataExplorer.Controllers
             TrackQueryView(queryId);
             ViewData["cached_results"] = GetCachedResults(query);
             return View("New", Site);
+        }
+
+        /// <summary>
+        /// Download a query execution plan as xml.
+        /// </summary>
+        [Route(@"{sitename}/plan/{queryId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowPlan(string sitename, int queryId)
+        {
+            Query query = FindQuery(queryId);
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            CachedPlan cachedPlan = GetCachedPlan(query);
+            if (cachedPlan == null)
+            {
+                return PageNotFound();
+            }
+
+            return new QueryPlanResult(cachedPlan.Plan);
         }
 
         [Route("{sitename}/query/new", RoutePriority.Low)]

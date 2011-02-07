@@ -2,10 +2,10 @@
 <ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 12.625, 14" name="CloudDb">
   <DataContextMoniker Name="/DBContext" />
   <nestedChildShapes>
-    <classShape Id="c9c616b7-e836-421a-bc05-12ae1f7baae3" absoluteBounds="4.375, 4.375, 2, 1.7708968098958327">
+    <classShape Id="c9c616b7-e836-421a-bc05-12ae1f7baae3" absoluteBounds="5, 5.5, 2, 1.7708968098958327">
       <DataClassMoniker Name="/DBContext/CachedResult" />
       <nestedChildShapes>
-        <elementListCompartment Id="778713d2-5992-495e-90c0-2ad0ed852155" absoluteBounds="4.39, 4.835, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="778713d2-5992-495e-90c0-2ad0ed852155" absoluteBounds="5.015, 5.96, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <classShape Id="a4292f52-e02d-47f1-aff9-1b0354bc248f" absoluteBounds="8.75, 9, 2, 2.1554996744791666">
@@ -52,14 +52,14 @@
         <classShapeMoniker Id="dfbfb22e-3355-4123-9dbf-1a916cf20b3f" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(9.75 : 7.39345540364583); (1.15625 : 7.39345540364583); (1.15625 : 8.625)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(9.75 : 8.08095540364583); (8.05208333333333 : 8.08095540364583 : JumpStart); (7.88541666666667 : 8.08095540364583 : JumpEnd); (1.92708333333333 : 8.08095540364583 : JumpStart); (1.76041666666667 : 8.08095540364583 : JumpEnd); (1.15625 : 8.08095540364583); (1.15625 : 8.625)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/DBContext/Site/Site_SavedQuery" />
       <nodes>
         <classShapeMoniker Id="1d2f0ba8-7800-4392-8385-7cd2666f76aa" />
         <classShapeMoniker Id="dfbfb22e-3355-4123-9dbf-1a916cf20b3f" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(2.1875 : 5.0401025390625); (2.1875 : 8.625)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(1.84375 : 5.0401025390625); (1.84375 : 8.625)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/DBContext/Query/Query_SavedQuery" />
       <nodes>
         <classShapeMoniker Id="c419e5c6-ec07-436a-8f95-bc97b50fe7c2" />
@@ -101,6 +101,12 @@
       <DataClassMoniker Name="/DBContext/BlackList" />
       <nestedChildShapes>
         <elementListCompartment Id="369bd3c1-36c2-42cb-9234-68dc825857fb" absoluteBounds="0.515, 1.21, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="bbaea34a-6a8f-44a9-bc8d-ccc0b8e6944b" absoluteBounds="2.375, 5.5, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/DBContext/CachedPlan" />
+      <nestedChildShapes>
+        <elementListCompartment Id="d1070daf-9172-48e6-a401-be8f6252e7b4" absoluteBounds="2.39, 5.96, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>
