@@ -61,6 +61,7 @@
             <p id="resultsToText">
               <input type="checkbox" name="resultsToText" value="true"/>
               <label>Results to Text</label>
+              &nbsp;&nbsp;&nbsp;
               <input type="checkbox" name="showExecutionPlan" value="true"/> 
               <label>Include execution plan</label>
               <% if (AppSettings.AllowRunOnAllDbsOption) { %>
