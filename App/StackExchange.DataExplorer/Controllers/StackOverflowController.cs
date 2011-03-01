@@ -36,7 +36,7 @@ namespace StackExchange.DataExplorer.Controllers
                     site = Current.DB.Sites.FirstOrDefault(s => s.Id == siteId);
                     if (site == null)
                     {
-                        site = Current.DB.Sites.First();
+                        site = Current.DB.Sites.OrderByDescending(s => s.TotalQuestions).First();
                     }
                 }
                 return site;
