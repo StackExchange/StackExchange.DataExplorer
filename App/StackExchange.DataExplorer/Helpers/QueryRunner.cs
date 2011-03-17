@@ -151,10 +151,17 @@ namespace StackExchange.DataExplorer.Helpers
 
                 foreach (var s in sites.Skip(1))
                 {
-                    json = QueryRunner.GetJson(parsedQuery, s, currentUser);
-                    var tmp = QueryResults.FromJson(json);
-                    results.ExecutionTime += tmp.ExecutionTime;
-                    MergePivot(s, results, tmp);
+                    try
+                    {
+                        json = QueryRunner.GetJson(parsedQuery, s, currentUser);
+                        var tmp = QueryResults.FromJson(json);
+                        results.ExecutionTime += tmp.ExecutionTime;
+                        MergePivot(s, results, tmp);
+                    }
+                    catch (Exception e)
+                    { 
+                        // don't blow up here ... just skip the site.
+                    }
                 }
             }
             else
@@ -163,10 +170,17 @@ namespace StackExchange.DataExplorer.Helpers
                 AddBody(buffer, results, firstSite);
                 foreach (var s in sites.Skip(1))
                 {
-                    json = QueryRunner.GetJson(parsedQuery, s, currentUser);
-                    var tmp = QueryResults.FromJson(json).ToTextResults();
-                    results.ExecutionTime += tmp.ExecutionTime;
-                    AddBody(buffer, tmp, s);
+                    try
+                    {
+                        json = QueryRunner.GetJson(parsedQuery, s, currentUser);
+                        var tmp = QueryResults.FromJson(json).ToTextResults();
+                        results.ExecutionTime += tmp.ExecutionTime;
+                        AddBody(buffer, tmp, s);
+                    }
+                    catch (Exception e)
+                    { 
+                        // don't blow up ... just skip the site
+                    }
 
                 }
             }
