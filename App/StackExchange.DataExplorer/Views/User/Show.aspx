@@ -51,7 +51,7 @@
                         </tr>
                         <tr>
                             <td>member for</td>
-                            <td><span class="cool" title="<%=Model.CreationDate%>"><%=(DateTime.Now - Model.CreationDate).Value.TimeTaken()%></span></td>
+                            <td><span class="cool" title="<%=Model.CreationDate%>"><%=(DateTime.UtcNow - Model.CreationDate).Value.TimeTaken()%></span></td>
                         </tr>
 
                         <tr>
