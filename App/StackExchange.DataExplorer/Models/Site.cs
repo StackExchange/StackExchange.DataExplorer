@@ -117,7 +117,7 @@ namespace StackExchange.DataExplorer.Models
                     string hash = Util.GravatarHash(user.Email);
                     cnn.Open();
                     SqlCommand cmd = cnn.CreateCommand();
-                    cmd.CommandText = "select top 1 Id from Users where EmailHash = @EmailHash";
+                    cmd.CommandText = "select top 1 Id from Users where EmailHash = @EmailHash order by Reputation desc";
                     SqlParameter p = cmd.Parameters.Add("@EmailHash", SqlDbType.NVarChar);
                     p.Value = hash;
                     try
