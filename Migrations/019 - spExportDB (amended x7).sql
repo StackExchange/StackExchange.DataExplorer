@@ -85,7 +85,7 @@ create unique  index idxName on dbo.Tags(TagName)
 select distinct pt.PostId, t.Id as TagId 
 into [dbo].[PostTags]
 from [' + @sourceDB + '].dbo.Tags t
-join [' + @sourceDB + '].dbo.PostTags pt on pt.Tag = t.Name')
+join [' + @sourceDB + '].dbo.PostTags pt on pt.TagId = t.Id')
  
 exec('
 
