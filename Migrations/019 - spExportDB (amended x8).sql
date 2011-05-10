@@ -50,20 +50,41 @@ end
 
 exec ('create database [' + @targetDB +']')
 
+-- set the size 
+declare @name nvarchar(1000) 
+declare @size int
+declare @command nvarchar(1000) 
+
+set @command = 'select @nameOut = name,@sizeOut = size from [' + @sourceDB +  '].sys.database_files where size = (select max(size) from [' + @sourceDB + '].sys.database_files)'
+exec sp_executesql @command,N'@nameOut nvarchar(1000) out, @sizeOut int out', @nameOut = @name OUTPUT, @sizeOut = @size OUTPUT 
+
+set @command = 'alter database [' + @targetDB + '] modify file  (NAME = '''+ @targetDB + ''', FILEGROWTH = 50%, Size = ' + CAST(@size / 400 as varchar(100)) + 'mb )'
+exec(@command) 
+
+RAISERROR( 'Exporting Users',0,1) WITH NOWAIT
 exec('select *, cast(SUBSTRING(master.sys.fn_varbintohexstr(HashBytes(''MD5'',ltrim(rtrim(cast(Email as varchar(100)))))),3,32) as varchar(32)) as EmailHash into [' + @targetDB + '].dbo.Users from [' + @sourceDB + '].dbo.vExportUsers')
 exec('alter table [' + @targetDB + '].dbo.Users drop column Email')
 exec('alter table [' + @targetDB + '].dbo.Users add Age int null')
 exec('update [' + @targetDB + '].dbo.Users set Age = DATEDIFF(yy, Birthday, getdate())')
 exec('alter table [' + @targetDB + '].dbo.Users drop column Birthday')
 
+RAISERROR( 'Exporting Posts',0,1) WITH NOWAIT
 exec spExportTable @sourceDB, @targetDB, 'vExportPosts', 'Posts'
+
+RAISERROR( 'Exporting History',0,1) WITH NOWAIT
 exec spExportTable @sourceDB, @targetDB, 'vExportPostHistory', 'PostHistory'
+
+RAISERROR( 'Exporting Votes',0,1) WITH NOWAIT
 exec spExportTable @sourceDB, @targetDB, 'vExportVotes', 'Votes'
+
+RAISERROR( 'Exporting Badges',0,1) WITH NOWAIT
 exec spExportTable @sourceDB, @targetDB, 'vExportBadges', 'Badges'
+
+RAISERROR( 'Exporting Comments',0,1) WITH NOWAIT
 exec spExportTable @sourceDB, @targetDB, 'vExportComments', 'Comments'
 
+RAISERROR( 'Indexing',0,1) WITH NOWAIT
 exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.Users (Id)')
-
 exec('create index ParentIdIdx on [' + @targetDB + '].dbo.Posts (ParentId)')
 
 exec('create  index idxPostOwner
@@ -72,7 +93,7 @@ INCLUDE ([Id],[ParentId])')
 
 exec ('create index [EmailHashIdx] on [' + @targetDB + '].dbo.Users(EmailHash)')
  
-
+RAISERROR( 'Exporting Tags',0,1) WITH NOWAIT
 exec (' use [' + @targetDB + '] 
 select Id, Name as [TagName], [Count] 
 into dbo.Tags
@@ -86,7 +107,8 @@ select distinct pt.PostId, t.Id as TagId
 into [dbo].[PostTags]
 from [' + @sourceDB + '].dbo.Tags t
 join [' + @sourceDB + '].dbo.PostTags pt on pt.TagId = t.Id')
- 
+
+RAISERROR( 'Indexing',0,1) WITH NOWAIT
 exec('
 
 create unique clustered index PostTagsIndex on [' + @targetDB + '].dbo.PostTags (PostId,TagId)
@@ -196,3 +218,6 @@ EXEC
 		UNION ALL
 		SELECT 22, ''Question Unmerged''
 ')
+go 
+
+exec spExportDB 'StackOverflow.Meta.dev', 'StackOverflow.Meta.dev.Exported'
