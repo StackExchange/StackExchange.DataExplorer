@@ -14,8 +14,29 @@ as
 	exec('select top 0 Id as Id1, * into [' + @targetDB + '].dbo.' + @targetTable + ' from [' + @sourceDB + '].dbo.' + @sourceTable)
 	exec('alter table [' + @targetDB + '].dbo.' + @targetTable + ' drop Column Id1')
 	exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.' + @targetTable + ' (Id)')
-	exec('use [' + @targetDB + '] 
-	insert dbo.' + @targetTable + ' select * from  [' + @sourceDB + '].dbo.' + @sourceTable )
+	
+	declare @text varchar(4000)
+	
+	set @text = 
+	'
+		use [' + @targetDB + ']
+		declare @keepGoing bit 
+		declare @current int 
+		set @keepGoing = 1 
+		set @current = -1 
+		while @keepGoing = 1 
+		begin
+			insert dbo.' + @targetTable + ' select top 50000 * from  [' + @sourceDB + '].dbo.' + @sourceTable + ' where Id > @current order by Id asc
+			if @@rowcount = 0 
+			begin
+				set @keepGoing = 0
+				break
+			end
+			select @current = max(Id) from ' + @targetTable + '
+		end
+		'
+		exec(@text)
+		
 go
 
 -- used to export a live SE db to a new database for DataExplorer Reasons
