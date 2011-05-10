@@ -218,6 +218,3 @@ EXEC
 		UNION ALL
 		SELECT 22, ''Question Unmerged''
 ')
-go 
-
-exec spExportDB 'StackOverflow.Meta.dev', 'StackOverflow.Meta.dev.Exported'
