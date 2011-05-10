@@ -61,6 +61,8 @@ exec sp_executesql @command,N'@nameOut nvarchar(1000) out, @sizeOut int out', @n
 set @command = 'alter database [' + @targetDB + '] modify file  (NAME = '''+ @targetDB + ''', FILEGROWTH = 50%, Size = ' + CAST(@size / 400 as varchar(100)) + 'mb )'
 exec(@command) 
 
+exec ('ALTER DATABASE [' + @targetDB +'] SET RECOVERY SIMPLE')
+
 RAISERROR( 'Exporting Users',0,1) WITH NOWAIT
 exec('select *, cast(SUBSTRING(master.sys.fn_varbintohexstr(HashBytes(''MD5'',ltrim(rtrim(cast(Email as varchar(100)))))),3,32) as varchar(32)) as EmailHash into [' + @targetDB + '].dbo.Users from [' + @sourceDB + '].dbo.vExportUsers')
 exec('alter table [' + @targetDB + '].dbo.Users drop column Email')
