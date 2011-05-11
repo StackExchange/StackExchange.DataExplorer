@@ -322,8 +322,6 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\jquery-1.4.2.js" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
-    <Content Include="Views\Admin\WhiteList.aspx" />
-    <Content Include="Views\Admin\Index.aspx" />
     <Content Include="Views\Shared\Captcha.ascx" />
     <Content Include="Views\Shared\PageNotFound.aspx" />
     <Content Include="Views\Legal\ContentPolicy.aspx" />
@@ -391,6 +389,8 @@
     <Content Include="Views\Home\Faq.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Account\LogIn.cshtml" />
+    <Content Include="Views\Admin\Index.cshtml" />
+    <Content Include="Views\Admin\WhiteList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">
