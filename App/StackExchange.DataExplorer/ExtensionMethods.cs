@@ -693,5 +693,11 @@ namespace StackExchange.DataExplorer
         }
 
         #endregion
+
+        public static void SetPageTitle(this WebViewPage page, string title)
+        {
+            title = HtmlUtilities.Encode(title);
+            page.ViewData["PageTitle"] = title;
+        }
     }
 }

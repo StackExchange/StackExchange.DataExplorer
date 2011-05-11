@@ -326,7 +326,6 @@
     <Content Include="Views\Admin\Index.aspx" />
     <Content Include="Views\Shared\Captcha.ascx" />
     <Content Include="Views\Shared\PageNotFound.aspx" />
-    <Content Include="Views\Home\Faq.aspx" />
     <Content Include="Views\Legal\ContentPolicy.aspx" />
     <Content Include="Views\Legal\PrivacyPolicy.aspx" />
     <Content Include="Views\Legal\TermsOfService.aspx" />
@@ -358,12 +357,9 @@
     </Content>
     <Content Include="Content\site.css" />
     <Content Include="Views\Account\LogIn.aspx" />
-    <Content Include="Views\Home\About.aspx" />
-    <Content Include="Views\Home\Index.aspx" />
     <Content Include="Views\Shared\Error.aspx" />
     <Content Include="Views\Shared\LogInUserControl.ascx" />
     <Content Include="Views\Shared\Site.Master" />
-    <Content Include="Views\Shared\Master.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -391,8 +387,10 @@
       <LastGenOutput>StackExchangeData.Designer.cs</LastGenOutput>
     </EntityDeploy>
     <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Shared\Site.cshtml" />
-    <Content Include="Views\Admin\Razor.cshtml" />
+    <Content Include="Views\Shared\Master.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\Faq.cshtml" />
+    <Content Include="Views\Home\About.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">
