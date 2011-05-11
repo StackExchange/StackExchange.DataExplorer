@@ -324,10 +324,6 @@
     <Content Include="Scripts\jquery.textarearesizer.js" />
     <Content Include="Views\Shared\Captcha.ascx" />
     <Content Include="Views\Shared\PageNotFound.aspx" />
-    <Content Include="Views\Legal\ContentPolicy.aspx" />
-    <Content Include="Views\Legal\PrivacyPolicy.aspx" />
-    <Content Include="Views\Legal\TermsOfService.aspx" />
-    <Content Include="Views\Legal\TrademarkGuidance.aspx" />
     <Content Include="Views\SavedQuery\Index.aspx" />
     <Content Include="Views\SavedQuery\Show.aspx" />
     <Content Include="Views\Shared\AboutSite.ascx" />
@@ -391,6 +387,10 @@
     <Content Include="Views\Account\LogIn.cshtml" />
     <Content Include="Views\Admin\Index.cshtml" />
     <Content Include="Views\Admin\WhiteList.cshtml" />
+    <Content Include="Views\Legal\ContentPolicy.cshtml" />
+    <Content Include="Views\Legal\PrivacyPolicy.cshtml" />
+    <Content Include="Views\Legal\TermsOfService.cshtml" />
+    <Content Include="Views\Legal\TrademarkGuidance.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">
