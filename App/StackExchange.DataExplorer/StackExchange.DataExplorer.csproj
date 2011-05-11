@@ -333,7 +333,6 @@
     <Content Include="Views\Shared\PageSizer.ascx" />
     <Content Include="Views\Shared\QueryVoting.ascx" />
     <Content Include="Views\Shared\SubHeader.ascx" />
-    <Content Include="Views\Query\New.aspx" />
     <Content Include="Views\Shared\TaglineWithOData.ascx" />
     <Content Include="Views\Shared\User.ascx" />
     <Content Include="Views\User\Edit.aspx" />
@@ -391,6 +390,7 @@
     <Content Include="Views\Legal\PrivacyPolicy.cshtml" />
     <Content Include="Views\Legal\TermsOfService.cshtml" />
     <Content Include="Views\Legal\TrademarkGuidance.cshtml" />
+    <Content Include="Views\Query\New.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">
