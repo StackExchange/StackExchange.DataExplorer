@@ -356,7 +356,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Content\site.css" />
-    <Content Include="Views\Account\LogIn.aspx" />
     <Content Include="Views\Shared\Error.aspx" />
     <Content Include="Views\Shared\LogInUserControl.ascx" />
     <Content Include="Views\Shared\Site.Master" />
@@ -391,6 +390,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\Faq.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Account\LogIn.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">
