@@ -324,8 +324,6 @@
     <Content Include="Scripts\jquery.textarearesizer.js" />
     <Content Include="Views\Shared\Captcha.ascx" />
     <Content Include="Views\Shared\PageNotFound.aspx" />
-    <Content Include="Views\SavedQuery\Index.aspx" />
-    <Content Include="Views\SavedQuery\Show.aspx" />
     <Content Include="Views\Shared\AboutSite.ascx" />
     <Content Include="Views\Shared\GuessedUserId.ascx" />
     <Content Include="Views\Shared\Menu.ascx" />
@@ -391,6 +389,8 @@
     <Content Include="Views\Legal\TermsOfService.cshtml" />
     <Content Include="Views\Legal\TrademarkGuidance.cshtml" />
     <Content Include="Views\Query\New.cshtml" />
+    <Content Include="Views\SavedQuery\Index.cshtml" />
+    <Content Include="Views\SavedQuery\Show.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">

@@ -345,7 +345,7 @@
 
         @if (cached_results != null)
         {
-            <text>gotResults( @cached_results.Results );</text>
+            <text>gotResults(@Html.Raw(cached_results.Results));</text>
         }
 
         $('.schema').show();
