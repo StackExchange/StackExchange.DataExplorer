@@ -322,17 +322,6 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\jquery-1.4.2.js" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
-    <Content Include="Views\Shared\Captcha.ascx" />
-    <Content Include="Views\Shared\PageNotFound.aspx" />
-    <Content Include="Views\Shared\AboutSite.ascx" />
-    <Content Include="Views\Shared\GuessedUserId.ascx" />
-    <Content Include="Views\Shared\Menu.ascx" />
-    <Content Include="Views\Shared\PageNumbers.ascx" />
-    <Content Include="Views\Shared\PageSizer.ascx" />
-    <Content Include="Views\Shared\QueryVoting.ascx" />
-    <Content Include="Views\Shared\SubHeader.ascx" />
-    <Content Include="Views\Shared\TaglineWithOData.ascx" />
-    <Content Include="Views\Shared\User.ascx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -344,9 +333,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Content\site.css" />
-    <Content Include="Views\Shared\Error.aspx" />
-    <Content Include="Views\Shared\LogInUserControl.ascx" />
-    <Content Include="Views\Shared\Site.Master" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -391,6 +377,19 @@
     <Content Include="Views\User\Index.cshtml" />
     <Content Include="Views\User\Edit.cshtml" />
     <Content Include="Views\User\Show.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\PageNotFound.cshtml" />
+    <Content Include="Views\Shared\LogInUserControl.cshtml" />
+    <Content Include="Views\Shared\AboutSite.cshtml" />
+    <Content Include="Views\Shared\GuessedUserId.cshtml" />
+    <Content Include="Views\Shared\Menu.cshtml" />
+    <Content Include="Views\Shared\PageNumbers.cshtml" />
+    <Content Include="Views\Shared\PageSizer.cshtml" />
+    <Content Include="Views\Shared\QueryVoting.cshtml" />
+    <Content Include="Views\Shared\SubHeader.cshtml" />
+    <Content Include="Views\Shared\TaglineWithOData.cshtml" />
+    <Content Include="Views\Shared\User.cshtml" />
+    <Content Include="Views\Shared\Captcha.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">
