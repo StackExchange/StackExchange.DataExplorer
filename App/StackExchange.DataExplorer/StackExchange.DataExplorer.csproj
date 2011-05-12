@@ -333,9 +333,6 @@
     <Content Include="Views\Shared\SubHeader.ascx" />
     <Content Include="Views\Shared\TaglineWithOData.ascx" />
     <Content Include="Views\Shared\User.ascx" />
-    <Content Include="Views\User\Edit.aspx" />
-    <Content Include="Views\User\Index.aspx" />
-    <Content Include="Views\User\Show.aspx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -391,6 +388,9 @@
     <Content Include="Views\Query\New.cshtml" />
     <Content Include="Views\SavedQuery\Index.cshtml" />
     <Content Include="Views\SavedQuery\Show.cshtml" />
+    <Content Include="Views\User\Index.cshtml" />
+    <Content Include="Views\User\Edit.cshtml" />
+    <Content Include="Views\User\Show.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">

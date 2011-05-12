@@ -1,0 +1,19 @@
+﻿@model StackExchange.DataExplorer.Helpers.PagedList<StackExchange.DataExplorer.Models.User>
+@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Models
+@{this.SetPageTitle("Users - Stack Exchange Data Explorer");}
+<table id="userList">
+    <tbody>
+        @foreach (var row in Model.ToRows(7))
+        {
+            <tr>
+                @foreach (User user in row)
+                {
+                    <td>@Html.Partial("User", user)</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@Html.Partial("PageNumbers", ViewData["PageNumbers"])
