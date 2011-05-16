@@ -42,7 +42,7 @@
             <p>
                 <input type="hidden" name="siteId" value="@Model.Id" />
                 <div id="sqlQueryWrapper" style="position:relative;">
-                    <textarea id="sqlQuery" name="sql" rows="18">@sql</textarea>
+                    <textarea id="sqlQuery" name="sql" rows="18">@Html.Raw(sql)</textarea>
                 </div>
                 <div class="clear"></div>
             </p>
