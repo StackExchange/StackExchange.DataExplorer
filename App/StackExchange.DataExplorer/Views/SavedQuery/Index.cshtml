@@ -71,11 +71,15 @@
 <div id="mainbar">
     @if (Current.User.IsAdmin)
     {
-        <p>
-            <a href="#" class="showAdmin">show admin functions</a>
-            <strong>|</strong>
-            <a href="#" class="showSkipped">show skipped queries</a>
-        </p>
+        var selectedTab = ((SubHeader)ViewData["Header"]).Items.Where(i => i.Selected).FirstOrDefault();
+        if (selectedTab == null || selectedTab.Description != "everything")
+        {
+            <p>
+                <a href="#" class="showAdmin">show admin functions</a>
+                <strong>|</strong>
+                <a href="#" class="showSkipped">show skipped queries</a>
+            </p>
+        }
     }
     <ul class="querylist">
         @foreach (QueryExecutionViewData query in Model)
