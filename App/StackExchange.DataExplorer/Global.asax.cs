@@ -135,7 +135,7 @@ namespace StackExchange.DataExplorer
                 }
             }
 
-           // StackExchange.MvcMiniProfiler.MiniProfiler.Stop(true);
+           StackExchange.MvcMiniProfiler.MiniProfiler.Stop(true);
         }
     }
 }
