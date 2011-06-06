@@ -11,6 +11,9 @@
     }
     @Html.Raw(AssetPackager.LinkCss("sitecss"))
     @RenderSection("additionalStyles", required: false)
+
+    @Html.Raw(AssetPackager.ScriptSrc("jquery"))
+    @StackExchange.MvcMiniProfiler.MiniProfiler.RenderIncludes()
 </head>
 <body>
     <div class="page">

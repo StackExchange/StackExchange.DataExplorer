@@ -1,4 +1,7 @@
 ﻿using System.Transactions;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Data.Common;
 
 namespace StackExchange.DataExplorer.Models
 {
@@ -25,12 +28,22 @@ namespace StackExchange.DataExplorer.Models
                                         new TransactionOptions {IsolationLevel = IsolationLevel.ReadCommitted});
         }
 
+
         /// <summary>
         /// Answers a new DBContext for the current site.
         /// </summary>
         public static DBContext GetContext()
         {
-            return new DBContext();
+            var cnnString = ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString;
+            DbConnection connection = new SqlConnection(cnnString);
+
+
+            if (Current.Profiler != null) 
+            {
+                connection = new StackExchange.MvcMiniProfiler.Data.ProfiledDbConnection(connection, Current.Profiler);    
+            }
+
+            return new DBContext(connection);
         }
 
         /// <summary>

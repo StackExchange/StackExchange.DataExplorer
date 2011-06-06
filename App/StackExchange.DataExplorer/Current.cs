@@ -316,6 +316,14 @@ namespace StackExchange.DataExplorer
 #endif
             }
         }
+
+        public static MvcMiniProfiler.MiniProfiler Profiler 
+        { 
+            get 
+            {
+                return MvcMiniProfiler.MiniProfiler.Current;
+            } 
+        }
     }
 
     public enum DeploymentTier

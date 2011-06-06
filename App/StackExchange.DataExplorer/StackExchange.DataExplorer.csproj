@@ -57,6 +57,10 @@
     <Reference Include="MarkdownSharp">
       <HintPath>..\..\Lib\MarkdownSharp.dll</HintPath>
     </Reference>
+    <Reference Include="MvcMiniProfiler, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\MvcMiniProfiler.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Lib\Newtonsoft.Json.dll</HintPath>
     </Reference>

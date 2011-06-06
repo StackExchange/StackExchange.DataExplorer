@@ -36,6 +36,8 @@ namespace StackExchange.DataExplorer
             // disable the X-AspNetMvc-Version: header
             MvcHandler.DisableMvcResponseHeader = true;
 
+            StackExchange.MvcMiniProfiler.MiniProfiler.Init();
+
             // set up MVC routes so our app URLs actually work
             // IMPORTANT: this must be called last; nothing else appears to execute after this
             RegisterRoutes(RouteTable.Routes);
@@ -65,6 +67,7 @@ namespace StackExchange.DataExplorer
 
             // MUST be the last route as a catch-all!
             routes.MapRoute("{*url}", new {controller = "Error", action = "PageNotFound"});
+
         }
 
 
@@ -74,10 +77,16 @@ namespace StackExchange.DataExplorer
             Application["LastError"] = Server.GetLastError();
         }
 
+        protected void Application_BeginRequest()
+        {
+           StackExchange.MvcMiniProfiler.MiniProfiler.Start();  
+        }
+
         protected void Application_EndRequest(object sender, EventArgs e)
         {
             Current.DisposeDB();
             Current.DisposeRegisteredConnections();
+            StackExchange.MvcMiniProfiler.MiniProfiler.Stop();
         }
 
 
@@ -114,14 +123,19 @@ namespace StackExchange.DataExplorer
                 {
                     if (HttpContext.Current.User.Identity is FormsIdentity)
                     {
+                        // let authenticated users get a taste of our awesome profiling
+            
                         var id = (FormsIdentity) HttpContext.Current.User.Identity;
                         FormsAuthenticationTicket ticket = id.Ticket;
 
                         string[] roles = (ticket.UserData ?? "").Split(',');
                         HttpContext.Current.User = new GenericPrincipal(id, roles);
+                        return;
                     }
                 }
             }
+
+            StackExchange.MvcMiniProfiler.MiniProfiler.Stop(true);
         }
     }
 }
