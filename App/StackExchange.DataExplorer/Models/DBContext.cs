@@ -35,15 +35,7 @@ namespace StackExchange.DataExplorer.Models
         public static DBContext GetContext()
         {
             var cnnString = ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString;
-            DbConnection connection = new SqlConnection(cnnString);
-
-
-            if (Current.Profiler != null) 
-            {
-                connection = new StackExchange.MvcMiniProfiler.Data.ProfiledDbConnection(connection, Current.Profiler);    
-            }
-
-            return new DBContext(connection);
+            return new DBContext(MvcMiniProfiler.Data.ProfiledDbConnection.Get(new SqlConnection(cnnString)));
         }
 
         /// <summary>

@@ -36,8 +36,6 @@ namespace StackExchange.DataExplorer
             // disable the X-AspNetMvc-Version: header
             MvcHandler.DisableMvcResponseHeader = true;
 
-            StackExchange.MvcMiniProfiler.MiniProfiler.Init();
-
             // set up MVC routes so our app URLs actually work
             // IMPORTANT: this must be called last; nothing else appears to execute after this
             RegisterRoutes(RouteTable.Routes);
@@ -79,14 +77,14 @@ namespace StackExchange.DataExplorer
 
         protected void Application_BeginRequest()
         {
-           StackExchange.MvcMiniProfiler.MiniProfiler.Start();  
+           MvcMiniProfiler.MiniProfiler.Start();  
         }
 
         protected void Application_EndRequest(object sender, EventArgs e)
         {
             Current.DisposeDB();
             Current.DisposeRegisteredConnections();
-            StackExchange.MvcMiniProfiler.MiniProfiler.Stop();
+            MvcMiniProfiler.MiniProfiler.Stop();
         }
 
 
@@ -135,7 +133,7 @@ namespace StackExchange.DataExplorer
                 }
             }
 
-           StackExchange.MvcMiniProfiler.MiniProfiler.Stop(true);
+           MvcMiniProfiler.MiniProfiler.Stop(discardResults: true);
         }
     }
 }
