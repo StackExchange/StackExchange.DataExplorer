@@ -14,7 +14,7 @@
             <td>@entry.OpenId</td>
             <td class="approved">@entry.Approved</td>
             <td>@entry.CreationDate</td>
-            <td>@(entry.Approved ? "" : "<a href='/admin/whitelist/approve/" + entry.Id + "' class='approve'>approved</a>")</td>
+            <td>@Html.Raw(entry.Approved ? "" : "<a href='/admin/whitelist/approve/" + entry.Id + "' class='approve'>approved</a>")</td>
             <td><a href="/admin/whitelist/remove/@(entry.Id)" class="remove">remove</a></td>
         </tr>
     }
