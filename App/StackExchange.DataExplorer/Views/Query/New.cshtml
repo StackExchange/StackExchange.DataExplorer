@@ -26,13 +26,14 @@
     sql = Html.Encode(sql);
 
     var cached_results = ViewData["cached_results"] as CachedResult;
+    var description = (query != null && query.Description != null) ? query.Description : ParsedQuery.DEFAULT_DESCRIPTION;
 }
 
 <div id="queryText">
     <div>
         <div id="queryInfo">
             <h2>@((query != null && query.Name != null) ? query.Name : ParsedQuery.DEFAULT_NAME)</h2>
-            <p>@((query != null && query.Description != null) ? query.Description : ParsedQuery.DEFAULT_DESCRIPTION)</p>
+            <p>@Html.Raw(description == null ? "" : Html.Encode(description).Replace("\n", "<br />"))</p>
         </div>
         @Html.Partial("AboutSite", Model)
         <div class="clear"></div>
@@ -284,8 +285,7 @@
         var info = getQueryInfo(textarea.val()); 
 
         queryTitle.text(info.title);
-        queryDescription.text(info.description);
-
+        queryDescription.html($("<div/>").text(info.description).html().replace(/\n/g,"<br>"));
         };
 
         var onTextChanged = function() {

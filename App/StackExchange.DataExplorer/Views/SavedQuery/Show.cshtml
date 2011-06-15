@@ -15,7 +15,7 @@
             Please <a href="/account/login">login or register</a> to vote for this query.</h2>
         (click on this box to dismiss)
     </div>
-    <div id="query-description">@Model.Description.Replace("\n", "<br>")</div>
+    <div id="query-description">@Html.Raw(Model.Description == null ? "" : Html.Encode(Model.Description).Replace("\n", "<br />"))</div>
     @Html.Partial("AboutSite")
     <div class="clear">
     </div>
@@ -130,7 +130,7 @@
     var queryId = @Model.Id;
     var loggedOn = @ViewData["LoggedOn"];
     var queryText;
-    var querySlug = "@Model.Title.UrlEncode()";
+    var querySlug = "@Model.Title.URLFriendly()";
 
     @Html.Partial("GuessedUserId")
 
