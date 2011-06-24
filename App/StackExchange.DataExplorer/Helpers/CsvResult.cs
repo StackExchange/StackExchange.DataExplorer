@@ -40,11 +40,10 @@ namespace StackExchange.DataExplorer.Helpers
         {
             HttpResponseBase response = context.HttpContext.Response;
 
-            string attachment = "attachment; filename=QueryResults.csv";
-
             response.Clear();
             response.ContentType = "text/csv";
-            response.AddHeader("content-disposition", attachment);
+            response.AddHeader("content-disposition", "attachment; filename=QueryResults.csv");
+            response.AddHeader("content-length", Encoding.UTF8.GetByteCount(RawCsv).ToString());
             response.AddHeader("Pragma", "public");
             response.Write(RawCsv);
             response.Flush();
