@@ -77,12 +77,6 @@ namespace StackExchange.DataExplorer.Controllers
             return Content("sucess");
         }
 
-        [Route("admin/razor")]
-        public ActionResult Razor()
-        {
-            return View();
-        }
-
         public bool Allowed()
         {
             return CurrentUser.IsAdmin;

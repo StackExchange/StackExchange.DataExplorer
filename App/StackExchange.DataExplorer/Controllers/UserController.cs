@@ -74,11 +74,15 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id)
         {
-            User user = Current.DB.Users.First(u => u.Id == id);
+            User user = Current.DB.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return PageNotFound();
+            }
 
             if (user.Id == CurrentUser.Id || CurrentUser.IsAdmin)
             {
-                SetHeader(HtmlUtilities.Encode(user.Login) + " - Edit");
+                SetHeader(user.Login + " - Edit");
                 SelectMenuItem("Users");
 
                 return View(user);
@@ -89,18 +93,23 @@ namespace StackExchange.DataExplorer.Controllers
             }
         }
 
-        [Route(@"users/{id:\d+}/{ignore?}")]
-        public ActionResult Show(int id, object ignore, string order_by)
+        [Route(@"users/{id:INT}/{name?}")]
+        public ActionResult Show(int id, string name, string order_by)
         {
             User user = Current.DB.Users.FirstOrDefault(row => row.Id == id);
             if (user == null)
             {
                 return PageNotFound();
             }
+            // if this user has a display name, and the title is missing or does not match, permanently redirect to it
+            if (user.UrlTitle.HasValue() && (string.IsNullOrEmpty(name) || name != user.UrlTitle))
+            {
+                return PageMovedPermanentlyTo(string.Format("/users/{0}/{1}",user.Id, HtmlUtilities.URLFriendly(user.Login)) + Request.Url.Query);
+            }
 
             DBContext db = Current.DB;
 
-            SetHeader(HtmlUtilities.Encode(user.Login));
+            SetHeader(user.Login);
             SelectMenuItem("Users");
 
             order_by = order_by ?? "saved";

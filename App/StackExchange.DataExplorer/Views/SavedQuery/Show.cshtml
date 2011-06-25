@@ -2,7 +2,7 @@
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Models
 @{
-    this.SetPageTitle(Html.Encode(Model.Title) + " - Stack Exchange Data Explorer");
+    this.SetPageTitle(Model.Title + " - Stack Exchange Data Explorer");
     var cached_results = ViewData["cached_results"] as CachedResult;
 }
 @section additionalStyles {

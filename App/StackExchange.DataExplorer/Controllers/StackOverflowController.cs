@@ -61,7 +61,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         public Site GetSite(string sitename)
         {
-            return Current.DB.Sites.First(s => s.Name.ToLower() == sitename);
+            return Current.DB.Sites.FirstOrDefault(s => s.Name.ToLower() == sitename);
         }
 
 
@@ -388,6 +388,17 @@ namespace StackExchange.DataExplorer.Controllers
         {
             Response.StatusCode = (int) HttpStatusCode.NotFound;
             return View("PageNotFound");
+        }
+
+        /// <summary>
+        /// returns a 301 permanent redirect
+        /// </summary>
+        /// <returns></returns>
+        protected ContentResult PageMovedPermanentlyTo(string url)
+        {
+            Response.RedirectLocation = url;
+            Response.StatusCode = (int) HttpStatusCode.MovedPermanently;
+            return null;
         }
 
         protected ViewResult PageBadRequest()

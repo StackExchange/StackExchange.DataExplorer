@@ -12,22 +12,26 @@ namespace StackExchange.DataExplorer.Controllers
     public class SavedQueryController : StackOverflowController
     {
         [Route(@"{sitename}/st/{id:\d+}/{slug?}")]
-        public ActionResult ShowText(int id, string sitename)
+        public ActionResult ShowText(int id, string sitename, string slug)
         {
-            return ProcessShow(id, sitename, "text");
+            return ProcessShow(id, sitename, "text",slug);
         }
 
         [Route(@"{sitename}/s/{id:\d+}/{slug?}")]
-        public ActionResult Show(int id, string sitename)
+        public ActionResult Show(int id, string sitename, string slug)
         {
-            return ProcessShow(id, sitename, "default");
+            return ProcessShow(id, sitename, "default",slug);
         }
 
-        private ActionResult ProcessShow(int id, string sitename, string format)
+        private ActionResult ProcessShow(int id, string sitename, string format,string slug)
         {
             DBContext db = Current.DB;
 
             Site = GetSite(sitename);
+            if (Site == null)
+            {
+                return PageNotFound();
+            }
 
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
             SelectMenuItem("Queries");
@@ -37,8 +41,12 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return PageNotFound();
             }
-
-            SetHeader(HtmlUtilities.Encode(savedQuery.Title));
+            // if this user has a display name, and the title is missing or does not match, permanently redirect to it
+            if (savedQuery.Title.URLFriendly().HasValue() && (string.IsNullOrEmpty(slug) || slug != savedQuery.Title.URLFriendly()))
+            {
+                return PageMovedPermanentlyTo(string.Format("/{0}/{1}/{2}/{3}", sitename, (format=="default"?"s":"st"), id, HtmlUtilities.URLFriendly(savedQuery.Title)) + Request.Url.Query);
+            }
+            SetHeader(savedQuery.Title);
             int totalVotes =
                 db.Votes.Where(v => v.SavedQueryId == id && v.VoteTypeId == (int) VoteType.Favorite).Count();
 
@@ -196,7 +204,11 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("{sitename}/queries")]
         public ActionResult Index(string sitename, string order_by, string q, int? page, int? pagesize)
         {
-            Site site = Current.DB.Sites.First(si => si.Name.ToLower() == sitename);
+            Site site = GetSite(sitename);
+            if (site==null)
+            {
+                return PageNotFound();
+            }
 
             QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);
 

@@ -132,5 +132,10 @@ namespace StackExchange.DataExplorer.Models
                     Util.GravatarHash(Email ?? Id.ToString()), width + "px"
                     );
         }
+
+        public string UrlTitle
+        {
+            get { return HtmlUtilities.URLFriendly(Login); }
+        }
     }
 }

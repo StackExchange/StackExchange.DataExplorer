@@ -3,7 +3,7 @@
 @using StackExchange.DataExplorer.Helpers
 @using StackExchange.DataExplorer.ViewModel
 @{
-    this.SetPageTitle("User " + HtmlUtilities.Encode(Model.Login) + " - Stack Exchange Data Explorer");
+    this.SetPageTitle("User " + Model.Login + " - Stack Exchange Data Explorer");
     bool isCurrentUser = Model.Id == Current.User.Id;
 }
 
@@ -70,7 +70,7 @@
                 </table>
             </td>
             <td style="width:390px;">
-                <div id="user-about-me" class="note">@Model.SafeAboutMe</div>
+                <div id="user-about-me" class="note">@Html.Raw(Model.SafeAboutMe)</div>
                 @if (false) {
                     <div class="summaryinfo">
                         last activity: @Model.LastActivityDate.ToRelativeTime() from this ip address

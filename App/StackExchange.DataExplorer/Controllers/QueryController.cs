@@ -93,7 +93,7 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return PageNotFound();
             }
-
+            
             var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, false);
 
             return new CsvResult(json);
@@ -133,7 +133,12 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/qte/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult EditText(string sitename, int savedQueryId)
         {
-            SetCommonQueryViewData(sitename);
+            bool foundSite = SetCommonQueryViewData(sitename);
+            if (!foundSite)
+            {
+                return PageNotFound();
+            }
+
             SetHeaderInfo(savedQueryId);
 
             SavedQuery savedQuery = FindSavedQuery(savedQueryId);
@@ -162,7 +167,12 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/qe/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult Edit(string sitename, int savedQueryId)
         {
-            SetCommonQueryViewData(sitename);
+            bool foundSite = SetCommonQueryViewData(sitename);
+            if (!foundSite)
+            {
+                return PageNotFound();
+            }
+
             SetHeaderInfo(savedQueryId);
 
             SavedQuery savedQuery = FindSavedQuery(savedQueryId);
@@ -184,7 +194,11 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/qt/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowText(string sitename, int queryId)
         {
-            SetCommonQueryViewData(sitename);
+            bool foundSite = SetCommonQueryViewData(sitename);
+            if (!foundSite)
+            {
+                return PageNotFound();
+            }
 
             Query query = FindQuery(queryId);
             if (query == null)
@@ -208,7 +222,12 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/q/{queryId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult Show(string sitename, int queryId)
         {
-            SetCommonQueryViewData(sitename);
+            bool foundSite = SetCommonQueryViewData(sitename);
+            if (!foundSite)
+            {
+                return PageNotFound();
+            }
+
             Query query = FindQuery(queryId);
             if (query == null)
             {
@@ -245,20 +264,27 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("{sitename}/query/new", RoutePriority.Low)]
         public ActionResult New(string sitename)
         {
-            SetCommonQueryViewData(sitename);
-            return View(Site);
+            bool foundSite = SetCommonQueryViewData(sitename);
+            
+            return foundSite?View(Site):PageNotFound();
         }
 
-        private void SetCommonQueryViewData(string sitename)
+        private bool SetCommonQueryViewData(string sitename)
         {
             SetHeaderInfo();
-            Site = GetSite(sitename);
-
+            var s = GetSite(sitename);
+            if (s==null)
+            {
+                return false;
+            }
+            Site = s;
             SelectMenuItem("Compose Query");
 
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
             ViewData["Tables"] = Site.GetTableInfos();
             ViewData["Sites"] = Current.DB.Sites.ToList();
+
+            return true;
         }
 
         private void TrackQueryView(int id)
