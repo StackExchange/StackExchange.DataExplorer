@@ -7,8 +7,7 @@ as
 
 declare sites_cursor cursor 
 for select Id, DatabaseName from Sites
-join sys.databases d on d.Name = DatabaseName
- 
+
 open sites_cursor 
 
 declare @id int 
