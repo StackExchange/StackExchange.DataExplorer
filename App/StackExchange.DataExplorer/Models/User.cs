@@ -72,8 +72,10 @@ namespace StackExchange.DataExplorer.Models
 
             if (login.Length == 0)
             {
+                /* email scrubbing got people upset, so it is gone now
                 if (email != null)
                     login = CleanLogin(email.Split('@')[0]);
+                 */
 
                 if (login.Length == 0)
                     login = "jon.doe";
