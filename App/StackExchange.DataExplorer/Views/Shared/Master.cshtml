@@ -103,6 +103,12 @@
                             rel="license">attribution required</a>
             </div>
         </div>
+
+        @if (HttpContext.Current.IsDebuggingEnabled)
+        { 
+            <div style="margin-top:15px;color:#d99;">Debugging is enabled</div>
+        }
+
     </div>
     <noscript>
         <div id="noscript-warning">
