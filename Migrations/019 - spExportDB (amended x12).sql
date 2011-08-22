@@ -106,6 +106,18 @@ exec spExportTable @sourceDB, @targetDB, 'vExportBadges', 'Badges'
 RAISERROR( 'Exporting Comments',0,1) WITH NOWAIT
 exec spExportTable @sourceDB, @targetDB, 'vExportComments', 'Comments'
 
+RAISERROR( 'Exporting Tag Synonyms',0,1) WITH NOWAIT
+exec spExportTable @sourceDB, @targetDB, 'vExportTagSynonyms', 'TagSynonyms'
+RAISERROR( 'Exporting Post Feedback',0,1) WITH NOWAIT
+exec spExportTable @sourceDB, @targetDB, 'vExportPostFeedback', 'PostFeedback'
+
+RAISERROR( 'Exporting Suggested Edits',0,1) WITH NOWAIT
+exec spExportTable @sourceDB, @targetDB, 'vExportSuggestedEdits', 'SuggestedEdits'
+
+RAISERROR( 'Exporting Suggested Edit Votes',0,1) WITH NOWAIT
+exec spExportTable @sourceDB, @targetDB, 'vExportSuggestedEditVotes', 'SuggestedEditVotes'
+
+
 RAISERROR( 'Indexing',0,1) WITH NOWAIT
 exec('create unique clustered index idxId on  [' + @targetDB + '].dbo.Users (Id)')
 exec('create index ParentIdIdx on [' + @targetDB + '].dbo.Posts (ParentId)')
@@ -240,4 +252,6 @@ EXEC
 		SELECT 21, ''Post Dissociated''
 		UNION ALL
 		SELECT 22, ''Question Unmerged''
+		UNION ALL
+		SELECT 24, ''Suggested Edit applied''
 ')
