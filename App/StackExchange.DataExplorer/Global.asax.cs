@@ -7,6 +7,8 @@ using System.Web.Routing;
 using System.Web.Security;
 using SimpleErrorHandler;
 using StackExchange.DataExplorer.Helpers;
+using System.Linq;
+using MvcMiniProfiler.MVCHelpers;
 
 namespace StackExchange.DataExplorer
 {
@@ -39,6 +41,15 @@ namespace StackExchange.DataExplorer
             // set up MVC routes so our app URLs actually work
             // IMPORTANT: this must be called last; nothing else appears to execute after this
             RegisterRoutes(RouteTable.Routes);
+
+            var copy = ViewEngines.Engines.ToList();
+            ViewEngines.Engines.Clear();
+            foreach (var item in copy)
+            {
+                ViewEngines.Engines.Add(new ProfilingViewEngine(item));
+            }
+
+            GlobalFilters.Filters.Add(new ProfilingActionFilter());
         }
 
         // http://msdn.microsoft.com/en-us/library/system.web.httpapplication.init(VS.71).aspx
