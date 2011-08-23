@@ -34,6 +34,11 @@
     <add name="ReaderConnection" connectionString="Server=$(TargetReaderDatabaseServer)%3bDatabase=!!DB!!%3bUser ID=$(DatabaseReadonlyUser)%3bPassword=$(DatabaseReadonlyPassword)%3bTrusted_Connection=False%3b" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
   </connectionStrings>
 
+  <system.web>
+    <compilation xdt:Transform="RemoveAttributes(debug)"/>
+  </system.web>
+
+
 </configuration>]]></WebReleaseConfig>
   </PropertyGroup>
 
