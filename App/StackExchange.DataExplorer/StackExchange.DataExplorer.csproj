@@ -57,9 +57,9 @@
     <Reference Include="MarkdownSharp">
       <HintPath>..\..\Lib\MarkdownSharp.dll</HintPath>
     </Reference>
-    <Reference Include="MvcMiniProfiler, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Lib\MvcMiniProfiler.dll</HintPath>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="MvcMiniProfiler">
+      <HintPath>..\packages\MiniProfiler.1.9\lib\net40\MvcMiniProfiler.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Lib\Newtonsoft.Json.dll</HintPath>
@@ -103,6 +103,9 @@
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Web.Mobile" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="WebActivator">
+      <HintPath>..\packages\WebActivator.1.4.2\lib\net40\WebActivator.dll</HintPath>
+    </Reference>
     <Reference Include="Yahoo.Yui.Compressor">
       <HintPath>..\..\Lib\Yahoo.Yui.Compressor.dll</HintPath>
     </Reference>
@@ -127,6 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppSettings.cs" />
+    <Compile Include="App_Start\MiniProfiler.cs" />
     <Compile Include="AssetPackager.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
@@ -140,6 +144,7 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VoteController.cs" />
     <Compile Include="Current.cs" />
+    <Compile Include="Dapper\SqlMapper.cs" />
     <Compile Include="DefaultAttribute.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Global.asax.cs">
@@ -148,6 +153,7 @@
     <Compile Include="Helpers\BusinessRuleViolation.cs" />
     <Compile Include="Helpers\Crc16.cs" />
     <Compile Include="Helpers\CsvResult.cs" />
+    <Compile Include="Helpers\DapperHelper.cs" />
     <Compile Include="Helpers\DataKeys.cs" />
     <Compile Include="Helpers\HtmlUtilities.cs" />
     <Compile Include="Helpers\JsonpResult.cs" />
@@ -394,6 +400,8 @@
     <Content Include="Views\Shared\TaglineWithOData.cshtml" />
     <Content Include="Views\Shared\User.cshtml" />
     <Content Include="Views\Shared\Captcha.cshtml" />
+    <Content Include="packages.config" />
+    <Content Include="Views\Shared\_MINIPROFILER UPDATED Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">

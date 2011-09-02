@@ -33,10 +33,10 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     int siteId = -1;
                     Int32.TryParse((Session["SiteId"] ?? "").ToString(), out siteId);
-                    site = Current.DB.Sites.FirstOrDefault(s => s.Id == siteId);
+                    site = Current.DB.Query<Models.Site>("select * from Sites where Id = @siteId",new {siteId}).FirstOrDefault(); 
                     if (site == null)
                     {
-                        site = Current.DB.Sites.OrderByDescending(s => s.TotalQuestions).First();
+                        site = Current.DB.Query<Models.Site>("select top 1 * from Sites order by TotalQuestions desc").Single();  
                     }
                 }
                 return site;
@@ -61,7 +61,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         public Site GetSite(string sitename)
         {
-            return Current.DB.Sites.FirstOrDefault(s => s.Name.ToLower() == sitename);
+            return Current.DB.Query<Models.Site>("select * from Sites where lower(Name) = @sitename", new { sitename }).FirstOrDefault(); 
         }
 
 

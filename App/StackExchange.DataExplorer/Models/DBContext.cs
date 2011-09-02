@@ -35,17 +35,9 @@ namespace StackExchange.DataExplorer.Models
         public static DBContext GetContext()
         {
             var cnnString = ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString;
-            return new DBContext(MvcMiniProfiler.Data.ProfiledDbConnection.Get(new SqlConnection(cnnString)));
+            return new DBContext(new MvcMiniProfiler.Data.ProfiledDbConnection(new SqlConnection(cnnString), MvcMiniProfiler.MiniProfiler.Current));
         }
 
-        /// <summary>
-        /// Ensures anonymous users aren't persisted to the database.
-        /// </summary>
-        /* public void InsertUser(User instance) {
-            if (instance == null || instance.IsAnonymous)
-                return;
-            ExecuteDynamicInsert(instance);
-        }*/
         public override string ToString()
         {
             return Site != null ? Site.Name : "unknown site";

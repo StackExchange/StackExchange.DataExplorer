@@ -86,16 +86,11 @@ namespace StackExchange.DataExplorer
             Application["LastError"] = Server.GetLastError();
         }
 
-        protected void Application_BeginRequest()
-        {
-           MvcMiniProfiler.MiniProfiler.Start();  
-        }
 
         protected void Application_EndRequest(object sender, EventArgs e)
         {
             Current.DisposeDB();
             Current.DisposeRegisteredConnections();
-            MvcMiniProfiler.MiniProfiler.Stop();
         }
 
 
@@ -144,7 +139,8 @@ namespace StackExchange.DataExplorer
                 }
             }
 
-           MvcMiniProfiler.MiniProfiler.Stop(discardResults: true);
+           // profiling for everyone.
+           //MvcMiniProfiler.MiniProfiler.Stop(discardResults: true);
         }
     }
 }

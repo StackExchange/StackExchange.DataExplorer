@@ -13,7 +13,9 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeader("Choose a Site");
             SelectMenuItem("Home");
 
-            return View(Current.DB.Sites.OrderByDescending(s => s.TotalQuestions).ToList());
+            var sites = Current.DB.Query<Models.Site>("select * from Sites order by TotalQuestions desc").ToList();
+
+            return View(sites);
         }
 
         [Route("about")]
