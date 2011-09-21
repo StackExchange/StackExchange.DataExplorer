@@ -6,11 +6,7 @@ using MvcMiniProfiler;
 using MvcMiniProfiler.MVCHelpers;
 using Microsoft.Web.Infrastructure;
 using Microsoft.Web.Infrastructure.DynamicModuleHelper;
-//using System.Data;
-//using System.Data.Entity;
-//using System.Data.Entity.Infrastructure;
-//using MvcMiniProfiler.Data.EntityFramework;
-//using MvcMiniProfiler.Data.Linq2Sql;
+using StackExchange.DataExplorer.Controllers;
 
 [assembly: WebActivator.PreApplicationStartMethod(
 	typeof(StackExchange.DataExplorer.App_Start.MiniProfilerPackage), "PreStart")]
@@ -23,23 +19,18 @@ namespace StackExchange.DataExplorer.App_Start
 {
     public static class MiniProfilerPackage
     {
+        class ProxySafeUserProvider : IUserProvider
+        {
+            public string GetUser(HttpRequest request)
+            {
+                return StackOverflowController.GetRemoteIP(request.ServerVariables);
+            }
+        }
+
         public static void PreStart()
         {
-
-            // Be sure to restart you ASP.NET Developement server, this code will not run until you do that. 
-
-            //TODO: See - _MINIPROFILER UPDATED Layout.cshtml
-            //      For profiling to display in the UI you will have to include the line @MvcMiniProfiler.MiniProfiler.RenderIncludes() 
-            //      in your master layout
-
-            //TODO: Non SQL Server based installs can use other formatters like: new MvcMiniProfiler.SqlFormatters.InlineFormatter()
+            WebRequestProfilerProvider.Settings.UserProvider = new ProxySafeUserProvider();
             MiniProfiler.Settings.SqlFormatter = new MvcMiniProfiler.SqlFormatters.SqlServerFormatter();
-
-			//TODO: To profile a standard DbConnection: 
-			// var profiled = new ProfiledDbConnection(cnn, MiniProfiler.Current);
-
-            //TODO: If you are profiling EF code first try: 
-			// MiniProfilerEF.Initialize();
 
             //Make sure the MiniProfiler handles BeginRequest and EndRequest
             DynamicModuleUtility.RegisterModule(typeof(MiniProfilerStartupModule));
@@ -67,10 +58,7 @@ namespace StackExchange.DataExplorer.App_Start
         {
             context.BeginRequest += (sender, e) =>
             {
-                var request = ((HttpApplication)sender).Request;
-                //TODO: By default only local requests are profiled, optionally you can set it up
-                //  so authenticated users are always profiled
-               // MiniProfiler.Start();
+                MiniProfiler.Start();
             };
 
             context.EndRequest += (sender, e) =>

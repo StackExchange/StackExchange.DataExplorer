@@ -13,7 +13,7 @@
     @RenderSection("additionalStyles", required: false)
 
     @Html.Raw(AssetPackager.ScriptSrc("jquery"))
-    @{ //@MvcMiniProfiler.MiniProfiler.RenderIncludes() }
+    @MvcMiniProfiler.MiniProfiler.RenderIncludes() 
 </head>
 <body>
     <div class="page">
