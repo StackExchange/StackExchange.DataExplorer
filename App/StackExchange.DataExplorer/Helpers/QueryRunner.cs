@@ -630,6 +630,9 @@ namespace StackExchange.DataExplorer.Helpers
                 case "User Link":
                     column.Type = ResultColumnType.User;
                     break;
+                case "Suggested Edit Link":
+                    column.Type = ResultColumnType.SuggestedEdit;
+                    break;
                 default:
                     break;
             }
@@ -640,9 +643,17 @@ namespace StackExchange.DataExplorer.Helpers
             var rval = new Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>();
             rval["Post Link"] = GetPostLinks;
             rval["User Link"] = GetUserLinks;
+            rval["Suggested Edit Link"] = GetSuggestedEditLinks;
             return rval;
         }
 
+        public static List<object> GetSuggestedEditLinks(SqlConnection cnn, IEnumerable<object> items)
+        {
+            return LookupIds(cnn, items,
+                             @"select Id, case when RejectionDate is not null then 'rejected' when ApprovalDate is not null then 'accepted' else 'pending' end 
+                            from SuggestedEdits
+                            where Id in ");
+        }
 
         public static List<object> GetUserLinks(SqlConnection cnn, IEnumerable<object> items)
         {

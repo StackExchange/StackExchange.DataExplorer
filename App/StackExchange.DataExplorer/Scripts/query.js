@@ -216,8 +216,23 @@ function gotResults(results) {
             var data = null;
             var col = results.resultSets[0].rows[i][c];
             if (col != null && col.title != null && col.id != null) {
-                var isUser = (results.resultSets[0].columns[c].type == "User");
-                data = ("<a href=\"" + results.url + (isUser ? "/users/" : "/questions/") +
+                var specialType = results.resultSets[0].columns[c].type; 
+                var baseUrl; 
+                switch (specialType) {
+                    case "User": 
+                        baseUrl = "/users/";
+                        break;
+                    case "Post":
+                        baseUrl = "/questions/"
+                        break;
+                    case "SuggestedEdit": 
+                        baseUrl = "/suggested-edits/"
+                        break;
+                    default:
+                        baseUrl = "invalid";
+                }
+
+                data = ("<a href=\"" + results.url + baseUrl +
                 col.id + "\">" + encodeColumn(col.title) + "</a>");
                 if (col.title.length > maxWidths[c]) maxWidths[c] = col.title.length;
             } else if (model[c].field == "Tags" || model[c].field == "TagName") {

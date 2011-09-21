@@ -20,7 +20,9 @@ namespace StackExchange.DataExplorer.Helpers
         User,
         Number,
         Date,
-        Text
+        Text,
+        Url, 
+        SuggestedEdit
     }
 
     public class ResultColumnInfo
