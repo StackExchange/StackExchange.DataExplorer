@@ -191,16 +191,24 @@ namespace StackExchange.DataExplorer.Helpers
             return json;
         }
 
-        public static string GetCachedResults(ParsedQuery query, Site site)
+        public static QueryResults GetCachedResults(ParsedQuery query, Site site)
         {
-            CachedResult row = Current.DB.CachedResults
-                .Where(result => result.QueryHash == query.ExecutionHash && result.SiteId == site.Id)
-                .FirstOrDefault();
-            string results = null;
-            if (row != null)
+            CachedResult cache = Current.DB.Query<Models.CachedResult>(
+                "SELECT * FROM CachedResults WHERE QueryHash = @hash AND SiteId = @siteId",
+                new
+                {
+                    hash = query.ExecutionHash,
+                    siteId = site.Id
+                }
+            ).FirstOrDefault();
+
+            QueryResults results = null;
+
+            if (cache != null && cache.Results != null)
             {
-                results = row.Results;
+                results = QueryResults.FromJson(cache.Results);
             }
+
             return results;
         }
 
@@ -503,23 +511,26 @@ namespace StackExchange.DataExplorer.Helpers
         public static string GetJson(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
         {
             DBContext db = Current.DB;
-            UpdateSavedQuery(user, parsedQuery);
 
-            var cachedJson = GetCachedResults(parsedQuery, site);
-            if (cachedJson != null)
+            var cache = GetCachedResults(parsedQuery, site);
+
+            VerifyQueryState(parsedQuery, cache, user);
+
+            if (cache != null)
             {
                 if (!IncludeExecutionPlan)
                 {
-                    return cachedJson;
+                    return cache.ToJson();
                 }
                 else
                 {
                     var plan = GetCachedPlan(parsedQuery, site);
+
                     if (plan != null)
                     {
-                        var queryResults = QueryResults.FromJson(cachedJson);
-                        queryResults.ExecutionPlan = plan.Plan;
-                        return queryResults.ToJson();
+                        cache.ExecutionPlan = plan.Plan;
+
+                        return cache.ToJson();
                     }
                 }
             }
@@ -527,10 +538,12 @@ namespace StackExchange.DataExplorer.Helpers
             QueryResults results = ExecuteNonCached(parsedQuery, site, user, IncludeExecutionPlan);
 
             string json = results.ToJson();
-            if (cachedJson == null)
+
+            if (cache == null)
             {
                 AddResultToCache(json, parsedQuery, site, db, IncludeExecutionPlan);
             }
+
             if (IncludeExecutionPlan)
             {
                 db.CachedPlans.InsertOnSubmit(new CachedPlan()
@@ -546,6 +559,97 @@ namespace StackExchange.DataExplorer.Helpers
 
             // well there is an annoying XSS condition here 
             return json.Replace("/", "\\/");
+        }
+
+        /// <summary>
+        /// Verifies that the cached set of results are correct for this particular query,
+        /// addressing the case where many queries may produce the same execution SQL, but may
+        /// have differing parameter names.
+        /// </summary>
+        /// <param name="parsedQuery">The current query that produces the results in the
+        /// cache</param>
+        /// <param name="cache">The cached results for a query semantically equivalent to the
+        /// provided one</param>
+        /// <param name="user"></param>
+        private static void VerifyQueryState(ParsedQuery parsedQuery, QueryResults cache, User user)
+        {
+            Query query = Current.DB.Query<Query>(
+                "SELECT * FROM Queries WHERE QueryHash = @hash",
+                new
+                {
+                    hash = parsedQuery.Hash
+                }
+            ).FirstOrDefault();
+
+            // Check if the parsed query is actually responsible for this cache
+            if (cache != null)
+            {
+                int id;
+
+                // If the query doesn't exist, now is the only time it'll get created since it
+                // corresponds to a pre-existing cache result (but isn't actually what generated
+                // the result set)
+                if (query == null)
+                {
+                    id = (int)Current.DB.Query<decimal>(@"
+                        INSERT INTO Queries(
+                            CreatorId, CreatorIP, FirstRun, Name,
+                            Description, QueryBody, QueryHash, Views
+                        ) VALUES(
+                            @CreatorId, @CreatorIP, @FirstRun, @Name,
+                            @Description, @QueryBody, @QueryHash, @Views
+                        )
+
+                        SELECT SCOPE_IDENTITY()",
+                        new
+                        {
+                            CreatorId = user.IsAnonymous ? (int?)null : user.Id,
+                            CreatorIP = user.IPAddress,
+                            FirstRun = DateTime.UtcNow,
+                            Name = parsedQuery.Name,
+                            Description = parsedQuery.Description,
+                            QueryBody = parsedQuery.RawSql,
+                            QueryHash = parsedQuery.Hash,
+                            Views = 0
+                        }
+                    ).First();
+                }
+                else
+                {
+                    id = query.Id;
+                }
+
+                // Update the cache's query ID to lie to the client that these results came from
+                // this specific query
+                if (id != cache.QueryId)
+                {
+                    cache.QueryId = id;
+                }
+            }
+
+            // Update the important bits of the query if we didn't just insert it, provided that
+            // the user isn't anonymous.
+            if (query != null && !user.IsAnonymous)
+            {
+                // Save ourselves the trouble of updating if nothing's changed
+                if (query.Name != parsedQuery.Name || query.Description != parsedQuery.Description || query.QueryBody != query.QueryBody)
+                {
+                    Current.DB.Execute(@"
+                        UPDATE Queries SET
+                            Name = @name,
+                            Description = @description,
+                            QueryBody = @sql
+                        WHERE QueryHash = @hash",
+                        new
+                        {
+                            name = parsedQuery.Name,
+                            description = parsedQuery.Description,
+                            sql = parsedQuery.RawSql,
+                            hash = parsedQuery.Hash
+                        }
+                    );
+                }
+            }
         }
 
         /// <summary>
@@ -571,29 +675,6 @@ namespace StackExchange.DataExplorer.Helpers
                 CreationDate = DateTime.UtcNow
             };
             db.CachedResults.InsertOnSubmit(cache);
-        }
-
-        /// <summary>
-        /// Updates a saved query if it exists and the user is not anonymous.
-        /// </summary>
-        private static void UpdateSavedQuery(User user, ParsedQuery parsedQuery)
-        {
-            DBContext db = Current.DB;
-
-            // update the query if its not anon
-            if (!user.IsAnonymous)
-            {
-                Query query = db.Queries
-                    .Where(q => q.QueryHash == parsedQuery.Hash)
-                    .FirstOrDefault();
-                if (query != null)
-                {
-                    query.Description = parsedQuery.Description;
-                    query.Name = parsedQuery.Name;
-                    query.QueryBody = parsedQuery.RawSql;
-                    db.SubmitChanges();
-                }
-            }
         }
 
         private static void ProcessMagicColumns(QueryResults results, SqlConnection cnn)
