@@ -11,7 +11,7 @@ namespace StackExchange.DataExplorer.Tests.Util {
     public class TestQueryRunner {
         [TestMethod]
         public void TestPostLinkShouldNotCrash() {
-            QueryRunner.GetJson(new ParsedQuery("select top 10 Id as [Post Link] from Posts", null), Current.DB.Sites.First() , new User());
+            QueryRunner.GetSingleSiteResults(new ParsedQuery("select top 10 Id as [Post Link] from Posts", null), Current.DB.Sites.First() , new User());
         }
     }
 }

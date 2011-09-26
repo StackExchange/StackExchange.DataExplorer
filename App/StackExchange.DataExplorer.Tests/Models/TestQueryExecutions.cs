@@ -42,7 +42,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
 
             var user = User.CreateUser("Fred", "a@a.com", "xyzdsa");
             var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user);
-            QueryRunner.LogQueryExecution(user, site , new ParsedQuery(sql,null));
+            QueryRunner.LogQueryExecution(user, site , new ParsedQuery(sql,null), results);
 
             var executions = Current.DB.QueryExecutions.Count(q => q.UserId == user.Id && q.QueryId == results.QueryId);
             Assert.AreEqual(1, executions);
@@ -57,8 +57,8 @@ namespace StackExchange.DataExplorer.Tests.Models {
 
             var user = User.CreateUser("Fred", "a@a.com", "xyzdsa");
             var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user);
-            QueryRunner.LogQueryExecution(user, site, new ParsedQuery(sql, null));
-            QueryRunner.LogQueryExecution(user, site, new ParsedQuery(sql, null));
+            QueryRunner.LogQueryExecution(user, site, new ParsedQuery(sql, null), results);
+            QueryRunner.LogQueryExecution(user, site, new ParsedQuery(sql, null), results);
 
             var runs = Current.DB.QueryExecutions.Where(q => q.UserId == user.Id && q.QueryId == results.QueryId);
            

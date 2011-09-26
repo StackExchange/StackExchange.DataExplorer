@@ -124,7 +124,7 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        public static string GetMultiSiteJson(ParsedQuery parsedQuery, User currentUser, bool excludeMetas)
+        public static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser, bool excludeMetas)
         {
             var sites = Current.DB.Sites.ToList();
             if (excludeMetas)
@@ -134,8 +134,7 @@ namespace StackExchange.DataExplorer.Helpers
 
 
             var firstSite = sites.First();
-            string json = QueryRunner.GetJson(parsedQuery, firstSite, currentUser);
-            QueryResults results = QueryResults.FromJson(json);
+            var results = QueryRunner.GetSingleSiteResults(parsedQuery, firstSite, currentUser);
             StringBuilder buffer = new StringBuilder();
 
             if (results.ResultSets.First().Columns.Where(c => c.Name == "Pivot").Any())
@@ -153,8 +152,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     try
                     {
-                        json = QueryRunner.GetJson(parsedQuery, s, currentUser);
-                        var tmp = QueryResults.FromJson(json);
+                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser);
                         results.ExecutionTime += tmp.ExecutionTime;
                         MergePivot(s, results, tmp);
                     }
@@ -172,8 +170,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     try
                     {
-                        json = QueryRunner.GetJson(parsedQuery, s, currentUser);
-                        var tmp = QueryResults.FromJson(json).ToTextResults();
+                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser).ToTextResults();
                         results.ExecutionTime += tmp.ExecutionTime;
                         AddBody(buffer, tmp, s);
                     }
@@ -184,11 +181,12 @@ namespace StackExchange.DataExplorer.Helpers
 
                 }
             }
+
             results.Messages = buffer.ToString();
             results.MultiSite = true;
             results.ExcludeMetas = excludeMetas;
-            json = results.ToJson();
-            return json;
+
+            return results;
         }
 
         public static QueryResults GetCachedResults(ParsedQuery query, Site site)
@@ -228,34 +226,60 @@ namespace StackExchange.DataExplorer.Helpers
                 .FirstOrDefault();
         }
 
-        public static void LogQueryExecution(User user, Site site, ParsedQuery parsedQuery)
+        public static void LogQueryExecution(User user, Site site, ParsedQuery parsedQuery, QueryResults results)
         {
-            if (user.IsAnonymous) return;
-
-            Query query = Current.DB.Queries.FirstOrDefault(q => q.QueryHash == parsedQuery.Hash);
-            if (query != null)
+            if (user.IsAnonymous)
             {
-                QueryExecution execution = Current.DB.QueryExecutions.FirstOrDefault(e => e.QueryId == query.Id);
+                return;
+            }
+
+            if (results.QueryId > 0)
+            {
+                var execution = Current.DB.Query<QueryExecution>(
+                    "SELECT * FROM QueryExecutions WHERE QueryId = @id AND UserId = @user",
+                    new
+                    {
+                        id = results.QueryId,
+                        user = user.Id
+                    }
+                ).FirstOrDefault();
+
                 if (execution == null)
                 {
-                    execution = new QueryExecution
-                                    {
-                                        ExecutionCount = 1,
-                                        FirstRun = DateTime.UtcNow,
-                                        LastRun = DateTime.UtcNow,
-                                        QueryId = query.Id,
-                                        SiteId = site.Id,
-                                        UserId = user.Id
-                                    };
-                    Current.DB.QueryExecutions.InsertOnSubmit(execution);
+                    Current.DB.Execute(@"
+                        INSERT INTO QueryExecutions(
+                            ExecutionCount, FirstRun, LastRun,
+                            QueryId, SiteId, UserId
+                        ) VALUES(
+                            1, @first, @last, @query, @site, @user
+                        )",
+                        new
+                        {
+                            first = DateTime.UtcNow,
+                            last = DateTime.UtcNow,
+                            query = results.QueryId,
+                            site = site.Id,
+                            user = user.Id
+                        }
+                    );
                 }
                 else
                 {
-                    execution.LastRun = DateTime.UtcNow;
-                    execution.ExecutionCount++;
-                    execution.SiteId = site.Id;
+                    Current.DB.Execute(@"
+                        UPDATE QueryExecutions SET
+                            ExecutionCount = @count,
+                            LastRun = @last,
+                            SiteId = @site
+                        WHERE Id = @id",
+                        new
+                        {
+                            count = execution.ExecutionCount + 1,
+                            last = DateTime.UtcNow,
+                            site = site.Id,
+                            id = execution.Id
+                        }
+                    );
                 }
-                Current.DB.SubmitChanges();
             }
         }
 
@@ -503,12 +527,12 @@ namespace StackExchange.DataExplorer.Helpers
             results.ExecutionPlan = plan.PlanXml;
         }
 
-        public static string GetJson(ParsedQuery parsedQuery, Site site, User CurrentUser)
+        public static QueryResults GetSingleSiteResults(ParsedQuery parsedQuery, Site site, User CurrentUser)
         {
-            return GetJson(parsedQuery, site, CurrentUser, false);
+            return GetSingleSiteResults(parsedQuery, site, CurrentUser, false);
         }
 
-        public static string GetJson(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
+        public static QueryResults GetSingleSiteResults(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
         {
             DBContext db = Current.DB;
 
@@ -520,7 +544,7 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 if (!IncludeExecutionPlan)
                 {
-                    return cache.ToJson();
+                    return cache;
                 }
                 else
                 {
@@ -530,18 +554,16 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         cache.ExecutionPlan = plan.Plan;
 
-                        return cache.ToJson();
+                        return cache;
                     }
                 }
             }
 
             QueryResults results = ExecuteNonCached(parsedQuery, site, user, IncludeExecutionPlan);
 
-            string json = results.ToJson();
-
             if (cache == null)
             {
-                AddResultToCache(json, parsedQuery, site, db, IncludeExecutionPlan);
+                AddResultToCache(results, parsedQuery, site, db, IncludeExecutionPlan);
             }
 
             if (IncludeExecutionPlan)
@@ -557,8 +579,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             db.SubmitChanges();
 
-            // well there is an annoying XSS condition here 
-            return json.Replace("/", "\\/");
+            return results;
         }
 
         /// <summary>
@@ -639,13 +660,13 @@ namespace StackExchange.DataExplorer.Helpers
                             Name = @name,
                             Description = @description,
                             QueryBody = @sql
-                        WHERE QueryHash = @hash",
+                        WHERE QueryHash = @id",
                         new
                         {
                             name = parsedQuery.Name,
                             description = parsedQuery.Description,
                             sql = parsedQuery.RawSql,
-                            hash = parsedQuery.Hash
+                            id = query.Id
                         }
                     );
                 }
@@ -658,23 +679,33 @@ namespace StackExchange.DataExplorer.Helpers
         /// <param name="json">Query results to add to the cache.</param>
         /// <param name="IncludeExecutionPlan">If true indicates that the result set includes a query
         /// execution plan; otherwise, false.</param>
-        private static void AddResultToCache(string json, ParsedQuery parsedQuery, Site site, DBContext db, bool IncludeExecutionPlan)
+        private static void AddResultToCache(QueryResults results, ParsedQuery parsedQuery, Site site, DBContext db, bool IncludeExecutionPlan)
         {
-            if (IncludeExecutionPlan)
-            {
-                var queryResults = QueryResults.FromJson(json);
-                queryResults.ExecutionPlan = null;
-                json = queryResults.ToJson();
-            }
-            var cache = new CachedResult
-            {
-                QueryHash = parsedQuery.ExecutionHash,
-                SiteId = site.Id,
-                // well there is an annoying XSS condition here
-                Results = json.Replace("/", "\\/"),
-                CreationDate = DateTime.UtcNow
-            };
-            db.CachedResults.InsertOnSubmit(cache);
+            // Avoid saving the execution plan as part of the results
+            string executionPlan = results.ExecutionPlan;
+            results.ExecutionPlan = null;
+
+            // After this method is called, the execution plan is cached in a separate (but very
+            // similar) way. It might make more sense to just include it in this table so that we
+            // don't have to make multiple queries, but I'd have to investigate it more.
+            db.Execute(@"
+                INSERT INTO CachedResults(
+                    QueryHash, SiteId, Results, CreationDate
+                ) VALUES(
+                    @hash, @site, @results, @creation
+                )",
+                new
+                {
+                    hash = parsedQuery.ExecutionHash,
+                    site = site.Id,
+                    // I removed the anti-XSS replace here because this should always pass through
+                    // the one that's now called on all results in the controller
+                    results = results.ToJson(),
+                    creation = DateTime.UtcNow
+                }
+            );
+
+            results.ExecutionPlan = executionPlan;
         }
 
         private static void ProcessMagicColumns(QueryResults results, SqlConnection cnn)

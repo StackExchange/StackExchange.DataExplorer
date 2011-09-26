@@ -20,7 +20,14 @@ namespace StackExchange.DataExplorer.Controllers
                 return Json(new { captcha = true });
             }
 
-            Site site = Current.DB.Sites.Where(s => s.Id == siteId).First();
+            var site = Current.DB.Query<Site>(
+                "SELECT * FROM Sites WHERE Id = @site",
+                new
+                {
+                    site = siteId
+                }
+            ).First();
+
             ActionResult rval;
 
             if (savedQueryId != null)
@@ -42,28 +49,33 @@ namespace StackExchange.DataExplorer.Controllers
                     throw new ApplicationException("All parameters must be set!");
                 }
 
-                string json = null;
+                QueryResults results;
 
                 if (allDBs == "true")
                 {
-                    json = QueryRunner.GetMultiSiteJson(parsedQuery, CurrentUser, excludeMetas == "true");
+                    results = QueryRunner.GetMultiSiteResults(parsedQuery, CurrentUser, excludeMetas == "true");
                 }
                 else
                 {
-                    json = QueryRunner.GetJson(parsedQuery, site, CurrentUser, showExecutionPlan == "true");
+                    results = QueryRunner.GetSingleSiteResults(parsedQuery, site, CurrentUser, showExecutionPlan == "true");
+
+
                     if (resultsToText == "true")
                     {
-                        json = QueryResults.FromJson(json).ToTextResults().ToJson();
+                        results = results.ToTextResults();
                     }
+
 					// Execution plans are cached as XML
                     if (showExecutionPlan == "true")
                     {
-                        json = QueryResults.FromJson(json).TransformQueryPlan().ToJson();
+                        results = results.TransformQueryPlan();
                     }
                 }
 
-                rval = Content(json, "application/json");
-                QueryRunner.LogQueryExecution(CurrentUser, site, parsedQuery);
+                // well there is an annoying XSS condition here 
+                rval = Content(results.ToJson().Replace("/", "\\/"), "application/json");
+
+                QueryRunner.LogQueryExecution(CurrentUser, site, parsedQuery, results);
             }
             catch (Exception e)
             {
@@ -94,7 +106,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
             
-            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, false);
+            var json = QueryRunner.GetMultiSiteResults(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, false).ToJson();
 
             return new CsvResult(json);
         }
@@ -109,7 +121,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var json = QueryRunner.GetMultiSiteJson(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, true);
+            var json = QueryRunner.GetMultiSiteResults(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, true).ToJson();
 
             return new CsvResult(json);
         }
