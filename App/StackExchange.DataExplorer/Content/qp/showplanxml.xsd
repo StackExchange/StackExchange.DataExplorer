@@ -733,6 +733,8 @@
         <xsd:attribute name="ScanDirection" type="shp:OrderType" use="optional" />
         <xsd:attribute name="ForcedIndex" type="xsd:boolean" use="optional" />
         <xsd:attribute name="ForceSeek" type="xsd:boolean" use="optional" />
+        <!-- This attribute started appearing in execution plans. Apparently a Denali thing, but not in the existing schema -->
+        <xsd:attribute name="ForceScan" type="xsd:boolean" use="optional" />
         <xsd:attribute name="NoExpandHint" type="xsd:boolean" use="optional" />
       </xsd:extension>
     </xsd:complexContent>
