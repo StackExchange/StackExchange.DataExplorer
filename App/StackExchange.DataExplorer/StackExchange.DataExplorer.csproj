@@ -196,9 +196,9 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\QueryRunner.cs" />
-    <Content Include="Content\codemirror\theme.css" />
     <Content Include="Content\codemirror\codemirror.css" />
     <Content Include="Content\codemirror\custom.css" />
+    <Content Include="Content\codemirror\theme.css" />
     <Content Include="Content\Img\openid\openid-logos.png" />
     <Content Include="Content\qp\images\arithmetic_expression.gif" />
     <Content Include="Content\qp\images\assert.gif" />

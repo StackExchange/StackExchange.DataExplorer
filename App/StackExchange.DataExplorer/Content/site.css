@@ -647,6 +647,14 @@ ul.site-list .desc {
   margin-right: 0.6em;
 }
 
+#query-errors {
+  margin-top: 5px;
+} 
+
+#query-errors p {
+  margin: 6px 6px 6px 6px;
+}
+
 .query {
   width: 100%; 
 }

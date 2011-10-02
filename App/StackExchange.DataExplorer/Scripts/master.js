@@ -1,7 +1,32 @@
 ﻿var DataExplorer = (function () {
-    var deferred = new $.Deferred();
+    var deferred = new $.Deferred(),
+        options = {
+            'User': {},
+            'Site': {}
+        };
 
-    function init(options) {
+    function init(settings) {
+        if (typeof settings === 'object') {
+            for (var setting in settings) {
+                if (settings.hasOwnProperty(setting)) {
+                    if (typeof settings[setting] === 'object') {
+                        if (typeof options[setting] === 'object') {
+                            $.extend(options[setting], settings[setting]);
+                        }
+                    } else {
+                        if (setting.indexOf('.') !== -1) {
+                            var option = setting.split('.');
+
+                            if (typeof options[option[0]] === 'object') {
+                                options[option[0]][option[1]] = settings[setting];
+                            }
+                        } else {
+                            options[setting] = settings[setting];
+                        }
+                    }
+                }
+            }
+        }
 
         $(document).ready(function () {
             deferred.resolve();
@@ -14,7 +39,8 @@
 
     return {
         'init': init,
-        'ready': ready
+        'ready': ready,
+        'options': options
     };
 })();
 

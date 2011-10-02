@@ -16,8 +16,14 @@
     @Html.Raw(AssetPackager.ScriptSrc("master"))
     @MvcMiniProfiler.MiniProfiler.RenderIncludes()
 
-    <script>
-        DataExplorer.init();
+    <script type="text/javascript">
+        DataExplorer.init({
+            'User.guessedID': null,
+            'User.isAuthenticated': @((!Current.User.IsAnonymous).ToString().ToLower()),
+            'Site.id': @(Current.Controller.Site != null ? Current.Controller.Site.Id.ToString() : "null"),
+            'enableEditorSuggestions': @(AppSettings.EnableEditorSuggestions.ToString().ToLower()),
+            'enableAdvancedSqlErrors': @(AppSettings.EnableAdvancedSqlErrors.ToString().ToLower())
+        });
     </script>
 </head>
 <body>

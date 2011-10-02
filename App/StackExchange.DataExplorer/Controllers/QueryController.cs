@@ -72,6 +72,11 @@ namespace StackExchange.DataExplorer.Controllers
                 if (sqlException != null)
                 {
                     result["error"] = sqlException.Message;
+
+                    if (AppSettings.EnableAdvancedSqlErrors)
+                    {
+                        result["line"] = sqlException.LineNumber.ToString();
+                    }
                 }
                 else
                 {

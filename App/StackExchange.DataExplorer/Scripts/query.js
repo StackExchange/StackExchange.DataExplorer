@@ -1,14 +1,21 @@
 ﻿DataExplorer.QueryEditor = (function () {
-    var editor;
+    var editor, field, activeError,
+        events = {
+            'description': [],
+            'text': [],
+            'title': []
+        };
 
     function create(target, callback) {
         if (typeof target === 'string') {
-            target = $(target)[0];
+            target = $(target);
         }
 
-        editor = CodeMirror.fromTextArea(target, {
+        field = target;
+        editor = CodeMirror.fromTextArea(target[0], {
             'mode': 'text/x-t-sql',
-            'lineNumbers': true
+            'lineNumbers': true,
+            'onChange': onChange
         });
 
         if (callback && typeof callback === 'function') {
@@ -16,19 +23,60 @@
         }
     }
 
-    function value() {
+    function getValue() {
         return editor.getValue();
+    }
+
+    function registerHandler(event, callback) {
+
+    }
+
+    function onChange() {
+        if (activeError !== null) {
+            editor.setLineClass(activeError, null);
+
+            activeError = null;
+        }
+    }
+
+    function onError(line) {
+        if (!DataExplorer.options.enableAdvancedSqlErrors) {
+            return;
+        }
+
+        activeError = +line;
+
+        // Determine the offset
+        var offset = -1, lines = getValue().split("\n"), i,
+            comments = false;
+
+        for (i = 0; i < lines.length; ++i) {
+            if (!comments && lines[i].indexOf('--') === 0) {
+                offset++;
+            } else if (/^\s*$/.test(lines[i])) {
+                comments = true;
+                offset++;
+            } else {
+                break;
+            }
+        }
+
+        activeError = activeError + offset;
+
+        editor.setLineClass(activeError, 'error');
     }
 
     return {
         'create': create,
-        'value': value
+        'value': getValue,
+        'change': registerHandler,
+        'error': onError
     };
 })();
 
 DataExplorer.ready(function () {
     var schema = $('ul.schema'),
-        panel = $('.query')
+        panel = $('.query');
 
     DataExplorer.QueryEditor.create('#sqlQuery', function (editor) {
         var wrapper, resizer, border = 2;
@@ -58,7 +106,7 @@ DataExplorer.ready(function () {
         });
     });
 
-    $('.minitabs').tabs();
+    $('.miniTabs').tabs();
     $('#schemaToggle').toggle(function () {
         schema.hide();
         panel.animate({ 'width': '100%' }, 'fast');
@@ -68,6 +116,11 @@ DataExplorer.ready(function () {
             schema.show();
         });
         $(this).text("hide schema >>");
+    });
+    $('#runQueryForm').submit(function () {
+        executeQuery(DataExplorer.QueryEditor.value());
+
+        return false;
     });
 });
 
@@ -180,13 +233,16 @@ function gotResults(results) {
     current_results = results;
 
     if (results.error != null) {
-        $("#queryErrorBox").show();
+        $("#query-errors").show();
         $("#queryError").html(results.error);
+
+        DataExplorer.QueryEditor.error(results.line);
+
         return;
     }
 
     if (results.truncated == true) {
-        $("#queryErrorBox").show();
+        $("#query-errors").show();
         $("#queryError").html("Your query was truncated, only " + results.maxResults + " results are allowed");
     }
 
@@ -339,7 +395,7 @@ function gotResults(results) {
 }
 
 function executeQuery(sql) {
-    $("#permalinks, #queryResults, #queryErrorBox").hide();
+    $("#permalinks, #queryResults, #query-errors").hide();
 
     if (!ensureAllParamsEntered(sql)) {
         return false;
