@@ -1,15 +1,76 @@
-﻿$.fn.tabs = function () {
-  $(this).delegate("a:not(.youarehere)", "click", function () {
-    $(this.hash).show();
-    $(this).addClass("youarehere")
-           .siblings(".youarehere")
-           .removeClass("youarehere").each(function () {
-             $(this.hash).hide();
-           });
-  }).delegate("a", "click", function () {
-    return false;
-  });
-};
+﻿DataExplorer.QueryEditor = (function () {
+    var editor;
+
+    function create(target, callback) {
+        if (typeof target === 'string') {
+            target = $(target)[0];
+        }
+
+        editor = CodeMirror.fromTextArea(target, {
+            'mode': 'text/x-t-sql',
+            'lineNumbers': true
+        });
+
+        if (callback && typeof callback === 'function') {
+            callback(editor);
+        }
+    }
+
+    function value() {
+        return editor.getValue();
+    }
+
+    return {
+        'create': create,
+        'value': value
+    };
+})();
+
+DataExplorer.ready(function () {
+    var schema = $('ul.schema'),
+        panel = $('.query')
+
+    DataExplorer.QueryEditor.create('#sqlQuery', function (editor) {
+        var wrapper, resizer, border = 2;
+
+        if (editor) {
+            wrapper = $(editor.getWrapperElement()).find('.CodeMirror-scroll');
+        }
+
+        resizer = $('#sqlQueryWrapper').TextAreaResizer(function () {
+            var height = resizer.height();
+
+            schema.height(height - border);
+
+            if (wrapper) {
+                wrapper.height(height - 10);
+                editor.refresh();
+            }
+        });
+
+        schema.height(resizer.height() - border);
+        schema.addClass('cm-s-' + editor.getOption('theme') + '');
+        schema.delegate('.schema-table', 'click', function () {
+            var self = $(this);
+
+            self.toggleClass('closed');
+            self.next('dl').slideToggle('fast');
+        });
+    });
+
+    $('.minitabs').tabs();
+    $('#schemaToggle').toggle(function () {
+        schema.hide();
+        panel.animate({ 'width': '100%' }, 'fast');
+        $(this).text("<< show schema");
+    }, function () {
+        panel.animate({ 'width': '70%' }, 'fast', function () {
+            schema.show();
+        });
+        $(this).text("hide schema >>");
+    });
+});
+
 
 
 function encodeColumn(s) {
@@ -354,15 +415,6 @@ function ensureAllParamsEntered(query) {
     }
 
     return allParamsHaveValues;
-}
-
-function forwardEvent(event, element) {
-    if (event == "focus") {
-        $(".CodeMirror-wrapping").addClass("focus");
-    }
-    if (event == "blur") {
-        $(".CodeMirror-wrapping").removeClass("focus");
-    }
 }
 
 $(function () {

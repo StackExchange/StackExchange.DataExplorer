@@ -13,7 +13,12 @@
     @RenderSection("additionalStyles", required: false)
 
     @Html.Raw(AssetPackager.ScriptSrc("jquery"))
-    @MvcMiniProfiler.MiniProfiler.RenderIncludes() 
+    @Html.Raw(AssetPackager.ScriptSrc("master"))
+    @MvcMiniProfiler.MiniProfiler.RenderIncludes()
+
+    <script>
+        DataExplorer.init();
+    </script>
 </head>
 <body>
     <div class="page">

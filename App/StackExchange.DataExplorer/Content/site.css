@@ -557,30 +557,94 @@ ul.site-list .desc {
 }
 
 
-#queryText ul.treeview {
-  margin-left: 15px;  
-  width: 265px;
-  overflow: auto;
-  list-style-type: none;
-  float: right;
-  display: block;
+#queryText ul.schema {
+  background-color: #F7F7F7;
+  border: 1px solid #CCCCCC;
+  border-left-width: 0px;
+  border-top-color: #999999;
   cursor: default;
+  display: block;
+  float: right;
+  list-style-type: none;
+  margin-left: -1px;
+  overflow: auto;
+  padding-left: 0px;
+  width: 30%;
 }
 
-#queryText .folder {
-    margin-bottom: 6px;
+#queryText ul.schema .schema-table {
+  color: #404040;
+  cursor: pointer;
+  border-bottom: 1px dotted #CCCCCC;
+  display: block;
+  font-weight: bold;
+  padding: 6px 8px 5px 8px;
 }
-#queryText ul.treeview li {
-   line-height: 18px;
-   color: #444;
-   cursor: help;
-} 
 
-#queryText ul.treeview ul {
-  padding-left: 17px; 
-  list-style-type: square;
-  margin: 0;
-  margin-bottom: 10px;
+#queryText ul.schema dl {
+  border-left: 1px solid #EAEAEA;
+  margin-left: 4px;
+}
+
+#queryText ul.schema dl dt {
+  border-right: 1px dotted #CCCCCC;
+  float: left;
+  margin-left: 7px;
+  margin-right: 7px;
+  width: 55%;
+}
+
+#queryText ul.schema dl > * {
+  padding-top: 5px;
+  padding-bottom: 4px;
+}
+
+#queryText ul.schema dl dd {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #FAFAFA;
+  color: #800080;
+}
+
+#schemaToggle {
+  float:right;
+  margin-top: -25px;
+}
+
+#query-options {
+  height: 1%;
+  list-style-type: none;
+  overflow: auto;
+  margin-left: 0px;
+}
+
+#query-options li {
+  float: left;
+  margin-right: 12px;
+}
+
+#query-options li label {
+  border: 1px solid transparent;
+  border-radius: 5px 5px;
+  cursor: pointer;
+  display: block;
+  padding: 5px 6px 5px 6px;
+}
+
+#query-options li label:hover {
+  background-color: #F7F7F7;
+  border-bottom: 1px solid #CCCCCC;
+  border-right: 1px solid #CCCCCC;
+}
+
+#query-options li label:active {
+  border-bottom-color: transparent;
+  border-left: 1px solid #CCCCCC;
+  border-right-color: transparent;
+  border-top: 1px solid #CCCCCC;  
+}
+
+#query-options li label input {
+  margin-right: 0.6em;
 }
 
 .query {
@@ -634,11 +698,6 @@ ul.site-list .desc {
 #permalink, #downloadCsv, #showSql, #hideSql, #editQuery, #deleteQuery, #undeleteQuery {
   margin-left: 10px; 
   margin-right: 10px;  
-}
-
-#schemaLink {
-  float:right;
-  margin-top: -25px;
 }
 
 #grid {

@@ -31,20 +31,26 @@ namespace StackExchange.DataExplorer
             get
             {
 
-                return
-                new Dictionary<string, AssetCollection>
+                return new Dictionary<string, AssetCollection>
+                {
                     {
-                        {"sitecss", new AssetCollection {"/Content/site.css"}},
+                        "sitecss", new AssetCollection
                         {
-                            "viewer_editor", new AssetCollection
-                                                 {
-                                                     "/Content/smoothness/jquery-ui-1.8.1.custom.css",
-                                                     "/Content/slickgrid/slick.grid.css",
-                                                     "/Content/codemirror/sqlcolors.css",
-                                                     "/Content/qp/qp.css",
-                                                 }
-                            }
-                    };
+                            "/Content/site.css"
+                        }
+                    },
+                    {
+                        "viewer_editor", new AssetCollection
+                        {
+                            "/Content/smoothness/jquery-ui-1.8.1.custom.css",
+                            "/Content/codemirror/codemirror.css",
+                            "/Content/codemirror/custom.css",
+                            "/Content/codemirror/theme.css",
+                            "/Content/slickgrid/slick.grid.css",
+                            "/Content/qp/qp.css",
+                        }
+                    }
+                };
             }
         }
 
@@ -53,54 +59,51 @@ namespace StackExchange.DataExplorer
         {
             get
             {
-                return
-                new Dictionary<string, AssetCollection>
+                return new Dictionary<string, AssetCollection>
+                {
                     {
+                        "master", new AssetCollection
                         {
-                            "viewer", new AssetCollection
-                                          {
-                                              "/Scripts/codemirror/stringstream.js",
-                                              "/Scripts/codemirror/tokenize.js",
-                                              "/Scripts/codemirror/highlight.js",
-                                              "/Scripts/codemirror/parsesql.js",
-                                              "/Scripts/query.js",
-                                              "/Scripts/jquery.rule.js",
-                                              "/Scripts/jquery.event.drag-1.5.js",
-                                              "/Scripts/slick.grid.js",
-                                              "/Scripts/qp.js",
-                                          }
-                            },
-                        {
-                            "editor", new AssetCollection
-                                          {
-                                              "/Scripts/jquery.rule.js",
-                                              "/Scripts/jquery.textarearesizer.js",
-                                              "/Scripts/jquery.event.drag-1.5.js",
-                                              "/Scripts/slick.grid.js",
-                                              "/Scripts/codemirror/codemirror.js",
-                                              "/Scripts/query.js",
-                                              "/Scripts/qp.js",
-                                          }
-                            },
-                            
-                            { "jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js")
-                                       {
-                                           "/Scripts/jquery-1.4.2.js"
-                                       }
-                            },
- 
-                            {"jquery.validate",
-                     new AssetCollection(
-                         "http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.pack.js")
-                             {
-                                 "/Scripts/jquery.validate.js"
-                             }
+                            "/Scripts/master.js"
                         }
-                    
-                    };
-
+                    },
+                    {
+                        "viewer", new AssetCollection
+                        {
+                            "/Scripts/query.js",
+                            "/Scripts/jquery.rule.js",
+                            "/Scripts/jquery.event.drag-1.5.js",
+                            "/Scripts/slick.grid.js",
+                            "/Scripts/qp.js",
+                        }
+                    },
+                    {
+                        "editor", new AssetCollection
+                        {
+                            "/Scripts/jquery.rule.js",
+                            "/Scripts/jquery.textarearesizer.js",
+                            "/Scripts/jquery.event.drag-1.5.js",
+                            "/Scripts/slick.grid.js",
+                            "/Scripts/codemirror/codemirror.js",
+                            "/Scripts/codemirror/sql.js",
+                            "/Scripts/query.js",
+                            "/Scripts/qp.js",
+                        }
+                    },
+                    {
+                        "jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.6.4.min.js")
+                        {
+                            "/Scripts/jquery-1.6.4.js"
+                        }
+                    },
+                    {
+                        "jquery.validate", new AssetCollection("http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.pack.js")
+                        {
+                            "/Scripts/jquery.validate.js"
+                        }
+                    }  
+                };
             }
         }
-
     }
 }
