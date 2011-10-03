@@ -2,8 +2,11 @@
     var editor, field, activeError,
         events = {
             'description': [],
-            'text': [],
             'title': []
+        },
+        metadata = {
+            'title': null,
+            'description': null
         };
 
     function create(target, callback) {
@@ -23,15 +26,41 @@
         }
     }
 
+    function dispatch(event, value) {
+        if (events[event]) {
+            event = events[event];
+
+            for (var i = 0; i < event.length; ++i) {
+                event[i](value);
+            }
+        }
+    }
+
     function getValue() {
-        return editor.getValue();
+        var value = editor.getValue();
+
+        // Strip zero-width that randomly appears when copying text from the current
+        // Data Explorer query editor into this one, at least until I can figure out
+        // where it's coming from.
+        if (value.charCodeAt(value.length - 1) === 8203) {
+            value = value.substring(0, value.length - 1);
+
+            // Explicitly update the field when this happens
+            field.val(value);
+        }
+
+        return value;
     }
 
     function registerHandler(event, callback) {
-
+        if (events[event] && typeof callback === 'function') {
+            events[event].push(callback);
+        }
     }
 
     function onChange() {
+        parseMetadata();
+
         if (activeError !== null) {
             editor.setLineClass(activeError, null);
 
@@ -44,14 +73,32 @@
             return;
         }
 
-        activeError = +line;
+        activeError = +line + parseMetadata();
 
+        editor.setLineClass(activeError, 'error');
+    }
+
+    function parseMetadata() {
         // Determine the offset
         var offset = -1, lines = getValue().split("\n"), i,
-            comments = false;
+            comments = false, title, description;
 
         for (i = 0; i < lines.length; ++i) {
             if (!comments && lines[i].indexOf('--') === 0) {
+                lines[i] = lines[i].substring(2).trim();
+
+                if (i === 0) {
+                    title = lines[i];
+                } else {
+                    if (!description) {
+                        description = "";
+                    } else {
+                        description = description + "\n";
+                    }
+
+                    description = description + lines[i];
+                }
+
                 offset++;
             } else if (/^\s*$/.test(lines[i])) {
                 comments = true;
@@ -61,9 +108,15 @@
             }
         }
 
-        activeError = activeError + offset;
+        if (title !== metadata.title) {
+            dispatch('title', metadata.title = title || "");
+        }
 
-        editor.setLineClass(activeError, 'error');
+        if (description !== metadata.description) {
+            dispatch('description', metadata.description = description || "");
+        }
+
+        return offset;
     }
 
     return {
@@ -76,13 +129,14 @@
 
 DataExplorer.ready(function () {
     var schema = $('ul.schema'),
-        panel = $('.query');
+        panel = $('.query'),
+        metadata = $('#queryInfo');
 
     DataExplorer.QueryEditor.create('#sqlQuery', function (editor) {
         var wrapper, resizer, border = 2;
 
         if (editor) {
-            wrapper = $(editor.getWrapperElement()).find('.CodeMirror-scroll');
+            wrapper = $(editor.getScrollerElement());
         }
 
         resizer = $('#sqlQueryWrapper').TextAreaResizer(function () {
@@ -104,6 +158,14 @@ DataExplorer.ready(function () {
             self.toggleClass('closed');
             self.next('dl').slideToggle('fast');
         });
+    });
+
+    DataExplorer.QueryEditor.change('title', function (title) {
+        metadata.find('h2').text(title);
+    });
+
+    DataExplorer.QueryEditor.change('description', function (description) {
+        metadata.find('p').text(description);
     });
 
     $('.miniTabs').tabs();
