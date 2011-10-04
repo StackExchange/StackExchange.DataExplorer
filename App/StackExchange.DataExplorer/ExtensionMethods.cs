@@ -699,5 +699,17 @@ namespace StackExchange.DataExplorer
             title = HtmlUtilities.Encode(title);
             page.ViewData["PageTitle"] = title;
         }
+
+
+        public static string ReplaceFirst(this string input, string search, string replace)
+        {
+            var index = input.IndexOf(search);
+            if (index < 0)
+            {
+                return input;
+            }
+            return input.Substring(0, index) + replace + input.Substring(index + search.Length);
+        }
+
     }
 }

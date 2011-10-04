@@ -1,0 +1,26 @@
+﻿@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Models
+           
+@{this.SetPageTitle("Merge Users - Stack Exchange Data Explorer Administration - Stack Exchange Data Explorer");}
+
+@{
+    var masterUser = (User) ViewBag.MasterUser;
+    var mergeUser = (User) ViewBag.MergeUser;
+}
+<h3>Master User (keep this user)</h3>
+@Html.Partial("User", masterUser)
+
+<br/>
+
+<h3>Merge User (remove this user by folding it into the master user)</h3>
+@Html.Partial("User", mergeUser)
+
+<a href="?masterId=@mergeUser.Id&mergeId=@masterUser.Id">(swap)</a>
+
+<h3>Are you sure?  This cannot be undone.</h3>
+<br/>
+<form method="post" action="/admin/merge-users-submit">
+    <input type="hidden" name="masterId" value="@masterUser.Id" />
+    <input type="hidden" name="mergeId" value="@mergeUser.Id" />
+    <input type="submit" id="submit" value="Merge these users" />
+</form>

@@ -1,0 +1,64 @@
+﻿@using StackExchange.DataExplorer
+@model List<Tuple<string,IEnumerable<StackExchange.DataExplorer.Models.OpenIdWhiteList>>>
+           
+@{this.SetPageTitle("Stack Exchange Data Explorer Administration - Stack Exchange Data Explorer");}
+
+Sort:  
+@foreach (var sort in ViewBag.Sorts)
+{
+    if (ViewBag.Sort==sort)
+    {
+        <b>@sort</b>
+    } else
+    {
+        <a href="?sort=@sort">@sort</a>
+    }
+}
+<br/><br/>
+** make sure to leave one openid, only delete additional entries.
+<br/>
+** don't worry about whether the entry you leave is normalized or not, once all duplicates are gone, the entire column can be checked.
+<br/><br/>
+<table>
+    <thead>
+        <th>OpenId</th>
+        <th>Approved</th>
+        <th>Creation Date</th>
+        <th></th>
+    </thead>
+    <tbody>
+    @foreach (var group in Model)
+    {
+        var first = group.Item2.First();
+        <tr><td></td></tr>
+        <tr><th colspan="4">@StackExchange.DataExplorer.Models.User.NormalizeOpenId(group.Item1)</th></tr>
+        foreach (var dupe in group.Item2)
+        {
+            <tr>
+                <td>@dupe.OpenId</td>
+                <td>@dupe.Approved</td>
+                <td>@dupe.CreationDate</td>
+                <td><a class="remove" href="/admin/whitelist/remove/@(dupe.Id)" class="remove">remove</a></td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+@if (Model.Count == 0)
+{
+    <a href="/admin/normalize-whitelist-openids">Normalize Whitelist OpenIds</a>
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("a.remove").click(function () {
+            var href = $(this);
+            href.hide();
+            $.post(this.href, null, function () {
+                href.parent().parent().hide();
+            });
+            return false;
+        });
+    })
+</script>

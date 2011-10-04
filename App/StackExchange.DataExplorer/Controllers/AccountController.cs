@@ -46,7 +46,8 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     if (AppSettings.EnableWhiteList)
                     {
-                        var whiteListEntry = Current.DB.OpenIdWhiteLists.FirstOrDefault(w => w.OpenId.ToLower() == id.OriginalString.ToLower());
+                        var claimedId = Models.User.NormalizeOpenId(id.ToString().ToLower());
+                        var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList where lower(OpenId) = @claimedId", new {claimedId}).FirstOrDefault();
                         if (whiteListEntry == null || !whiteListEntry.Approved)
                         {
                             if (whiteListEntry == null)
@@ -56,7 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 {
                                     Approved = false,
                                     CreationDate = DateTime.UtcNow,
-                                    OpenId = id.OriginalString,
+                                    OpenId = claimedId,
                                     IpAddress = Request.UserHostAddress
                                 };
 
@@ -103,10 +104,8 @@ namespace StackExchange.DataExplorer.Controllers
                     case AuthenticationStatus.Authenticated:
                         var sreg = response.GetExtension<ClaimsResponse>();
                         User user = null;
-
-                        UserOpenId openId =
-                            Current.DB.UserOpenIds.Where(o => o.OpenIdClaim == response.ClaimedIdentifier.OriginalString)
-                                .FirstOrDefault();
+                        var claimedId = Models.User.NormalizeOpenId(response.ClaimedIdentifier.ToString().ToLower());
+                        var openId = Current.DB.UserOpenIds.Where(o => o.OpenIdClaim == claimedId).FirstOrDefault();
 
                         if (!CurrentUser.IsAnonymous)
                         {
@@ -118,7 +117,7 @@ namespace StackExchange.DataExplorer.Controllers
                             return View("Login");
                           }
                           openId = CurrentUser.UserOpenIds.FirstOrDefault();
-                          openId.OpenIdClaim = response.ClaimedIdentifier.OriginalString;
+                          openId.OpenIdClaim = claimedId;
                           Current.DB.SubmitChanges();
                           user = CurrentUser;
                           returnUrl = "/user/" + user.Id;
@@ -126,13 +125,13 @@ namespace StackExchange.DataExplorer.Controllers
                         else if (openId == null)
                         {
 
-                            if (sreg != null && IsVerifiedEmailProvider(response.ClaimedIdentifier.OriginalString))
+                            if (sreg != null && IsVerifiedEmailProvider(claimedId))
                             {
                                 user = Current.DB.Users.FirstOrDefault(u => u.Email == sreg.Email);
                                 if (user != null)
                                 {
                                     var o = new UserOpenId();
-                                    o.OpenIdClaim = response.ClaimedIdentifier.OriginalString;
+                                    o.OpenIdClaim = claimedId;
                                     o.User = user;
                                     Current.DB.UserOpenIds.InsertOnSubmit(o);
                                     Current.DB.SubmitChanges();
@@ -149,7 +148,7 @@ namespace StackExchange.DataExplorer.Controllers
                                     email = sreg.Email;
                                     login = sreg.Nickname;
                                 }
-                                user = Models.User.CreateUser(login, email, response.ClaimedIdentifier.OriginalString);
+                                user = Models.User.CreateUser(login, email, claimedId);
                             }
                         }
                         else

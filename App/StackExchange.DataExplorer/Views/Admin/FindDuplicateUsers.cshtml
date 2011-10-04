@@ -1,0 +1,42 @@
+﻿@using StackExchange.DataExplorer
+@model List<Tuple<string,IEnumerable<StackExchange.DataExplorer.Models.User>>>
+           
+@{this.SetPageTitle("Stack Exchange Data Explorer Administration - Stack Exchange Data Explorer");}
+
+<p>Merge links are safe to click, confirmation is required.</p>
+
+Sort:  
+@foreach (var sort in ViewBag.Sorts)
+{
+    if (ViewBag.Sort==sort)
+    {
+        <b>@sort</b>
+    } else
+    {
+        <a href="?sort=@sort">@sort</a>
+    }
+}
+<br/><br/>
+@foreach (var group in Model)
+{
+    <h3>@group.Item1</h3>
+    var master = group.Item2.First();
+    @Html.Partial("User", master);
+    <span>(suggested master)</span>
+    <br /><br />
+    <div style="padding-left:50px;">
+    <br/>
+        @foreach (var dupe in group.Item2.Skip(1))
+        {
+            @Html.Partial("User", dupe);
+            <a href="/admin/merge-users?masterId=@master.Id&mergeId=@dupe.Id">(merge with suggested master)</a>
+        }
+    </div>
+    <br />
+    <hr />
+}
+
+@if (Model.Count == 0)
+{
+    <a href="/admin/normalize-openids">Normalize OpenIds</a>
+}
