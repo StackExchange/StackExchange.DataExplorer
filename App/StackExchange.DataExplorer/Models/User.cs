@@ -11,6 +11,8 @@ namespace StackExchange.DataExplorer.Models
 {
     public partial class User
     {
+        private const string emptyLogin = "jon.doe";
+
         /// <summary>
         /// Should be set when ControllerBase determines CurrentUser
         /// </summary>
@@ -79,7 +81,7 @@ namespace StackExchange.DataExplorer.Models
                  */
 
                 if (login.Length == 0)
-                    login = "jon.doe";
+                    login = emptyLogin;
             }
 
             u.Login = login;
@@ -204,7 +206,7 @@ namespace StackExchange.DataExplorer.Models
 
             // User
             log.AppendLine("Moving user properties over");
-            if (masterUser.Login == "user" + masterUser.Id && mergeUser.Login != "user" + mergeUser.Id) masterUser.Login = mergeUser.Login;
+            if (masterUser.Login.StartsWith(emptyLogin) && !mergeUser.Login.StartsWith(emptyLogin)) masterUser.Login = mergeUser.Login;
             if (masterUser.Email.IsNullOrEmpty() && !mergeUser.Email.IsNullOrEmpty()) masterUser.Email = mergeUser.Email;
             // if (masterUser.LastLogin.GetValueOrDefault() < mergeUser.LastLogin.GetValueOrDefault()) masterUser.LastLogin = mergeUser.LastLogin;
             if (!masterUser.IsAdmin && mergeUser.IsAdmin) masterUser.IsAdmin = true;
