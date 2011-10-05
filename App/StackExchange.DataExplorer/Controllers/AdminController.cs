@@ -161,6 +161,30 @@ namespace StackExchange.DataExplorer.Controllers
             return TextPlain(log.ToString());
         }
 
+        [Route("admin/find-dupe-user-openids")]
+        public ActionResult FindDuplicateUserOpenIds()
+        {
+            var dupes = (from uoi in Current.DB.UserOpenIds
+                        group uoi by uoi.UserId
+                        into grp
+                        where grp.Count() > 1
+                        select new Tuple<int?, IEnumerable<UserOpenId>>(grp.Key, grp.Select(g=>g))).ToList();
+            SetHeader("Possible Duplicate User OpenId records");
+            return View(dupes);
+        }
+
+
+        [Route("admin/useropenid/remove/{id:int}", HttpVerbs.Post)]
+        public ActionResult RemoveUserOpenIdEntry(int id)
+        {
+            var entry = Current.DB.UserOpenIds.First(uoi => uoi.Id == id);
+            Current.DB.UserOpenIds.DeleteOnSubmit(entry);
+            Current.DB.SubmitChanges();
+
+            return Json("ok");
+        }
+
+
         public bool Allowed()
         {
             return CurrentUser.IsAdmin;

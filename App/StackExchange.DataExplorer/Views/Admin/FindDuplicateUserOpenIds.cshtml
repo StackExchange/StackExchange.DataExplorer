@@ -1,0 +1,42 @@
+﻿@using StackExchange.DataExplorer
+@model List<Tuple<int?,IEnumerable<StackExchange.DataExplorer.Models.UserOpenId>>>
+           
+@{this.SetPageTitle("Stack Exchange Data Explorer Administration - Stack Exchange Data Explorer");}
+
+** make sure to leave one openid, only delete additional entries.
+<br/>
+** don't worry about whether the entry you leave is normalized or not, once all <a href="/admin/find-dupe-users">duplicates</a> are gone, the entire column can be checked.
+<br/><br/>
+<table>
+    <thead>
+        <th>OpenId</th>
+        <th></th>
+    </thead>
+    <tbody>
+    @foreach (var group in Model)
+    {
+        <tr><td></td></tr>
+        <tr><th colspan="2">@group.Item1</th></tr>
+        foreach (var dupe in group.Item2)
+        {
+            <tr>
+                <td>@dupe.OpenIdClaim</td>
+                <td><a class="remove" href="/admin/useropenid/remove/@(dupe.Id)" class="remove">remove</a></td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(function () {
+        $("a.remove").click(function () {
+            var href = $(this);
+            href.hide();
+            $.post(this.href, null, function () {
+                href.parent().parent().hide();
+            });
+            return false;
+        });
+    })
+</script>

@@ -194,7 +194,10 @@ namespace StackExchange.DataExplorer.Models
             savedQueries.ForEach(sq => sq.UserId = masterId);
 
             // User Open Ids
-            var userOpenIds = db.UserOpenIds.Where(uoi => uoi.UserId == masterId).Skip(1).ToList();
+            var userOpenIds = db.UserOpenIds.Where(uoi => uoi.UserId == masterId).ToList();
+            var firstOpenId = userOpenIds.First();
+            firstOpenId.OpenIdClaim = User.NormalizeOpenId(firstOpenId.OpenIdClaim);
+            userOpenIds = userOpenIds.Skip(1).ToList();
             log.AppendLine(string.Format("Removing {0} inaccessible openids found for master", userOpenIds.Count));
             userOpenIds.ForEach(uoi => log.AppendLine(string.Format("--Dropping {0} as an open id for the master user", uoi.OpenIdClaim)));
             db.UserOpenIds.DeleteAllOnSubmit(userOpenIds);
@@ -206,7 +209,8 @@ namespace StackExchange.DataExplorer.Models
 
             // User
             log.AppendLine("Moving user properties over");
-            if (masterUser.Login.StartsWith(emptyLogin) && !mergeUser.Login.StartsWith(emptyLogin)) masterUser.Login = mergeUser.Login;
+            string savedLogin = null;
+            if (masterUser.Login.StartsWith(emptyLogin) && !mergeUser.Login.StartsWith(emptyLogin)) savedLogin = mergeUser.Login;
             if (masterUser.Email.IsNullOrEmpty() && !mergeUser.Email.IsNullOrEmpty()) masterUser.Email = mergeUser.Email;
             // if (masterUser.LastLogin.GetValueOrDefault() < mergeUser.LastLogin.GetValueOrDefault()) masterUser.LastLogin = mergeUser.LastLogin;
             if (!masterUser.IsAdmin && mergeUser.IsAdmin) masterUser.IsAdmin = true;
@@ -238,9 +242,40 @@ namespace StackExchange.DataExplorer.Models
             });
             log.AppendLine(string.Format("Removed {0} dupe votes", dupe));
 
+            Func<Action, bool> submitIfValid = doIfOk =>
+            {
+                var violations = masterUser.GetBusinessRuleViolations(ChangeAction.Update);
+                if (violations.Count == 0)
+                {
+                    doIfOk();
+                    return true;
+                }
+                else
+                {
+                    log.AppendLine("**UNABLE TO SUBMIT:");
+                    violations.ToList().ForEach(v => log.AppendLine(string.Format("--{0}: {1}", v.PropertyName, v.ErrorMessage)));
+                    return false;
+                }
+            };
+
             log.AppendLine("Deleting merged user");
-            db.Users.DeleteOnSubmit(mergeUser);
-            db.SubmitChanges();
+            var okToContinue = submitIfValid(() =>
+            {
+                db.Users.DeleteOnSubmit(mergeUser);
+                db.SubmitChanges();
+            });
+            if (!okToContinue) return false;
+
+            if (savedLogin.HasValue())
+            {
+                log.AppendLine("Replacing jon.doe username on master");
+                okToContinue = submitIfValid(() =>
+                {
+                    masterUser.Login = savedLogin;
+                    db.SubmitChanges();
+                });
+                if (!okToContinue) return false;
+            }
             log.AppendLine("That's all folks");
             return true;
         }

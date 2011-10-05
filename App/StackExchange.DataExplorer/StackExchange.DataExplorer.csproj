@@ -405,6 +405,7 @@
     <Content Include="Views\Admin\FindDuplicateUsers.cshtml" />
     <Content Include="Views\Admin\FindDuplicateWhitelistOpenIds.cshtml" />
     <Content Include="Views\Admin\MergeUsers.cshtml" />
+    <Content Include="Views\Admin\FindDuplicateUserOpenIds.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">
