@@ -196,7 +196,6 @@ namespace StackExchange.DataExplorer.Models
             // User Open Ids
             var userOpenIds = db.UserOpenIds.Where(uoi => uoi.UserId == masterId).ToList();
             var firstOpenId = userOpenIds.First();
-            firstOpenId.OpenIdClaim = User.NormalizeOpenId(firstOpenId.OpenIdClaim);
             userOpenIds = userOpenIds.Skip(1).ToList();
             log.AppendLine(string.Format("Removing {0} inaccessible openids found for master", userOpenIds.Count));
             userOpenIds.ForEach(uoi => log.AppendLine(string.Format("--Dropping {0} as an open id for the master user", uoi.OpenIdClaim)));
@@ -272,6 +271,7 @@ namespace StackExchange.DataExplorer.Models
                 okToContinue = submitIfValid(() =>
                 {
                     masterUser.Login = savedLogin;
+                    firstOpenId.OpenIdClaim = User.NormalizeOpenId(firstOpenId.OpenIdClaim);
                     db.SubmitChanges();
                 });
                 if (!okToContinue) return false;
