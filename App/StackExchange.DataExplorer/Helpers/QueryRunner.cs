@@ -653,14 +653,14 @@ namespace StackExchange.DataExplorer.Helpers
             if (query != null && !user.IsAnonymous)
             {
                 // Save ourselves the trouble of updating if nothing's changed
-                if (query.Name != parsedQuery.Name || query.Description != parsedQuery.Description || query.QueryBody != query.QueryBody)
+                if (query.Name != parsedQuery.Name || query.Description != parsedQuery.Description || query.QueryBody != parsedQuery.RawSql)
                 {
                     Current.DB.Execute(@"
                         UPDATE Queries SET
                             Name = @name,
                             Description = @description,
                             QueryBody = @sql
-                        WHERE QueryHash = @id",
+                        WHERE Id = @id",
                         new
                         {
                             name = parsedQuery.Name,
