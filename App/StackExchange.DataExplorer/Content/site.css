@@ -557,7 +557,7 @@ ul.site-list .desc {
 }
 
 
-#queryText ul.schema {
+#schema {
   background-color: #F7F7F7;
   border: 1px solid #CCCCCC;
   border-left-width: 0px;
@@ -572,7 +572,7 @@ ul.site-list .desc {
   width: 30%;
 }
 
-#queryText ul.schema .schema-table {
+#schema .schema-table {
   color: #404040;
   cursor: pointer;
   border-bottom: 1px dotted #CCCCCC;
@@ -586,7 +586,7 @@ ul.site-list .desc {
   margin-left: 4px;
 }
 
-#queryText ul.schema dl dt {
+#schema dl dt {
   border-right: 1px dotted #CCCCCC;
   float: left;
   margin-left: 7px;
@@ -594,18 +594,18 @@ ul.site-list .desc {
   width: 55%;
 }
 
-#queryText ul.schema dl > * {
+#schema dl > * {
   padding-top: 5px;
   padding-bottom: 4px;
 }
 
-#queryText ul.schema dl dd {
+#schema dl dd {
   background-color: #FFFFFF;
   border-bottom: 1px solid #FAFAFA;
   color: #800080;
 }
 
-#schemaToggle {
+#schema-toggle {
   float:right;
   margin-top: -25px;
 }
@@ -648,27 +648,38 @@ ul.site-list .desc {
 }
 
 #query-errors {
+  display: none;
   margin-top: 5px;
-} 
-
-#query-errors p {
-  margin: 6px 6px 6px 6px;
+  padding: 6px 6px 6px 6px;
 }
 
-.query {
-  width: 100%; 
+#query-metadata .info {
+  float: left;
+  max-width: 60%;
 }
 
-#sqlQuery{
+#query {
+  margin-top: 20px;
+}
+
+#sql{
   height: 100%;
-  width: 100%;
   overflow: auto;
+  width: 100%;
 }
 
-#sqlQueryWrapper {
+#wrapper {
   margin-bottom: 30px;
+  position: relative;
 }
 
+#query .compact {
+  width: 70%;
+}
+
+.left-group {
+  float: left;
+}
 
 #queryText .title h2{
   float: left;
@@ -683,29 +694,26 @@ ul.site-list .desc {
   margin-right: 12%;
 }
 
-#queryParams{
-  margin-bottom: 8px;  
-}
-#queryParams h3 {
-  margin-bottom: 8px;  
-}
-
-#queryParams label {
-    display:block;
-    float:left;
-    padding:12px 8px 0 0;
-    min-width:100px;
-}
-
-#queryParams input {
-  float: left; 
-  display: block;
+#query-params{
+  display: none;
   margin-bottom: 8px;
 }
 
-#permalink, #downloadCsv, #showSql, #hideSql, #editQuery, #deleteQuery, #undeleteQuery {
-  margin-left: 10px; 
-  margin-right: 10px;  
+#query-params h3 {
+  margin-bottom: 8px;  
+}
+
+#query-params label {
+  display: block;
+  float: left;
+  min-width: 100px;
+  padding: 12px 8px 0 0;
+}
+
+#query-params input {
+  display: block;
+  float: left;
+  margin-bottom: 8px;
 }
 
 #grid {
@@ -718,19 +726,19 @@ p.tagline{
 }
 
 div.grippie {
-background:#EEEEEE url(/Content/images/grippie.png) no-repeat scroll center 2px;
-border-color:#DDDDDD;
-border-style:solid;
-border-width:0pt 1px 1px;
-cursor:s-resize;
-height:9px;
-overflow:visible;
+  background:#EEEEEE url(/Content/images/grippie.png) no-repeat scroll center 2px;
+  border-color:#DDDDDD;
+  border-style:solid;
+  border-width:0pt 1px 1px;
+  cursor:s-resize;
+  height:9px;
+  overflow:visible;
 }
 .resizable-textarea textarea {
-display:block;
-margin-bottom:0pt;
-width:95%;
-height: 20%;
+  display: block;
+  height: 20%;
+  margin-bottom: 0pt;
+  width: 95%;
 }
 
 .openid_large_btn  {
@@ -933,9 +941,12 @@ font-weight:bold;
   color:#858585;
 }
 
+#loading {
+  display: none;
+}
 
-.loading span { 
-  padding-left: 12px;
+#loading img { 
+  margin-right: 12px;
 }
 
 /* code mirror */

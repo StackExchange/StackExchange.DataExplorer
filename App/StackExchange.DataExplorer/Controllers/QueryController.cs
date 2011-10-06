@@ -271,7 +271,7 @@ namespace StackExchange.DataExplorer.Controllers
         {
             bool foundSite = SetCommonQueryViewData(sitename);
             
-            return foundSite?View(Site):PageNotFound();
+            return foundSite?View("Editor"):PageNotFound();
         }
 
         private bool SetCommonQueryViewData(string sitename)

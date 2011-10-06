@@ -6,7 +6,7 @@
     var cached_results = ViewData["cached_results"] as CachedResult;
 }
 @section additionalStyles {
-    @Html.Raw(AssetPackager.LinkCss("viewer_editor"))
+    @Html.Raw(AssetPackager.LinkCss("query"))
 }
 <div id="savedQueryTitle">
     @Html.Partial("QueryVoting", ViewData["QueryVoting"])
@@ -124,7 +124,7 @@
         </div>
     </div>
 </div>
-@Html.Raw(AssetPackager.ScriptSrc("viewer"))
+@Html.Raw(AssetPackager.ScriptSrc("query"))
 <script type="text/javascript">
     var inProgress = false;
     var queryId = @Model.Id;

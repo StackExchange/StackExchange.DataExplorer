@@ -75,7 +75,7 @@
 
         activeError = +line + parseMetadata();
 
-        editor.setLineClass(activeError, 'error');
+        editor.setLineClass(activeError, 'error-line');
     }
 
     function parseMetadata() {
@@ -128,18 +128,18 @@
 })();
 
 DataExplorer.ready(function () {
-    var schema = $('ul.schema'),
-        panel = $('.query'),
-        metadata = $('#queryInfo');
+    var schema = $('#schema'),
+        panel = $('#query .left-group'),
+        metadata = $('#query-metadata .info');
 
-    DataExplorer.QueryEditor.create('#sqlQuery', function (editor) {
+    DataExplorer.QueryEditor.create('#sql', function (editor) {
         var wrapper, resizer, border = 2;
 
         if (editor) {
             wrapper = $(editor.getScrollerElement());
         }
 
-        resizer = $('#sqlQueryWrapper').TextAreaResizer(function () {
+        resizer = $('#wrapper').TextAreaResizer(function () {
             var height = resizer.height();
 
             schema.height(height - border);
@@ -169,7 +169,7 @@ DataExplorer.ready(function () {
     });
 
     $('.miniTabs').tabs();
-    $('#schemaToggle').toggle(function () {
+    $('#schema-toggle').toggle(function () {
         schema.hide();
         panel.animate({ 'width': '100%' }, 'fast');
         $(this).text("<< show schema");
@@ -235,7 +235,7 @@ function getParameterByName(name) {
 }
 
 function populateParamsFromUrl() {
-    $('#queryParams').find("p input").each(function () {
+    $('#query-params').find("p input").each(function () {
         var val = getParameterByName(this.name);
         if (val != null && val.length > 0) {
             $(this).val(getParameterByName(this.name));
@@ -284,7 +284,7 @@ function displayCaptcha() {
 
 function gotResults(results) {
 
-    $(".loading").hide();
+    $("#loading").hide();
     $('form input[type=submit]').attr('disabled', null);
 
     if (results && results.captcha) {
@@ -311,7 +311,7 @@ function gotResults(results) {
     $("#messages pre code").text(results.messages);
 
     var currentParams = "?";
-    currentParams += $('#queryParams').find("p input").serialize();
+    currentParams += $('#query-params').find("p input").serialize();
 
     if (currentParams == "?") {
         currentParams = "";
@@ -463,7 +463,7 @@ function executeQuery(sql) {
         return false;
     }
 
-    $(".loading").show();
+    $("#loading").show();
     $('#runQueryForm input[type=submit]', this).attr('disabled', 'disabled');
 
     $.ajax({
@@ -485,7 +485,7 @@ function ensureAllParamsEntered(query) {
     var params = query.match(pattern);
     if (params == null) params = [];
 
-    var div = $('#queryParams');
+    var div = $('#query-params');
 
     var allParamsHaveValues = true;
 
@@ -548,3 +548,24 @@ $(function () {
     $("#gridStats").width(width + 10);
   });
 });
+
+function getQueryInfo(text) {
+    var info = { title: "", description: "" };
+    var lines = text.split("\n");
+    var gotTitle = false;
+
+    for (var i = 0; i < lines.length; i++) {
+        if (lines[i].match("^--") == "--") {
+            var data = lines[i].substring(2).replace(/^\s+|\s+$/g, "");
+            if (gotTitle) {
+                info.description += data + "\n";
+            } else {
+                info.title = data;
+                gotTitle = true;
+            }
+        } else {
+            break;
+        }
+    }
+    return info;
+}

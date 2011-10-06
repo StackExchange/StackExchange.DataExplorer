@@ -1,0 +1,104 @@
+﻿@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Helpers
+@using StackExchange.DataExplorer.Models
+@{
+    Layout = "~/Views/Shared/Master.cshtml";
+}
+
+@section AdditionalStyles
+{
+    @Html.Raw(AssetPackager.LinkCss("query"))
+}
+
+<div id="query-metadata">
+    <div class="info">
+        @RenderSection("Metadata")
+    </div>
+    @Html.Partial("AboutSite")
+</div>
+<div class="clear"></div>
+<div id="query">
+    <form id="runQueryForm" action="/query/@Current.Controller.Site.Id" method='post'>
+        @RenderBody()
+        <div id="query-params">
+            <h3>Enter Parameters</h3>
+        </div>
+        <ul id="query-options">
+            <li>
+                <label><input type="checkbox" name="resultsToText" value="true" />Results to text</label>
+            </li>
+            <li>
+                <label><input type="checkbox" name="showExecutionPlan" value="true" />Include execution plan</label>
+            </li>
+        @if (AppSettings.AllowRunOnAllDbsOption)
+        {
+            <li>
+                <label><input type="checkbox" name="allDbs" value="true" />Run as a mutli-site query</label>
+            </li>
+            <li>
+                <label><input type="checkbox" name="excludeMetas" value="true" />Exclude meta sites</label>
+            </li>
+        }
+        </ul>
+    @if (Current.User.IsAnonymous)
+    {
+        @Html.Partial("Captcha", Current.NewRecaptchControl())
+    }
+        <div id="toolbar">
+            <input type="submit" value="Run Query" />
+            <ul class="options">
+                @RenderSection("ToolbarOptions", required: false)
+                <li>
+                    <a id="permalink" href="#">permalink to this query</a>
+                </li>
+                <li>
+                    <a id="downloadCsv" href="#" title="download results as CSV">download results</a>
+                </li>
+                <li>
+                    <a id="downloadPlan" href="#" title="download execution plan as XML">download execution plan</a>
+                </li>
+            </ul>
+            <span class="options sites">
+            @foreach (Site site in (IEnumerable<Site>)ViewData["Sites"])
+            {
+                if (site.Id == Current.Controller.Site.Id)
+                {
+                    continue;
+                }
+                
+                <a class="site" href="/@site.Name.ToLower()/q//" title="View results on @site.LongName">
+                    <img src="@site.IconUrl" alt="@site.LongName" width="16" height="16" />
+                </a>
+            }
+            </span>
+        </div>
+    </form>
+    <div class="ui-state-error ui-corner-all" id="query-errors">
+        <span style="float:left; margin-right:0.3em;" class="ui-icon ui-icon-alert"></span>
+        <strong>Error:</strong> <span id="queryError"> </span>
+    </div>
+    <div id="loading">
+        <img src="http://sstatic.net/img/progress-dots.gif" alt="loading" />Hold tight while we fetch your results
+    </div>
+    <div id="queryResults" style="display:none;">
+        <div id="resultTabs" class="subheader">
+            <div class="miniTabs">
+                <a id="resultsTabButton" href="#grid" class="youarehere">Results</a>
+                <a id="messagesTabButton" href="#messages">Messages</a>
+                <a id="planTabButton" href="#executionPlan" onclick="QP.drawLines();">Execution Plan</a>
+            </div>
+        </div>
+        <div id="grid"></div>
+        <div id="messages" style="display:none;">
+            <pre><code></code></pre>
+        </div>
+        <div id="executionPlan" style="display:none;"></div>
+        <div id="gridStats" class="ui-widget-header">
+            <span class="duration"></span>
+            <span class="rows"></span>
+            <div class="clear"></div>
+        </div>
+    </div>
+</div>
+@Html.Raw(AssetPackager.ScriptSrc("jquery.validate"))
+@Html.Raw(AssetPackager.ScriptSrc("query"))

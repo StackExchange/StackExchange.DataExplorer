@@ -390,6 +390,9 @@
     <Content Include="Views\Shared\Captcha.cshtml" />
     <Content Include="packages.config" />
     <Content Include="Views\Shared\_MINIPROFILER UPDATED Layout.cshtml" />
+    <Content Include="Views\Shared\Query.cshtml" />
+    <Content Include="Views\Query\Editor.cshtml" />
+    <Content Include="Views\SavedQuery\Viewer.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">

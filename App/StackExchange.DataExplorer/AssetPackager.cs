@@ -40,7 +40,7 @@ namespace StackExchange.DataExplorer
                         }
                     },
                     {
-                        "viewer_editor", new AssetCollection
+                        "query", new AssetCollection
                         {
                             "/Content/smoothness/jquery-ui-1.8.1.custom.css",
                             "/Content/codemirror/codemirror.css",
@@ -68,17 +68,7 @@ namespace StackExchange.DataExplorer
                         }
                     },
                     {
-                        "viewer", new AssetCollection
-                        {
-                            "/Scripts/query.js",
-                            "/Scripts/jquery.rule.js",
-                            "/Scripts/jquery.event.drag-1.5.js",
-                            "/Scripts/slick.grid.js",
-                            "/Scripts/qp.js",
-                        }
-                    },
-                    {
-                        "editor", new AssetCollection
+                        "query", new AssetCollection
                         {
                             "/Scripts/jquery.rule.js",
                             "/Scripts/jquery.textarearesizer.js",

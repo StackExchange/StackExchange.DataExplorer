@@ -5,7 +5,7 @@
 @{this.SetPageTitle("Query " + Model.LongName + " - Stack Exchange Data Explorer");}
 
 @section AdditionalStyles{
-    @Html.Raw(AssetPackager.LinkCss("viewer_editor"))
+    @Html.Raw(AssetPackager.LinkCss("query"))
     <style type="text/css">
         @Html.Raw(Model.TagCss)
     </style>
@@ -160,7 +160,7 @@
 </div>
 
 @Html.Raw(AssetPackager.ScriptSrc("jquery.validate"))
-@Html.Raw(AssetPackager.ScriptSrc("editor"))
+@Html.Raw(AssetPackager.ScriptSrc("query"))
 
 <script type="text/javascript">
     var siteId = @Model.Id;
