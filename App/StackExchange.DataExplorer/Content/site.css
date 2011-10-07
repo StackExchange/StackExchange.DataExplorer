@@ -581,7 +581,7 @@ ul.site-list .desc {
   padding: 6px 8px 5px 8px;
 }
 
-#queryText ul.schema dl {
+#schema dl {
   border-left: 1px solid #EAEAEA;
   margin-left: 4px;
 }
@@ -610,41 +610,60 @@ ul.site-list .desc {
   margin-top: -25px;
 }
 
-#query-options {
-  height: 1%;
-  list-style-type: none;
-  overflow: auto;
-  margin-left: 0px;
+#schema-toggle:hover {
+  text-decoration: none;
 }
 
-#query-options li {
-  float: left;
-  margin-right: 12px;
+#query-options .options {
+  color: #606060;
+  display: inline-block;
+  font-weight: bold;
+  margin-left: 15px;
 }
 
-#query-options li label {
-  border: 1px solid transparent;
-  border-radius: 5px 5px;
+#query-options label {
+  color: #909090;
   cursor: pointer;
-  display: block;
-  padding: 5px 6px 5px 6px;
+  margin-left: 8px;
+  padding-bottom: 2px;
 }
 
-#query-options li label:hover {
-  background-color: #F7F7F7;
-  border-bottom: 1px solid #CCCCCC;
-  border-right: 1px solid #CCCCCC;
+#query-options label:active {
+  
 }
 
-#query-options li label:active {
-  border-bottom-color: transparent;
-  border-left: 1px solid #CCCCCC;
-  border-right-color: transparent;
-  border-top: 1px solid #CCCCCC;  
+#query-options input {
+  display: none;
 }
 
-#query-options li label input {
-  margin-right: 0.6em;
+#query-options input:checked + label {
+  border-bottom: 3px solid #0C57A0;
+  color: #0C57A0;
+}
+
+#submit-query {
+  background: none repeat scroll 0 0 #0C57A0;
+  border-width: 0px;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 0px;
+  padding: 6px 12px 6px 12px;
+}
+
+#toolbar {
+  margin-top: 10px;
+}
+
+#toolbar .options {
+  display: inline;
+  list-style-type: none;
+  margin: 0px;
+}
+
+#toolbar .options li {
+  display: inline;
+  margin-right: 10px;
 }
 
 #query-errors {

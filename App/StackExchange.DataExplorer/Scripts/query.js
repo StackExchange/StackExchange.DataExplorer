@@ -172,12 +172,12 @@ DataExplorer.ready(function () {
     $('#schema-toggle').toggle(function () {
         schema.hide();
         panel.animate({ 'width': '100%' }, 'fast');
-        $(this).text("<< show schema");
+        $(this).text("◄ show schema");
     }, function () {
         panel.animate({ 'width': '70%' }, 'fast', function () {
             schema.show();
         });
-        $(this).text("hide schema >>");
+        $(this).text("hide schema ►");
     });
     $('#runQueryForm').submit(function () {
         executeQuery(DataExplorer.QueryEditor.value());

@@ -23,30 +23,25 @@
         <div id="query-params">
             <h3>Enter Parameters</h3>
         </div>
-        <ul id="query-options">
-            <li>
-                <label><input type="checkbox" name="resultsToText" value="true" />Results to text</label>
-            </li>
-            <li>
-                <label><input type="checkbox" name="showExecutionPlan" value="true" />Include execution plan</label>
-            </li>
-        @if (AppSettings.AllowRunOnAllDbsOption)
-        {
-            <li>
-                <label><input type="checkbox" name="allDbs" value="true" />Run as a mutli-site query</label>
-            </li>
-            <li>
-                <label><input type="checkbox" name="excludeMetas" value="true" />Exclude meta sites</label>
-            </li>
-        }
-        </ul>
+        <div id="query-options">
+            <button id="submit-query" type="submit">Run Query</button>
+            <span class="options">
+                Include:
+                <input type="checkbox" id="resultsToText" name="resultsToText" value="true" /><label for="resultsToText" title="Return results in text format">Text results</label>
+                <input type="checkbox" id="showExecutionPlan" name="showExecutionPlan" value="true" /><label for="showExecutionPlan" title="Include the execution plan for this query in the results">Execution plan</label>
+            @if (AppSettings.AllowRunOnAllDbsOption)
+            {
+                <input type="checkbox" id="allDbs" name="allDbs" value="true" /><label for="allDbs" title="Execute this query on all sites at once">Mutli-site</label>
+                <input type="checkbox" id="excludeMetas" name="excludeMetas" value="true" /><label for="excludeMetas" title="Exclude meta sites from the sites this query is executed against">Exclude metas</label>
+            }
+            </span>
+        </div>
     @if (Current.User.IsAnonymous)
     {
         @Html.Partial("Captcha", Current.NewRecaptchControl())
     }
         <div id="toolbar">
-            <input type="submit" value="Run Query" />
-            <ul class="options">
+            <ul class="options links">
                 @RenderSection("ToolbarOptions", required: false)
                 <li>
                     <a id="permalink" href="#">permalink to this query</a>
@@ -58,17 +53,18 @@
                     <a id="downloadPlan" href="#" title="download execution plan as XML">download execution plan</a>
                 </li>
             </ul>
-            <span class="options sites">
+            <ul class="options sites">
             @foreach (Site site in (IEnumerable<Site>)ViewData["Sites"])
             {
                 if (site.Id == Current.Controller.Site.Id)
                 {
                     continue;
                 }
-                
-                <a class="site" href="/@site.Name.ToLower()/q//" title="View results on @site.LongName">
-                    <img src="@site.IconUrl" alt="@site.LongName" width="16" height="16" />
-                </a>
+                <li>
+                    <a class="site" href="/@site.Name.ToLower()/q//" title="View results on @site.LongName">
+                        <img src="@site.IconUrl" alt="@site.LongName" width="16" height="16" />
+                    </a>
+                </li>
             }
             </span>
         </div>
@@ -89,10 +85,10 @@
             </div>
         </div>
         <div id="grid"></div>
-        <div id="messages" style="display:none;">
+        <div id="messages">
             <pre><code></code></pre>
         </div>
-        <div id="executionPlan" style="display:none;"></div>
+        <div id="executionPlan"></div>
         <div id="gridStats" class="ui-widget-header">
             <span class="duration"></span>
             <span class="rows"></span>
