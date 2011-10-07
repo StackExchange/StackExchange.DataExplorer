@@ -573,7 +573,7 @@ ul.site-list .desc {
 }
 
 #schema .schema-table {
-  color: #404040;
+  color: #606060;
   cursor: pointer;
   border-bottom: 1px dotted #CCCCCC;
   display: block;
@@ -622,14 +622,12 @@ ul.site-list .desc {
 }
 
 #query-options label {
-  color: #909090;
+  background: transparent url('images/sprites.png') no-repeat scroll 0px 1px;
+  color: #C0C0C0;
   cursor: pointer;
-  margin-left: 8px;
-  padding-bottom: 2px;
-}
-
-#query-options label:active {
-  
+  display: inline-block;
+  margin-left: 6px;
+  padding: 5px 0px 5px 20px;
 }
 
 #query-options input {
@@ -637,7 +635,7 @@ ul.site-list .desc {
 }
 
 #query-options input:checked + label {
-  border-bottom: 3px solid #0C57A0;
+  background-position: 0px -27px;
   color: #0C57A0;
 }
 
