@@ -70,9 +70,8 @@ namespace StackExchange.DataExplorer
                     {
                         "query", new AssetCollection
                         {
-                            "/Scripts/jquery.rule.js",
                             "/Scripts/jquery.textarearesizer.js",
-                            "/Scripts/jquery.event.drag-1.5.js",
+                            "/Scripts/jquery.event.drag-2.0.js",
                             "/Scripts/slick.grid.js",
                             "/Scripts/codemirror/codemirror.js",
                             "/Scripts/codemirror/sql.js",

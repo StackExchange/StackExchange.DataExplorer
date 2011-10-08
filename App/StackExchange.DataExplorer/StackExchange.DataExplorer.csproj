@@ -273,6 +273,7 @@
     <Content Include="Scripts\codemirror\codemirror.js" />
     <Content Include="Scripts\codemirror\sql.js" />
     <Content Include="Scripts\jquery-1.6.4.js" />
+    <Content Include="Scripts\jquery.event.drag-2.0.js" />
     <Content Include="Scripts\master.js" />
     <Content Include="Scripts\openid-jquery.js" />
     <Content Include="robots.txt" />
@@ -298,7 +299,6 @@
     <Content Include="favicon.ico" />
     <Content Include="OData.svc" />
     <Content Include="Scripts\jquery-ui-1.8.1.custom.min.js" />
-    <Content Include="Scripts\jquery.event.drag-1.5.js" />
     <Content Include="Scripts\jquery.rule.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\qp.js" />
