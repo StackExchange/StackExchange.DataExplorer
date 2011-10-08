@@ -180,7 +180,21 @@ DataExplorer.ready(function () {
         $(this).text("hide schema ►");
     });
     $('#runQueryForm').submit(function () {
-        executeQuery(DataExplorer.QueryEditor.value());
+        $('.report-option').fadeOut();
+        var data, self = $(this), sql = DataExplorer.QueryEditor.value();
+
+        if (ensureAllParamsEntered(sql)) {
+            $('#loading').show();
+            self.find('input').prop('disabled', true);
+
+            $.ajax({
+                'type': 'POST',
+                'url': this.action,
+                'data': self.serialize(),
+                'success': gotResults,
+                'cache': false,
+            });
+        }
 
         return false;
     });
@@ -286,6 +300,8 @@ function gotResults(results) {
 
     $("#loading").hide();
     $('form input[type=submit]').attr('disabled', null);
+    $('.report-option:not(#query-errors)').fadeIn();
+    $('#resultTabs .miniTabs a:first').click();
 
     if (results && results.captcha) {
         displayCaptcha();
@@ -456,30 +472,6 @@ function gotResults(results) {
     $("#grid").resize();
 }
 
-function executeQuery(sql) {
-    $("#permalinks, #queryResults, #query-errors").hide();
-
-    if (!ensureAllParamsEntered(sql)) {
-        return false;
-    }
-
-    $("#loading").show();
-    $('#runQueryForm input[type=submit]', this).attr('disabled', 'disabled');
-
-    $.ajax({
-      cache: false,
-      url: $('#runQueryForm')[0].action,
-      type: "POST",
-      data: $("#runQueryForm").serialize(),
-      error: function () {
-        alert("Something is wrong with the server!");
-      },
-      success: gotResults
-    });
-
-    return false;
-}
-
 function ensureAllParamsEntered(query) {
     var pattern = /##([a-zA-Z0-9]+):?([a-zA-Z]+)?##/g;
     var params = query.match(pattern);
@@ -548,24 +540,3 @@ $(function () {
     $("#gridStats").width(width + 10);
   });
 });
-
-function getQueryInfo(text) {
-    var info = { title: "", description: "" };
-    var lines = text.split("\n");
-    var gotTitle = false;
-
-    for (var i = 0; i < lines.length; i++) {
-        if (lines[i].match("^--") == "--") {
-            var data = lines[i].substring(2).replace(/^\s+|\s+$/g, "");
-            if (gotTitle) {
-                info.description += data + "\n";
-            } else {
-                info.title = data;
-                gotTitle = true;
-            }
-        } else {
-            break;
-        }
-    }
-    return info;
-}

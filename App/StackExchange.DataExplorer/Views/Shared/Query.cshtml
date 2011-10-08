@@ -42,10 +42,6 @@
     }
         <div id="toolbar">
             <ul class="options links">
-                @RenderSection("ToolbarOptions", required: false)
-                <li>
-                    <a id="permalink" href="#">permalink to this query</a>
-                </li>
                 <li>
                     <a id="downloadCsv" href="#" title="download results as CSV">download results</a>
                 </li>
@@ -69,17 +65,17 @@
             </span>
         </div>
     </form>
-    <div class="ui-state-error ui-corner-all" id="query-errors">
+    <div class="ui-state-error ui-corner-all report-option" id="query-errors">
         <span style="float:left; margin-right:0.3em;" class="ui-icon ui-icon-alert"></span>
         <strong>Error:</strong> <span id="queryError"> </span>
     </div>
     <div id="loading">
         <img src="http://sstatic.net/img/progress-dots.gif" alt="loading" />Hold tight while we fetch your results
     </div>
-    <div id="queryResults" style="display:none;">
+    <div id="queryResults" class="report-option">
         <div id="resultTabs" class="subheader">
             <div class="miniTabs">
-                <a id="resultsTabButton" href="#grid" class="youarehere">Results</a>
+                <a id="resultsTabButton" href="#grid">Results</a>
                 <a id="messagesTabButton" href="#messages">Messages</a>
                 <a id="planTabButton" href="#executionPlan" onclick="QP.drawLines();">Execution Plan</a>
             </div>

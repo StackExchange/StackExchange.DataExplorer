@@ -93,10 +93,10 @@ list-style:decimal outside none;
 margin-bottom:1em;
 margin-left:30px;
 }
-a {
-color:#0077CC;
-cursor:pointer;
-text-decoration:none;
+a, ul.linkbar li {
+  color:#0077CC;
+  cursor:pointer;
+  text-decoration:none;
 }
 a:hover {
 text-decoration:underline;
@@ -606,8 +606,8 @@ ul.site-list .desc {
 }
 
 #schema-toggle {
-  float:right;
-  margin-top: -25px;
+  float: right;
+  margin-right: 0px;
 }
 
 #schema-toggle:hover {
@@ -649,7 +649,28 @@ ul.site-list .desc {
   padding: 6px 12px 6px 12px;
 }
 
+#editor-toolbar {
+  height: 1%;
+  margin: -25px 0px 0px 0px;
+  overflow: auto;
+  padding-bottom: 15px;
+}
+
+ul.linkbar {
+  list-style-type: none;
+}
+
+ul.linkbar li {
+  float: left;
+  margin-right: 15px;
+}
+
+.report-option {
+  display: none;
+}
+
 #toolbar {
+  display: none;
   margin-top: 10px;
 }
 

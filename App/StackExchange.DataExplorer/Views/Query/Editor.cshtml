@@ -34,11 +34,21 @@
     description = Html.Encode(description).Replace("\n", "<br />");
 }
 
+@section Metadata
+{
+    <h2>@name</h2>
+    <p>@Html.Raw(description)</p>
+}
+
 <div class="left-group compact">
     <div id="wrapper">
         <textarea id="sql" name="sql" rows="18">@Html.Raw(sql)</textarea>
     </div>
-    <a id="schema-toggle" href="#">hide schema ►</a>
+    <ul id="editor-toolbar" class="linkbar">
+        <li id="permalink" class="report-option"><a href="#">permalink</a></li>
+        <li id="savelink" class="report-option">save query</li>
+        <li id="schema-toggle">hide schema ►</li>
+    </ul>
 </div>
 <ul id="schema">
 @foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
@@ -59,9 +69,3 @@
 <script type="text/javascript">
     @Html.Partial("GuessedUserId")
 </script>
-
-@section Metadata
-{
-    <h2>@name</h2>
-    <p>@Html.Raw(description)</p>
-}

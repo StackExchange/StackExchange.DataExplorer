@@ -48,8 +48,9 @@ $.fn.tabs = function () {
     $(this).delegate("a:not(.youarehere)", "click", function () {
         $(this.hash).show();
         $(this).addClass("youarehere")
-            .siblings(".youarehere")
-            .removeClass("youarehere").each(function () {
+            .siblings()
+            .removeClass("youarehere")
+            .each(function () {
                 $(this.hash).hide();
             });
     }).delegate("a", "click", function () {
