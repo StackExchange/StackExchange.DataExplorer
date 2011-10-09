@@ -40,56 +40,42 @@
     {
         @Html.Partial("Captcha", Current.NewRecaptchControl())
     }
-        <div id="toolbar">
-            <ul class="options links">
-                <li>
-                    <a id="downloadCsv" href="#" title="download results as CSV">download results</a>
-                </li>
-                <li>
-                    <a id="downloadPlan" href="#" title="download execution plan as XML">download execution plan</a>
-                </li>
-            </ul>
-            <ul class="options sites">
-            @foreach (Site site in (IEnumerable<Site>)ViewData["Sites"])
+        <ul id="site-selector" class="result-option">
+        @foreach (Site site in (IEnumerable<Site>)ViewData["Sites"])
+        {
+            if (site.Id == Current.Controller.Site.Id)
             {
-                if (site.Id == Current.Controller.Site.Id)
-                {
-                    continue;
-                }
-                <li>
-                    <a class="site" href="/@site.Name.ToLower()/q//" title="View results on @site.LongName">
-                        <img src="@site.IconUrl" alt="@site.LongName" width="16" height="16" />
-                    </a>
-                </li>
+                continue;
             }
-            </span>
-        </div>
+            <li>
+                <a class="site templated" href="/@site.Name.ToLower()/q/:id/:slug" title="View results on @site.LongName">
+                    <img src="@site.IconUrl" alt="@site.LongName" width="16" height="16" />
+                </a>
+            </li>
+        }
+        </ul>
     </form>
-    <div class="ui-state-error ui-corner-all report-option" id="query-errors">
-        <span style="float:left; margin-right:0.3em;" class="ui-icon ui-icon-alert"></span>
-        <strong>Error:</strong> <span id="queryError"> </span>
-    </div>
     <div id="loading">
         <img src="http://sstatic.net/img/progress-dots.gif" alt="loading" />Hold tight while we fetch your results
     </div>
-    <div id="queryResults" class="report-option">
-        <div id="resultTabs" class="subheader">
-            <div class="miniTabs">
-                <a id="resultsTabButton" href="#grid">Results</a>
-                <a id="messagesTabButton" href="#messages">Messages</a>
-                <a id="planTabButton" href="#executionPlan" onclick="QP.drawLines();">Execution Plan</a>
+    <div id="query-results" class="result-option">
+        <div class="subheader">
+            <div class="group">
+                <div class="miniTabs">
+                    <a id="resultsetTab" href="#resultset">Results</a>
+                    <a id="messagesTab" href="#messages">Messages</a>
+                    <a id="executionPlanTab" class="optional" href="#executionPlan" onclick="QP.drawLines();">Execution Plan</a>
+                </div>
+                <div id="result-stats" class="right-group">
+                    <a id="resultsetButton" class="download-button templated" title="Download results as CSV" href="/:site/:metas:multicsv/:id">Download CSV</a>
+                    <a id="executionPlanButton" class="download-button templated" title="Download execution plan as XML" href="/:site/:metas:multiplan/:id">Download XML</a>
+                    <span>:records rows returned in :time ms</span>
+                </div>
             </div>
         </div>
-        <div id="grid"></div>
-        <div id="messages">
-            <pre><code></code></pre>
-        </div>
-        <div id="executionPlan"></div>
-        <div id="gridStats" class="ui-widget-header">
-            <span class="duration"></span>
-            <span class="rows"></span>
-            <div class="clear"></div>
-        </div>
+        <div id="resultset" class="panel"></div>
+        <pre id="messages" class="panel"><code></code></pre>
+        <div id="executionPlan" class="panel"></div>
     </div>
 </div>
 @Html.Raw(AssetPackager.ScriptSrc("jquery.validate"))
