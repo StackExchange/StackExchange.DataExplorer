@@ -19,7 +19,44 @@ namespace StackExchange.DataExplorer.Controllers
                 return Json(new { captcha = true });
             }
 
+            Revision parent = null;
+
+            if (parentId.HasValue)
+            {
+                parent = Current.DB.Query<Revision>(
+                    "SELECT * FROM Revisions WHERE ID = @id",
+                    new
+                    {
+                        id = parentId.Value
+                    }
+                ).FirstOrDefault();
+
+                if (parent == null)
+                {
+                    throw new ApplicationException("Invalid revision ID");
+                }
+            }
+
+            var parsedQuery = new ParsedQuery(sql, Request.Params);
+            var query = Current.DB.Query<Query>(
+                "SELECT * FROM Queries WHERE QueryHash = @hash",
+                new
+                {
+                    hash = parsedQuery.Hash
+                }
+            ).FirstOrDefault();
+
+            // We only create revisions if something actually changed.
+            // We'll log it as an execution anyway if applicable, so the user will
+            // still get a link in their profile, just not their own revision.
+            if (!(parent != null && query != null && query.ID == parent.ID))
+            {
+
+            }
+
             ActionResult response = null;
+
+            
 
             return response;
         }
