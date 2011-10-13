@@ -106,6 +106,24 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"query/run/{siteID:\d+}/{revisionID:\d+}")]
         public ActionResult Execute(int revisionID, int siteID, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
+            var query = Current.DB.Query<Query>(@"
+                SELECT
+                    *
+                FROM
+                    Queries JOIN
+                    Revisions ON Queries.ID = Revisions.QueryID AND Revisions.ID = @revision
+                ",
+                new
+                {
+                    revision = revisionID
+                }
+            ).FirstOrDefault();
+
+            if (query == null)
+            {
+                throw new ApplicationException("Invalid revision ID");
+            }
+
             ActionResult response = null;
 
 
@@ -297,6 +315,21 @@ namespace StackExchange.DataExplorer.Controllers
             bool foundSite = SetCommonQueryViewData(sitename);
             
             return foundSite?View(Site):PageNotFound();
+        }
+
+        private QueryResults ExecuteWithResults(ParsedQuery query, int siteID)
+        {
+            QueryResults results = null;
+
+
+            return results;
+        }
+
+        private ActionResult HandleExecutionException(Exception ex)
+        {
+            ActionResult response = null;
+
+            return response;
         }
 
         private bool SetCommonQueryViewData(string sitename)
