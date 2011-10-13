@@ -11,8 +11,8 @@ namespace StackExchange.DataExplorer.Controllers
     public class QueryController : StackOverflowController
     {
         [HttpPost]
-        [Route(@"query/save/{parentId?:\d+}")]
-        public ActionResult Create(string sql, int? parentId, int? siteId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        [Route(@"query/save/{parentID?:\d+}")]
+        public ActionResult Create(string sql, int? parentID, int? siteID, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -21,13 +21,13 @@ namespace StackExchange.DataExplorer.Controllers
 
             Revision parent = null;
 
-            if (parentId.HasValue)
+            if (parentID.HasValue)
             {
                 parent = Current.DB.Query<Revision>(
                     "SELECT * FROM Revisions WHERE ID = @id",
                     new
                     {
-                        id = parentId.Value
+                        id = parentID.Value
                     }
                 ).FirstOrDefault();
 
@@ -47,6 +47,7 @@ namespace StackExchange.DataExplorer.Controllers
             ).FirstOrDefault();
 
             int? saveID = null, queryID = null;
+            DateTime saveTime;
 
             // We only create revisions if something actually changed.
             // We'll log it as an execution anyway if applicable, so the user will
@@ -89,7 +90,7 @@ namespace StackExchange.DataExplorer.Controllers
                         root = parent != null ? (int?)parent.ID : null,
                         owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
                         ip = GetRemoteIP(),
-                        creation = DateTime.UtcNow
+                        creation = saveTime = DateTime.UtcNow
                     }
                 ).First();
             }
@@ -97,6 +98,17 @@ namespace StackExchange.DataExplorer.Controllers
             ActionResult response = null;
 
             
+
+            return response;
+        }
+
+        [HttpPost]
+        [Route(@"query/run/{siteID:\d+}/{revisionID:\d+}")]
+        public ActionResult Execute(int revisionID, int siteID, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        {
+            ActionResult response = null;
+
+
 
             return response;
         }
