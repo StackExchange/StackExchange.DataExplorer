@@ -11,88 +11,17 @@ namespace StackExchange.DataExplorer.Controllers
     public class QueryController : StackOverflowController
     {
         [HttpPost]
-        [Route("query/{siteId}")]
-        public ActionResult Execute(string sql, int siteId, string resultsToText, string showExecutionPlan, int? savedQueryId, string allDBs, string excludeMetas)
+        [Route(@"query/save/{parentId?:\d+}")]
+        public ActionResult Create(string sql, int? parentId, int? siteId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
-
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
                 return Json(new { captcha = true });
             }
 
-            var site = Current.DB.Query<Site>(
-                "SELECT * FROM Sites WHERE Id = @site",
-                new
-                {
-                    site = siteId
-                }
-            ).First();
+            ActionResult response = null;
 
-            ActionResult rval;
-
-            if (savedQueryId != null)
-            {
-                sql = Current.DB.SavedQueries.First(q => q.Id == savedQueryId.Value).Query.QueryBody;
-            }
-
-            var parsedQuery = new ParsedQuery(sql, Request.Params);
-
-            try
-            {
-                if (!parsedQuery.AllParamsSet)
-                {
-                    if (!string.IsNullOrEmpty(parsedQuery.ErrorMessage))
-                    {
-                        throw new ApplicationException(parsedQuery.ErrorMessage);
-                    }
-
-                    throw new ApplicationException("All parameters must be set!");
-                }
-
-                QueryResults results;
-
-                if (allDBs == "true")
-                {
-                    results = QueryRunner.GetMultiSiteResults(parsedQuery, CurrentUser, excludeMetas == "true");
-                }
-                else
-                {
-                    results = QueryRunner.GetSingleSiteResults(parsedQuery, site, CurrentUser, showExecutionPlan == "true");
-
-
-                    if (resultsToText == "true")
-                    {
-                        results = results.ToTextResults();
-                    }
-
-					// Execution plans are cached as XML
-                    if (showExecutionPlan == "true")
-                    {
-                        results = results.TransformQueryPlan();
-                    }
-                }
-
-                // well there is an annoying XSS condition here 
-                rval = Content(results.ToJson().Replace("/", "\\/"), "application/json");
-
-                QueryRunner.LogQueryExecution(CurrentUser, site, parsedQuery, results);
-            }
-            catch (Exception e)
-            {
-                var result = new Dictionary<string, string>();
-                var sqlException = e as SqlException;
-                if (sqlException != null)
-                {
-                    result["error"] = sqlException.Message;
-                }
-                else
-                {
-                    result["error"] = e.Message;
-                }
-                rval = Json(result);
-            }
-
-            return rval;
+            return response;
         }
 
 

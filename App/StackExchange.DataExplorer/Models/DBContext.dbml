@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Database Name="DataExplorer" Class="DBContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="WebSettings" ConnectionString="Data Source=.;Initial Catalog=DataExplorer;Integrated Security=True" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="AppConnection" Provider="System.Data.SqlClient" />
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="DataExplorerDev" Class="DBContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
   <Table Name="dbo.CachedResults" Member="CachedResults">
     <Type Name="CachedResult">
       <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
@@ -36,9 +35,9 @@
       <Column Name="DOB" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="LastActivityDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="LastSeenDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Association Name="User_Query" Member="Queries" ThisKey="Id" OtherKey="CreatorId" Type="Query" />
       <Association Name="User_SavedQuery" Member="SavedQueries" ThisKey="Id" OtherKey="UserId" Type="SavedQuery" />
       <Association Name="User_UserOpenId" Member="UserOpenIds" ThisKey="Id" OtherKey="UserId" Type="UserOpenId" />
+      <Association Name="User_Revision" Member="Revisions" ThisKey="Id" OtherKey="OwnerID" Type="Revision" />
     </Type>
   </Table>
   <Table Name="dbo.Sites" Member="Sites">
@@ -63,21 +62,6 @@
       <Association Name="Site_SavedQuery" Member="SavedQueries" ThisKey="Id" OtherKey="SiteId" Type="SavedQuery" />
     </Type>
   </Table>
-  <Table Name="dbo.Queries" Member="Queries">
-    <Type Name="Query">
-      <Column Name="Id" AutoSync="Never" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
-      <Column Name="QueryBody" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
-      <Column Name="CreatorId" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="CreatorIP" Type="System.String" DbType="VarChar(15)" CanBeNull="true" />
-      <Column Name="FirstRun" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="Views" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="Name" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
-      <Column Name="Description" Type="System.String" DbType="NVarChar(1000)" CanBeNull="true" />
-      <Association Name="Query_SavedQuery" Member="SavedQueries" ThisKey="Id" OtherKey="QueryId" Type="SavedQuery" />
-      <Association Name="User_Query" Member="User" ThisKey="CreatorId" OtherKey="Id" Type="User" IsForeignKey="true" />
-    </Type>
-  </Table>
   <Table Name="dbo.SavedQueries" Member="SavedQueries">
     <Type Name="SavedQuery">
       <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -95,7 +79,6 @@
       <Column Name="IsFirst" Type="System.Boolean" DbType="bit" CanBeNull="false" />
       <Association Name="User_SavedQuery" Member="User" ThisKey="UserId" OtherKey="Id" Type="User" IsForeignKey="true" />
       <Association Name="Site_SavedQuery" Member="Site" ThisKey="SiteId" OtherKey="Id" Type="Site" IsForeignKey="true" />
-      <Association Name="Query_SavedQuery" Member="Query" ThisKey="QueryId" OtherKey="Id" Type="Query" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.Votes" Member="Votes">
@@ -145,6 +128,26 @@
       <Column Name="SiteId" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="[Plan]" Member="Plan" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
       <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Queries" Member="Queries">
+    <Type Name="Query">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
+      <Column Name="QueryBody" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />
+      <Association Name="Query_Revision" Member="Revisions" ThisKey="ID" OtherKey="QueryID" Type="Revision" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Revisions" Member="Revisions">
+    <Type Name="Revision">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="QueryID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="RootID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="OwnerID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="OwnerIP" Type="System.String" DbType="VarChar(15) NOT NULL" CanBeNull="false" />
+      <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="Query_Revision" Member="Query" ThisKey="QueryID" OtherKey="ID" Type="Query" IsForeignKey="true" />
+      <Association Name="User_Revision" Member="User" ThisKey="OwnerID" OtherKey="Id" Type="User" IsForeignKey="true" />
     </Type>
   </Table>
 </Database>
