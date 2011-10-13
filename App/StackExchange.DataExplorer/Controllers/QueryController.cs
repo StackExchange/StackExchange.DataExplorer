@@ -46,12 +46,52 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             ).FirstOrDefault();
 
+            int? saveID = null, queryID = null;
+
             // We only create revisions if something actually changed.
             // We'll log it as an execution anyway if applicable, so the user will
             // still get a link in their profile, just not their own revision.
             if (!(parent != null && query != null && query.ID == parent.ID))
             {
+                if (query == null)
+                {
+                    queryID = (int)Current.DB.Query<decimal>(@"
+                        INSERT INTO Queries(
+                            QueryHash, QueryBody
+                        ) VALUES(
+                            @hash, @body
+                        )
 
+                        SELECT SCOPE_IDENTITY()",
+                        new
+                        {
+                            hash = parsedQuery.Hash,
+                            body = parsedQuery.RawSql
+                        }
+                    ).First();
+                }
+                else
+                {
+                    queryID = query.ID;
+                }
+
+                saveID = (int)Current.DB.Query<decimal>(@"
+                    INSERT INTO Revisions(
+                        QueryID, RootID, OwnerID, OwnerIP, CreationDate
+                    ) VALUES(
+                        @query, @root, @owner, @ip, @creation
+                    )
+
+                    SELECT SCOPE_IDENTITY()",
+                    new
+                    {
+                        query = queryID,
+                        root = parent != null ? (int?)parent.ID : null,
+                        owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
+                        ip = GetRemoteIP(),
+                        creation = DateTime.UtcNow
+                    }
+                ).First();
             }
 
             ActionResult response = null;
