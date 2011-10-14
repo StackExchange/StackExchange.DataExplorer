@@ -104,6 +104,10 @@ namespace StackExchange.DataExplorer.Controllers
                         }
                     ).First();
                 }
+                else
+                {
+                    queryId = query.Id;
+                }
 
                 if (!saveId.HasValue)
                 {
@@ -114,7 +118,7 @@ namespace StackExchange.DataExplorer.Controllers
                 // new revision but not run anything in the process.
                 if (siteId.HasValue)
                 {
-                    ExecuteWithResults(parsedQuery, siteId.Value, saveId.Value, textResults == true);
+                    ExecuteWithResults(parsedQuery, siteId.Value, queryId.Value, textResults == true);
                 }
             }
             catch (Exception ex)
@@ -159,7 +163,7 @@ namespace StackExchange.DataExplorer.Controllers
                     excludeMetas == true
                 );
 
-                ExecuteWithResults(parsedQuery, siteId, r
+                ExecuteWithResults(parsedQuery, siteId, query.Id, textResults == true);
             }
             catch (Exception ex)
             {
@@ -355,7 +359,7 @@ namespace StackExchange.DataExplorer.Controllers
             return foundSite?View(Site):PageNotFound();
         }
 
-        private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, int revisionId, bool textResults)
+        private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, int queryId, bool textResults)
         {
             QueryResults results = null;
 
@@ -398,7 +402,7 @@ namespace StackExchange.DataExplorer.Controllers
                 results = results.TransformQueryPlan();
             }
 
-            QueryRunner.LogQueryExecution(CurrentUser, site, revisionId);
+            QueryRunner.LogQueryExecution(CurrentUser, site, queryId);
 
             return results;
         }
