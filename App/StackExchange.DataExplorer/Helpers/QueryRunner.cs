@@ -555,29 +555,14 @@ namespace StackExchange.DataExplorer.Helpers
 
             if (cachedResults == null)
             {
-                AddResultToCache(results, query, site);
-            }
-
-            if (query.HasExecutionPlan && cachedPlan == null)
-            {
-                AddPlanToCache(results, query);
+                AddResultToCache(results, query, site,
+                    // Need to decide what to do about execution plans,
+                    // related to the storage format of the cache
+                    false);
             }
 
             return results;
         }
-
-        /// <summary>
-        /// Adds the execution plan of a particular query to the database cache
-        /// </summary>
-        /// <param name="results">The results of the query that include the plan</param>
-        /// <param name="query"></param>
-        private static void AddPlanToCache(QueryResults results, ParsedQuery query)
-        {
-            if (string.IsNullOrEmpty(results.ExecutionPlan)) {
-                return;
-            }
-        }
-
 
         /// <summary>
         /// Adds the results of a running a particular query for a given site to the database cache
@@ -585,7 +570,8 @@ namespace StackExchange.DataExplorer.Helpers
         /// <param name="results">The results of the query</param>
         /// <param name="query">The query that was executed</param>
         /// <param name="site">The site that the query was run against</param>
-        private static void AddResultToCache(QueryResults results, ParsedQuery query, Site site)
+        /// <param name="planOnly">Whether or not this is just an update to add the cached execution plan</param>
+        private static void AddResultToCache(QueryResults results, ParsedQuery query, Site site, bool planOnly)
         {
             // Avoid saving the execution plan as part of the results
             string executionPlan = results.ExecutionPlan;
