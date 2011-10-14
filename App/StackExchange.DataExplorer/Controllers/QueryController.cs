@@ -56,7 +56,7 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 ).FirstOrDefault();
 
-                int? saveID = null, queryID = null;
+                int? saveId = null, queryId = null;
                 DateTime saveTime;
 
                 // We only create revisions if something actually changed.
@@ -66,7 +66,7 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     if (query == null)
                     {
-                        queryID = (int)Current.DB.Query<decimal>(@"
+                        queryId = (int)Current.DB.Query<decimal>(@"
                             INSERT INTO Queries(
                                 QueryHash, QueryBody
                             ) VALUES(
@@ -83,10 +83,10 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                     else
                     {
-                        queryID = query.ID;
+                        queryId = query.Id;
                     }
 
-                    saveID = (int)Current.DB.Query<decimal>(@"
+                    saveId = (int)Current.DB.Query<decimal>(@"
                         INSERT INTO Revisions(
                             QueryId, RootId, OwnerId, OwnerIP, CreationDate
                         ) VALUES(
@@ -96,13 +96,25 @@ namespace StackExchange.DataExplorer.Controllers
                         SELECT SCOPE_IDENTITY()",
                         new
                         {
-                            query = queryID,
+                            query = queryId,
                             root = parent != null ? (int?)parent.Id : null,
                             owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
                             ip = GetRemoteIP(),
                             creation = saveTime = DateTime.UtcNow
                         }
                     ).First();
+                }
+
+                if (!saveId.HasValue)
+                {
+                    throw new ApplicationException("Unable to save revision");
+                }
+
+                // Just in case we get into a situation where we want to create a
+                // new revision but not run anything in the process.
+                if (siteId.HasValue)
+                {
+                    ExecuteWithResults(parsedQuery, siteId.Value, saveId.Value, textResults == true);
                 }
             }
             catch (Exception ex)
@@ -146,6 +158,8 @@ namespace StackExchange.DataExplorer.Controllers
                     crossSite == true,
                     excludeMetas == true
                 );
+
+                ExecuteWithResults(parsedQuery, siteId, r
             }
             catch (Exception ex)
             {
@@ -341,7 +355,7 @@ namespace StackExchange.DataExplorer.Controllers
             return foundSite?View(Site):PageNotFound();
         }
 
-        private QueryResults ExecuteWithResults(ParsedQuery query, int siteID, int revisionID, bool textResults)
+        private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, int revisionId, bool textResults)
         {
             QueryResults results = null;
 
@@ -355,7 +369,7 @@ namespace StackExchange.DataExplorer.Controllers
                 "SELECT * FROM Sites WHERE Id = @site",
                 new
                 {
-                    site = siteID
+                    site = siteId
                 }
             ).FirstOrDefault();
 
@@ -384,7 +398,7 @@ namespace StackExchange.DataExplorer.Controllers
                 results = results.TransformQueryPlan();
             }
 
-            QueryRunner.LogQueryExecution(CurrentUser, site, revisionID);
+            QueryRunner.LogQueryExecution(CurrentUser, site, revisionId);
 
             return results;
         }

@@ -226,7 +226,7 @@ namespace StackExchange.DataExplorer.Helpers
                 .FirstOrDefault();
         }
 
-        public static void LogQueryExecution(User user, Site site, int revisionId)
+        public static void LogQueryExecution(User user, Site site, int queryId)
         {
             QueryExecution execution;
 
@@ -236,12 +236,12 @@ namespace StackExchange.DataExplorer.Helpers
                 FROM
                     QueryExecutions
                 WHERE
-                    RevisionId = @revision AND
+                    QueryId = @revision AND
                     SiteId = @site AND
                     UserId " + (user.IsAnonymous ? "IS NULL" : "= @user"),
                 new
                 {
-                    revision = revisionId,
+                    revision = queryId,
                     site = site.Id,
                     user = user.Id
                 }
@@ -254,13 +254,13 @@ namespace StackExchange.DataExplorer.Helpers
                         ExecutionCount, FirstRun, LastRun,
                         QueryId, SiteId, UserId
                     ) VALUES(
-                        1, @first, @last, @revision, @site, @user
+                        1, @first, @last, @query, @site, @user
                     )",
                     new
                     {
                         first = DateTime.UtcNow,
                         last = DateTime.UtcNow,
-                        revision = revisionId,
+                        revision = queryId,
                         site = site.Id,
                         user = user.Id
                     }
@@ -271,15 +271,13 @@ namespace StackExchange.DataExplorer.Helpers
                 Current.DB.Execute(@"
                     UPDATE QueryExecutions SET
                         ExecutionCount = @count,
-                        LastRun = @last,
-                        SiteId = @site
+                        LastRun = @last
                     WHERE Id = @id",
                     new
                     {
                         count = execution.ExecutionCount + 1,
                         last = DateTime.UtcNow,
-                        site = site.Id,
-                        id = execution.ID
+                        id = execution.Id
                     }
                 );
             }

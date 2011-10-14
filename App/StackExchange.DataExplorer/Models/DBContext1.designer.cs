@@ -2995,7 +2995,7 @@ namespace StackExchange.DataExplorer.Models
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ID", AutoSync=AutoSync.Always, DbType="Int NOT NULL IDENTITY", IsDbGenerated=true)]
-		public int ID
+		public int Id
 		{
 			get
 			{
@@ -3011,7 +3011,7 @@ namespace StackExchange.DataExplorer.Models
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RevisionID", DbType="Int NOT NULL")]
-		public int RevisionID
+		public int QueryId
 		{
 			get
 			{
@@ -3027,7 +3027,7 @@ namespace StackExchange.DataExplorer.Models
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserID", DbType="Int")]
-		public System.Nullable<int> UserID
+		public System.Nullable<int> UserId
 		{
 			get
 			{
@@ -3043,7 +3043,7 @@ namespace StackExchange.DataExplorer.Models
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SiteID", DbType="Int NOT NULL")]
-		public int SiteID
+		public int SiteId
 		{
 			get
 			{

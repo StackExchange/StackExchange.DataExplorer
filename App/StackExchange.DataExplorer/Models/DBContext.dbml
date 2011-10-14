@@ -142,10 +142,10 @@
   </Table>
   <Table Name="dbo.QueryExecutions" Member="QueryExecutions">
     <Type Name="QueryExecution">
-      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="RevisionID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="UserID" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="SiteID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Id" Storage="_ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="QueryId" Storage="_RevisionID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UserId" Storage="_UserID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="SiteId" Storage="_SiteID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="FirstRun" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="LastRun" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="ExecutionCount" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
