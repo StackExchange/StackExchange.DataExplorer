@@ -226,7 +226,7 @@ namespace StackExchange.DataExplorer.Helpers
                 .FirstOrDefault();
         }
 
-        public static void LogQueryExecution(User user, Site site, int queryId)
+        public static void LogQueryExecution(User user, int siteId, int queryId)
         {
             QueryExecution execution;
 
@@ -242,7 +242,7 @@ namespace StackExchange.DataExplorer.Helpers
                 new
                 {
                     revision = queryId,
-                    site = site.Id,
+                    site = siteId,
                     user = user.Id
                 }
             ).FirstOrDefault();
@@ -261,7 +261,7 @@ namespace StackExchange.DataExplorer.Helpers
                         first = DateTime.UtcNow,
                         last = DateTime.UtcNow,
                         revision = queryId,
-                        site = site.Id,
+                        site = siteId,
                         user = user.Id
                     }
                 );

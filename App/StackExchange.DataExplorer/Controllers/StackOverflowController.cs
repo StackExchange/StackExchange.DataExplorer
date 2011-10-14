@@ -64,6 +64,17 @@ namespace StackExchange.DataExplorer.Controllers
             return Current.DB.Query<Models.Site>("select * from Sites where lower(Name) = @sitename", new { sitename }).FirstOrDefault(); 
         }
 
+        public Site GetSite(int siteId)
+        {
+            return Current.DB.Query<Site>(
+                "SELECT * FROM Sites WHERE Id = @site",
+                new
+                {
+                    site = siteId
+                }
+            ).FirstOrDefault();
+        }
+
 
 #if DEBUG
         private Stopwatch watch;

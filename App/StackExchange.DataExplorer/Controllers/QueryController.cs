@@ -24,6 +24,7 @@ namespace StackExchange.DataExplorer.Controllers
             try
             {
                 Revision parent = null;
+                bool executeQuery = siteId.HasValue;
 
                 if (parentId.HasValue)
                 {
@@ -48,6 +49,14 @@ namespace StackExchange.DataExplorer.Controllers
                     crossSite == true,
                     excludeMetas == true
                 );
+
+                // Just in case we get into a situation where we want to create a
+                // new revision but not run anything in the process.
+                if (executeQuery)
+                {
+                    var results = ExecuteWithResults(parsedQuery, siteId.Value, textResults == true);
+                }
+
                 var query = Current.DB.Query<Query>(
                     "SELECT * FROM Queries WHERE QueryHash = @hash",
                     new
@@ -56,7 +65,8 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 ).FirstOrDefault();
 
-                int? saveId = null, queryId = null;
+                int? saveId = null;
+                int queryId;
                 DateTime saveTime;
 
                 // We only create revisions if something actually changed.
@@ -114,11 +124,9 @@ namespace StackExchange.DataExplorer.Controllers
                     throw new ApplicationException("Unable to save revision");
                 }
 
-                // Just in case we get into a situation where we want to create a
-                // new revision but not run anything in the process.
-                if (siteId.HasValue)
+                if (executeQuery)
                 {
-                    ExecuteWithResults(parsedQuery, siteId.Value, queryId.Value, textResults == true);
+                    QueryRunner.LogQueryExecution(CurrentUser, siteId.Value, queryId);
                 }
             }
             catch (Exception ex)
@@ -163,7 +171,8 @@ namespace StackExchange.DataExplorer.Controllers
                     excludeMetas == true
                 );
 
-                ExecuteWithResults(parsedQuery, siteId, query.Id, textResults == true);
+                var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
+                QueryRunner.LogQueryExecution(CurrentUser, siteId, query.Id);
             }
             catch (Exception ex)
             {
@@ -359,7 +368,7 @@ namespace StackExchange.DataExplorer.Controllers
             return foundSite?View(Site):PageNotFound();
         }
 
-        private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, int queryId, bool textResults)
+        private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, bool textResults)
         {
             QueryResults results = null;
 
@@ -369,13 +378,7 @@ namespace StackExchange.DataExplorer.Controllers
                     query.ErrorMessage : "All parameters must be set!");
             }
 
-            var site = Current.DB.Query<Site>(
-                "SELECT * FROM Sites WHERE Id = @site",
-                new
-                {
-                    site = siteId
-                }
-            ).FirstOrDefault();
+            Site site = GetSite(siteId);
 
             if (site == null)
             {
@@ -401,8 +404,6 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 results = results.TransformQueryPlan();
             }
-
-            QueryRunner.LogQueryExecution(CurrentUser, site, queryId);
 
             return results;
         }
