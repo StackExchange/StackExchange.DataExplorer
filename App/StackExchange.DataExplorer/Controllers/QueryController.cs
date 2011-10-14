@@ -11,8 +11,8 @@ namespace StackExchange.DataExplorer.Controllers
     public class QueryController : StackOverflowController
     {
         [HttpPost]
-        [Route(@"query/save/{parentID?:\d+}")]
-        public ActionResult Create(string sql, int? parentID, int? siteID, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        [Route(@"query/save/{parentId?:\d+}")]
+        public ActionResult Create(string sql, int? parentId, int? siteId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -25,13 +25,13 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 Revision parent = null;
 
-                if (parentID.HasValue)
+                if (parentId.HasValue)
                 {
                     parent = Current.DB.Query<Revision>(
-                        "SELECT * FROM Revisions WHERE ID = @id",
+                        "SELECT * FROM Revisions WHERE Id = @id",
                         new
                         {
-                            id = parentID.Value
+                            id = parentId.Value
                         }
                     ).FirstOrDefault();
 
@@ -62,7 +62,7 @@ namespace StackExchange.DataExplorer.Controllers
                 // We only create revisions if something actually changed.
                 // We'll log it as an execution anyway if applicable, so the user will
                 // still get a link in their profile, just not their own revision.
-                if (!(parent != null && query != null && query.ID == parent.ID))
+                if (!(parent != null && query != null && query.Id == parent.Id))
                 {
                     if (query == null)
                     {
@@ -88,7 +88,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                     saveID = (int)Current.DB.Query<decimal>(@"
                         INSERT INTO Revisions(
-                            QueryID, RootID, OwnerID, OwnerIP, CreationDate
+                            QueryId, RootId, OwnerId, OwnerIP, CreationDate
                         ) VALUES(
                             @query, @root, @owner, @ip, @creation
                         )
@@ -97,7 +97,7 @@ namespace StackExchange.DataExplorer.Controllers
                         new
                         {
                             query = queryID,
-                            root = parent != null ? (int?)parent.ID : null,
+                            root = parent != null ? (int?)parent.Id : null,
                             owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
                             ip = GetRemoteIP(),
                             creation = saveTime = DateTime.UtcNow
@@ -114,8 +114,8 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpPost]
-        [Route(@"query/run/{siteID:\d+}/{revisionID:\d+}")]
-        public ActionResult Execute(int revisionID, int siteID, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        [Route(@"query/run/{siteId:\d+}/{revisionId:\d+}")]
+        public ActionResult Execute(int revisionId, int siteId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
             ActionResult response = null;
 
@@ -126,11 +126,11 @@ namespace StackExchange.DataExplorer.Controllers
                         *
                     FROM
                         Queries JOIN
-                        Revisions ON Queries.ID = Revisions.QueryID AND Revisions.ID = @revision
+                        Revisions ON Queries.Id = Revisions.QueryId AND Revisions.Id = @revision
                     ",
                     new
                     {
-                        revision = revisionID
+                        revision = revisionId
                     }
                 ).FirstOrDefault();
 
@@ -341,7 +341,7 @@ namespace StackExchange.DataExplorer.Controllers
             return foundSite?View(Site):PageNotFound();
         }
 
-        private QueryResults ExecuteWithResults(ParsedQuery query, int siteID, bool textResults)
+        private QueryResults ExecuteWithResults(ParsedQuery query, int siteID, int revisionID, bool textResults)
         {
             QueryResults results = null;
 
@@ -370,7 +370,7 @@ namespace StackExchange.DataExplorer.Controllers
             }
             else
             {
-                results = QueryRunner.GetMultiSiteResults(query, site, CurrentUser);
+                results = QueryRunner.GetMultiSiteResults(query, CurrentUser);
                 textResults = true;
             }
 
@@ -379,11 +379,12 @@ namespace StackExchange.DataExplorer.Controllers
                 results = results.ToTextResults();
             }
 
-
             if (query.ExecutionPlan)
             {
                 results = results.TransformQueryPlan();
             }
+
+            QueryRunner.LogQueryExecution(CurrentUser, site, revisionID);
 
             return results;
         }

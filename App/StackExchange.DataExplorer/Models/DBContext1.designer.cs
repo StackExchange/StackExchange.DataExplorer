@@ -33,9 +33,6 @@ namespace StackExchange.DataExplorer.Models
     partial void InsertCachedResult(CachedResult instance);
     partial void UpdateCachedResult(CachedResult instance);
     partial void DeleteCachedResult(CachedResult instance);
-    partial void InsertQueryExecution(QueryExecution instance);
-    partial void UpdateQueryExecution(QueryExecution instance);
-    partial void DeleteQueryExecution(QueryExecution instance);
     partial void InsertUser(User instance);
     partial void UpdateUser(User instance);
     partial void DeleteUser(User instance);
@@ -71,6 +68,12 @@ namespace StackExchange.DataExplorer.Models
     partial void DeleteRevision(Revision instance);
     #endregion
 		
+		public DBContext() : 
+				base(global::System.Configuration.ConfigurationManager.ConnectionStrings["DataExplorerDevConnectionString"].ConnectionString, mappingSource)
+		{
+			OnCreated();
+		}
+		
 		public DBContext(string connection) : 
 				base(connection, mappingSource)
 		{
@@ -100,14 +103,6 @@ namespace StackExchange.DataExplorer.Models
 			get
 			{
 				return this.GetTable<CachedResult>();
-			}
-		}
-		
-		public System.Data.Linq.Table<QueryExecution> QueryExecutions
-		{
-			get
-			{
-				return this.GetTable<QueryExecution>();
 			}
 		}
 		
@@ -196,6 +191,14 @@ namespace StackExchange.DataExplorer.Models
 			get
 			{
 				return this.GetTable<Revision>();
+			}
+		}
+		
+		public System.Data.Linq.Table<QueryExecution> QueryExecutions
+		{
+			get
+			{
+				return this.GetTable<QueryExecution>();
 			}
 		}
 	}
@@ -333,212 +336,6 @@ namespace StackExchange.DataExplorer.Models
 					this._Id = value;
 					this.SendPropertyChanged("Id");
 					this.OnIdChanged();
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.QueryExecutions")]
-	public partial class QueryExecution : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private int _QueryId;
-		
-		private int _UserId;
-		
-		private int _SiteId;
-		
-		private System.DateTime _FirstRun;
-		
-		private System.DateTime _LastRun;
-		
-		private int _ExecutionCount;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnQueryIdChanging(int value);
-    partial void OnQueryIdChanged();
-    partial void OnUserIdChanging(int value);
-    partial void OnUserIdChanged();
-    partial void OnSiteIdChanging(int value);
-    partial void OnSiteIdChanged();
-    partial void OnFirstRunChanging(System.DateTime value);
-    partial void OnFirstRunChanged();
-    partial void OnLastRunChanging(System.DateTime value);
-    partial void OnLastRunChanged();
-    partial void OnExecutionCountChanging(int value);
-    partial void OnExecutionCountChanged();
-    #endregion
-		
-		public QueryExecution()
-		{
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int Id
-		{
-			get
-			{
-				return this._Id;
-			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_QueryId", DbType="Int NOT NULL")]
-		public int QueryId
-		{
-			get
-			{
-				return this._QueryId;
-			}
-			set
-			{
-				if ((this._QueryId != value))
-				{
-					this.OnQueryIdChanging(value);
-					this.SendPropertyChanging();
-					this._QueryId = value;
-					this.SendPropertyChanged("QueryId");
-					this.OnQueryIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserId", DbType="Int NOT NULL")]
-		public int UserId
-		{
-			get
-			{
-				return this._UserId;
-			}
-			set
-			{
-				if ((this._UserId != value))
-				{
-					this.OnUserIdChanging(value);
-					this.SendPropertyChanging();
-					this._UserId = value;
-					this.SendPropertyChanged("UserId");
-					this.OnUserIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SiteId", DbType="Int NOT NULL")]
-		public int SiteId
-		{
-			get
-			{
-				return this._SiteId;
-			}
-			set
-			{
-				if ((this._SiteId != value))
-				{
-					this.OnSiteIdChanging(value);
-					this.SendPropertyChanging();
-					this._SiteId = value;
-					this.SendPropertyChanged("SiteId");
-					this.OnSiteIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FirstRun", DbType="DateTime NOT NULL")]
-		public System.DateTime FirstRun
-		{
-			get
-			{
-				return this._FirstRun;
-			}
-			set
-			{
-				if ((this._FirstRun != value))
-				{
-					this.OnFirstRunChanging(value);
-					this.SendPropertyChanging();
-					this._FirstRun = value;
-					this.SendPropertyChanged("FirstRun");
-					this.OnFirstRunChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LastRun", DbType="DateTime NOT NULL")]
-		public System.DateTime LastRun
-		{
-			get
-			{
-				return this._LastRun;
-			}
-			set
-			{
-				if ((this._LastRun != value))
-				{
-					this.OnLastRunChanging(value);
-					this.SendPropertyChanging();
-					this._LastRun = value;
-					this.SendPropertyChanged("LastRun");
-					this.OnLastRunChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ExecutionCount", DbType="Int NOT NULL")]
-		public int ExecutionCount
-		{
-			get
-			{
-				return this._ExecutionCount;
-			}
-			set
-			{
-				if ((this._ExecutionCount != value))
-				{
-					this.OnExecutionCountChanging(value);
-					this.SendPropertyChanging();
-					this._ExecutionCount = value;
-					this.SendPropertyChanged("ExecutionCount");
-					this.OnExecutionCountChanged();
 				}
 			}
 		}
@@ -952,7 +749,7 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_Revision", Storage="_Revisions", ThisKey="Id", OtherKey="OwnerID")]
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_Revision", Storage="_Revisions", ThisKey="Id", OtherKey="OwnerId")]
 		public EntitySet<Revision> Revisions
 		{
 			get
@@ -2791,8 +2588,8 @@ namespace StackExchange.DataExplorer.Models
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
     partial void OnCreated();
-    partial void OnIDChanging(int value);
-    partial void OnIDChanged();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
     partial void OnQueryHashChanging(System.Guid value);
     partial void OnQueryHashChanged();
     partial void OnQueryBodyChanging(string value);
@@ -2806,7 +2603,7 @@ namespace StackExchange.DataExplorer.Models
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int ID
+		public int Id
 		{
 			get
 			{
@@ -2816,11 +2613,11 @@ namespace StackExchange.DataExplorer.Models
 			{
 				if ((this._ID != value))
 				{
-					this.OnIDChanging(value);
+					this.OnIdChanging(value);
 					this.SendPropertyChanging();
 					this._ID = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
 				}
 			}
 		}
@@ -2865,7 +2662,7 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Query_Revision", Storage="_Revisions", ThisKey="ID", OtherKey="QueryID")]
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Query_Revision", Storage="_Revisions", ThisKey="Id", OtherKey="QueryId")]
 		public EntitySet<Revision> Revisions
 		{
 			get
@@ -2937,14 +2734,14 @@ namespace StackExchange.DataExplorer.Models
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
     partial void OnCreated();
-    partial void OnIDChanging(int value);
-    partial void OnIDChanged();
-    partial void OnQueryIDChanging(int value);
-    partial void OnQueryIDChanged();
-    partial void OnRootIDChanging(System.Nullable<int> value);
-    partial void OnRootIDChanged();
-    partial void OnOwnerIDChanging(System.Nullable<int> value);
-    partial void OnOwnerIDChanged();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnQueryIdChanging(int value);
+    partial void OnQueryIdChanged();
+    partial void OnRootIdChanging(System.Nullable<int> value);
+    partial void OnRootIdChanged();
+    partial void OnOwnerIdChanging(System.Nullable<int> value);
+    partial void OnOwnerIdChanged();
     partial void OnOwnerIPChanging(string value);
     partial void OnOwnerIPChanged();
     partial void OnCreationDateChanging(System.DateTime value);
@@ -2959,7 +2756,7 @@ namespace StackExchange.DataExplorer.Models
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int ID
+		public int Id
 		{
 			get
 			{
@@ -2969,17 +2766,17 @@ namespace StackExchange.DataExplorer.Models
 			{
 				if ((this._ID != value))
 				{
-					this.OnIDChanging(value);
+					this.OnIdChanging(value);
 					this.SendPropertyChanging();
 					this._ID = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
 				}
 			}
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_QueryID", DbType="Int NOT NULL")]
-		public int QueryID
+		public int QueryId
 		{
 			get
 			{
@@ -2993,17 +2790,17 @@ namespace StackExchange.DataExplorer.Models
 					{
 						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
 					}
-					this.OnQueryIDChanging(value);
+					this.OnQueryIdChanging(value);
 					this.SendPropertyChanging();
 					this._QueryID = value;
-					this.SendPropertyChanged("QueryID");
-					this.OnQueryIDChanged();
+					this.SendPropertyChanged("QueryId");
+					this.OnQueryIdChanged();
 				}
 			}
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RootID", DbType="Int")]
-		public System.Nullable<int> RootID
+		public System.Nullable<int> RootId
 		{
 			get
 			{
@@ -3013,17 +2810,17 @@ namespace StackExchange.DataExplorer.Models
 			{
 				if ((this._RootID != value))
 				{
-					this.OnRootIDChanging(value);
+					this.OnRootIdChanging(value);
 					this.SendPropertyChanging();
 					this._RootID = value;
-					this.SendPropertyChanged("RootID");
-					this.OnRootIDChanged();
+					this.SendPropertyChanged("RootId");
+					this.OnRootIdChanged();
 				}
 			}
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_OwnerID", DbType="Int")]
-		public System.Nullable<int> OwnerID
+		public System.Nullable<int> OwnerId
 		{
 			get
 			{
@@ -3037,11 +2834,11 @@ namespace StackExchange.DataExplorer.Models
 					{
 						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
 					}
-					this.OnOwnerIDChanging(value);
+					this.OnOwnerIdChanging(value);
 					this.SendPropertyChanging();
 					this._OwnerID = value;
-					this.SendPropertyChanged("OwnerID");
-					this.OnOwnerIDChanged();
+					this.SendPropertyChanged("OwnerId");
+					this.OnOwnerIdChanged();
 				}
 			}
 		}
@@ -3086,7 +2883,7 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Query_Revision", Storage="_Query", ThisKey="QueryID", OtherKey="ID", IsForeignKey=true)]
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Query_Revision", Storage="_Query", ThisKey="QueryId", OtherKey="Id", IsForeignKey=true)]
 		public Query Query
 		{
 			get
@@ -3109,7 +2906,7 @@ namespace StackExchange.DataExplorer.Models
 					if ((value != null))
 					{
 						value.Revisions.Add(this);
-						this._QueryID = value.ID;
+						this._QueryID = value.Id;
 					}
 					else
 					{
@@ -3120,7 +2917,7 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_Revision", Storage="_User", ThisKey="OwnerID", OtherKey="Id", IsForeignKey=true)]
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_Revision", Storage="_User", ThisKey="OwnerId", OtherKey="Id", IsForeignKey=true)]
 		public User User
 		{
 			get
@@ -3171,6 +2968,141 @@ namespace StackExchange.DataExplorer.Models
 			if ((this.PropertyChanged != null))
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.QueryExecutions")]
+	public partial class QueryExecution
+	{
+		
+		private int _ID;
+		
+		private int _RevisionID;
+		
+		private System.Nullable<int> _UserID;
+		
+		private int _SiteID;
+		
+		private System.DateTime _FirstRun;
+		
+		private System.DateTime _LastRun;
+		
+		private int _ExecutionCount;
+		
+		public QueryExecution()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ID", AutoSync=AutoSync.Always, DbType="Int NOT NULL IDENTITY", IsDbGenerated=true)]
+		public int ID
+		{
+			get
+			{
+				return this._ID;
+			}
+			set
+			{
+				if ((this._ID != value))
+				{
+					this._ID = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RevisionID", DbType="Int NOT NULL")]
+		public int RevisionID
+		{
+			get
+			{
+				return this._RevisionID;
+			}
+			set
+			{
+				if ((this._RevisionID != value))
+				{
+					this._RevisionID = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserID", DbType="Int")]
+		public System.Nullable<int> UserID
+		{
+			get
+			{
+				return this._UserID;
+			}
+			set
+			{
+				if ((this._UserID != value))
+				{
+					this._UserID = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SiteID", DbType="Int NOT NULL")]
+		public int SiteID
+		{
+			get
+			{
+				return this._SiteID;
+			}
+			set
+			{
+				if ((this._SiteID != value))
+				{
+					this._SiteID = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FirstRun", DbType="DateTime NOT NULL")]
+		public System.DateTime FirstRun
+		{
+			get
+			{
+				return this._FirstRun;
+			}
+			set
+			{
+				if ((this._FirstRun != value))
+				{
+					this._FirstRun = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LastRun", DbType="DateTime NOT NULL")]
+		public System.DateTime LastRun
+		{
+			get
+			{
+				return this._LastRun;
+			}
+			set
+			{
+				if ((this._LastRun != value))
+				{
+					this._LastRun = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ExecutionCount", DbType="Int NOT NULL")]
+		public int ExecutionCount
+		{
+			get
+			{
+				return this._ExecutionCount;
+			}
+			set
+			{
+				if ((this._ExecutionCount != value))
+				{
+					this._ExecutionCount = value;
+				}
 			}
 		}
 	}

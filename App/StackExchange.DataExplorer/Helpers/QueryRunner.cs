@@ -124,7 +124,7 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        public static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser, bool excludeMetas)
+        public static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser)
         {
             var sites = Current.DB.Sites.ToList();
             if (excludeMetas)
@@ -226,60 +226,62 @@ namespace StackExchange.DataExplorer.Helpers
                 .FirstOrDefault();
         }
 
-        public static void LogQueryExecution(User user, Site site, ParsedQuery parsedQuery, QueryResults results)
+        public static void LogQueryExecution(User user, Site site, int revisionId)
         {
-            if (user.IsAnonymous)
-            {
-                return;
-            }
+            QueryExecution execution;
 
-            if (results.QueryId > 0)
+            execution = Current.DB.Query<QueryExecution>(@"
+                SELECT
+                    *
+                FROM
+                    QueryExecutions
+                WHERE
+                    RevisionId = @revision AND
+                    SiteId = @site AND
+                    UserId " + (user.IsAnonymous ? "IS NULL" : "= @user"),
+                new
+                {
+                    revision = revisionId,
+                    site = site.Id,
+                    user = user.Id
+                }
+            ).FirstOrDefault();
+
+            if (execution == null)
             {
-                var execution = Current.DB.Query<QueryExecution>(
-                    "SELECT * FROM QueryExecutions WHERE QueryId = @id AND UserId = @user",
+                Current.DB.Execute(@"
+                    INSERT INTO QueryExecutions(
+                        ExecutionCount, FirstRun, LastRun,
+                        QueryId, SiteId, UserId
+                    ) VALUES(
+                        1, @first, @last, @revision, @site, @user
+                    )",
                     new
                     {
-                        id = results.QueryId,
+                        first = DateTime.UtcNow,
+                        last = DateTime.UtcNow,
+                        revision = revisionId,
+                        site = site.Id,
                         user = user.Id
                     }
-                ).FirstOrDefault();
-
-                if (execution == null)
-                {
-                    Current.DB.Execute(@"
-                        INSERT INTO QueryExecutions(
-                            ExecutionCount, FirstRun, LastRun,
-                            QueryId, SiteId, UserId
-                        ) VALUES(
-                            1, @first, @last, @query, @site, @user
-                        )",
-                        new
-                        {
-                            first = DateTime.UtcNow,
-                            last = DateTime.UtcNow,
-                            query = results.QueryId,
-                            site = site.Id,
-                            user = user.Id
-                        }
-                    );
-                }
-                else
-                {
-                    Current.DB.Execute(@"
-                        UPDATE QueryExecutions SET
-                            ExecutionCount = @count,
-                            LastRun = @last,
-                            SiteId = @site
-                        WHERE Id = @id",
-                        new
-                        {
-                            count = execution.ExecutionCount + 1,
-                            last = DateTime.UtcNow,
-                            site = site.Id,
-                            id = execution.Id
-                        }
-                    );
-                }
+                );
+            }
+            else
+            {
+                Current.DB.Execute(@"
+                    UPDATE QueryExecutions SET
+                        ExecutionCount = @count,
+                        LastRun = @last,
+                        SiteId = @site
+                    WHERE Id = @id",
+                    new
+                    {
+                        count = execution.ExecutionCount + 1,
+                        last = DateTime.UtcNow,
+                        site = site.Id,
+                        id = execution.ID
+                    }
+                );
             }
         }
 
