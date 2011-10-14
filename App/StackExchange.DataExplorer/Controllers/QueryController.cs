@@ -19,85 +19,96 @@ namespace StackExchange.DataExplorer.Controllers
                 return Json(new { captcha = true });
             }
 
-            Revision parent = null;
+            ActionResult response = null;
 
-            if (parentID.HasValue)
+            try
             {
-                parent = Current.DB.Query<Revision>(
-                    "SELECT * FROM Revisions WHERE ID = @id",
+                Revision parent = null;
+
+                if (parentID.HasValue)
+                {
+                    parent = Current.DB.Query<Revision>(
+                        "SELECT * FROM Revisions WHERE ID = @id",
+                        new
+                        {
+                            id = parentID.Value
+                        }
+                    ).FirstOrDefault();
+
+                    if (parent == null)
+                    {
+                        throw new ApplicationException("Invalid revision ID");
+                    }
+                }
+
+                var parsedQuery = new ParsedQuery(
+                    sql,
+                    Request.Params,
+                    executionPlan == true,
+                    crossSite == true,
+                    excludeMetas == true
+                );
+                var query = Current.DB.Query<Query>(
+                    "SELECT * FROM Queries WHERE QueryHash = @hash",
                     new
                     {
-                        id = parentID.Value
+                        hash = parsedQuery.Hash
                     }
                 ).FirstOrDefault();
 
-                if (parent == null)
-                {
-                    throw new ApplicationException("Invalid revision ID");
-                }
-            }
+                int? saveID = null, queryID = null;
+                DateTime saveTime;
 
-            var parsedQuery = new ParsedQuery(sql, Request.Params);
-            var query = Current.DB.Query<Query>(
-                "SELECT * FROM Queries WHERE QueryHash = @hash",
-                new
+                // We only create revisions if something actually changed.
+                // We'll log it as an execution anyway if applicable, so the user will
+                // still get a link in their profile, just not their own revision.
+                if (!(parent != null && query != null && query.ID == parent.ID))
                 {
-                    hash = parsedQuery.Hash
-                }
-            ).FirstOrDefault();
+                    if (query == null)
+                    {
+                        queryID = (int)Current.DB.Query<decimal>(@"
+                            INSERT INTO Queries(
+                                QueryHash, QueryBody
+                            ) VALUES(
+                                @hash, @body
+                            )
 
-            int? saveID = null, queryID = null;
-            DateTime saveTime;
+                            SELECT SCOPE_IDENTITY()",
+                            new
+                            {
+                                hash = parsedQuery.Hash,
+                                body = parsedQuery.RawSql
+                            }
+                        ).First();
+                    }
+                    else
+                    {
+                        queryID = query.ID;
+                    }
 
-            // We only create revisions if something actually changed.
-            // We'll log it as an execution anyway if applicable, so the user will
-            // still get a link in their profile, just not their own revision.
-            if (!(parent != null && query != null && query.ID == parent.ID))
-            {
-                if (query == null)
-                {
-                    queryID = (int)Current.DB.Query<decimal>(@"
-                        INSERT INTO Queries(
-                            QueryHash, QueryBody
+                    saveID = (int)Current.DB.Query<decimal>(@"
+                        INSERT INTO Revisions(
+                            QueryID, RootID, OwnerID, OwnerIP, CreationDate
                         ) VALUES(
-                            @hash, @body
+                            @query, @root, @owner, @ip, @creation
                         )
 
                         SELECT SCOPE_IDENTITY()",
                         new
                         {
-                            hash = parsedQuery.Hash,
-                            body = parsedQuery.RawSql
+                            query = queryID,
+                            root = parent != null ? (int?)parent.ID : null,
+                            owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
+                            ip = GetRemoteIP(),
+                            creation = saveTime = DateTime.UtcNow
                         }
                     ).First();
                 }
-                else
-                {
-                    queryID = query.ID;
-                }
-
-                saveID = (int)Current.DB.Query<decimal>(@"
-                    INSERT INTO Revisions(
-                        QueryID, RootID, OwnerID, OwnerIP, CreationDate
-                    ) VALUES(
-                        @query, @root, @owner, @ip, @creation
-                    )
-
-                    SELECT SCOPE_IDENTITY()",
-                    new
-                    {
-                        query = queryID,
-                        root = parent != null ? (int?)parent.ID : null,
-                        owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
-                        ip = GetRemoteIP(),
-                        creation = saveTime = DateTime.UtcNow
-                    }
-                ).First();
             }
-
-            ActionResult response = null;
-
-            
+            catch (Exception ex)
+            {
+                response = TransformExecutionException(ex);
+            }
 
             return response;
         }
@@ -106,27 +117,40 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"query/run/{siteID:\d+}/{revisionID:\d+}")]
         public ActionResult Execute(int revisionID, int siteID, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
-            var query = Current.DB.Query<Query>(@"
-                SELECT
-                    *
-                FROM
-                    Queries JOIN
-                    Revisions ON Queries.ID = Revisions.QueryID AND Revisions.ID = @revision
-                ",
-                new
-                {
-                    revision = revisionID
-                }
-            ).FirstOrDefault();
-
-            if (query == null)
-            {
-                throw new ApplicationException("Invalid revision ID");
-            }
-
             ActionResult response = null;
 
+            try
+            {
+                var query = Current.DB.Query<Query>(@"
+                    SELECT
+                        *
+                    FROM
+                        Queries JOIN
+                        Revisions ON Queries.ID = Revisions.QueryID AND Revisions.ID = @revision
+                    ",
+                    new
+                    {
+                        revision = revisionID
+                    }
+                ).FirstOrDefault();
 
+                if (query == null)
+                {
+                    throw new ApplicationException("Invalid revision ID");
+                }
+
+                var parsedQuery = new ParsedQuery(
+                    query.QueryBody,
+                    Request.Params,
+                    executionPlan == true,
+                    crossSite == true,
+                    excludeMetas == true
+                );
+            }
+            catch (Exception ex)
+            {
+                response = TransformExecutionException(ex);
+            }
 
             return response;
         }
@@ -317,19 +341,66 @@ namespace StackExchange.DataExplorer.Controllers
             return foundSite?View(Site):PageNotFound();
         }
 
-        private QueryResults ExecuteWithResults(ParsedQuery query, int siteID)
+        private QueryResults ExecuteWithResults(ParsedQuery query, int siteID, bool textResults)
         {
             QueryResults results = null;
 
+            if (!query.AllParamsSet)
+            {
+                throw new ApplicationException(!string.IsNullOrEmpty(query.ErrorMessage) ?
+                    query.ErrorMessage : "All parameters must be set!");
+            }
+
+            var site = Current.DB.Query<Site>(
+                "SELECT * FROM Sites WHERE Id = @site",
+                new
+                {
+                    site = siteID
+                }
+            ).FirstOrDefault();
+
+            if (site == null)
+            {
+                throw new ApplicationException("Invalid site ID");
+            }
+
+            if (!query.CrossSite)
+            {
+                results = QueryRunner.GetSingleSiteResults(query, site, CurrentUser);
+            }
+            else
+            {
+                results = QueryRunner.GetMultiSiteResults(query, site, CurrentUser);
+                textResults = true;
+            }
+
+            if (textResults)
+            {
+                results = results.ToTextResults();
+            }
+
+
+            if (query.ExecutionPlan)
+            {
+                results = results.TransformQueryPlan();
+            }
 
             return results;
         }
 
-        private ActionResult HandleExecutionException(Exception ex)
+        private ActionResult TransformExecutionException(Exception ex)
         {
-            ActionResult response = null;
+            var response = new Dictionary<string, string>();
+            var sqlex = ex as SqlException;
 
-            return response;
+            if (sqlex != null)
+            {
+                response["errorLine"] = sqlex.LineNumber.ToString();
+            }
+
+            response["error"] = ex.Message;
+
+            return Json(response);
         }
 
         private bool SetCommonQueryViewData(string sitename)

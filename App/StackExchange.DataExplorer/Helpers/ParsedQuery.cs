@@ -33,6 +33,13 @@ namespace StackExchange.DataExplorer.Helpers
         private static readonly Regex SplitOnGoRegex = new Regex(@"^\s*GO\s*$",
                                                                  RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
+        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan, bool crossSite, bool excludeMetas) : this(sql, requestParams)
+        {
+            ExecutionPlan = executionPlan;
+            CrossSite = crossSite;
+            ExcludeMetas = excludeMetas;
+        }
+
         public ParsedQuery(string sql, NameValueCollection requestParams)
         {
             Parse(sql, requestParams);
@@ -47,6 +54,44 @@ namespace StackExchange.DataExplorer.Helpers
         public string Description { get; private set; }
 
         public bool AllParamsSet { get; private set; }
+
+        private bool executionPlan = false;
+
+        /// <summary>
+        /// Whether or not running this query should produce an execution plan
+        /// </summary>
+        public bool ExecutionPlan {
+            get
+            {
+                return !CrossSite && executionPlan;
+            }
+
+            private set
+            {
+                executionPlan = value;
+            }
+        }
+
+        /// <summary>
+        /// Whether or not this query should be executed across all sites
+        /// </summary>
+        public bool CrossSite { get; private set; }
+
+        private bool excludeMetas = false;
+
+        /// <summary>
+        /// Whether or not this query should exclude meta sites, if it should be executed across all sites
+        /// </summary>
+        public bool ExcludeMetas {
+            get {
+                return CrossSite && excludeMetas;
+            }
+
+            private set
+            {
+                excludeMetas = value;
+            }
+        }
 
         public string ErrorMessage { get; private set; }
 

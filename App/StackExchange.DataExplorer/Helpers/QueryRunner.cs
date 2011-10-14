@@ -527,12 +527,7 @@ namespace StackExchange.DataExplorer.Helpers
             results.ExecutionPlan = plan.PlanXml;
         }
 
-        public static QueryResults GetSingleSiteResults(ParsedQuery parsedQuery, Site site, User CurrentUser)
-        {
-            return GetSingleSiteResults(parsedQuery, site, CurrentUser, false);
-        }
-
-        public static QueryResults GetSingleSiteResults(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
+        public static QueryResults GetSingleSiteResults(ParsedQuery parsedQuery, Site site, User user)
         {
             DBContext db = Current.DB;
 
