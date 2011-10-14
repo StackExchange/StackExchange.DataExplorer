@@ -382,7 +382,7 @@ namespace StackExchange.DataExplorer.Controllers
                 throw new ApplicationException("Invalid site ID");
             }
 
-            if (!query.CrossSite)
+            if (!query.IsCrossSite)
             {
                 results = QueryRunner.GetSingleSiteResults(query, site, CurrentUser);
             }
@@ -397,7 +397,7 @@ namespace StackExchange.DataExplorer.Controllers
                 results = results.ToTextResults();
             }
 
-            if (query.ExecutionPlan)
+            if (query.HasExecutionPlan)
             {
                 results = results.TransformQueryPlan();
             }

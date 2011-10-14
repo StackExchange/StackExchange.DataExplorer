@@ -35,9 +35,9 @@ namespace StackExchange.DataExplorer.Helpers
 
         public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan, bool crossSite, bool excludeMetas) : this(sql, requestParams)
         {
-            ExecutionPlan = executionPlan;
-            CrossSite = crossSite;
-            ExcludeMetas = excludeMetas;
+            HasExecutionPlan = executionPlan;
+            IsCrossSite = crossSite;
+            ExcludesMetas = excludeMetas;
         }
 
         public ParsedQuery(string sql, NameValueCollection requestParams)
@@ -55,41 +55,41 @@ namespace StackExchange.DataExplorer.Helpers
 
         public bool AllParamsSet { get; private set; }
 
-        private bool executionPlan = false;
+        private bool hasExecutionPlan = false;
 
         /// <summary>
         /// Whether or not running this query should produce an execution plan
         /// </summary>
-        public bool ExecutionPlan {
+        public bool HasExecutionPlan {
             get
             {
-                return !CrossSite && executionPlan;
+                return !IsCrossSite && hasExecutionPlan;
             }
 
             private set
             {
-                executionPlan = value;
+                hasExecutionPlan = value;
             }
         }
 
         /// <summary>
         /// Whether or not this query should be executed across all sites
         /// </summary>
-        public bool CrossSite { get; private set; }
+        public bool IsCrossSite { get; private set; }
 
-        private bool excludeMetas = false;
+        private bool excludesMetas = false;
 
         /// <summary>
         /// Whether or not this query should exclude meta sites, if it should be executed across all sites
         /// </summary>
-        public bool ExcludeMetas {
+        public bool ExcludesMetas {
             get {
-                return CrossSite && excludeMetas;
+                return IsCrossSite && excludesMetas;
             }
 
             private set
             {
-                excludeMetas = value;
+                excludesMetas = value;
             }
         }
 

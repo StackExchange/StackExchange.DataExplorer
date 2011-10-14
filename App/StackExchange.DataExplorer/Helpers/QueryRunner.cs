@@ -127,7 +127,7 @@ namespace StackExchange.DataExplorer.Helpers
         public static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser)
         {
             var sites = Current.DB.Sites.ToList();
-            if (excludeMetas)
+            if (parsedQuery.ExcludesMetas)
             { 
                 sites = sites.Where(s => !s.Url.Contains("meta.")).ToList();
             }
@@ -184,7 +184,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             results.Messages = buffer.ToString();
             results.MultiSite = true;
-            results.ExcludeMetas = excludeMetas;
+            results.ExcludeMetas = parsedQuery.ExcludesMetas;
 
             return results;
         }
@@ -527,163 +527,71 @@ namespace StackExchange.DataExplorer.Helpers
             results.ExecutionPlan = plan.PlanXml;
         }
 
-        public static QueryResults GetSingleSiteResults(ParsedQuery parsedQuery, Site site, User user)
+        public static QueryResults GetSingleSiteResults(ParsedQuery query, Site site, User user)
         {
-            DBContext db = Current.DB;
+            var cachedResults = GetCachedResults(query, site);
+            string cachedPlan = null;
 
-            var cache = GetCachedResults(parsedQuery, site);
-
-            VerifyQueryState(parsedQuery, cache, user);
-
-            if (cache != null)
+            if (cachedResults != null)
             {
-                if (!IncludeExecutionPlan)
+                if (!query.HasExecutionPlan)
                 {
-                    return cache;
+                    return cachedResults;
                 }
                 else
                 {
-                    var plan = GetCachedPlan(parsedQuery, site);
+                    var plan = GetCachedPlan(query, site);
 
                     if (plan != null)
                     {
-                        cache.ExecutionPlan = plan.Plan;
+                        cachedResults.ExecutionPlan = plan.Plan;
 
-                        return cache;
+                        return cachedResults;
                     }
                 }
             }
 
-            QueryResults results = ExecuteNonCached(parsedQuery, site, user, IncludeExecutionPlan);
+            QueryResults results = ExecuteNonCached(query, site, user);
 
-            if (cache == null)
+            if (cachedResults == null)
             {
-                AddResultToCache(results, parsedQuery, site, db, IncludeExecutionPlan);
+                AddResultToCache(results, query, site);
             }
 
-            if (IncludeExecutionPlan)
+            if (query.HasExecutionPlan && cachedPlan == null)
             {
-                db.CachedPlans.InsertOnSubmit(new CachedPlan()
-                {
-                    QueryHash = parsedQuery.ExecutionHash,
-                    SiteId = site.Id,
-                    Plan = results.ExecutionPlan,
-                    CreationDate = DateTime.UtcNow,
-                });
+                AddPlanToCache(results, query);
             }
-
-            db.SubmitChanges();
 
             return results;
         }
 
         /// <summary>
-        /// Verifies that the cached set of results are correct for this particular query,
-        /// addressing the case where many queries may produce the same execution SQL, but may
-        /// have differing parameter names.
+        /// Adds the execution plan of a particular query to the database cache
         /// </summary>
-        /// <param name="parsedQuery">The current query that produces the results in the
-        /// cache</param>
-        /// <param name="cache">The cached results for a query semantically equivalent to the
-        /// provided one</param>
-        /// <param name="user"></param>
-        private static void VerifyQueryState(ParsedQuery parsedQuery, QueryResults cache, User user)
+        /// <param name="results">The results of the query that include the plan</param>
+        /// <param name="query"></param>
+        private static void AddPlanToCache(QueryResults results, ParsedQuery query)
         {
-            Query query = Current.DB.Query<Query>(
-                "SELECT * FROM Queries WHERE QueryHash = @hash",
-                new
-                {
-                    hash = parsedQuery.Hash
-                }
-            ).FirstOrDefault();
-
-            // Check if the parsed query is actually responsible for this cache
-            if (cache != null)
-            {
-                int id;
-
-                // If the query doesn't exist, now is the only time it'll get created since it
-                // corresponds to a pre-existing cache result (but isn't actually what generated
-                // the result set)
-                if (query == null)
-                {
-                    id = (int)Current.DB.Query<decimal>(@"
-                        INSERT INTO Queries(
-                            CreatorId, CreatorIP, FirstRun, Name,
-                            Description, QueryBody, QueryHash, Views
-                        ) VALUES(
-                            @CreatorId, @CreatorIP, @FirstRun, @Name,
-                            @Description, @QueryBody, @QueryHash, @Views
-                        )
-
-                        SELECT SCOPE_IDENTITY()",
-                        new
-                        {
-                            CreatorId = user.IsAnonymous ? (int?)null : user.Id,
-                            CreatorIP = user.IPAddress,
-                            FirstRun = DateTime.UtcNow,
-                            Name = parsedQuery.Name,
-                            Description = parsedQuery.Description,
-                            QueryBody = parsedQuery.RawSql,
-                            QueryHash = parsedQuery.Hash,
-                            Views = 0
-                        }
-                    ).First();
-                }
-                else
-                {
-                    id = query.Id;
-                }
-
-                // Update the cache's query ID to lie to the client that these results came from
-                // this specific query
-                if (id != cache.QueryId)
-                {
-                    cache.QueryId = id;
-                }
-            }
-
-            // Update the important bits of the query if we didn't just insert it, provided that
-            // the user isn't anonymous.
-            if (query != null && !user.IsAnonymous)
-            {
-                // Save ourselves the trouble of updating if nothing's changed
-                if (query.Name != parsedQuery.Name || query.Description != parsedQuery.Description || query.QueryBody != parsedQuery.RawSql)
-                {
-                    Current.DB.Execute(@"
-                        UPDATE Queries SET
-                            Name = @name,
-                            Description = @description,
-                            QueryBody = @sql
-                        WHERE Id = @id",
-                        new
-                        {
-                            name = parsedQuery.Name,
-                            description = parsedQuery.Description,
-                            sql = parsedQuery.RawSql,
-                            id = query.Id
-                        }
-                    );
-                }
+            if (string.IsNullOrEmpty(results.ExecutionPlan)) {
+                return;
             }
         }
 
+
         /// <summary>
-        /// Adds a query result to the cache.
+        /// Adds the results of a running a particular query for a given site to the database cache
         /// </summary>
-        /// <param name="json">Query results to add to the cache.</param>
-        /// <param name="IncludeExecutionPlan">If true indicates that the result set includes a query
-        /// execution plan; otherwise, false.</param>
-        private static void AddResultToCache(QueryResults results, ParsedQuery parsedQuery, Site site, DBContext db, bool IncludeExecutionPlan)
+        /// <param name="results">The results of the query</param>
+        /// <param name="query">The query that was executed</param>
+        /// <param name="site">The site that the query was run against</param>
+        private static void AddResultToCache(QueryResults results, ParsedQuery query, Site site)
         {
             // Avoid saving the execution plan as part of the results
             string executionPlan = results.ExecutionPlan;
             results.ExecutionPlan = null;
 
-            // After this method is called, the execution plan is cached in a separate (but very
-            // similar) way. It might make more sense to just include it in this table so that we
-            // don't have to make multiple queries, but I'd have to investigate it more.
-            db.Execute(@"
+            Current.DB.Execute(@"
                 INSERT INTO CachedResults(
                     QueryHash, SiteId, Results, CreationDate
                 ) VALUES(
@@ -691,7 +599,7 @@ namespace StackExchange.DataExplorer.Helpers
                 )",
                 new
                 {
-                    hash = parsedQuery.ExecutionHash,
+                    hash = query.ExecutionHash,
                     site = site.Id,
                     // I removed the anti-XSS replace here because this should always pass through
                     // the one that's now called on all results in the controller
