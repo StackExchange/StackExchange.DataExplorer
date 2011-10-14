@@ -283,19 +283,12 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user)
-        {
-            return ExecuteNonCached(parsedQuery, site, user, false);
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security", 
             "CA2100:Review SQL queries for security vulnerabilities", 
             Justification = "What else can I do, we are allowing users to run sql.")]
-        public static QueryResults ExecuteNonCached(ParsedQuery parsedQuery, Site site, User user, bool IncludeExecutionPlan)
+        public static QueryResults ExecuteNonCached(ParsedQuery query, Site site, User user)
         {
-            DBContext db = Current.DB;
-
             var remoteIP = OData.GetRemoteIP(); 
             var key = "total-" + remoteIP;
             var currentCount = (int?)Current.GetCachedObject(key) ?? 0;
@@ -313,7 +306,7 @@ namespace StackExchange.DataExplorer.Helpers
                 throw new Exception("You can not run any new queries for another hour, you have exceeded your limit!");
             }
 
-            if (db.ExecuteQuery<int>("select count(*) from BlackList where IPAddress = {0}", remoteIP).First() > 0)
+            if (Current.DB.ExecuteQuery<int>("select count(*) from BlackList where IPAddress = {0}", remoteIP).First() > 0)
             {
                 System.Threading.Thread.Sleep(2000);
                 throw new Exception("You have been blacklisted due to abuse!");
@@ -344,7 +337,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     cnn.InfoMessage += infoHandler;
 
-                    if (IncludeExecutionPlan)
+                    if (query.HasExecutionPlan)
                     {
                         using (var command = new SqlCommand("SET STATISTICS XML ON", cnn))
                         {
@@ -353,19 +346,22 @@ namespace StackExchange.DataExplorer.Helpers
                     }
 
                     var plan = new QueryPlan();
-                    foreach (string batch in parsedQuery.ExecutionSqlBatches)
+
+                    foreach (string batch in query.ExecutionSqlBatches)
                     {
                         using (var command = new SqlCommand(batch, cnn))
                         {
                             command.CommandTimeout = QUERY_TIMEOUT;
-                            PopulateResults(results, command, messages, IncludeExecutionPlan);
+                            PopulateResults(results, command, messages, query.HasExecutionPlan);
                         }
-                        if (IncludeExecutionPlan)
+
+                        if (query.HasExecutionPlan)
                         {
                             plan.AppendBatchPlan(results.ExecutionPlan);
                             results.ExecutionPlan = null;
                         }
                     }
+
                     results.ExecutionPlan = plan.PlanXml;
                 }
                 finally
@@ -378,46 +374,7 @@ namespace StackExchange.DataExplorer.Helpers
                 results.ExecutionTime = timer.ElapsedMilliseconds;
 
                 ProcessMagicColumns(results, cnn);
-
             }
-
-
-            Query query = db.Queries
-                .Where(q => q.QueryHash == parsedQuery.Hash)
-                .FirstOrDefault();
-
-            if (query == null)
-            {
-                query = new Query
-                            {
-                                CreatorIP = user.IPAddress,
-                                FirstRun = DateTime.UtcNow,
-                                QueryBody = parsedQuery.RawSql,
-                                QueryHash = parsedQuery.Hash,
-                                Views = 0,
-                                CreatorId = user.IsAnonymous ? (int?) null : user.Id,
-                                Name = parsedQuery.Name,
-                                Description = parsedQuery.Description
-                            };
-
-                db.Queries.InsertOnSubmit(query);
-            }
-            else
-            {
-                if (!user.IsAnonymous)
-                {
-                    query.Name = parsedQuery.Name;
-                    query.Description = parsedQuery.Description;
-                }
-            }
-
-            db.SubmitChanges();
-
-            results.QueryId = query.Id;
-
-            db.SubmitChanges();
-
-            results.Slug = query.Name.URLFriendly();
 
             return results;
         }
