@@ -57,8 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 ).FirstOrDefault();
 
-                int? saveId = null;
-                int queryId;
+                int saveId, queryId;
                 DateTime saveTime;
 
                 // We only create revisions if something actually changed.
@@ -113,13 +112,8 @@ namespace StackExchange.DataExplorer.Controllers
 
                 QueryRunner.LogQueryExecution(CurrentUser, siteId, queryId);
 
-                if (!saveId.HasValue)
-                {
-                    throw new ApplicationException("Unable to save revision");
-                }
-
                 // Need to fix up the way we pass back results
-                results.QueryId = saveId.Value;
+                results.QueryId = saveId;
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
             }
