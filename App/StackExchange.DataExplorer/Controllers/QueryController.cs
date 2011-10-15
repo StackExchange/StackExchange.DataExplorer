@@ -158,18 +158,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             try
             {
-                var query = Current.DB.Query<Query>(@"
-                    SELECT
-                        *
-                    FROM
-                        Queries JOIN
-                        Revisions ON Queries.Id = Revisions.QueryId AND Revisions.Id = @revision
-                    ",
-                    new
-                    {
-                        revision = revisionId
-                    }
-                ).FirstOrDefault();
+                var query = GetQueryForRevision(revisionId);
 
                 if (query == null)
                 {
@@ -198,40 +187,8 @@ namespace StackExchange.DataExplorer.Controllers
             return response;
         }
 
-
-        [Route(@"{sitename}/mcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowmCsv(string sitename, int queryId)
-        {
-            Query query = FindQuery(queryId);
-
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-            
-            var json = QueryRunner.GetMultiSiteResults(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, false).ToJson();
-
-            return new CsvResult(json);
-        }
-
-        [Route(@"{sitename}/nmcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShownmCsv(string sitename, int queryId)
-        {
-            Query query = FindQuery(queryId);
-
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            var json = QueryRunner.GetMultiSiteResults(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, true).ToJson();
-
-            return new CsvResult(json);
-        }
-      
-      
         [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowCsv(string sitename, int queryId)
+        public ActionResult ShowSingleSiteCsv(string sitename, int queryId)
         {
             Query query = FindQuery(queryId);
 
@@ -243,6 +200,42 @@ namespace StackExchange.DataExplorer.Controllers
             TrackQueryView(queryId);
             CachedResult cachedResults = GetCachedResults(query);
             return new CsvResult(cachedResults.Results);
+        }
+
+        [Route(@"{sitename}/mcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteCsv(string sitename, int revisionId)
+        {
+            Query query = GetQueryForRevision(revisionId);
+
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+            
+            var json = QueryRunner.GetMultiSiteResults(
+                new ParsedQuery(query.QueryBody, Request.Params, true, false),
+                CurrentUser
+            ).ToJson();
+
+            return new CsvResult(json);
+        }
+
+        [Route(@"{sitename}/nmcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteWithoutMetaCsv(string sitename, int revisionId)
+        {
+            Query query = GetQueryForRevision(revisionId);
+
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            var json = QueryRunner.GetMultiSiteResults(
+                new ParsedQuery(query.QueryBody, Request.Params, true, true),
+                CurrentUser
+            ).ToJson();
+
+            return new CsvResult(json);
         }
 
         [Route(@"{sitename}/qte/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
@@ -437,6 +430,22 @@ namespace StackExchange.DataExplorer.Controllers
             response["error"] = ex.Message;
 
             return Json(response);
+        }
+
+        private Query GetQueryForRevision(int revisionId)
+        {
+            return Current.DB.Query<Query>(@"
+                SELECT
+                    *
+                FROM
+                    Queries JOIN
+                    Revisions ON Queries.Id = Revisions.QueryId AND Revisions.Id = @revision
+                ",
+                new
+                {
+                    revision = revisionId
+                }
+            ).FirstOrDefault();
         }
 
         private bool SetCommonQueryViewData(string sitename)

@@ -33,7 +33,14 @@ namespace StackExchange.DataExplorer.Helpers
         private static readonly Regex SplitOnGoRegex = new Regex(@"^\s*GO\s*$",
                                                                  RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
-        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan, bool crossSite, bool excludeMetas) : this(sql, requestParams)
+        public ParsedQuery(string sql, NameValueCollection requestParams, bool crossSite, bool excludeMetas)
+            : this(sql, requestParams, false, crossSite, excludeMetas)
+        {
+
+        }
+
+        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan, bool crossSite, bool excludeMetas)
+            : this(sql, requestParams)
         {
             HasExecutionPlan = executionPlan;
             IsCrossSite = crossSite;
