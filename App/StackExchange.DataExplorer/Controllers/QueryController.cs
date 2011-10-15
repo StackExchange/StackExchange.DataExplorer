@@ -57,7 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 ).FirstOrDefault();
 
-                int saveId, queryId;
+                int saveId = 0, queryId;
                 DateTime saveTime;
 
                 // We only create revisions if something actually changed.
