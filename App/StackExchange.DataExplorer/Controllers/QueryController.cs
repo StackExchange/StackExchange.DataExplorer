@@ -12,7 +12,7 @@ namespace StackExchange.DataExplorer.Controllers
     {
         [HttpPost]
         [Route(@"query/save/{parentId?:\d+}")]
-        public ActionResult Create(string sql, int? parentId, int? siteId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        public ActionResult Create(string sql, int siteId, int? parentId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -24,7 +24,6 @@ namespace StackExchange.DataExplorer.Controllers
             try
             {
                 Revision parent = null;
-                bool executeQuery = siteId.HasValue;
 
                 if (parentId.HasValue)
                 {
@@ -49,15 +48,7 @@ namespace StackExchange.DataExplorer.Controllers
                     crossSite == true,
                     excludeMetas == true
                 );
-                QueryResults results = null;
-
-                // Just in case we get into a situation where we want to create a
-                // new revision but not run anything in the process.
-                if (executeQuery)
-                {
-                    results = ExecuteWithResults(parsedQuery, siteId.Value, textResults == true);
-                }
-
+                var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
                 var query = Current.DB.Query<Query>(
                     "SELECT * FROM Queries WHERE QueryHash = @hash",
                     new
@@ -120,27 +111,17 @@ namespace StackExchange.DataExplorer.Controllers
                     queryId = query.Id;
                 }
 
-                if (executeQuery)
-                {
-                    QueryRunner.LogQueryExecution(CurrentUser, siteId.Value, queryId);
-                }
+                QueryRunner.LogQueryExecution(CurrentUser, siteId, queryId);
 
                 if (!saveId.HasValue)
                 {
                     throw new ApplicationException("Unable to save revision");
                 }
 
-                if (executeQuery)
-                {
-                    // Need to fix up the way we pass back results
-                    results.QueryId = saveId.Value;
-                    // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
-                    response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
-                }
-                else
-                {
-                    // Return a response appropriate for an executionless creation
-                }
+                // Need to fix up the way we pass back results
+                results.QueryId = saveId.Value;
+                // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
+                response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
             }
             catch (Exception ex)
             {

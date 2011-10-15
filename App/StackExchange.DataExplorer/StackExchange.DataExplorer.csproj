@@ -179,7 +179,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DBContext.dbml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Query.cs" />
     <Compile Include="Models\SavedQuery.cs" />
     <Compile Include="Models\SaveQueryMetadata.cs" />
     <Compile Include="Models\Site.cs" />
