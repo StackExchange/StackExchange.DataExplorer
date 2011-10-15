@@ -27,7 +27,6 @@
       <Column Name="LastSeenDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Association Name="User_SavedQuery" Member="SavedQueries" ThisKey="Id" OtherKey="UserId" Type="SavedQuery" />
       <Association Name="User_UserOpenId" Member="UserOpenIds" ThisKey="Id" OtherKey="UserId" Type="UserOpenId" />
-      <Association Name="User_Revision" Member="Revisions" ThisKey="Id" OtherKey="OwnerId" Type="Revision" />
     </Type>
   </Table>
   <Table Name="dbo.Sites" Member="Sites">
@@ -125,7 +124,6 @@
       <Column Name="Id" Storage="_ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
       <Column Name="QueryBody" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />
-      <Association Name="Query_Revision" Member="Revisions" ThisKey="Id" OtherKey="QueryId" Type="Revision" />
     </Type>
   </Table>
   <Table Name="dbo.Revisions" Member="Revisions">
@@ -136,8 +134,6 @@
       <Column Name="OwnerId" Storage="_OwnerID" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="OwnerIP" Type="System.String" DbType="VarChar(15) NOT NULL" CanBeNull="false" />
       <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Association Name="Query_Revision" Member="Query" ThisKey="QueryId" OtherKey="Id" Type="Query" IsForeignKey="true" />
-      <Association Name="User_Revision" Member="User" ThisKey="OwnerId" OtherKey="Id" Type="User" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.QueryExecutions" Member="QueryExecutions">
@@ -149,6 +145,13 @@
       <Column Name="FirstRun" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="LastRun" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="ExecutionCount" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Metadata" Member="Metadatas">
+    <Type Name="Metadata">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(1000)" CanBeNull="true" />
     </Type>
   </Table>
 </Database>

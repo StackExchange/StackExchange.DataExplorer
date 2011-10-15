@@ -423,6 +423,30 @@ namespace StackExchange.DataExplorer.Controllers
             ).FirstOrDefault();
         }
 
+        private Revision GetCompleteRevision(int revisionId)
+        {
+            return Current.DB.Query<Revision, Query, Metadata, Revision>(@"
+                SELECT
+                    *
+                FROM
+                    Revisions revision JOIN
+                    Queries query ON query.Id = revision.QueryId AND revision.Id = @revision JOIN
+                    Metadata metadata ON metadata.Id = @revision OR metadata.Id = revision.RootId
+                ",
+                (revision, query, metadata) =>
+                {
+                    revision.Query = query;
+                    revision.Metadata = metadata;
+
+                    return revision;
+                },
+                new
+                {
+                    revision = revisionId
+                }
+            ).FirstOrDefault();
+        }
+
         private bool SetCommonQueryViewData(string sitename)
         {
             SetHeaderInfo();

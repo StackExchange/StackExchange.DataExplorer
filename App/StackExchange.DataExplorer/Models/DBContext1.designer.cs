@@ -66,6 +66,9 @@ namespace StackExchange.DataExplorer.Models
     partial void InsertRevision(Revision instance);
     partial void UpdateRevision(Revision instance);
     partial void DeleteRevision(Revision instance);
+    partial void InsertMetadata(Metadata instance);
+    partial void UpdateMetadata(Metadata instance);
+    partial void DeleteMetadata(Metadata instance);
     #endregion
 		
 		public DBContext() : 
@@ -199,6 +202,14 @@ namespace StackExchange.DataExplorer.Models
 			get
 			{
 				return this.GetTable<QueryExecution>();
+			}
+		}
+		
+		public System.Data.Linq.Table<Metadata> Metadatas
+		{
+			get
+			{
+				return this.GetTable<Metadata>();
 			}
 		}
 	}
@@ -399,8 +410,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		private EntitySet<UserOpenId> _UserOpenIds;
 		
-		private EntitySet<Revision> _Revisions;
-		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -439,7 +448,6 @@ namespace StackExchange.DataExplorer.Models
 		{
 			this._SavedQueries = new EntitySet<SavedQuery>(new Action<SavedQuery>(this.attach_SavedQueries), new Action<SavedQuery>(this.detach_SavedQueries));
 			this._UserOpenIds = new EntitySet<UserOpenId>(new Action<UserOpenId>(this.attach_UserOpenIds), new Action<UserOpenId>(this.detach_UserOpenIds));
-			this._Revisions = new EntitySet<Revision>(new Action<Revision>(this.attach_Revisions), new Action<Revision>(this.detach_Revisions));
 			OnCreated();
 		}
 		
@@ -749,19 +757,6 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_Revision", Storage="_Revisions", ThisKey="Id", OtherKey="OwnerId")]
-		public EntitySet<Revision> Revisions
-		{
-			get
-			{
-				return this._Revisions;
-			}
-			set
-			{
-				this._Revisions.Assign(value);
-			}
-		}
-		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -801,18 +796,6 @@ namespace StackExchange.DataExplorer.Models
 		}
 		
 		private void detach_UserOpenIds(UserOpenId entity)
-		{
-			this.SendPropertyChanging();
-			entity.User = null;
-		}
-		
-		private void attach_Revisions(Revision entity)
-		{
-			this.SendPropertyChanging();
-			entity.User = this;
-		}
-		
-		private void detach_Revisions(Revision entity)
 		{
 			this.SendPropertyChanging();
 			entity.User = null;
@@ -2582,8 +2565,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		private string _QueryBody;
 		
-		private EntitySet<Revision> _Revisions;
-		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -2598,7 +2579,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		public Query()
 		{
-			this._Revisions = new EntitySet<Revision>(new Action<Revision>(this.attach_Revisions), new Action<Revision>(this.detach_Revisions));
 			OnCreated();
 		}
 		
@@ -2662,19 +2642,6 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Query_Revision", Storage="_Revisions", ThisKey="Id", OtherKey="QueryId")]
-		public EntitySet<Revision> Revisions
-		{
-			get
-			{
-				return this._Revisions;
-			}
-			set
-			{
-				this._Revisions.Assign(value);
-			}
-		}
-		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -2693,18 +2660,6 @@ namespace StackExchange.DataExplorer.Models
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
-		}
-		
-		private void attach_Revisions(Revision entity)
-		{
-			this.SendPropertyChanging();
-			entity.Query = this;
-		}
-		
-		private void detach_Revisions(Revision entity)
-		{
-			this.SendPropertyChanging();
-			entity.Query = null;
 		}
 	}
 	
@@ -2726,10 +2681,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		private System.DateTime _CreationDate;
 		
-		private EntityRef<Query> _Query;
-		
-		private EntityRef<User> _User;
-		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -2750,8 +2701,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		public Revision()
 		{
-			this._Query = default(EntityRef<Query>);
-			this._User = default(EntityRef<User>);
 			OnCreated();
 		}
 		
@@ -2786,10 +2735,6 @@ namespace StackExchange.DataExplorer.Models
 			{
 				if ((this._QueryID != value))
 				{
-					if (this._Query.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
 					this.OnQueryIdChanging(value);
 					this.SendPropertyChanging();
 					this._QueryID = value;
@@ -2830,10 +2775,6 @@ namespace StackExchange.DataExplorer.Models
 			{
 				if ((this._OwnerID != value))
 				{
-					if (this._User.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
 					this.OnOwnerIdChanging(value);
 					this.SendPropertyChanging();
 					this._OwnerID = value;
@@ -2879,74 +2820,6 @@ namespace StackExchange.DataExplorer.Models
 					this._CreationDate = value;
 					this.SendPropertyChanged("CreationDate");
 					this.OnCreationDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Query_Revision", Storage="_Query", ThisKey="QueryId", OtherKey="Id", IsForeignKey=true)]
-		public Query Query
-		{
-			get
-			{
-				return this._Query.Entity;
-			}
-			set
-			{
-				Query previousValue = this._Query.Entity;
-				if (((previousValue != value) 
-							|| (this._Query.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Query.Entity = null;
-						previousValue.Revisions.Remove(this);
-					}
-					this._Query.Entity = value;
-					if ((value != null))
-					{
-						value.Revisions.Add(this);
-						this._QueryID = value.Id;
-					}
-					else
-					{
-						this._QueryID = default(int);
-					}
-					this.SendPropertyChanged("Query");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_Revision", Storage="_User", ThisKey="OwnerId", OtherKey="Id", IsForeignKey=true)]
-		public User User
-		{
-			get
-			{
-				return this._User.Entity;
-			}
-			set
-			{
-				User previousValue = this._User.Entity;
-				if (((previousValue != value) 
-							|| (this._User.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._User.Entity = null;
-						previousValue.Revisions.Remove(this);
-					}
-					this._User.Entity = value;
-					if ((value != null))
-					{
-						value.Revisions.Add(this);
-						this._OwnerID = value.Id;
-					}
-					else
-					{
-						this._OwnerID = default(Nullable<int>);
-					}
-					this.SendPropertyChanged("User");
 				}
 			}
 		}
@@ -3103,6 +2976,116 @@ namespace StackExchange.DataExplorer.Models
 				{
 					this._ExecutionCount = value;
 				}
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Metadata")]
+	public partial class Metadata : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _Id;
+		
+		private string _Title;
+		
+		private string _Description;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnTitleChanging(string value);
+    partial void OnTitleChanged();
+    partial void OnDescriptionChanging(string value);
+    partial void OnDescriptionChanged();
+    #endregion
+		
+		public Metadata()
+		{
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Title", DbType="NVarChar(100) NOT NULL", CanBeNull=false)]
+		public string Title
+		{
+			get
+			{
+				return this._Title;
+			}
+			set
+			{
+				if ((this._Title != value))
+				{
+					this.OnTitleChanging(value);
+					this.SendPropertyChanging();
+					this._Title = value;
+					this.SendPropertyChanged("Title");
+					this.OnTitleChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Description", DbType="NVarChar(1000)")]
+		public string Description
+		{
+			get
+			{
+				return this._Description;
+			}
+			set
+			{
+				if ((this._Description != value))
+				{
+					this.OnDescriptionChanging(value);
+					this.SendPropertyChanging();
+					this._Description = value;
+					this.SendPropertyChanged("Description");
+					this.OnDescriptionChanged();
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
