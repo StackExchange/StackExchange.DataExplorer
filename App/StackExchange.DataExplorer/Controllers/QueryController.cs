@@ -245,27 +245,26 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [Route(@"{sitename}/query/edit/{revisionId:\d+}/{slug?}")]
-        public ActionResult Edit(string sitename, int savedQueryId)
+        public ActionResult Edit(string sitename, int revisionId)
         {
             bool foundSite = SetCommonQueryViewData(sitename);
+
             if (!foundSite)
             {
                 return PageNotFound();
             }
 
-            SetHeaderInfo(savedQueryId);
+            SetHeaderInfo(revisionId);
 
-            SavedQuery savedQuery = FindSavedQuery(savedQueryId);
+            Revision revision = GetCompleteRevision(revisionId);
 
-            if (savedQuery == null)
+            if (revision == null)
             {
                 return PageNotFound();
             }
 
-            savedQuery.UpdateQueryBodyComment();
-
-            ViewData["query"] = savedQuery.Query;
-            ViewData["cached_results"] = GetCachedResults(savedQuery.Query);
+            ViewData["query"] = revision.Query;
+            ViewData["cached_results"] = GetCachedResults(revision.Query);
 
             return View("New", Site);
         }
@@ -295,8 +294,13 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult New(string sitename)
         {
             bool foundSite = SetCommonQueryViewData(sitename);
+
+            if (!foundSite)
+            {
+                return PageNotFound();
+            }
             
-            return foundSite?View(Site):PageNotFound();
+            return View(Site);
         }
 
         private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, bool textResults)
