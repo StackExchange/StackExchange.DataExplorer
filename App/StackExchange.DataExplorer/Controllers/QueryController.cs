@@ -244,41 +244,7 @@ namespace StackExchange.DataExplorer.Controllers
             return new CsvResult(json);
         }
 
-        [Route(@"{sitename}/qte/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult EditText(string sitename, int savedQueryId)
-        {
-            bool foundSite = SetCommonQueryViewData(sitename);
-            if (!foundSite)
-            {
-                return PageNotFound();
-            }
-
-            SetHeaderInfo(savedQueryId);
-
-            SavedQuery savedQuery = FindSavedQuery(savedQueryId);
-
-            if (savedQuery == null)
-            {
-                return PageNotFound();
-            }
-
-            savedQuery.UpdateQueryBodyComment();
-
-            ViewData["query"] = savedQuery.Query;
-
-            CachedResult cachedResults = GetCachedResults(savedQuery.Query);
-
-            if (cachedResults != null && cachedResults.Results != null)
-            {
-                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
-            }
-
-            ViewData["cached_results"] = cachedResults;
-
-            return View("New", Site);
-        }
-
-        [Route(@"{sitename}/qe/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
+        [Route(@"{sitename}/query/edit/{revisionId:\d+}/{slug?}")]
         public ActionResult Edit(string sitename, int savedQueryId)
         {
             bool foundSite = SetCommonQueryViewData(sitename);
@@ -301,56 +267,6 @@ namespace StackExchange.DataExplorer.Controllers
             ViewData["query"] = savedQuery.Query;
             ViewData["cached_results"] = GetCachedResults(savedQuery.Query);
 
-            return View("New", Site);
-        }
-
-
-        [Route(@"{sitename}/qt/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowText(string sitename, int queryId)
-        {
-            bool foundSite = SetCommonQueryViewData(sitename);
-            if (!foundSite)
-            {
-                return PageNotFound();
-            }
-
-            Query query = FindQuery(queryId);
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            TrackQueryView(queryId);
-
-            ViewData["query"] = query;
-            CachedResult cachedResults = GetCachedResults(query);
-            if (cachedResults != null && cachedResults.Results != null)
-            {
-                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
-            }
-
-            ViewData["cached_results"] = cachedResults;
-            return View("New", Site);
-        }
-
-        [Route(@"{sitename}/q/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult Show(string sitename, int queryId)
-        {
-            bool foundSite = SetCommonQueryViewData(sitename);
-            if (!foundSite)
-            {
-                return PageNotFound();
-            }
-
-            Query query = FindQuery(queryId);
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            ViewData["query"] = query;
-            TrackQueryView(queryId);
-            ViewData["cached_results"] = GetCachedResults(query);
             return View("New", Site);
         }
 
