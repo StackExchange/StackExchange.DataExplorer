@@ -226,7 +226,7 @@ namespace StackExchange.DataExplorer.Helpers
                 .FirstOrDefault();
         }
 
-        public static void LogQueryExecution(User user, int siteId, int queryId)
+        public static void LogQueryExecution(User user, int siteId, int revisionId, int queryId)
         {
             QueryExecution execution;
 
@@ -236,12 +236,12 @@ namespace StackExchange.DataExplorer.Helpers
                 FROM
                     QueryExecutions
                 WHERE
-                    QueryId = @revision AND
+                    RevisionId = @revision AND
                     SiteId = @site AND
                     UserId " + (user.IsAnonymous ? "IS NULL" : "= @user"),
                 new
                 {
-                    revision = queryId,
+                    revision = revisionId,
                     site = siteId,
                     user = user.Id
                 }
@@ -252,15 +252,16 @@ namespace StackExchange.DataExplorer.Helpers
                 Current.DB.Execute(@"
                     INSERT INTO QueryExecutions(
                         ExecutionCount, FirstRun, LastRun,
-                        QueryId, SiteId, UserId
+                        RevisionId, QueryId, SiteId, UserId
                     ) VALUES(
-                        1, @first, @last, @query, @site, @user
+                        1, @first, @last, @revision, @query, @site, @user
                     )",
                     new
                     {
                         first = DateTime.UtcNow,
                         last = DateTime.UtcNow,
-                        revision = queryId,
+                        revision = revisionId,
+                        query = queryId,
                         site = siteId,
                         user = user.Id
                     }

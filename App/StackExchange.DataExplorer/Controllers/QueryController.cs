@@ -51,7 +51,7 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 ).FirstOrDefault();
 
-                int saveId = 0, queryId;
+                int revisionId = 0, queryId;
                 DateTime saveTime;
 
                 // We only create revisions if something actually changed.
@@ -81,7 +81,7 @@ namespace StackExchange.DataExplorer.Controllers
                         queryId = query.Id;
                     }
 
-                    saveId = (int)Current.DB.Query<decimal>(@"
+                    revisionId = (int)Current.DB.Query<decimal>(@"
                         INSERT INTO Revisions(
                             QueryId, RootId, OwnerId, OwnerIP, CreationDate
                         ) VALUES(
@@ -101,7 +101,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                     if (parent == null)
                     {
-                        SaveMetadata(saveId, title, description, true);
+                        SaveMetadata(revisionId, title, description, true);
                     }
                 }
                 else
@@ -109,10 +109,10 @@ namespace StackExchange.DataExplorer.Controllers
                     queryId = query.Id;
                 }
 
-                QueryRunner.LogQueryExecution(CurrentUser, siteId, queryId);
+                QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, queryId);
 
                 // Need to fix up the way we pass back results
-                results.QueryId = saveId;
+                results.QueryId = revisionId;
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
             }
@@ -148,7 +148,7 @@ namespace StackExchange.DataExplorer.Controllers
                 );
 
                 var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
-                QueryRunner.LogQueryExecution(CurrentUser, siteId, query.Id);
+                QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, query.Id);
 
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
