@@ -192,18 +192,19 @@ namespace StackExchange.DataExplorer.Controllers
             return response;
         }
 
-        [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowSingleSiteCsv(string sitename, int queryId)
+        [Route(@"{sitename}/csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowSingleSiteCsv(string sitename, int revisionId)
         {
-            Query query = FindQuery(queryId);
+            Query query = GetQueryForRevision(revisionId);
 
             if (query == null)
             {
                 return PageNotFound();
             }
 
-            TrackQueryView(queryId);
+            TrackQueryView(revisionId);
             CachedResult cachedResults = GetCachedResults(query);
+
             return new CsvResult(cachedResults.Results);
         }
 
