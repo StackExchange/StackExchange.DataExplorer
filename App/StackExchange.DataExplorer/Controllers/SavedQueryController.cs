@@ -11,19 +11,8 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class SavedQueryController : StackOverflowController
     {
-        [Route(@"{sitename}/st/{id:\d+}/{slug?}")]
-        public ActionResult ShowText(int id, string sitename, string slug)
-        {
-            return ProcessShow(id, sitename, "text",slug);
-        }
-
         [Route(@"{sitename}/s/{id:\d+}/{slug?}")]
         public ActionResult Show(int id, string sitename, string slug)
-        {
-            return ProcessShow(id, sitename, "default",slug);
-        }
-
-        private ActionResult ProcessShow(int id, string sitename, string format,string slug)
         {
             DBContext db = Current.DB;
 
@@ -44,23 +33,23 @@ namespace StackExchange.DataExplorer.Controllers
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
             if (savedQuery.Title.URLFriendly().HasValue() && (string.IsNullOrEmpty(slug) || slug != savedQuery.Title.URLFriendly()))
             {
-                return PageMovedPermanentlyTo(string.Format("/{0}/{1}/{2}/{3}", sitename, (format=="default"?"s":"st"), id, HtmlUtilities.URLFriendly(savedQuery.Title)) + Request.Url.Query);
+                return PageMovedPermanentlyTo(string.Format("/{0}/{1}/{2}/{3}", sitename, (format == "default" ? "s" : "st"), id, HtmlUtilities.URLFriendly(savedQuery.Title)) + Request.Url.Query);
             }
             SetHeader(savedQuery.Title);
             int totalVotes =
-                db.Votes.Where(v => v.SavedQueryId == id && v.VoteTypeId == (int) VoteType.Favorite).Count();
+                db.Votes.Where(v => v.SavedQueryId == id && v.VoteTypeId == (int)VoteType.Favorite).Count();
 
             var voting = new QueryVoting
-                             {
-                                 TotalVotes = totalVotes
-                             };
+            {
+                TotalVotes = totalVotes
+            };
 
             if (!Current.User.IsAnonymous)
             {
                 voting.HasVoted = (
                                       db.Votes.FirstOrDefault(v => v.SavedQueryId == id
                                                                    && v.UserId == Current.User.Id
-                                                                   && v.VoteTypeId == (int) VoteType.Favorite)
+                                                                   && v.VoteTypeId == (int)VoteType.Favorite)
                                   ) != null;
             }
 
@@ -87,7 +76,7 @@ namespace StackExchange.DataExplorer.Controllers
                 QueryViewTracker.TrackQueryView(GetRemoteIP(), savedQuery.Query.Id);
             }
 
-            return View("Show", savedQuery);
+            return View(savedQuery);
         }
 
         [Route("saved_query/delete", HttpVerbs.Post)]
