@@ -12,7 +12,7 @@ namespace StackExchange.DataExplorer.Controllers
     {
         [HttpPost]
         [Route(@"query/save/{parentId?:\d+}")]
-        public ActionResult Create(string sql, int siteId, int? parentId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        public ActionResult Create(string sql, string title, string description, int siteId, int? parentId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -27,13 +27,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                 if (parentId.HasValue)
                 {
-                    parent = Current.DB.Query<Revision>(
-                        "SELECT * FROM Revisions WHERE Id = @id",
-                        new
-                        {
-                            id = parentId.Value
-                        }
-                    ).FirstOrDefault();
+                    parent = GetBasicRevision(parentId.Value);
 
                     if (parent == null)
                     {
@@ -104,6 +98,11 @@ namespace StackExchange.DataExplorer.Controllers
                             creation = saveTime = DateTime.UtcNow
                         }
                     ).First();
+
+                    if (parent == null)
+                    {
+                        SaveMetadata(saveId, title, description, true);
+                    }
                 }
                 else
                 {
@@ -155,6 +154,37 @@ namespace StackExchange.DataExplorer.Controllers
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
             }
             catch (Exception ex)
+            {
+                response = TransformExecutionException(ex);
+            }
+
+            return response;
+        }
+
+
+        [HttpPost]
+        [Route(@"query/update/{revisionId:\d+}")]
+        public ActionResult UpdateMetadata(int revisionId, string title, string description)
+        {
+            ActionResult response = null;
+
+            try
+            {
+                Revision revision = GetBasicRevision(revisionId);
+
+                if (revision == null)
+                {
+                    throw new ApplicationException("Invalid revision ID");
+                }
+
+                if (revision.RootId.HasValue)
+                {
+                    revisionId = revision.RootId.Value;
+                }
+
+                SaveMetadata(revisionId, title, description, false);
+            }
+            catch (ApplicationException ex)
             {
                 response = TransformExecutionException(ex);
             }
@@ -423,6 +453,17 @@ namespace StackExchange.DataExplorer.Controllers
             ).FirstOrDefault();
         }
 
+        private Revision GetBasicRevision(int revisionId)
+        {
+            return Current.DB.Query<Revision>(
+                "SELECT * FROM Revisions WHERE Id = @revision",
+                new
+                {
+                    revision = revisionId
+                }
+            ).FirstOrDefault();
+        }
+
         private Revision GetCompleteRevision(int revisionId)
         {
             return Current.DB.Query<Revision, Query, Metadata, Revision>(@"
@@ -445,6 +486,66 @@ namespace StackExchange.DataExplorer.Controllers
                     revision = revisionId
                 }
             ).FirstOrDefault();
+        }
+
+        private void SaveMetadata(int rootId, string title, string description, bool isNew)
+        {
+            if (isNew)
+            {
+                Current.DB.Execute(@"
+                    INSERT INTO Metadata(
+                        Id, Title, Description
+                    ) VALUES(
+                        @id, @title, @description
+                    )",
+                    new
+                    {
+                        id = rootId,
+                        title = title,
+                        description = description
+                    }
+                );
+            }
+            else
+            {
+                // Currently we only allow the author of the original revision to change
+                // the metadata, but people might be annoyed by this inflexibility...
+                int isOwner = Current.DB.Query<int>(@"
+                    SELECT
+                        COUNT(Id)
+                    FROM
+                        Revisions
+                    WHERE
+                        Id = @revision AND
+                        CreatorId = @user",
+                    new
+                    {
+                        revision = rootId,
+                        user = CurrentUser.Id
+                    }
+                ).First();
+
+                if (isOwner == 0)
+                {
+                    throw new ApplicationException("You are not the owner!");
+                }
+
+                Current.DB.Execute(@"
+                    UPDATE
+                        Metadata
+                    SET
+                        Title = @title,
+                        Description = @description
+                    WHERE
+                        Id = @revision",
+                    new
+                    {
+                        title = title,
+                        description = description,
+                        revision = rootId
+                    }
+                );
+            }
         }
 
         private bool SetCommonQueryViewData(string sitename)
