@@ -83,6 +83,13 @@ namespace StackExchange.DataExplorer.Controllers
                         if (AppSettings.EnableWhiteList)
                         {
                             string lookupClaim = claimedId;
+
+                            // google
+                            if (claimedId.StartsWith(@"http://www.google.com/accounts/o8/id") && !claimedId.Contains("@") && sreg.Email != null && sreg.Email.Length > 2)
+                            {
+                                lookupClaim = "email:" + sreg.Email;
+                            }
+
                             if (IsVerifiedEmailProvider(claimedId) && sreg.Email != null && sreg.Email.Length > 2)
                             {
                                 lookupClaim = "email:" + sreg.Email;
