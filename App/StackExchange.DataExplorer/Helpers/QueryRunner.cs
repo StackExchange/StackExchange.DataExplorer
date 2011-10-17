@@ -190,17 +190,41 @@ namespace StackExchange.DataExplorer.Helpers
             return results;
         }
 
-        public static QueryResults GetCachedResults(ParsedQuery query, Site site)
-        {
-            CachedResult cache = Current.DB.Query<Models.CachedResult>(
-                "SELECT * FROM CachedResults WHERE QueryHash = @hash AND SiteId = @siteId",
-                new
-                {
-                    hash = query.ExecutionHash,
-                    siteId = site.Id
-                }
-            ).FirstOrDefault();
 
+        public static CachedResult GetCachedResults(ParsedQuery query, Site site)
+        {
+            CachedResult cachedResults = null;
+
+            if (query == null) return null;
+
+            DBContext db = Current.DB;
+            if (query.AllParamsSet)
+            {
+               cachedResults = Current.DB.Query<Models.CachedResult>(
+                     "SELECT * FROM CachedResults WHERE QueryHash = @hash AND SiteId = @siteId",
+                     new
+                     {
+                         hash = query.ExecutionHash,
+                         siteId = site.Id
+                     }
+                ).FirstOrDefault();
+            }
+
+            if (AppSettings.AutoExpireCacheMinutes >= 0 && cachedResults != null && cachedResults.CreationDate != null)
+            {
+                if (cachedResults.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
+                {
+                    Current.DB.Execute("delete CachedResults where Id = @Id", new { cachedResults.Id });
+                    cachedResults = null;
+                }
+            }
+
+            return cachedResults;
+        }
+
+        public static QueryResults GetQueryResults(ParsedQuery query, Site site)
+        {
+            CachedResult cache = GetCachedResults(query, site);
             QueryResults results = null;
 
             if (cache != null && cache.Results != null)
@@ -222,9 +246,26 @@ namespace StackExchange.DataExplorer.Helpers
         /// </remarks>
         public static CachedPlan GetCachedPlan(ParsedQuery query, Site site)
         {
-            return Current.DB.CachedPlans
-                .Where(plan => plan.QueryHash == query.ExecutionHash && plan.SiteId == site.Id)
-                .FirstOrDefault();
+            DBContext db = Current.DB;
+            CachedPlan plan = null;
+
+            if (query.AllParamsSet)
+            {
+                plan = db.CachedPlans
+                    .Where(r => r.QueryHash == query.ExecutionHash && r.SiteId == site.Id)
+                    .FirstOrDefault();
+            }
+
+            if (AppSettings.AutoExpireCacheMinutes >= 0 && plan != null && plan.CreationDate != null)
+            {
+                if (plan.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
+                {
+                    Current.DB.Execute("delete CachedPlans where Id = @Id", new { plan.Id });
+                    plan = null;
+                }
+            }
+
+            return plan;
         }
 
         public static void LogQueryExecution(User user, Site site, ParsedQuery parsedQuery, QueryResults results)
@@ -540,7 +581,7 @@ namespace StackExchange.DataExplorer.Helpers
         {
             DBContext db = Current.DB;
 
-            var cache = GetCachedResults(parsedQuery, site);
+            var cache = GetQueryResults(parsedQuery, site);
 
             VerifyQueryState(parsedQuery, cache, user);
 

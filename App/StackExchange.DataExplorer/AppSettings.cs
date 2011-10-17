@@ -45,6 +45,15 @@ namespace StackExchange.DataExplorer
                         property.SetValue(null, parsed, null);
                     }
 
+                    if (property.PropertyType == typeof(int))
+                    {
+                        int parsed = -1;
+                        if (int.TryParse(overrideData, out parsed))
+                        {
+                            property.SetValue(null, parsed, null);
+                        }
+                    }
+
                     if (property.PropertyType == typeof(string))
                     {
                         property.SetValue(null, overrideData, null);
