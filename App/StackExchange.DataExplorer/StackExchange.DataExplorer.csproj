@@ -164,6 +164,7 @@
     <Compile Include="Helpers\QueryPlan.cs" />
     <Compile Include="Helpers\QueryPlanResult.cs" />
     <Compile Include="Helpers\QuerySearchCriteria.cs" />
+    <Compile Include="Helpers\QueryUtil.cs" />
     <Compile Include="Helpers\QueryViewTracker.cs" />
     <Compile Include="Helpers\QueryResults.cs" />
     <Compile Include="Helpers\RedirectPermanentResult.cs" />

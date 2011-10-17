@@ -182,47 +182,6 @@ namespace StackExchange.DataExplorer.Controllers
             ViewData["Header"] = new SubHeader(title) {Items = tabs};
         }
 
-        protected CachedResult GetCachedResults(Query query)
-        {
-            CachedResult cachedResults = null;
-
-            if (query == null) return null;
-
-            DBContext db = Current.DB;
-
-            var p = new ParsedQuery(query.QueryBody, Request.Params);
-            if (p.AllParamsSet)
-            {
-                cachedResults = db.CachedResults
-                    .Where(r => r.QueryHash == p.ExecutionHash && r.SiteId == Site.Id)
-                    .FirstOrDefault();
-            }
-            return cachedResults;
-        }
-
-        /// <summary>
-        /// Retrieves a cached execution plan for a query
-        /// </summary>
-        /// <param name="query">Query to retrieve the cached plan for.</param>
-        /// <returns>Cached execution plan, or null if no plan exists in the cache.</returns>
-        protected CachedPlan GetCachedPlan(Query query)
-        {
-            if (query == null)
-            {
-                return null;
-            }
-
-            DBContext db = Current.DB;
-            var p = new ParsedQuery(query.QueryBody, Request.Params);
-            if (p.AllParamsSet)
-            {
-                return db.CachedPlans
-                    .Where(r => r.QueryHash == p.ExecutionHash && r.SiteId == Site.Id)
-                    .FirstOrDefault();
-            }
-            return null;
-        }
-
         /// <summary>
         /// Gets the shared DataContext to be used by a Request's controllers.
         /// </summary>

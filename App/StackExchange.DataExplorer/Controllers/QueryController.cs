@@ -27,7 +27,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                 if (parentId.HasValue)
                 {
-                    parent = GetBasicRevision(parentId.Value);
+                    parent = QueryUtil.GetBasicRevision(parentId.Value);
 
                     if (parent == null)
                     {
@@ -132,7 +132,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             try
             {
-                var query = GetQueryForRevision(revisionId);
+                var query = QueryUtil.GetQueryForRevision(revisionId);
 
                 if (query == null)
                 {
@@ -170,7 +170,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             try
             {
-                Revision revision = GetBasicRevision(revisionId);
+                Revision revision = QueryUtil.GetBasicRevision(revisionId);
 
                 if (revision == null)
                 {
@@ -195,7 +195,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowSingleSiteCsv(string sitename, int revisionId)
         {
-            Query query = GetQueryForRevision(revisionId);
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
 
             if (query == null)
             {
@@ -203,7 +203,10 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             TrackQueryView(revisionId);
-            CachedResult cachedResults = GetCachedResults(query);
+            CachedResult cachedResults = QueryUtil.GetCachedResults(
+                new ParsedQuery(query.QueryBody, Request.Params),
+                Site.Id
+            );
 
             return new CsvResult(cachedResults.Results);
         }
@@ -211,7 +214,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/mcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowMultiSiteCsv(string sitename, int revisionId)
         {
-            Query query = GetQueryForRevision(revisionId);
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
 
             if (query == null)
             {
@@ -229,7 +232,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/nmcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowMultiSiteWithoutMetaCsv(string sitename, int revisionId)
         {
-            Query query = GetQueryForRevision(revisionId);
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
 
             if (query == null)
             {
@@ -256,7 +259,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             SetHeaderInfo(revisionId);
 
-            Revision revision = GetCompleteRevision(revisionId);
+            Revision revision = QueryUtil.GetCompleteRevision(revisionId);
 
             if (revision == null)
             {
@@ -264,7 +267,10 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             ViewData["query"] = revision.Query;
-            ViewData["cached_results"] = GetCachedResults(revision.Query);
+            ViewData["cached_results"] = QueryUtil.GetCachedResults(
+                new ParsedQuery(revision.Query.QueryBody, Request.Params),
+                Site.Id
+            );
 
             return View("New", Site);
         }
@@ -272,16 +278,21 @@ namespace StackExchange.DataExplorer.Controllers
         /// <summary>
         /// Download a query execution plan as xml.
         /// </summary>
-        [Route(@"{sitename}/plan/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowPlan(string sitename, int queryId)
+        [Route(@"{sitename}/plan/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowPlan(string sitename, int revisionId)
         {
-            Query query = FindQuery(queryId);
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
+
             if (query == null)
             {
                 return PageNotFound();
             }
 
-            CachedPlan cachedPlan = GetCachedPlan(query);
+            CachedPlan cachedPlan = QueryUtil.GetCachedPlan(
+                new ParsedQuery(query.QueryBody, Request.Params),
+                Site.Id
+            );
+
             if (cachedPlan == null)
             {
                 return PageNotFound();
@@ -356,57 +367,6 @@ namespace StackExchange.DataExplorer.Controllers
             response["error"] = ex.Message;
 
             return Json(response);
-        }
-
-        private Query GetQueryForRevision(int revisionId)
-        {
-            return Current.DB.Query<Query>(@"
-                SELECT
-                    *
-                FROM
-                    Queries JOIN
-                    Revisions ON Queries.Id = Revisions.QueryId AND Revisions.Id = @revision
-                ",
-                new
-                {
-                    revision = revisionId
-                }
-            ).FirstOrDefault();
-        }
-
-        private Revision GetBasicRevision(int revisionId)
-        {
-            return Current.DB.Query<Revision>(
-                "SELECT * FROM Revisions WHERE Id = @revision",
-                new
-                {
-                    revision = revisionId
-                }
-            ).FirstOrDefault();
-        }
-
-        private Revision GetCompleteRevision(int revisionId)
-        {
-            return Current.DB.Query<Revision, Query, Metadata, Revision>(@"
-                SELECT
-                    *
-                FROM
-                    Revisions revision JOIN
-                    Queries query ON query.Id = revision.QueryId AND revision.Id = @revision JOIN
-                    Metadata metadata ON metadata.Id = @revision OR metadata.Id = revision.RootId
-                ",
-                (revision, query, metadata) =>
-                {
-                    revision.Query = query;
-                    revision.Metadata = metadata;
-
-                    return revision;
-                },
-                new
-                {
-                    revision = revisionId
-                }
-            ).FirstOrDefault();
         }
 
         private void SaveMetadata(int rootId, string title, string description, bool isNew)

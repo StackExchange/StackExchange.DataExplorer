@@ -11,8 +11,8 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class SavedQueryController : StackOverflowController
     {
-        [Route(@"{sitename}/s/{id:\d+}/{slug?}")]
-        public ActionResult Show(int id, string sitename, string slug)
+        [Route(@"{sitename}/query/show/{revisionId:\d+}/{slug?}")]
+        public ActionResult Show(string sitename, int revisionId, string slug)
         {
             DBContext db = Current.DB;
 
