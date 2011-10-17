@@ -209,6 +209,9 @@ namespace StackExchange.DataExplorer.Controllers
         private bool IsVerifiedEmailProvider(string identifier)
         {
             identifier = identifier.ToLowerInvariant();
+
+            if (identifier.Contains("@")) return false;
+
             if (identifier.StartsWith(@"https://www.google.com/accounts/o8/id")) return true;
             if (identifier.StartsWith(@"https://me.yahoo.com")) return true;
             if (identifier.Contains(@"//www.google.com/profiles/")) return true;
