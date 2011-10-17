@@ -95,7 +95,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 lookupClaim = "email:" + sreg.Email;
                             }
 
-                            var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList where lower(OpenId) = @claimedId", new { lookupClaim }).FirstOrDefault();
+                            var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList where lower(OpenId) = @lookupClaim", new { lookupClaim }).FirstOrDefault();
                             if (whiteListEntry == null || !whiteListEntry.Approved)
                             {
                                 if (whiteListEntry == null)
