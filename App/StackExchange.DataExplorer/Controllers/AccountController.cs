@@ -105,7 +105,7 @@ namespace StackExchange.DataExplorer.Controllers
                                     {
                                         Approved = false,
                                         CreationDate = DateTime.UtcNow,
-                                        OpenId = claimedId,
+                                        OpenId = lookupClaim,
                                         IpAddress = Request.UserHostAddress
                                     };
 
