@@ -26,6 +26,9 @@ namespace StackExchange.DataExplorer
         [Default("")]
         public static string RecaptchaPrivateKey { get; private set; }
 
+        [Default(-1)]
+        public static int AutoExpireCacheMinutes { get; private set; }
+
         public static void Refresh()
         {
             var data = Current.DB.AppSettings.ToDictionary(v => v.Setting, v => v.Value);

@@ -14,6 +14,7 @@ using log4net;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
+using Dapper;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -186,6 +187,16 @@ namespace StackExchange.DataExplorer.Controllers
                     .Where(r => r.QueryHash == p.ExecutionHash && r.SiteId == Site.Id)
                     .FirstOrDefault();
             }
+
+            if (AppSettings.AutoExpireCacheMinutes >= 0 && cachedResults != null && cachedResults.CreationDate != null)
+            {
+                if (cachedResults.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
+                {
+                    Current.DB.Execute("delete CachedResults where Id = @Id", new { cachedResults.Id });
+                    cachedResults = null;
+                }
+            }
+
             return cachedResults;
         }
 
@@ -202,14 +213,26 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             DBContext db = Current.DB;
+            CachedPlan plan = null;
+
             var p = new ParsedQuery(query.QueryBody, Request.Params);
             if (p.AllParamsSet)
             {
-                return db.CachedPlans
+                plan = db.CachedPlans
                     .Where(r => r.QueryHash == p.ExecutionHash && r.SiteId == Site.Id)
                     .FirstOrDefault();
             }
-            return null;
+
+            if (AppSettings.AutoExpireCacheMinutes >= 0 && plan != null && plan.CreationDate != null)
+            {
+                if (plan.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
+                {
+                    Current.DB.Execute("delete CachedPlans where Id = @Id", new { plan.Id });
+                    plan = null;
+                }
+            }
+
+            return plan;
         }
 
         /// <summary>
