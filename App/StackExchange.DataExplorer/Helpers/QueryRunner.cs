@@ -189,43 +189,6 @@ namespace StackExchange.DataExplorer.Helpers
             return results;
         }
 
-        public static QueryResults GetCachedResults(ParsedQuery query, Site site)
-        {
-            CachedResult cache = Current.DB.Query<Models.CachedResult>(
-                "SELECT * FROM CachedResults WHERE QueryHash = @hash AND SiteId = @siteId",
-                new
-                {
-                    hash = query.ExecutionHash,
-                    siteId = site.Id
-                }
-            ).FirstOrDefault();
-
-            QueryResults results = null;
-
-            if (cache != null && cache.Results != null)
-            {
-                results = QueryResults.FromJson(cache.Results);
-            }
-
-            return results;
-        }
-
-        /// <summary>
-        /// Retrieves a cached execution plan.
-        /// </summary>
-        /// <param name="query">The parsed query to return the execution plan for.</param>
-        /// <param name="site">The site to return the execution plan for.</param>
-        /// <returns>Cached execution plan, or null if there is no cached plan entry.</returns>
-        /// <remarks>
-        /// Note that a null return value is different from a cached plan entry with a null cache.
-        /// </remarks>
-        public static CachedPlan GetCachedPlan(ParsedQuery query, Site site)
-        {
-            return Current.DB.CachedPlans
-                .Where(plan => plan.QueryHash == query.ExecutionHash && plan.SiteId == site.Id)
-                .FirstOrDefault();
-        }
-
         public static void LogQueryExecution(User user, int siteId, int revisionId, int queryId)
         {
             QueryExecution execution;
@@ -315,10 +278,6 @@ namespace StackExchange.DataExplorer.Helpers
 
             var results = new QueryResults();
 
-            results.Url = site.Url;
-            results.SiteId = site.Id;
-            results.SiteName = site.Name.ToLower();
-
             using (SqlConnection cnn = site.GetConnection())
             {
                 cnn.Open();
@@ -338,7 +297,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     cnn.InfoMessage += infoHandler;
 
-                    if (query.HasExecutionPlan)
+                    if (query.IncludeExecutionPlan)
                     {
                         using (var command = new SqlCommand("SET STATISTICS XML ON", cnn))
                         {
@@ -353,10 +312,10 @@ namespace StackExchange.DataExplorer.Helpers
                         using (var command = new SqlCommand(batch, cnn))
                         {
                             command.CommandTimeout = QUERY_TIMEOUT;
-                            PopulateResults(results, command, messages, query.HasExecutionPlan);
+                            PopulateResults(results, command, messages, query.IncludeExecutionPlan);
                         }
 
-                        if (query.HasExecutionPlan)
+                        if (query.IncludeExecutionPlan)
                         {
                             plan.AppendBatchPlan(results.ExecutionPlan);
                             results.ExecutionPlan = null;
@@ -378,17 +337,6 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             return results;
-        }
-
-        /// <summary>
-        /// Executes an SQL query and populates a given <see cref="QueryResults" /> instance with the results.
-        /// </summary>
-        /// <param name="results"><see cref="QueryResults" /> instance to populate with results.</param>
-        /// <param name="command">SQL command to execute.</param>
-        /// <param name="messages"><see cref="StringBuilder" /> instance to which to append messages.</param>
-        private static void PopulateResults(QueryResults results, SqlCommand command, StringBuilder messages)
-        {
-            PopulateResults(results, command, messages, false);
         }
 
         /// <summary>
@@ -487,37 +435,32 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static QueryResults GetSingleSiteResults(ParsedQuery query, Site site, User user)
         {
-            var cachedResults = GetCachedResults(query, site);
-            string cachedPlan = null;
+            QueryResults results = null;
+            var cache = QueryUtil.GetCachedResults(query, site.Id);
 
-            if (cachedResults != null)
+            if (cache != null)
             {
-                if (!query.HasExecutionPlan)
+                if (!query.IncludeExecutionPlan || cache.ExecutionPlan != null)
                 {
-                    return cachedResults;
-                }
-                else
-                {
-                    var plan = GetCachedPlan(query, site);
-
-                    if (plan != null)
-                    {
-                        cachedResults.ExecutionPlan = plan.Plan;
-
-                        return cachedResults;
-                    }
+                    results = new QueryResults();
+                    results.WithCache(cache);
+                    results.Truncated = cache.Truncated;
+                    results.Messages = cache.Messages;
+                    results.FromCache = true;
                 }
             }
 
-            QueryResults results = ExecuteNonCached(query, site, user);
-
-            if (cachedResults == null)
+            if (results == null)
             {
-                AddResultToCache(results, query, site,
-                    // Need to decide what to do about execution plans,
-                    // related to the storage format of the cache
-                    false);
+                results = ExecuteNonCached(query, site, user);
+                results.FromCache = false;
+
+                AddResultToCache(results, query, site, cache != null);
             }
+
+            results.Url = site.Url;
+            results.SiteId = site.Id;
+            results.SiteName = site.Name.ToLower();
 
             return results;
         }
@@ -531,28 +474,46 @@ namespace StackExchange.DataExplorer.Helpers
         /// <param name="planOnly">Whether or not this is just an update to add the cached execution plan</param>
         private static void AddResultToCache(QueryResults results, ParsedQuery query, Site site, bool planOnly)
         {
-            // Avoid saving the execution plan as part of the results
-            string executionPlan = results.ExecutionPlan;
-            results.ExecutionPlan = null;
-
-            Current.DB.Execute(@"
-                INSERT INTO CachedResults(
-                    QueryHash, SiteId, Results, CreationDate
-                ) VALUES(
-                    @hash, @site, @results, @creation
-                )",
-                new
-                {
-                    hash = query.ExecutionHash,
-                    site = site.Id,
-                    // I removed the anti-XSS replace here because this should always pass through
-                    // the one that's now called on all results in the controller
-                    results = results.ToJson(),
-                    creation = DateTime.UtcNow
-                }
-            );
-
-            results.ExecutionPlan = executionPlan;
+            if (!planOnly)
+            {
+                Current.DB.Execute(@"
+                    INSERT INTO CachedResults(
+                        QueryHash, SiteId, Results, ExecutionPlan,
+                        Messages, Truncated, CreationDate
+                    ) VALUES(
+                        @hash, @site, @results, @plan,
+                        @messages, @truncated, @creation
+                    )",
+                    new
+                    {
+                        hash = query.ExecutionHash,
+                        site = site.Id,
+                        results = results.GetJsonResults(),
+                        plan = results.ExecutionPlan,
+                        messages = results.Messages,
+                        truncated = results.Truncated,
+                        creation = DateTime.UtcNow
+                    }
+                );
+            }
+            else
+            {
+                // Should we just update everything in this case? Presumably the only
+                // thing that changed was the addition of the execution plan, but...
+                Current.DB.Execute(@"
+                    UPDATE
+                        CachedResults
+                    SET
+                        ExecutionPlan = @plan
+                    WHERE
+                        QueryHash = @hash",
+                    new
+                    {
+                        plan = results.ExecutionPlan,
+                        hash = query.ExecutionHash
+                    }
+                );
+            }
         }
 
         private static void ProcessMagicColumns(QueryResults results, SqlConnection cnn)

@@ -172,6 +172,7 @@
     <Compile Include="Helpers\RoutePriority.cs" />
     <Compile Include="Helpers\Util.cs" />
     <Compile Include="Helpers\XSRFSafeAttribute.cs" />
+    <Compile Include="Models\CachedResult.cs" />
     <Compile Include="Models\DBContext.cs">
       <DependentUpon>DBContext.dbml</DependentUpon>
     </Compile>

@@ -27,24 +27,6 @@ namespace StackExchange.DataExplorer.Helpers
         }
 
         /// <summary>
-        /// Retrieves a cached execution plan for a query
-        /// </summary>
-        /// <param name="query">Query to retrieve the cached plan for.</param>
-        /// <param name="siteId">The site ID that the query is run against</param>
-        /// <returns>Cached execution plan, or null if no plan exists in the cache.</returns>
-        public static CachedPlan GetCachedPlan(ParsedQuery query, int siteId)
-        {
-            if (query == null || !query.AllParamsSet)
-            {
-                return null;
-            }
-
-                return db.CachedPlans
-                    .Where(r => r.QueryHash == p.ExecutionHash && r.SiteId == Site.Id)
-                    .FirstOrDefault();
-        }
-
-        /// <summary>
         /// Retrieves the cached results for the given query
         /// </summary>
         /// <param name="query">The query to retrieve cached results for</param>

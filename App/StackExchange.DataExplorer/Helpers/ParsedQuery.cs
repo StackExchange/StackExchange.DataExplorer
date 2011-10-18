@@ -42,7 +42,7 @@ namespace StackExchange.DataExplorer.Helpers
         public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan, bool crossSite, bool excludeMetas)
             : this(sql, requestParams)
         {
-            HasExecutionPlan = executionPlan;
+            IncludeExecutionPlan = executionPlan;
             IsCrossSite = crossSite;
             ExcludesMetas = excludeMetas;
         }
@@ -62,20 +62,20 @@ namespace StackExchange.DataExplorer.Helpers
 
         public bool AllParamsSet { get; private set; }
 
-        private bool hasExecutionPlan = false;
+        private bool includeExecutionPlan = false;
 
         /// <summary>
         /// Whether or not running this query should produce an execution plan
         /// </summary>
-        public bool HasExecutionPlan {
+        public bool IncludeExecutionPlan {
             get
             {
-                return !IsCrossSite && hasExecutionPlan;
+                return !IsCrossSite && includeExecutionPlan;
             }
 
             private set
             {
-                hasExecutionPlan = value;
+                includeExecutionPlan = value;
             }
         }
 

@@ -288,17 +288,17 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            CachedPlan cachedPlan = QueryUtil.GetCachedPlan(
+            CachedResult cache = QueryUtil.GetCachedResults(
                 new ParsedQuery(query.QueryBody, Request.Params),
                 Site.Id
             );
 
-            if (cachedPlan == null)
+            if (cache == null || cache.ExecutionPlan == null)
             {
                 return PageNotFound();
             }
 
-            return new QueryPlanResult(cachedPlan.Plan);
+            return new QueryPlanResult(cache.ExecutionPlan);
         }
 
         [Route("{sitename}/query/new", RoutePriority.Low)]
@@ -346,7 +346,7 @@ namespace StackExchange.DataExplorer.Controllers
                 results = results.ToTextResults();
             }
 
-            if (query.HasExecutionPlan)
+            if (query.IncludeExecutionPlan)
             {
                 results = results.TransformQueryPlan();
             }
