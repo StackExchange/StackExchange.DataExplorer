@@ -177,7 +177,7 @@ namespace StackExchange.DataExplorer.Controllers
                     throw new ApplicationException("Invalid revision ID");
                 }
 
-                if (revision.RootId.HasValue)
+                if (!revision.IsRoot())
                 {
                     revisionId = revision.RootId.Value;
                 }
