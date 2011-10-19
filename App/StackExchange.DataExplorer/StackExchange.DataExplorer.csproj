@@ -182,7 +182,6 @@
       <DependentUpon>DBContext.dbml</DependentUpon>
     </Compile>
     <Compile Include="Models\Revision.cs" />
-    <Compile Include="Models\SavedQuery.cs" />
     <Compile Include="Models\SaveQueryMetadata.cs" />
     <Compile Include="Models\Site.cs" />
     <Compile Include="Models\StackEntities\StackExchangeData.Designer.cs">

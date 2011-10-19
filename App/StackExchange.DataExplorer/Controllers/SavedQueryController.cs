@@ -14,30 +14,48 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/query/show/{revisionId:\d+}/{slug?}")]
         public ActionResult Show(string sitename, int revisionId, string slug)
         {
-            DBContext db = Current.DB;
-
             Site = GetSite(sitename);
+
             if (Site == null)
             {
                 return PageNotFound();
             }
 
-            ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
-            SelectMenuItem("Queries");
-
-            SavedQuery savedQuery = db.SavedQueries.FirstOrDefault(q => q.Id == id);
-            if (savedQuery == null)
+            var revision = QueryUtil.GetCompleteRevision(revisionId);
+            
+            if (revision == null)
             {
                 return PageNotFound();
             }
+
+            var title = revision.Metadata.Title;
+
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
-            if (savedQuery.Title.URLFriendly().HasValue() && (string.IsNullOrEmpty(slug) || slug != savedQuery.Title.URLFriendly()))
+            if (title.URLFriendly().HasValue() && (string.IsNullOrEmpty(slug) || slug != title.URLFriendly()))
             {
-                return PageMovedPermanentlyTo(string.Format("/{0}/{1}/{2}/{3}", sitename, (format == "default" ? "s" : "st"), id, HtmlUtilities.URLFriendly(savedQuery.Title)) + Request.Url.Query);
+                return PageMovedPermanentlyTo(string.Format("/{0}/query/show/{1}/{2}", sitename, revisionId, title.URLFriendly()) + Request.Url.Query);
             }
-            SetHeader(savedQuery.Title);
-            int totalVotes =
-                db.Votes.Where(v => v.SavedQueryId == id && v.VoteTypeId == (int)VoteType.Favorite).Count();
+
+            SetHeader(title);
+            SelectMenuItem("Queries");
+            ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
+
+            // Need to revamp voting process
+            int totalVotes = 0; /* Current.DB.Query<int>(@"
+                SELECT
+                    COUNT(*)
+                FROM
+                    Votes
+                WHERE
+                    RevisionId = @revision AND
+                    VoteTypeId = @voteType",
+                new
+                {
+                    revision = revision.Id,
+                    voteType = (int)VoteType.Favorite
+                }
+            ).FirstOrDefault();
+            */
 
             var voting = new QueryVoting
             {
@@ -46,37 +64,41 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!Current.User.IsAnonymous)
             {
-                voting.HasVoted = (
-                                      db.Votes.FirstOrDefault(v => v.SavedQueryId == id
-                                                                   && v.UserId == Current.User.Id
-                                                                   && v.VoteTypeId == (int)VoteType.Favorite)
-                                  ) != null;
+                voting.HasVoted = false; /* Current.DB.Query<Vote>(@"
+                    SELECT TOP 1
+                        *
+                    FROM
+                        Votes
+                    WHERE
+                        RevisionId = @revision AND
+                        VoteTypeId = @voteType AND
+                        UserId = @user",
+                   new
+                   {
+                       revision = revision.Id,
+                       voteType = (int)VoteType.Favorite,
+                       user = Current.User.Id
+                   }
+               ).FirstOrDefault() != null;
+               */
             }
+
+            CachedResult cachedResults = QueryUtil.GetCachedResults(
+                new ParsedQuery(revision.Query.QueryBody, Request.Params),
+                Site.Id
+            );
 
             ViewData["QueryVoting"] = voting;
             ViewData["Sites"] = Current.DB.Sites.ToList();
-            ViewData["LoggedOn"] = Current.User.IsAnonymous ? "false" : "true";
-
-            CachedResult cachedResults = GetCachedResults(savedQuery.Query);
-            if (cachedResults != null)
-            {
-                ViewData["cached_results"] = cachedResults;
-
-                if (format == "text")
-                {
-                    if (cachedResults.Results != null)
-                    {
-                        cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
-                    }
-                }
-            }
+            ViewData["cached_results"] = cachedResults;
 
             if (!IsSearchEngine())
             {
-                QueryViewTracker.TrackQueryView(GetRemoteIP(), savedQuery.Query.Id);
+                // View tracking needs to be updated in line with vote tracking
+                //QueryViewTracker.TrackQueryView(GetRemoteIP(), savedQuery.Query.Id);
             }
 
-            return View(savedQuery);
+            return View(revision);
         }
 
         [Route("saved_query/delete", HttpVerbs.Post)]
