@@ -126,16 +126,6 @@
       <Column Name="QueryBody" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />
     </Type>
   </Table>
-  <Table Name="dbo.Revisions" Member="Revisions">
-    <Type Name="Revision">
-      <Column Name="Id" Storage="_ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="QueryId" Storage="_QueryID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="RootId" Storage="_RootID" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="OwnerId" Storage="_OwnerID" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="OwnerIP" Type="System.String" DbType="VarChar(15) NOT NULL" CanBeNull="false" />
-      <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-    </Type>
-  </Table>
   <Table Name="dbo.QueryExecutions" Member="QueryExecutions">
     <Type Name="QueryExecution">
       <Column Name="Id" Storage="_ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsDbGenerated="true" CanBeNull="false" />
