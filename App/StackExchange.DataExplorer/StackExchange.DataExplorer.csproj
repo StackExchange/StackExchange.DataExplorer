@@ -191,6 +191,7 @@
     </Compile>
     <Compile Include="Models\TableInfo.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Models\Votes.cs" />
     <Compile Include="Models\VoteType.cs" />
     <Compile Include="OData.svc.cs">
       <DependentUpon>OData.svc</DependentUpon>
