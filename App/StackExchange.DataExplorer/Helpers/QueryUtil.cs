@@ -85,6 +85,49 @@ namespace StackExchange.DataExplorer.Helpers
         }
 
         /// <summary>
+        /// Retrieves the Revision that represents the "featurable" version of a particular
+        /// user's edits on a given query lineage. Basically, this is either the user's most
+        /// recent revision, or the revision they marked as being the one to feature.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="rootId"></param>
+        /// <returns></returns>
+        public static Revision GetFeaturedCompleteRevision(int userId, int rootId)
+        {
+            return Current.DB.Query<Revision, Query, Metadata, Revision>(@"
+                SELECT
+                    *
+                FROM
+                    Revisions revision
+                JOIN
+                    Queries query
+                ON
+                    query.Id = revision.QueryId AND
+                    revision.OwnerId = @owner AND
+                    (revision.RootId = @root OR revision.Id = @root)
+                JOIN
+                    Metadata metadata
+                ON
+                    metadata.Id = @root OR metadata.Id = revision.RootId
+                ORDER BY
+                    revision.IsFeature DESC, revision.CreationDate DESC
+                ",
+                (revision, query, metadata) =>
+                {
+                    revision.Query = query;
+                    revision.Metadata = metadata;
+
+                    return revision;
+                },
+                new
+                {
+                    owner = userId,
+                    root = rootId
+                }
+            ).FirstOrDefault();
+        }
+
+        /// <summary>
         /// Retrieves the Query linked to the provided revision
         /// </summary>
         /// <param name="revisionId">The ID of the revision</param>

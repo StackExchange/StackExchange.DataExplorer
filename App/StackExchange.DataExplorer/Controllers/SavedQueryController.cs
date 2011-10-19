@@ -11,8 +11,8 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class SavedQueryController : StackOverflowController
     {
-        [Route(@"{sitename}/query/show/{revisionId:\d+}/{slug?}")]
-        public ActionResult Show(string sitename, int revisionId, string slug)
+        [Route(@"{sitename}/query/show/{ownerId:\d+}/{rootId:\d+}/{slug?}")]
+        public ActionResult Show(string sitename, int ownerId, int rootId, string slug)
         {
             Site = GetSite(sitename);
 
@@ -21,7 +21,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var revision = QueryUtil.GetCompleteRevision(revisionId);
+            var revision = QueryUtil.GetFeaturedCompleteRevision(ownerId, rootId);
             
             if (revision == null)
             {
@@ -33,7 +33,7 @@ namespace StackExchange.DataExplorer.Controllers
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
             if (title.URLFriendly().HasValue() && (string.IsNullOrEmpty(slug) || slug != title.URLFriendly()))
             {
-                return PageMovedPermanentlyTo(string.Format("/{0}/query/show/{1}/{2}", sitename, revisionId, title.URLFriendly()) + Request.Url.Query);
+                return PageMovedPermanentlyTo(string.Format("/{0}/query/show/{1}/{2}", sitename, rootId, title.URLFriendly()) + Request.Url.Query);
             }
 
             SetHeader(title);
@@ -41,21 +41,22 @@ namespace StackExchange.DataExplorer.Controllers
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
 
             // Need to revamp voting process
-            int totalVotes = 0; /* Current.DB.Query<int>(@"
+            int totalVotes = Current.DB.Query<int>(@"
                 SELECT
                     COUNT(*)
                 FROM
                     Votes
                 WHERE
-                    RevisionId = @revision AND
+                    RootId = @root AND
+                    OwnerId = @owner AND
                     VoteTypeId = @voteType",
                 new
                 {
-                    revision = revision.Id,
+                    root = rootId,
+                    owner = ownerId,
                     voteType = (int)VoteType.Favorite
                 }
             ).FirstOrDefault();
-            */
 
             var voting = new QueryVoting
             {
@@ -64,23 +65,24 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!Current.User.IsAnonymous)
             {
-                voting.HasVoted = false; /* Current.DB.Query<Vote>(@"
-                    SELECT TOP 1
+                voting.HasVoted = Current.DB.Query<Vote>(@"
+                    SELECT
                         *
                     FROM
                         Votes
                     WHERE
-                        RevisionId = @revision AND
+                        RootId = @root AND
+                        OwnerId = @owner AND
                         VoteTypeId = @voteType AND
                         UserId = @user",
                    new
                    {
-                       revision = revision.Id,
+                       root = rootId,
+                       owner = ownerId,
                        voteType = (int)VoteType.Favorite,
                        user = Current.User.Id
                    }
                ).FirstOrDefault() != null;
-               */
             }
 
             CachedResult cachedResults = QueryUtil.GetCachedResults(
