@@ -57,15 +57,9 @@ namespace StackExchange.DataExplorer.Models
     partial void InsertBlackList(BlackList instance);
     partial void UpdateBlackList(BlackList instance);
     partial void DeleteBlackList(BlackList instance);
-    partial void InsertCachedPlan(CachedPlan instance);
-    partial void UpdateCachedPlan(CachedPlan instance);
-    partial void DeleteCachedPlan(CachedPlan instance);
     partial void InsertQuery(Query instance);
     partial void UpdateQuery(Query instance);
     partial void DeleteQuery(Query instance);
-    partial void InsertMetadata(Metadata instance);
-    partial void UpdateMetadata(Metadata instance);
-    partial void DeleteMetadata(Metadata instance);
     #endregion
 		
 		public DBContext() : 
@@ -170,14 +164,6 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		public System.Data.Linq.Table<CachedPlan> CachedPlans
-		{
-			get
-			{
-				return this.GetTable<CachedPlan>();
-			}
-		}
-		
 		public System.Data.Linq.Table<Query> Queries
 		{
 			get
@@ -191,14 +177,6 @@ namespace StackExchange.DataExplorer.Models
 			get
 			{
 				return this.GetTable<QueryExecution>();
-			}
-		}
-		
-		public System.Data.Linq.Table<Metadata> Metadatas
-		{
-			get
-			{
-				return this.GetTable<Metadata>();
 			}
 		}
 	}
@@ -2384,164 +2362,6 @@ namespace StackExchange.DataExplorer.Models
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CachedPlans")]
-	public partial class CachedPlan : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private System.Nullable<System.Guid> _QueryHash;
-		
-		private System.Nullable<int> _SiteId;
-		
-		private string _Plan;
-		
-		private System.Nullable<System.DateTime> _CreationDate;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnQueryHashChanging(System.Nullable<System.Guid> value);
-    partial void OnQueryHashChanged();
-    partial void OnSiteIdChanging(System.Nullable<int> value);
-    partial void OnSiteIdChanged();
-    partial void OnPlanChanging(string value);
-    partial void OnPlanChanged();
-    partial void OnCreationDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnCreationDateChanged();
-    #endregion
-		
-		public CachedPlan()
-		{
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int Id
-		{
-			get
-			{
-				return this._Id;
-			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_QueryHash", DbType="UniqueIdentifier")]
-		public System.Nullable<System.Guid> QueryHash
-		{
-			get
-			{
-				return this._QueryHash;
-			}
-			set
-			{
-				if ((this._QueryHash != value))
-				{
-					this.OnQueryHashChanging(value);
-					this.SendPropertyChanging();
-					this._QueryHash = value;
-					this.SendPropertyChanged("QueryHash");
-					this.OnQueryHashChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SiteId", DbType="Int")]
-		public System.Nullable<int> SiteId
-		{
-			get
-			{
-				return this._SiteId;
-			}
-			set
-			{
-				if ((this._SiteId != value))
-				{
-					this.OnSiteIdChanging(value);
-					this.SendPropertyChanging();
-					this._SiteId = value;
-					this.SendPropertyChanged("SiteId");
-					this.OnSiteIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Name="[Plan]", Storage="_Plan", DbType="NVarChar(MAX)")]
-		public string Plan
-		{
-			get
-			{
-				return this._Plan;
-			}
-			set
-			{
-				if ((this._Plan != value))
-				{
-					this.OnPlanChanging(value);
-					this.SendPropertyChanging();
-					this._Plan = value;
-					this.SendPropertyChanged("Plan");
-					this.OnPlanChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreationDate", DbType="DateTime")]
-		public System.Nullable<System.DateTime> CreationDate
-		{
-			get
-			{
-				return this._CreationDate;
-			}
-			set
-			{
-				if ((this._CreationDate != value))
-				{
-					this.OnCreationDateChanging(value);
-					this.SendPropertyChanging();
-					this._CreationDate = value;
-					this.SendPropertyChanged("CreationDate");
-					this.OnCreationDateChanged();
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Queries")]
 	public partial class Query : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -2783,116 +2603,6 @@ namespace StackExchange.DataExplorer.Models
 				{
 					this._ExecutionCount = value;
 				}
-			}
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Metadata")]
-	public partial class Metadata : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private string _Title;
-		
-		private string _Description;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnTitleChanging(string value);
-    partial void OnTitleChanged();
-    partial void OnDescriptionChanging(string value);
-    partial void OnDescriptionChanged();
-    #endregion
-		
-		public Metadata()
-		{
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", DbType="Int NOT NULL", IsPrimaryKey=true)]
-		public int Id
-		{
-			get
-			{
-				return this._Id;
-			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Title", DbType="NVarChar(100) NOT NULL", CanBeNull=false)]
-		public string Title
-		{
-			get
-			{
-				return this._Title;
-			}
-			set
-			{
-				if ((this._Title != value))
-				{
-					this.OnTitleChanging(value);
-					this.SendPropertyChanging();
-					this._Title = value;
-					this.SendPropertyChanged("Title");
-					this.OnTitleChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Description", DbType="NVarChar(1000)")]
-		public string Description
-		{
-			get
-			{
-				return this._Description;
-			}
-			set
-			{
-				if ((this._Description != value))
-				{
-					this.OnDescriptionChanging(value);
-					this.SendPropertyChanging();
-					this._Description = value;
-					this.SendPropertyChanged("Description");
-					this.OnDescriptionChanged();
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
