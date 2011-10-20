@@ -202,7 +202,6 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            TrackQueryView(revisionId);
             CachedResult cachedResults = QueryUtil.GetCachedResults(
                 new ParsedQuery(query.QueryBody, Request.Params),
                 Site.Id
@@ -446,15 +445,6 @@ namespace StackExchange.DataExplorer.Controllers
 
             return true;
         }
-
-        private void TrackQueryView(int id)
-        {
-            if (!IsSearchEngine())
-            {
-                QueryViewTracker.TrackQueryView(GetRemoteIP(), id);
-            }
-        }
-
 
         private void SetHeaderInfo()
         {
