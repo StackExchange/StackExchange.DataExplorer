@@ -68,7 +68,7 @@ namespace StackExchange.DataExplorer.Helpers
                 FROM
                     Revisions revision JOIN
                     Queries query ON query.Id = revision.QueryId AND revision.Id = @revision JOIN
-                    Metadata metadata ON metadata.Id = @revision OR metadata.Id = revision.RootId
+                    Metadata metadata ON metadata.RevisionId = @revision OR metadata.RevisionId = revision.RootId
                 ",
                 (revision, query, metadata) =>
                 {
@@ -108,7 +108,7 @@ namespace StackExchange.DataExplorer.Helpers
                 JOIN
                     Metadata metadata
                 ON
-                    metadata.Id = @root OR metadata.Id = revision.RootId
+                    metadata.RevisionId = @root OR metadata.RevisionId = revision.RootId
                 ORDER BY
                     revision.IsFeature DESC, revision.CreationDate DESC
                 ",
