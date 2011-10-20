@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
+using System.Collections.Generic;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -96,8 +97,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!IsSearchEngine())
             {
-                // View tracking needs to be updated in line with vote tracking
-                //QueryViewTracker.TrackQueryView(GetRemoteIP(), savedQuery.Query.Id);
+                QueryViewTracker.TrackQueryView(GetRemoteIP(), rootId, ownerId);
             }
 
             return View(revision);
@@ -217,11 +217,53 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("{sitename}/queries")]
         public ActionResult Index(string sitename, string order_by, string q, int? page, int? pagesize)
         {
-            Site site = GetSite(sitename);
-            if (site==null)
+            Site = GetSite(sitename);
+
+            if (Site == null)
             {
                 return PageNotFound();
             }
+
+            ViewData["Site"] = Site;
+            SelectMenuItem("Queries");
+            SetHeader(
+                "All Queries",
+                new SubHeaderViewData
+                {
+                    Description = "featured",
+                    Title = "Interesting queries selected by the administrators",
+                    Href = "/" + sitename + "/queries?order_by=featured",
+                    Selected = (order_by == "featured")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "recent",
+                    Title = "Recently saved queries",
+                    Href = "/" + sitename + "/queries?order_by=recent",
+                    Selected = (order_by == "recent")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "favorite",
+                    Title = "Favorite saved queries",
+                    Href = "/" + sitename + "/queries?order_by=favorite",
+                    Selected = (order_by == "favorite")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "popular",
+                    Title = "Saved queries with the most views",
+                    Href = "/" + sitename + "/queries?order_by=popular",
+                    Selected = (order_by == "popular")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "everything",
+                    Title = "All queries recently executed on the site",
+                    Href = "/" + sitename + "/queries?order_by=everything",
+                    Selected = (order_by == "everything")
+                }
+            );
 
             QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);
 
@@ -233,131 +275,153 @@ namespace StackExchange.DataExplorer.Controllers
                     order_by = "featured";
             }
 
-            Site = site;
-            SelectMenuItem("Queries");
+            IEnumerable<QueryExecutionViewData> queries;
 
-            SetHeader("All Queries",
-                      new SubHeaderViewData
-                          {
-                              Description = "featured",
-                              Title = "Interesting queries selected by the administrators",
-                              Href = "/" + sitename + "/queries?order_by=featured",
-                              Selected = (order_by == "featured")
-                          },
-                      new SubHeaderViewData
-                          {
-                              Description = "recent",
-                              Title = "Recently saved queries",
-                              Href = "/" + sitename + "/queries?order_by=recent",
-                              Selected = (order_by == "recent")
-                          },
-                      new SubHeaderViewData
-                          {
-                              Description = "favorite",
-                              Title = "Favorite saved queries",
-                              Href = "/" + sitename + "/queries?order_by=favorite",
-                              Selected = (order_by == "favorite")
-                          },
-                      new SubHeaderViewData
-                          {
-                              Description = "popular",
-                              Title = "Saved queries with the most views",
-                              Href = "/" + sitename + "/queries?order_by=popular",
-                              Selected = (order_by == "popular")
-                          },
-                      new SubHeaderViewData
-                          {
-                              Description = "everything",
-                              Title = "All queries recently executed on the site",
-                              Href = "/" + sitename + "/queries?order_by=everything",
-                              Selected = (order_by == "everything")
-                          }
-                );
-
-
-            ViewData["Site"] = site;
-
-            DBContext db = Current.DB;
-
-            var query = db.Queries.Select(qu => new {Query = qu, Saved = (SavedQuery) null});
-
-
-            if (order_by != "everything")
+            if (order_by == "recent")
             {
-                query = from qu in query
-                        join sq in db.SavedQueries on qu.Query.Id equals sq.QueryId
-                        where sq.IsFirst
-                        select new {qu.Query, Saved = sq};
-            }
-
-            if (order_by == "featured")
-                query = query.Where(qu => qu.Saved.IsFeatured == true);
-
-            if (order_by != "everything")
-            {
-                query = query.Where(qu => !(qu.Saved.IsDeleted ?? false));
-
-                if (searchCriteria.IsValid)
-                    query = query.Where(qu => (qu.Saved.Title.Contains(searchCriteria.SearchTerm) || qu.Saved.Description.Contains(searchCriteria.SearchTerm)));
-            }
-
-            ViewData["SearchCriteria"] = searchCriteria;
-
-
-
-            IQueryable<QueryExecutionViewData> transformed =
-                query.Select
-                (
-                    qu =>
-                        new QueryExecutionViewData
+                queries = Current.DB.Query<Metadata, User, QueryExecutionViewData>(@"
+                    SELECT
+                        metadata.*, user.*
+                    FROM
+                        (
+                            SELECT
+	                            MAX(metadata.Id) AS Id
+                            FROM
+	                            Metadata metadata
+                            JOIN
+	                            Revisions revisions
+                            ON
+	                            metadata.RevisionId = revisions.Id
+                            GROUP BY ISNULL(revisions.RootId, revisions.Id)
+                        ) ids
+                    JOIN
+                        Metadata metadata
+                    ON
+                        metadata.id = ids.id
+                    LEFT OUTER JOIN
+                        Users [user]
+                    ON
+                        metadata.OwnerId = [user].Id
+                    ORDER BY
+                        metadata.LastActivity DESC",
+                    (metadata, user) =>
+                    {
+                        return new QueryExecutionViewData
                         {
-                            Id = (qu.Saved == null) ? qu.Query.Id : qu.Saved.Id,
-                            SQL = qu.Query.QueryBody,
-                            Name = (qu.Saved == null) ? qu.Query.Name : qu.Saved.Title,
-                            Description = (qu.Saved == null) ? qu.Query.Description : qu.Saved.Description,
-                            SiteName = site.Name.ToLower(),
-                            LastRun = qu.Query.FirstRun ?? DateTime.Now,
-                            Views = qu.Query.Views ?? 1,
-                            Creator = (qu.Saved == null) ? qu.Query.User : qu.Saved.User,
-                            Featured = (qu.Saved == null) ? false : (qu.Saved.IsFeatured ?? false),
-                            Skipped = (qu.Saved == null) ? false : (qu.Saved.IsSkipped ?? false),
-                            FavoriteCount = (qu.Saved == null) ? 0 : qu.Saved.FavoriteCount,
-                            UrlPrefix = (qu.Saved == null) ? "q" : "s"
-                        }
+                            Id = metadata.RevisionId,
+                            Name = metadata.Title,
+                            Description = metadata.Description
+                        };
+                    }
                 );
-
-            if (order_by == "popular")
-            {
-                transformed = transformed.OrderByDescending(item => item.Views)
-                    .ThenByDescending(item => item.FavoriteCount);
             }
-            else if (order_by == "favorite" || order_by == "featured")
+            else if (order_by == "everything")
             {
-                transformed = transformed.OrderByDescending(item => item.FavoriteCount)
-                    .ThenByDescending(item => item.Views);
+                queries = Current.DB.Query<Revision, Metadata, User, QueryExecutionViewData>(@"
+                    SELECT
+                        *
+                    FROM
+                        Revisions revision
+                    JOIN
+                        Metadata metadata
+                    ON 
+                        (
+                            metadata.RevisionId = revision.RootId AND
+                            metadata.OwnerId = revision.OwnerId
+                        ) OR (
+                            metadata.RevisionId = revision.Id AND
+                            metadata.OwnerId = revision.OwnerId AND
+                            revision.RootId IS NULL
+                        ) OR (
+                            metadata.RevisionId = revision.Id AND
+                            metadata.OwnerId IS NULL AND
+                            revision.OwnerId IS NULL
+                        )
+                    LEFT OUTER JOIN
+                        Users [user]
+                    ON
+                        revision.OwnerId = [user].Id
+                    ORDER BY
+                        revision.CreationDate DESC",
+                    (revision, metadata, user) =>
+                    {
+                        return new QueryExecutionViewData
+                        {
+                            Id = revision.Id,
+                            Name = metadata.Title,
+                            Description = metadata.Description,
+                            Creator = user
+                        };
+                    }
+                );
             }
             else
             {
-                transformed = transformed.OrderByDescending(item => item.LastRun);
+                // The default view is favorite
+                int threshold = 0;
+                string primary = "Votes";
+                string fallback = "Views";
+
+                if (order_by == "popular") {
+                    primary = "Views";
+                    fallback = "Votes";
+                }
+
+                queries = Current.DB.Query<Metadata, User, QueryExecutionViewData>(String.Format(@"
+                    SELECT
+                        *
+                    FROM
+                        Metadata metadata
+                    LEFT OUTER JOIN
+                        Users [user]
+                    ON
+                        metadata.OwnerId = [user].Id
+                    WHERE
+                        metadata.{0} > @threshold
+                    ORDER BY
+                        metadata.{0} DESC,
+                        metadata.{1} DESC", primary, fallback),
+                    (metadata, user) => {
+                        return new QueryExecutionViewData {
+                            Id = metadata.RevisionId,
+                            Name = metadata.Title,
+                            Description = metadata.Description
+                        };
+                    },
+                    new
+                    {
+                        threshold = threshold
+                    }
+                );
             }
 
-
-            int totalQueries = transformed.Count();
-            ViewData["TotalQueries"] = totalQueries;
+            int totalQueries = queries.Count();
             int currentPerPage = Math.Max(pagesize ?? 50, 1);
             int currentPage = Math.Max(page ?? 1, 1);
-            string href = "/" + site.Name.ToLower() + "/queries?order_by=" + order_by;
+            string href = "/" + Site.Name.ToLower() + "/queries?order_by=" + order_by;
 
             if (searchCriteria.IsValid)
+            {
                 href += "&q=" + HtmlUtilities.UrlEncode(searchCriteria.RawInput);
+            }
 
-            ViewData["PageNumbers"] = new PageNumber(href + "&page=-1", Convert.ToInt32(Math.Ceiling(totalQueries / (decimal)currentPerPage)), currentPerPage,
-                                                     currentPage - 1, "pager");
+            ViewData["SearchCriteria"] = searchCriteria;
+            ViewData["TotalQueries"] = totalQueries;
+            ViewData["PageNumbers"] = new PageNumber(
+                href + "&page=-1",
+                Convert.ToInt32(Math.Ceiling(totalQueries / (decimal)currentPerPage)),
+                currentPerPage,
+                currentPage - 1, "pager"
+            );
+            ViewData["PageSizer"] = new PageSizer(
+                href + "&pagesize=-1",
+                currentPage,
+                currentPerPage,
+                totalQueries,
+                "page-sizer fr"
+            );
 
-            ViewData["PageSizer"] = new PageSizer(href + "&pagesize=-1", currentPage, currentPerPage, totalQueries,
-                                                  "page-sizer fr");
-
-            return View(transformed.Skip((currentPage - 1)*currentPerPage).Take(currentPerPage));
+            return View(queries.Skip((currentPage - 1) * currentPerPage).Take(currentPerPage));
         }
     }
 }
