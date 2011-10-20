@@ -62,14 +62,31 @@ namespace StackExchange.DataExplorer.Helpers
         /// <returns>The revision, or null if the ID was invalid</returns>
         public static Revision GetCompleteRevision(int revisionId)
         {
+            // The metadata join condition is pretty ugly...
             return Current.DB.Query<Revision, Query, Metadata, Revision>(@"
                 SELECT
                     *
                 FROM
-                    Revisions revision JOIN
-                    Queries query ON query.Id = revision.QueryId AND revision.Id = @revision JOIN
-                    Metadata metadata ON metadata.RevisionId = @revision OR metadata.RevisionId = revision.RootId
-                ",
+                    Revisions revision
+                JOIN
+                    Queries query
+                ON
+                    query.Id = revision.QueryId AND revision.Id = @revision
+                JOIN
+                    Metadata metadata
+                ON
+                    (
+                        metadata.RevisionId = revision.RootId AND
+                        metadata.OwnerId = revision.OwnerId
+                    ) OR (
+                        metadata.RevisionId = revision.Id AND
+                        metadata.OwnerId = revision.OwnerId AND
+                        revision.RootId IS NULL
+                    ) OR (
+                        metadata.RevisionId = revision.Id AND
+                        metadata.OwnerId IS NULL AND
+                        revision.OwnerId IS NULL
+                    )",
                 (revision, query, metadata) =>
                 {
                     revision.Query = query;
@@ -108,7 +125,8 @@ namespace StackExchange.DataExplorer.Helpers
                 JOIN
                     Metadata metadata
                 ON
-                    metadata.RevisionId = @root OR metadata.RevisionId = revision.RootId
+                    (metadata.RevisionId = @root OR metadata.RevisionId = revision.RootId) AND
+                    metadata.OwnerId = @owner
                 ORDER BY
                     revision.IsFeature DESC, revision.CreationDate DESC
                 ",
