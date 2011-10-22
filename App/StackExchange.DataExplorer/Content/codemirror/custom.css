@@ -1,0 +1,16 @@
+﻿.CodeMirror
+{
+    font-size: 10pt;
+    border: 1px solid #CCCCCC;
+    border-top-color: #999999;
+}
+
+.CodeMirror-focused
+{
+    border-color: #CF982D;
+}
+
+.CodeMirror pre 
+{
+    overflow: visible;
+}

@@ -5,7 +5,7 @@
 @{this.SetPageTitle("Query " + Model.LongName + " - Stack Exchange Data Explorer");}
 
 @section AdditionalStyles{
-    @Html.Raw(AssetPackager.LinkCss("viewer_editor"))
+    @Html.Raw(AssetPackager.LinkCss("query"))
     <style type="text/css">
         @Html.Raw(Model.TagCss)
     </style>
@@ -30,54 +30,47 @@
 }
 
 <div id="queryText">
-    <div>
-        <div id="queryInfo">
-            <h2>@((query != null && query.Name != null) ? query.Name : ParsedQuery.DEFAULT_NAME)</h2>
-            <p>@Html.Raw(description == null ? "" : Html.Encode(description).Replace("\n", "<br />"))</p>
-        </div>
-        @Html.Partial("AboutSite", Model)
-        <div class="clear"></div>
+    <div id="queryInfo">
+        <h2>@((query != null && query.Name != null) ? query.Name : ParsedQuery.DEFAULT_NAME)</h2>
+        <p>@Html.Raw(description == null ? "" : Html.Encode(description).Replace("\n", "<br />"))</p>
     </div>
+    @Html.Partial("AboutSite", Model)
+    <div class="clear"></div>
     <div class="query" style="width:70%;">
         <form id="runQueryForm" action="/query/@Model.Id" method="post">
-            <p>
-                <input type="hidden" name="siteId" value="@Model.Id" />
-                <div id="sqlQueryWrapper" style="position:relative;">
-                    <textarea id="sqlQuery" name="sql" rows="18">@Html.Raw(sql)</textarea>
-                </div>
-                <div class="clear"></div>
-            </p>
-            <a id="schemaLink" href="#">hide schema &gt;&gt;</a>
+            <div id="sqlQueryWrapper" style="position:relative;">
+                <textarea id="sqlQuery" name="sql" rows="18">@Html.Raw(sql)</textarea>
+            </div>
+            <div class="clear"></div>
+            <a id="schemaToggle" href="#">hide schema &gt;&gt;</a>
             <div id="queryParams" style="display:none;">
                 <h3>Enter Parameters</h3>
             </div>
-            <p id="resultsToText">
-                <input type="checkbox" name="resultsToText" value="true" />
-                <label>Results to Text</label>
-                &nbsp;&nbsp;&nbsp;
-                <input type="checkbox" name="showExecutionPlan" value="true" />
-                <label>Include execution plan</label>
-                @if (AppSettings.AllowRunOnAllDbsOption)
-                {
-                    <text>&nbsp;&nbsp;&nbsp;</text>
-                    <input type="checkbox" name="allDbs" value="true" />
-                    <label>Run on all DBs</label>
-                }
-                    
-                @if (AppSettings.AllowExcludeMetaOption)
-                {
-                    <text>&nbsp;&nbsp;&nbsp;</text>
-                    <input type="checkbox" name="excludeMetas" value="true" />
-                    <label>Exclude Metas</label>
-                }
-            </p>
+            <ul id="query-options">
+                <li>
+                    <input type="hidden" name="siteId" value="@Model.Id" />
+                    <label><input type="checkbox" name="resultsToText" value="true" />Results to text</label>
+                </li>
+                <li>
+                    <label><input type="checkbox" name="showExecutionPlan" value="true" />Include execution plan</label>
+                </li>
+            @if (AppSettings.AllowRunOnAllDbsOption)
+            {
+                <li>
+                    <label><input type="checkbox" name="allDbs" value="true" />Run as a mutli-site query</label>
+                </li>
+                <li>
+                    <label><input type="checkbox" name="excludeMetas" value="true" />Exclude meta sites</label>
+                </li>
+            }
+            </ul>
 
             @if (Current.User.IsAnonymous)
             {
                 @Html.Partial("Captcha", Current.NewRecaptchControl())
             }
                 
-            <p id="toolbar">
+            <div id="toolbar">
                 <input type="submit" value="Run Query" />
 
                 <span id="permalinks" style="display:none;">
@@ -93,7 +86,7 @@
                         </a>
                     }
                 </span>
-            </p>
+            </div>
         </form>
         <div class="clear"></div>        
         <div id="saveDialog" style="position:relative; display:none;">
@@ -113,7 +106,7 @@
             </form>
         </div>
 
-        <div style="padding:5px; display:none;" class="ui-state-error ui-corner-all" id="queryErrorBox">
+        <div style="padding:5px; display:none;" class="ui-state-error ui-corner-all" id="query-errors">
             <p>
                 <span style="float:left; margin-right:0.3em;" class="ui-icon ui-icon-alert"></span>
                 <strong>Error:</strong> <span id="queryError"> </span>
@@ -121,17 +114,18 @@
         </div>
         <div class="clear"></div>
     </div>
-    <ul class="treeview schema" style="display:none;">
+    <ul class="schema">
         @foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
         {
             <li>
-                <span class="folder">@table.Name</span>
-                <ul>
+                <span class="schema-table">@table.Name</span>
+                <dl>
                     @for (int i = 0; i < table.ColumnNames.Count; i++)
                     {
-                        <li title="@table.DataTypes[i]">@table.ColumnNames[i]</li>
+                        <dt>@table.ColumnNames[i]</dt>
+                        <dd class="cm-variable-2">@table.DataTypes[i]</dd>
                     }
-                </ul>
+                </dl>
             </li>
         }
     </ul>
@@ -166,7 +160,7 @@
 </div>
 
 @Html.Raw(AssetPackager.ScriptSrc("jquery.validate"))
-@Html.Raw(AssetPackager.ScriptSrc("editor"))
+@Html.Raw(AssetPackager.ScriptSrc("query"))
 
 <script type="text/javascript">
     var siteId = @Model.Id;
@@ -196,172 +190,4 @@
         }
         return info;
     }
-
-
-    $(document).ready(function () {
-       
-        $('.miniTabs').tabs();
-
-        var textarea = $('#runQueryForm textarea');
-        var treeview = $('.treeview.schema');
-
-        var getQueryBody = function() {
-        if (codemirror != null) 
-        {
-            return codemirror.getCode();
-        } else {
-            return textarea.val();
-        }
-        };
-
-        $("#saveQuery").click(function() {
-        
-        if (!loggedOn) {
-            this.href = "/account/login";
-            return true;
-        }
-
-        $("#saveDialog .error").hide();
-        var data = getQueryInfo(getQueryBody());
-        $("#saveDialog .title").val(data.title);
-        $("#saveDialog .description").val(data.description);
-        $("#saveDialog").show();
-        $("#saveDialog .title").focus();
-
-        return false;
-        });
-
-       
-        $("#saveQueryForm").validate({
-        rules: {
-            title: {
-            required: true,
-            minlength: 10
-            }
-        }
-        });
-
-        $("#saveQueryForm").submit(function() {
-
-        if(!$(this).valid()){
-            return false;
-        }
-
-        $("#saveDialog .error").hide();
-        $("#saveDialog .save").attr("disabled", true);
-        $.post('/saved_query/create', {
-          
-            queryId: current_results.queryId ,
-            savedQueryId: $("#saveDialog .savedQueryId").val(),
-            title: $("#saveDialog .title").val() ,
-            description: $("#saveDialog .description").val(),
-            siteId: siteId
-        }, function(data) {
-            $("#saveDialog .save").attr("disabled", false);
-            if (data.success == true) {
-                $("#saveDialog").hide(); 
-            } else {
-                $("#saveDialog .error").show().text(data.message);
-            }
-        });
-
-        return false;
-        });
-
-        $("#saveDialog .cancel").click(function() {
-        $("#saveDialog").hide();
-        return false;
-        });
-
-        var oldTimeout = null; 
-
-        var queryTitle = $("#queryInfo h2");
-        var queryDescription = $("#queryInfo p");
-
-        var updateTitle = function() {
-        if (codemirror != null) {
-            textarea.val(codemirror.getCode());
-        } 
-        var info = getQueryInfo(textarea.val()); 
-
-        queryTitle.text(info.title);
-        queryDescription.html($("<div/>").text(info.description).html().replace(/\n/g,"<br>"));
-        };
-
-        var onTextChanged = function() {
-        if (oldTimeout != null) {
-            clearTimeout(oldTimeout); 
-        }
-        oldTimeout = setTimeout(updateTitle, 10);
-        };
-
-        if (CodeMirror.isProbablySupported()) 
-        {
-        codemirror = CodeMirror.fromTextArea('sqlQuery', {
-            height: "250px",
-            width: "100%",
-            parserfile: "parsesql.js",
-            stylesheet: "/Content/codemirror/sqlcolors.css",
-            path: "/Scripts/codemirror/",
-            textWrapping: false,
-            tabMode: "default",
-            onChange: onTextChanged,
-            initCallback: function() {
-            codemirror.focus();
-            }
-        });
-        }
-
-        $('#schemaLink').toggle(function() {
-        $('.query').animate({width: "100%"}, 'fast');
-        $('.schema.treeview').hide(); 
-        $(this).text("<< show schema");
-        }, function(){
-        $('.query').animate({width: "70%"}, 'fast', function() { $('.schema.treeview').show(); });
-        $(this).text("hide schema >>");
-        });
-      
-        treeview.height(textarea.height() + 10);
-
-        // its messy cause CodeMirror does not like the wrap method
-        var queryWrapper = $('#sqlQueryWrapper');
-
-        $('#sqlQueryWrapper').TextAreaResizer(function() { 
-        treeview.height(queryWrapper.height() + 10);
-        if (codemirror != null) {
-            $(codemirror.wrapping).height(queryWrapper.height() - 10);
-        }
-        });
-      
-        if (codemirror == null) {
-        textarea.focus();
-        textarea.keydown(onTextChanged); 
-        } 
-
-        // code mirror is probably not ready yet
-        ensureAllParamsEntered(textarea.val());
-        populateParamsFromUrl();
-
-        @if (cached_results != null)
-        {
-            <text>gotResults(@Html.Raw(cached_results.Results));</text>
-        }
-
-        $('.schema').show();
-
-        $('#runQueryForm').submit(function () {
-
-        var sql = getQueryBody();
-        
-        // ie hack 
-        if (codemirror != null) 
-        {
-            textarea.val(sql);
-        }
-
-        executeQuery(sql);
-
-        return false;
-        });
-    });
 </script>

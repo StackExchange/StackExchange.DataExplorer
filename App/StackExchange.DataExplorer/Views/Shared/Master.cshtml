@@ -13,7 +13,18 @@
     @RenderSection("additionalStyles", required: false)
 
     @Html.Raw(AssetPackager.ScriptSrc("jquery"))
-    @MvcMiniProfiler.MiniProfiler.RenderIncludes() 
+    @Html.Raw(AssetPackager.ScriptSrc("master"))
+    @MvcMiniProfiler.MiniProfiler.RenderIncludes()
+
+    <script type="text/javascript">
+        DataExplorer.init({
+            'User.guessedID': null,
+            'User.isAuthenticated': @((!Current.User.IsAnonymous).ToString().ToLower()),
+            'Site.id': @(Current.Controller.Site != null ? Current.Controller.Site.Id.ToString() : "null"),
+            'enableEditorSuggestions': @(AppSettings.EnableEditorSuggestions.ToString().ToLower()),
+            'enableAdvancedSqlErrors': @(AppSettings.EnableAdvancedSqlErrors.ToString().ToLower())
+        });
+    </script>
 </head>
 <body>
     <div class="page">

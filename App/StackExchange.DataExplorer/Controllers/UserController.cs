@@ -115,95 +115,86 @@ namespace StackExchange.DataExplorer.Controllers
             order_by = order_by ?? "saved";
 
             ViewData["UserQueryHeaders"] = new SubHeader
-                                               {
-                                                   Items = new List<SubHeaderViewData>
-                                                               {
-                                                                   new SubHeaderViewData
-                                                                       {
-                                                                           Description = "saved",
-                                                                           Title = "Saved Queries",
-                                                                           Href =
-                                                                               "/users/" + user.Id + "?order_by=saved",
-                                                                           Selected = (order_by == "saved")
-                                                                       },
-                                                                   new SubHeaderViewData
-                                                                       {
-                                                                           Description = "favorite",
-                                                                           Title = "Favorite Queries",
-                                                                           Href =
-                                                                               "/users/" + user.Id +
-                                                                               "?order_by=favorite",
-                                                                           Selected = (order_by == "favorite")
-                                                                       },
-                                                                   new SubHeaderViewData
-                                                                       {
-                                                                           Description = "recent",
-                                                                           Title = "Recent Queries",
-                                                                           Href =
-                                                                               "/users/" + user.Id + "?order_by=recent",
-                                                                           Selected = (order_by == "recent")
-                                                                       }
-                                                               }
-                                               };
+            {
+                Items = new List<SubHeaderViewData>
+                {
+                    new SubHeaderViewData
+                    {
+                        Description = "saved",
+                        Title = "Saved Queries",
+                        Href =
+                            "/users/" + user.Id + "?order_by=saved",
+                        Selected = (order_by == "saved")
+                    },
+                    new SubHeaderViewData
+                    {
+                        Description = "favorite",
+                        Title = "Favorite Queries",
+                        Href =
+                            "/users/" + user.Id +
+                            "?order_by=favorite",
+                        Selected = (order_by == "favorite")
+                    },
+                    new SubHeaderViewData
+                    {
+                        Description = "recent",
+                        Title = "Recent Queries",
+                        Href =
+                            "/users/" + user.Id + "?order_by=recent",
+                        Selected = (order_by == "recent")
+                    }
+                }
+            };
 
-
-            IQueryable<QueryExecutionViewData> queries;
+            IEnumerable<QueryExecutionViewData> queries;
 
             if (order_by == "recent")
             {
-                queries = from e in db.QueryExecutions
-                          join q in db.Queries on e.QueryId equals q.Id
-                          join s in db.Sites on e.SiteId equals s.Id
-                          where e.UserId == id
-                          orderby e.LastRun descending
-                          select new QueryExecutionViewData
-                                     {
-                                         LastRun = e.LastRun,
-                                         SiteName = s.Name.ToLower(),
-                                         SQL = q.QueryBody,
-                                         Id = q.Id,
-                                         Name = q.Name,
-                                         Description = q.Description,
-                                         UrlPrefix = "q"
-                                     };
+                queries = Current.DB.Query<Metadata, QueryExecution, QueryExecutionViewData>(@"
+                    ",
+                    (metadata, execution) =>
+                    {
+                        return new QueryExecutionViewData
+                        {
+
+                        };
+                    }
+                );
+            }
+            else if (order_by == "favorite")
+            {
+                queries = from v in db.Votes
+                            join e in db.SavedQueries on v.SavedQueryId equals e.Id
+                            join q in db.Queries on e.QueryId equals q.Id
+                            join s in db.Sites on e.SiteId equals s.Id
+                            where v.UserId == id && v.VoteTypeId == (int) VoteType.Favorite
+                            orderby e.LastEditDate descending
+                            select new QueryExecutionViewData
+                                        {
+                                            LastRun = e.LastEditDate ?? DateTime.Now,
+                                            SiteName = s.Name.ToLower(),
+                                            SQL = q.QueryBody,
+                                            Id = e.Id,
+                                            Name = e.Title,
+                                            Description = e.Description
+                                        };
             }
             else
             {
-                if (order_by == "favorite")
-                {
-                    queries = from v in db.Votes
-                              join e in db.SavedQueries on v.SavedQueryId equals e.Id
-                              join q in db.Queries on e.QueryId equals q.Id
-                              join s in db.Sites on e.SiteId equals s.Id
-                              where v.UserId == id && v.VoteTypeId == (int) VoteType.Favorite
-                              orderby e.LastEditDate descending
-                              select new QueryExecutionViewData
-                                         {
-                                             LastRun = e.LastEditDate ?? DateTime.Now,
-                                             SiteName = s.Name.ToLower(),
-                                             SQL = q.QueryBody,
-                                             Id = e.Id,
-                                             Name = e.Title,
-                                             Description = e.Description
-                                         };
-                }
-                else
-                {
-                    queries = from e in db.SavedQueries
-                              join q in db.Queries on e.QueryId equals q.Id
-                              join s in db.Sites on e.SiteId equals s.Id
-                              where e.UserId == id && !(e.IsDeleted ?? false)
-                              orderby e.LastEditDate descending
-                              select new QueryExecutionViewData
-                                         {
-                                             LastRun = e.LastEditDate ?? DateTime.Now,
-                                             SiteName = s.Name.ToLower(),
-                                             SQL = q.QueryBody,
-                                             Id = e.Id,
-                                             Name = e.Title,
-                                             Description = e.Description
-                                         };
-                }
+                queries = from e in db.SavedQueries
+                            join q in db.Queries on e.QueryId equals q.Id
+                            join s in db.Sites on e.SiteId equals s.Id
+                            where e.UserId == id && !(e.IsDeleted ?? false)
+                            orderby e.LastEditDate descending
+                            select new QueryExecutionViewData
+                                        {
+                                            LastRun = e.LastEditDate ?? DateTime.Now,
+                                            SiteName = s.Name.ToLower(),
+                                            SQL = q.QueryBody,
+                                            Id = e.Id,
+                                            Name = e.Title,
+                                            Description = e.Description
+                                        };
             }
 
             QueryExecutionViewData[] queriesArray = queries.Take(50).ToArray();

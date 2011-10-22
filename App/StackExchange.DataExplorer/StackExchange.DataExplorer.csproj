@@ -199,6 +199,9 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\QueryRunner.cs" />
+    <Content Include="Content\codemirror\codemirror.css" />
+    <Content Include="Content\codemirror\custom.css" />
+    <Content Include="Content\codemirror\theme.css" />
     <Content Include="Content\Img\openid\openid-logos.png" />
     <Content Include="Content\qp\images\arithmetic_expression.gif" />
     <Content Include="Content\qp\images\assert.gif" />
@@ -270,6 +273,11 @@
     <Content Include="Content\qp\images\while.gif" />
     <Content Include="Content\qp\qp.css" />
     <Content Include="Content\qp\qp.xslt" />
+    <Content Include="Scripts\codemirror\codemirror.js" />
+    <Content Include="Scripts\codemirror\sql.js" />
+    <Content Include="Scripts\jquery-1.6.4.js" />
+    <Content Include="Scripts\jquery.event.drag-2.0.js" />
+    <Content Include="Scripts\master.js" />
     <Content Include="Scripts\openid-jquery.js" />
     <Content Include="robots.txt" />
     <Compile Include="ViewModel\QueryExecutionViewData.cs" />
@@ -278,7 +286,6 @@
     <Compile Include="ViewModel\SubHeaderViewData.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\codemirror\sqlcolors.css" />
     <Content Include="Content\images\csv_ico.gif" />
     <Content Include="Content\images\edgar.jpg" />
     <Content Include="Content\images\grippie.png" />
@@ -294,25 +301,7 @@
     <Content Include="Content\slickgrid\slick.grid.css" />
     <Content Include="favicon.ico" />
     <Content Include="OData.svc" />
-    <Content Include="Scripts\codemirror\codemirror.js" />
-    <Content Include="Scripts\codemirror\editor.js" />
-    <Content Include="Scripts\codemirror\highlight.js" />
-    <Content Include="Scripts\codemirror\mirrorframe.js" />
-    <Content Include="Scripts\codemirror\parsecss.js" />
-    <Content Include="Scripts\codemirror\parsedummy.js" />
-    <Content Include="Scripts\codemirror\parsehtmlmixed.js" />
-    <Content Include="Scripts\codemirror\parsejavascript.js" />
-    <Content Include="Scripts\codemirror\parsesparql.js" />
-    <Content Include="Scripts\codemirror\parsesql.js" />
-    <Content Include="Scripts\codemirror\parsexml.js" />
-    <Content Include="Scripts\codemirror\select.js" />
-    <Content Include="Scripts\codemirror\stringstream.js" />
-    <Content Include="Scripts\codemirror\tokenize.js" />
-    <Content Include="Scripts\codemirror\tokenizejavascript.js" />
-    <Content Include="Scripts\codemirror\undo.js" />
-    <Content Include="Scripts\codemirror\util.js" />
     <Content Include="Scripts\jquery-ui-1.8.1.custom.min.js" />
-    <Content Include="Scripts\jquery.event.drag-1.5.js" />
     <Content Include="Scripts\jquery.rule.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\qp.js" />
@@ -333,7 +322,6 @@
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
     <Content Include="Content\smoothness\jquery-ui-1.8.1.custom.css" />
     <Content Include="Global.asax" />
-    <Content Include="Scripts\jquery-1.4.2.js" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -408,6 +396,9 @@
     <Content Include="Views\Admin\FindDuplicateUsers.cshtml" />
     <Content Include="Views\Admin\FindDuplicateWhitelistOpenIds.cshtml" />
     <Content Include="Views\Admin\MergeUsers.cshtml" />
+    <Content Include="Views\Shared\Query.cshtml" />
+    <Content Include="Views\Query\Editor.cshtml" />
+    <Content Include="Views\SavedQuery\Viewer.cshtml" />
     <Content Include="Views\Admin\FindDuplicateUserOpenIds.cshtml" />
   </ItemGroup>
   <ItemGroup>

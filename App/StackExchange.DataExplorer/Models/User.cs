@@ -179,9 +179,11 @@ namespace StackExchange.DataExplorer.Models
             log.AppendLine(string.Format("Beginning merge of {0} into {1}", mergeId, masterId));
 
             // Queries
+            /*
             var queries = db.Queries.Where(q => q.CreatorId == mergeId).ToList();
             log.AppendLine(string.Format("Moving {0} queries over", queries.Count));
             queries.ForEach(q => q.CreatorId = masterId);
+            */
 
             // Query Executions
             var queryExecutions = db.QueryExecutions.Where(qe => qe.UserId == mergeId).ToList();

@@ -1,0 +1,71 @@
+﻿@model StackExchange.DataExplorer.Models.Site
+@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Helpers
+@using StackExchange.DataExplorer.Models
+@{
+    Layout = "~/Views/Shared/Query.cshtml";
+    this.SetPageTitle("Query " + Current.Controller.Site.LongName + " - Stack Exchange Data Explorer");
+
+    var query = ViewData["query"] as Query;
+    string sql, name = null, description = null;
+    
+    if (query != null)
+    {
+        sql = query.QueryBody;
+        name = query.Name;
+        description = query.Description;
+    }
+    else
+    {
+        sql = ParsedQuery.DefaultComment;
+    }
+    
+    if (name == null)
+    {
+        name = ParsedQuery.DEFAULT_NAME;
+    }
+    
+    if (description == null)
+    {
+        description = ParsedQuery.DEFAULT_DESCRIPTION;
+    }
+
+    sql = Html.Encode(sql);
+    description = Html.Encode(description).Replace("\n", "<br />");
+}
+
+@section Metadata
+{
+    <h2>@name</h2>
+    <p>@Html.Raw(description)</p>
+}
+
+<div class="left-group compact">
+    <div id="wrapper">
+        <textarea id="sql" name="sql" rows="18">@Html.Raw(sql)</textarea>
+    </div>
+    <ul id="editor-toolbar" class="linkbar">
+        <li id="permalink" class="result-option"><a class="templated" href="#">permalink</a></li>
+        <li id="savelink" class="result-option">save query</li>
+        <li id="schema-toggle">hide schema ►</li>
+    </ul>
+</div>
+<ul id="schema">
+@foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
+{
+    <li>
+        <span class="schema-table">@table.Name</span>
+        <dl>
+        @for (int i = 0; i < table.ColumnNames.Count; i++)
+        {
+            <dt>@table.ColumnNames[i]</dt>
+            <dd class="cm-variable-2">@table.DataTypes[i]</dd>
+        }
+        </dl>
+    </li>
+}
+</ul>
+<div class="clear"></div>
+<script type="text/javascript">
+    @Html.Partial("GuessedUserId")
+</script>

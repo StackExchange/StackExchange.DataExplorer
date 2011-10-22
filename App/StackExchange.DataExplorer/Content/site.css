@@ -93,10 +93,10 @@ list-style:decimal outside none;
 margin-bottom:1em;
 margin-left:30px;
 }
-a {
-color:#0077CC;
-cursor:pointer;
-text-decoration:none;
+a, ul.linkbar li {
+  color:#0077CC;
+  cursor:pointer;
+  text-decoration:none;
 }
 a:hover {
 text-decoration:underline;
@@ -180,8 +180,6 @@ img {
 
 
 #header #topbar {
-  -moz-border-radius-bottomleft:3px;
-  -moz-border-radius-bottomright:3px;
   background-color:#EEEEEE;
   float:right;
   height:30px;
@@ -557,46 +555,159 @@ ul.site-list .desc {
 }
 
 
-#queryText ul.treeview {
-  margin-left: 15px;  
-  width: 265px;
-  overflow: auto;
-  list-style-type: none;
-  float: right;
-  display: block;
+#schema {
+  background-color: #F7F7F7;
+  border: 1px solid #CCCCCC;
+  border-left-width: 0px;
+  border-top-color: #999999;
   cursor: default;
-}
-
-#queryText .folder {
-    margin-bottom: 6px;
-}
-#queryText ul.treeview li {
-   line-height: 18px;
-   color: #444;
-   cursor: help;
-} 
-
-#queryText ul.treeview ul {
-  padding-left: 17px; 
-  list-style-type: square;
-  margin: 0;
-  margin-bottom: 10px;
-}
-
-.query {
-  width: 100%; 
-}
-
-#sqlQuery{
-  height: 100%;
-  width: 100%;
+  display: block;
+  float: right;
+  list-style-type: none;
+  margin-left: -1px;
   overflow: auto;
+  padding-left: 0px;
+  width: 30%;
 }
 
-#sqlQueryWrapper {
+#schema .schema-table {
+  color: #606060;
+  cursor: pointer;
+  border-bottom: 1px dotted #CCCCCC;
+  display: block;
+  font-weight: bold;
+  padding: 6px 8px 5px 8px;
+}
+
+#schema dl {
+  border-left: 1px solid #EAEAEA;
+  margin-left: 4px;
+}
+
+#schema dl dt {
+  border-right: 1px dotted #CCCCCC;
+  float: left;
+  margin-left: 7px;
+  margin-right: 7px;
+  width: 55%;
+}
+
+#schema dl > * {
+  padding-top: 5px;
+  padding-bottom: 4px;
+}
+
+#schema dl dd {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #FAFAFA;
+  color: #800080;
+}
+
+#schema-toggle {
+  float: right;
+  margin-right: 0px;
+}
+
+#schema-toggle:hover {
+  text-decoration: none;
+}
+
+#query-options .options {
+  color: #606060;
+  display: inline-block;
+  font-weight: bold;
+  margin-left: 15px;
+}
+
+#query-options {
+  margin-bottom: 18px;
+}
+
+#query-options label {
+  background: transparent url('images/sprites.png') no-repeat scroll 0px 1px;
+  color: #C0C0C0;
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 6px;
+  padding: 5px 0px 5px 20px;
+}
+
+#query-options input {
+  display: none;
+}
+
+#query-options input:checked + label {
+  background-position: 0px -27px;
+  color: #0C57A0;
+}
+
+#submit-query {
+  background: none repeat scroll 0 0 #0C57A0;
+  border-width: 0px;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 0px;
+  padding: 6px 12px 6px 12px;
+}
+
+#editor-toolbar {
+  height: 1%;
+  margin: -25px 0px 0px 0px;
+  overflow: auto;
+  padding-bottom: 15px;
+}
+
+ul.linkbar {
+  list-style-type: none;
+}
+
+ul.linkbar li {
+  float: left;
+  margin-right: 15px;
+}
+
+.result-option {
+  display: none;
+}
+
+#query-errors {
+  display: none;
+  margin-top: 5px;
+  padding: 6px 6px 6px 6px;
+}
+
+#query-metadata .info {
+  float: left;
+  max-width: 60%;
+}
+
+#query {
+  margin-top: 20px;
+}
+
+#sql{
+  height: 100%;
+  overflow: auto;
+  width: 100%;
+}
+
+#wrapper {
   margin-bottom: 30px;
+  position: relative;
 }
 
+#query .compact {
+  width: 70%;
+}
+
+.left-group {
+  float: left;
+}
+
+.right-group {
+  float: right;
+}
 
 #queryText .title h2{
   float: left;
@@ -611,39 +722,71 @@ ul.site-list .desc {
   margin-right: 12%;
 }
 
-#queryParams{
-  margin-bottom: 8px;  
-}
-#queryParams h3 {
-  margin-bottom: 8px;  
-}
-
-#queryParams label {
-    display:block;
-    float:left;
-    padding:12px 8px 0 0;
-    min-width:100px;
-}
-
-#queryParams input {
-  float: left; 
-  display: block;
+#query-params{
+  display: none;
   margin-bottom: 8px;
 }
 
-#permalink, #downloadCsv, #showSql, #hideSql, #editQuery, #deleteQuery, #undeleteQuery {
-  margin-left: 10px; 
-  margin-right: 10px;  
+#query-params h3 {
+  margin-bottom: 8px;  
 }
 
-#schemaLink {
-  float:right;
-  margin-top: -25px;
+#query-params label {
+  display: block;
+  float: left;
+  min-width: 100px;
+  padding: 12px 8px 0 0;
 }
 
-#grid {
-  border: 1px solid #bbb;  
+#query-params input {
+  display: block;
+  float: left;
+  margin-bottom: 8px;
+}
+
+#query-results .subheader {
+  margin-bottom: 5px;  
+}
+
+#query-results .subheader .group {
+  width: 960px;
+  margin: 0px auto 0px auto;
+}
+
+#query-results .subheader .miniTabs {
+  margin-left: 0px;
+}
+
+#result-stats {
+  padding-top: 5px;
+}
+
+#result-stats span {
+  color: #606060;
+  display: inline-block;
+  font-weight: bold;
+  padding: 6px 0px 6px 0px;
+}
+
+#query-results .download-button {
+  background: transparent url('images/sprites.png') no-repeat scroll 0px 0px;
+  border-radius: 5px 5px;
+  display: inline-block;
+  margin-right: 15px;
+  padding: 6px 7px 6px 24px;
+}
+
+#query-results .download-button:hover {
+  background-color: #F7F7F7;
+}
+
+#resultsetButton.download-button {
+  background-position: 4px -54px;
+}
+
+#resultset {
   cursor: default;
+  height: 500px;
 }
 
 p.tagline{
@@ -651,19 +794,19 @@ p.tagline{
 }
 
 div.grippie {
-background:#EEEEEE url(/Content/images/grippie.png) no-repeat scroll center 2px;
-border-color:#DDDDDD;
-border-style:solid;
-border-width:0pt 1px 1px;
-cursor:s-resize;
-height:9px;
-overflow:visible;
+  background:#EEEEEE url(/Content/images/grippie.png) no-repeat scroll center 2px;
+  border-color:#DDDDDD;
+  border-style:solid;
+  border-width:0pt 1px 1px;
+  cursor:s-resize;
+  height:9px;
+  overflow:visible;
 }
 .resizable-textarea textarea {
-display:block;
-margin-bottom:0pt;
-width:95%;
-height: 20%;
+  display: block;
+  height: 20%;
+  margin-bottom: 0pt;
+  width: 95%;
 }
 
 .openid_large_btn  {
@@ -866,9 +1009,12 @@ font-weight:bold;
   color:#858585;
 }
 
+#loading {
+  display: none;
+}
 
-.loading span { 
-  padding-left: 12px;
+#loading img { 
+  margin-right: 12px;
 }
 
 /* code mirror */
@@ -892,25 +1038,25 @@ font-weight:bold;
 }
 
 
-#gridStats {
+#resultsetStats {
   width: 950px;
   padding: 5px;
   color: #4a4a4a;
 }
 
-#gridStats .bar {
+#resultsetStats .bar {
   color: #222;
   margin-left: 16px;
   margin-right: 16px;
 }
 
-#gridStats span {
+#resultsetStats span {
   float: left;
   display: block;   
   vertical-align:middle;
 }
 
-#gridStats .rows {
+#resultsetStats .rows {
   float: right;
 }
 
@@ -995,10 +1141,6 @@ input, select, button {
   padding:2px;
 }
 
-#resultTabs.subheader {
-  margin-bottom: 5px;  
-}
-
 pre {
   font-family:Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;
   margin-bottom:10px;
@@ -1009,37 +1151,23 @@ pre {
 }
 
 #messages {
-  font-size: 12px;  
-  width: 100%; 
-  height:500px; 
-  margin-bottom: 10px; 
-  background-color: #fafafa; 
-}
-
-#messages pre {
-  max-height: 500px; 
-  height:500px;  
-  background-color: #fafafa;
+  background-color: #FAFAFA;
+  font-size: 12px;
+  padding-bottom: 0px;
+  padding-top: 0px;
 }
 
 #messages code {
-  background-color: #fafafa;
-}
-
-#grid {
-  width: 100%; 
-  height:500px;  
+  margin: 5px 0px 5px 0px;
 }
 
 #executionPlan {
-  width: 100%;
-  height: 500px;
   text-align: left; 
   position: relative;
   overflow: auto;
 }
 
-// Workaround for execution plan tool tips
+/* Workaround for execution plan tool tips */
 #executionPlan > div {
   padding-bottom: 250px;
 }
