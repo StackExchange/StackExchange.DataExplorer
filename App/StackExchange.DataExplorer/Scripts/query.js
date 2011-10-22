@@ -160,8 +160,9 @@ DataExplorer.ready(function () {
             var self = $(this);
 
             self.toggleClass('closed');
-            self.next('dl').slideToggle('fast');
+            self.next('dl').toggle();
         });
+        schema.find('.schema-table').click();
     });
 
     DataExplorer.QueryEditor.change('title', function (title) {
