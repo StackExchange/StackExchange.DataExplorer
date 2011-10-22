@@ -18,7 +18,7 @@
 
     <script type="text/javascript">
         DataExplorer.init({
-            'User.guessedID': null,
+            'User.guessedID': @(ViewData["GuessedUserId"] != null ? ViewData["GuessedUserId"] : "null"),
             'User.isAuthenticated': @((!Current.User.IsAnonymous).ToString().ToLower()),
             'Site.id': @(Current.Controller.Site != null ? Current.Controller.Site.Id.ToString() : "null"),
             'enableEditorSuggestions': @(AppSettings.EnableEditorSuggestions.ToString().ToLower()),

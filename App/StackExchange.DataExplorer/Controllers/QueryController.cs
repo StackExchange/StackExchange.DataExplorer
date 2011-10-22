@@ -265,13 +265,13 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            ViewData["query"] = revision.Query;
+            ViewData["revision"] = revision;
             ViewData["cached_results"] = QueryUtil.GetCachedResults(
                 new ParsedQuery(revision.Query.QueryBody, Request.Params),
                 Site.Id
             );
 
-            return View("New", Site);
+            return View("Editor", Site);
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
             
-            return View(Site);
+            return View("Editor", Site);
         }
 
         private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, bool textResults)
@@ -360,7 +360,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (sqlex != null)
             {
-                response["errorLine"] = sqlex.LineNumber.ToString();
+                response["line"] = sqlex.LineNumber.ToString();
             }
 
             response["error"] = ex.Message;

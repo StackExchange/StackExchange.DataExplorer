@@ -6,14 +6,14 @@
     Layout = "~/Views/Shared/Query.cshtml";
     this.SetPageTitle("Query " + Current.Controller.Site.LongName + " - Stack Exchange Data Explorer");
 
-    var query = ViewData["query"] as Query;
+    var revision = ViewData["revision"] as Revision;
     string sql, name = null, description = null;
     
-    if (query != null)
+    if (revision != null)
     {
-        sql = query.QueryBody;
-        name = query.Name;
-        description = query.Description;
+        sql = revision.Query.QueryBody;
+        name = revision.Metadata.Title;
+        description = revision.Metadata.Description;
     }
     else
     {
