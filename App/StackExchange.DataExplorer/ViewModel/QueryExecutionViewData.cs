@@ -24,6 +24,7 @@ namespace StackExchange.DataExplorer.ViewModel
 
         public bool Featured { get; set; }
         public bool Skipped { get; set; }
+        public bool UseLatestLink { get; set; }
 
         public DateTime LastRun { get; set; }
         public string SiteName { get; set; }
@@ -53,8 +54,27 @@ namespace StackExchange.DataExplorer.ViewModel
         {
             get
             {
-                string prefix = UrlPrefix ?? "s";
-                return "/" + SiteName + "/" + prefix + "/" + Id + "/" + Name.URLFriendly();
+                // {0} - Site Name
+                // {1} - Revision / Root ID
+                // {2} - User ID
+                // {3} - Slug
+                string format = "/{0}/query/";
+
+                if (UseLatestLink && Creator != null)
+                {
+                    format += "{2}/{1}/{3}";
+                }
+                else
+                {
+                    format += "{1}/{3}";
+                }
+
+                return string.Format(format, new object[] {
+                    SiteName,
+                    Id,
+                    Creator != null ? Creator.Id : 0,
+                    Name.URLFriendly()
+                });
             }
         }
 

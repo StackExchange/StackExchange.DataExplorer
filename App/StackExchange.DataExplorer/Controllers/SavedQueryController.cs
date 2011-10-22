@@ -281,7 +281,7 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 queries = Current.DB.Query<Metadata, User, QueryExecutionViewData>(@"
                     SELECT
-                        metadata.*, user.*
+                        metadata.*, [user].*
                     FROM
                         (
                             SELECT
@@ -310,7 +310,13 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             Id = metadata.RevisionId,
                             Name = metadata.Title,
-                            Description = metadata.Description
+                            Description = metadata.Description,
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = true
                         };
                     }
                 );
@@ -350,7 +356,12 @@ namespace StackExchange.DataExplorer.Controllers
                             Id = revision.Id,
                             Name = metadata.Title,
                             Description = metadata.Description,
-                            Creator = user
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = false
                         };
                     }
                 );
@@ -385,7 +396,13 @@ namespace StackExchange.DataExplorer.Controllers
                         return new QueryExecutionViewData {
                             Id = metadata.RevisionId,
                             Name = metadata.Title,
-                            Description = metadata.Description
+                            Description = metadata.Description,
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = true
                         };
                     },
                     new
@@ -411,7 +428,8 @@ namespace StackExchange.DataExplorer.Controllers
                 href + "&page=-1",
                 Convert.ToInt32(Math.Ceiling(totalQueries / (decimal)currentPerPage)),
                 currentPerPage,
-                currentPage - 1, "pager"
+                currentPage - 1,
+                "pager"
             );
             ViewData["PageSizer"] = new PageSizer(
                 href + "&pagesize=-1",
