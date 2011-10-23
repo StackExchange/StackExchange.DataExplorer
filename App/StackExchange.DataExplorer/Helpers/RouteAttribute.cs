@@ -263,7 +263,7 @@ namespace StackExchange.DataExplorer.Helpers
                         constraints.Add(param, constraint);
                     }
 
-                    result = result.Replace(metadata, "");
+                    result = result.Replace(m.Value, "{" + param + "}");
                 }
             }
 
