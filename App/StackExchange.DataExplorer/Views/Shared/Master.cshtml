@@ -42,7 +42,7 @@
                     {
                         <span id="search">
                             <form method="get" action="/@site.Name.ToLower()/queries">
-                            @Html.TextBox("q", "search", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, onfocus = "if (this.value=='search') this.value=''", onblur = "if (this.value='') this.value='search'" })
+                            @Html.TextBox("q", "", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, placeholder = "search" })
                             </form>
                         </span>
                     }
