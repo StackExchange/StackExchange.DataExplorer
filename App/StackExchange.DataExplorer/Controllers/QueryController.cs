@@ -11,8 +11,8 @@ namespace StackExchange.DataExplorer.Controllers
     public class QueryController : StackOverflowController
     {
         [HttpPost]
-        [Route(@"query/save/{parentId?:\d+}")]
-        public ActionResult Create(string sql, string title, string description, int siteId, int? parentId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        [Route(@"query/save/{siteId:\d+}/{parentId?:\d+}")]
+        public ActionResult Create(string sql, string title, string description, int siteId, int? parentId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -38,7 +38,7 @@ namespace StackExchange.DataExplorer.Controllers
                 var parsedQuery = new ParsedQuery(
                     sql,
                     Request.Params,
-                    executionPlan == true,
+                    withExecutionPlan == true,
                     crossSite == true,
                     excludeMetas == true
                 );
@@ -112,7 +112,7 @@ namespace StackExchange.DataExplorer.Controllers
                 QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, queryId);
 
                 // Need to fix up the way we pass back results
-                results.QueryId = revisionId;
+                results.RevisionId = revisionId;
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
             }
@@ -126,7 +126,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         [HttpPost]
         [Route(@"query/run/{siteId:\d+}/{revisionId:\d+}")]
-        public ActionResult Execute(int revisionId, int siteId, bool? textResults, bool? executionPlan, bool? crossSite, bool? excludeMetas)
+        public ActionResult Execute(int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
         {
             ActionResult response = null;
 
@@ -142,7 +142,7 @@ namespace StackExchange.DataExplorer.Controllers
                 var parsedQuery = new ParsedQuery(
                     query.QueryBody,
                     Request.Params,
-                    executionPlan == true,
+                    withExecutionPlan == true,
                     crossSite == true,
                     excludeMetas == true
                 );
@@ -265,6 +265,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
+            ViewData["query_action"] = "save/" + Site.Id + (!revision.IsRoot() ? "/" + revision.RootId : "");
             ViewData["revision"] = revision;
             ViewData["cached_results"] = QueryUtil.GetCachedResults(
                 new ParsedQuery(revision.Query.QueryBody, Request.Params),
@@ -309,7 +310,9 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return PageNotFound();
             }
-            
+
+            ViewData["query_action"] = "save/" + Site.Id;
+
             return View("Editor", Site);
         }
 

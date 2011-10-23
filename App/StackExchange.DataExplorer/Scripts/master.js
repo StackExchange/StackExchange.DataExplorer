@@ -74,8 +74,12 @@
     }
 
     function DeferredRequest(settings) {
+        if (!(this instanceof DeferredRequest)) {
+            return new DeferredRequest(settings);
+        }
+
         var options = $.extend({
-                'delay': 750,
+                'delay': 950,
                 'type': 'post'
             }, settings),
             pending = null,
@@ -115,11 +119,11 @@
         }
 
         function response(response) {
-            dispatched = false;
-
             if (options.callback) {
                 options.callback(response);
             }
+
+            dispatched = false;
 
             if (deferred) {
                 deferred();

@@ -677,9 +677,17 @@ ul.linkbar li {
   padding: 6px 6px 6px 6px;
 }
 
-#query-metadata .info {
+#metadata .info {
   float: left;
-  max-width: 60%;
+  width: 60%;
+}
+
+#metadata {
+  margin-bottom: 18px;
+}
+
+#metadata .info input {
+  width: 100%;
 }
 
 #query {

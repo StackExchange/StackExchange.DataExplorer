@@ -7,7 +7,7 @@
     this.SetPageTitle("Query " + Current.Controller.Site.LongName + " - Stack Exchange Data Explorer");
 
     var revision = ViewData["revision"] as Revision;
-    string sql, name = null, description = null;
+    string sql = null, name = null, description = null;
     
     if (revision != null)
     {
@@ -15,29 +15,13 @@
         name = revision.Metadata.Title;
         description = revision.Metadata.Description;
     }
-    else
-    {
-        sql = ParsedQuery.DefaultComment;
-    }
-    
-    if (name == null)
-    {
-        name = ParsedQuery.DEFAULT_NAME;
-    }
-    
-    if (description == null)
-    {
-        description = ParsedQuery.DEFAULT_DESCRIPTION;
-    }
 
     sql = Html.Encode(sql);
-    description = Html.Encode(description).Replace("\n", "<br />");
 }
 
 @section Metadata
 {
-    <h2>@name</h2>
-    <p>@Html.Raw(description)</p>
+    <h2><input type="text" id="title" name="title" value="@name" size="40" placeholder="Enter a title for your query" /></h2>
 }
 
 <div class="left-group compact">
@@ -66,6 +50,3 @@
 }
 </ul>
 <div class="clear"></div>
-<script type="text/javascript">
-    @Html.Partial("GuessedUserId")
-</script>

@@ -213,8 +213,6 @@ DataExplorer.ready(function () {
             } else {
                 hideSchema();
             }
-
-
         });
     });
 

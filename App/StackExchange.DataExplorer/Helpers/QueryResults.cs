@@ -92,7 +92,7 @@ namespace StackExchange.DataExplorer.Helpers
         public bool Truncated { get; set; }
         public string Slug { get; set; }
         public bool TextOnly { get; set; }
-        public bool RevisionId { get; set; }
+        public int RevisionId { get; set; }
         public bool FromCache { get; set; }
 
         /// <summary>
