@@ -165,14 +165,6 @@ DataExplorer.ready(function () {
         schema.find('.schema-table').click();
     });
 
-    DataExplorer.QueryEditor.change('title', function (title) {
-        metadata.find('h2').text(title);
-    });
-
-    DataExplorer.QueryEditor.change('description', function (description) {
-        metadata.find('p').text(description);
-    });
-
     $('.miniTabs').tabs();
     $('#schema-toggle').toggle(function () {
         schema.hide();
