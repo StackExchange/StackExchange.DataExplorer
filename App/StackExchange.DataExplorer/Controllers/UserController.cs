@@ -11,6 +11,11 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class UserController : StackOverflowController
     {
+        private static readonly HashSet<string> AllowedPreferences = new HashSet<string>
+        {
+            "HideSchema"
+        };
+
         [Route("users")]
         public ActionResult Index(int? page)
         {
@@ -91,6 +96,31 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return Redirect("/");
             }
+        }
+
+        [HttpPost]
+        [Route(@"users/save-preference/{id:\d+}/{preference}")]
+        public ActionResult SavePreference(int id, string preference, string value)
+        {
+            if (!AllowedPreferences.Contains(preference)) {
+                return ContentError("Invalid preference");
+            }
+
+            User user = Current.DB.Users.FirstOrDefault(u => u.Id == id);
+
+            if (user == null || (user.Id != CurrentUser.Id && !CurrentUser.IsAdmin))
+            {
+                return ContentError("Invalid action");
+            }
+
+            if (preference == "HideSchema")
+            {
+                user.HideSchema = value == "true";
+            }
+
+            Current.DB.SubmitChanges();
+
+            return Content("ok");
         }
 
         [Route(@"users/{id:INT}/{name?}")]

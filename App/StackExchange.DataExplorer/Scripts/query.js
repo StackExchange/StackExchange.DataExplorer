@@ -137,7 +137,17 @@ DataExplorer.ready(function () {
         };
 
     DataExplorer.QueryEditor.create('#sql', function (editor) {
-        var wrapper, resizer, border = 2;
+        var wrapper, resizer, border = 2,
+            toggle = $('#schema-toggle'),
+            schemaPreference = null;
+
+        if (DataExplorer.options.User.isAuthenticated) {
+            schemaPreference = new DataExplorer.DeferredRequest({
+                'url': '/users/save-preference/:id/HideSchema'.format({
+                    'id': DataExplorer.options.User.id
+                })
+            });
+        }
 
         if (editor) {
             wrapper = $(editor.getScrollerElement());
@@ -163,19 +173,52 @@ DataExplorer.ready(function () {
             self.next('dl').toggle();
         });
         schema.find('.schema-table').click();
+
+        function showSchema() {
+            panel.animate({ 'width': '70%' }, 'fast', function () {
+                schema.show();
+            });
+            toggle.text("hide schema ►").removeClass('hidden');
+
+            if (schemaPreference) {
+                schemaPreference.request({ 'value': false });
+            }
+        }
+
+        function hideSchema(immediately) {
+            schema.hide();
+            
+            if (immediately !== true) {
+                panel.animate({ 'width': '100%' }, 'fast');
+            } else {
+                panel.css('width', '100%');
+            }
+
+            toggle.text("◄ show schema").addClass('hidden');
+
+            if (schemaPreference) {
+                schemaPreference.request({ 'value': true });
+            }
+        }
+
+        if (DataExplorer.options.User.hideSchema) {
+            hideSchema(true);
+        }
+
+        toggle.click(function () {
+            var self = $(this);
+
+            if (self.hasClass('hidden')) {
+                showSchema();
+            } else {
+                hideSchema();
+            }
+
+
+        });
     });
 
     $('.miniTabs').tabs();
-    $('#schema-toggle').toggle(function () {
-        schema.hide();
-        panel.animate({ 'width': '100%' }, 'fast');
-        $(this).text("◄ show schema");
-    }, function () {
-        panel.animate({ 'width': '70%' }, 'fast', function () {
-            schema.show();
-        });
-        $(this).text("hide schema ►");
-    });
     $('#runQueryForm').submit(function () {
         $('.report-option').fadeOut();
         var data, self = $(this), sql = DataExplorer.QueryEditor.value();
@@ -493,7 +536,7 @@ function ensureAllParamsEntered(query) {
         } else {
             // auto param 
             if ($(this).find('input').val().length == 0 && name == "UserId") {
-                $(this).find('input').val(guessedUserId);
+                $(this).find('input').val(DataExplorer.options.User.guessedID);
             }
         }
     });

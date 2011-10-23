@@ -73,11 +73,66 @@
         });
     }
 
+    function DeferredRequest(settings) {
+        var options = $.extend({
+                'delay': 750,
+                'type': 'post'
+            }, settings),
+            pending = null,
+            dispatched = false,
+            deferred = null;
+
+        $(document).bind('unload', function () {
+            request(true);
+        });
+
+        this.request = function rerequest(data) {
+            if (pending) {
+                clearTimeout(pending);
+            }
+
+            if (!dispatched) {
+                options.data = data;
+                pending = setTimeout(request, options.delay);
+            } else {
+                deferred = function () {
+                    rerequest(data);
+                };
+            }
+        }
+
+        function request(synchronous) {
+            dispatched = true;
+            synchronous = !!synchronous;
+
+            $.ajax({
+                'async': synchronous,
+                'data': options.data,
+                'type': options.type,
+                'url': options.url,
+                'success': response
+            });
+        }
+
+        function response(response) {
+            dispatched = false;
+
+            if (options.callback) {
+                options.callback(response);
+            }
+
+            if (deferred) {
+                deferred();
+            }
+        }
+    }
+
     return {
         'init': init,
         'ready': ready,
         'options': options,
-        'template': template
+        'template': template,
+        'DeferredRequest': DeferredRequest
     };
 })();
 

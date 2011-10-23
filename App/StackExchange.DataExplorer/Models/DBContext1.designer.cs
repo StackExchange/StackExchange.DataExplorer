@@ -63,7 +63,7 @@ namespace StackExchange.DataExplorer.Models
     #endregion
 		
 		public DBContext() : 
-				base(global::System.Configuration.ConfigurationManager.ConnectionStrings["DataExplorerDevConnectionString"].ConnectionString, mappingSource)
+				base(global::System.Configuration.ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
@@ -373,6 +373,8 @@ namespace StackExchange.DataExplorer.Models
 		
 		private System.Nullable<System.DateTime> _LastSeenDate;
 		
+		private System.Nullable<bool> _HideSchema;
+		
 		private EntitySet<SavedQuery> _SavedQueries;
 		
 		private EntitySet<UserOpenId> _UserOpenIds;
@@ -409,6 +411,8 @@ namespace StackExchange.DataExplorer.Models
     partial void OnLastActivityDateChanged();
     partial void OnLastSeenDateChanging(System.Nullable<System.DateTime> value);
     partial void OnLastSeenDateChanged();
+    partial void OnHideSchemaChanging(System.Nullable<bool> value);
+    partial void OnHideSchemaChanged();
     #endregion
 		
 		public User()
@@ -694,6 +698,26 @@ namespace StackExchange.DataExplorer.Models
 					this._LastSeenDate = value;
 					this.SendPropertyChanged("LastSeenDate");
 					this.OnLastSeenDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_HideSchema", DbType="Bit")]
+		public System.Nullable<bool> HideSchema
+		{
+			get
+			{
+				return this._HideSchema;
+			}
+			set
+			{
+				if ((this._HideSchema != value))
+				{
+					this.OnHideSchemaChanging(value);
+					this.SendPropertyChanging();
+					this._HideSchema = value;
+					this.SendPropertyChanged("HideSchema");
+					this.OnHideSchemaChanged();
 				}
 			}
 		}
