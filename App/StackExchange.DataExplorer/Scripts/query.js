@@ -113,9 +113,21 @@ function displayCaptcha() {
 }
 
 function isGraph(resultSet) {
-    return resultSet.columns.length == 2 &&
-        (resultSet.columns[0]["type"] == 'Date' || resultSet.columns[0]["type"] == 'Number') &&
-        resultSet.columns[1]["type"] == 'Number'
+
+    var graph = true;
+
+    for (var i = 0; i < resultSet.columns.length; i++) {
+        var type = resultSet.columns[i]["type"];
+        if (i != 0 && type == 'Date') {
+            graph = false;
+            break;
+        }
+        if (type != 'Number' && type != 'Date') {
+            graph = false;
+            break;
+        } 
+    }
+    return graph;
 }
 
 function showTooltip(x, y, contents) {
@@ -184,7 +196,20 @@ function renderGraph(resultSet) {
         options.xaxis = { mode: "time" };
     }
     var graph = $("#graph");
-    $.plot(graph, [resultSet.rows], options);
+
+    var series = [];
+
+    for (var col = 1; col < resultSet.columns.length; col++) {
+        series.push([]);
+    }
+
+    for (var row = 0; row < resultSet.rows.length; row++) {
+        for (var col = 1; col < resultSet.columns.length; col++) {
+            series[col - 1].push([resultSet.rows[row][0], resultSet.rows[row][col]]);
+        }
+    }
+
+    $.plot(graph, series, options);
     bindToolTip(graph, "");
 }
 
