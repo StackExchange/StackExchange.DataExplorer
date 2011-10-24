@@ -530,11 +530,17 @@ ul.site-list .desc {
   color: #777;  
 }
 
-#aboutSite {
-  float:right;  
+#query #aboutSite {
+  float: right;
+  width: 30%;
 }
+
 #aboutSite p {
-  margin:0;  
+  margin: 0px;
+}
+
+#query #aboutSite p, #query #aboutSite img {
+  margin-left: 8px;
 }
 
 
@@ -625,7 +631,7 @@ ul.site-list .desc {
 
 #query-options label {
   background: transparent url('images/sprites.png') no-repeat scroll 0px 1px;
-  color: #C0C0C0;
+  color: #A7A7A7;
   cursor: pointer;
   display: inline-block;
   margin-left: 6px;
@@ -671,12 +677,6 @@ ul.linkbar li {
   display: none;
 }
 
-#query-errors {
-  display: none;
-  margin-top: 5px;
-  padding: 6px 6px 6px 6px;
-}
-
 #metadata .info {
   float: left;
   width: 60%;
@@ -688,6 +688,26 @@ ul.linkbar li {
 
 #metadata .info input {
   width: 100%;
+}
+
+#site-selector {
+  list-style-type: none;
+  margin-left: 0px;
+  padding-left: 0px;
+}
+
+#site-selector li {
+  float: left;
+  margin-right: 6px;
+}
+
+#error-message {
+  background-color: #F5E9E9;
+  border: 1px solid #B50000;
+  color: #B50000;
+  display: none;
+  margin-top: 5px;
+  padding: 10px 14px 10px 14px;
 }
 
 #query {

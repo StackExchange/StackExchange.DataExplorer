@@ -19,6 +19,6 @@
 .cm-s-default span.cm-attribute  { color: #00c;    }
 .cm-s-default span.cm-sql-word   { color: #000000; }
 .cm-s-default .error-line { 
-  background-color: #FEF1EC;
+  background-color: #F5E9E9;
   border-radius: 3px 3px;
 }

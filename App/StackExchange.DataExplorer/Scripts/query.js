@@ -134,7 +134,8 @@ DataExplorer.ready(function () {
         gridOptions = {
             'enableCellNavigation': false,
             'enableColumnReorder': false
-        };
+        },
+        error = $('#error-message');
 
     DataExplorer.QueryEditor.create('#sql', function (editor) {
         var wrapper, resizer, border = 2,
@@ -219,6 +220,8 @@ DataExplorer.ready(function () {
     $('.miniTabs').tabs();
     $('#runQueryForm').submit(function () {
         $('.report-option').fadeOut();
+        error.fadeOut();
+
         var data, self = $(this), sql = DataExplorer.QueryEditor.value();
 
         if (ensureAllParamsEntered(sql)) {
@@ -244,8 +247,8 @@ DataExplorer.ready(function () {
     function parseQueryResponse(response) {
         $('#loading').hide();
 
-        if (!response || response.error) {
-            
+        if (showError(response)) {
+            return;
         }
 
         if (response.captcha) {
@@ -300,6 +303,18 @@ DataExplorer.ready(function () {
         }).animate({ 'height': Math.min(height, maxHeight) });
 
         $('#query-results .miniTabs a:first').click();
+    }
+
+    function showError(response) {
+        if (response && !response.error) {
+            return false;
+        }
+
+        if (response.line) {
+            DataExplorer.QueryEditor.error(response.line);
+        }
+
+        error.text(response.error).show();
     }
 
     // Note that we destroy resultset in this function!
@@ -547,17 +562,3 @@ function ensureAllParamsEntered(query) {
 
     return allParamsHaveValues;
 }
-
-$(function () {
-  $("#grid").resize(function () {
-    var width = 0;
-    $(".slick-header-column").each(function () { width += $(this).outerWidth(); });
-    $.data(this, "width", width)
-  }).add(window).resize(function () {
-    var width = $("#grid").data("width"), docWidth = document.documentElement.clientWidth - 80;
-    if(width > docWidth) width = docWidth - 80;
-    if(width < 950) width = 950;
-    $("#query-results").width(width + 20);
-    $("#gridStats").width(width + 10);
-  });
-});
