@@ -260,7 +260,9 @@ namespace StackExchange.DataExplorer.Helpers
                         if (PredefinedConstraints.TryGetValue(constraint.ToUpper(), out predefined))
                             constraint = predefined;
 
-                        constraints.Add(param, constraint);
+                        constraints.Add(param, constraint +
+                            // If the parameter is optional, also match the empty string (our default)
+                            (m.Groups["optional"].Success ? "|^$" : ""));
                     }
 
                     result = result.Replace(m.Value, "{" + param + "}");

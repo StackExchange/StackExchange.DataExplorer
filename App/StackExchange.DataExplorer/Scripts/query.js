@@ -270,7 +270,7 @@ DataExplorer.ready(function () {
             'multi': response.multiSite ? 'm' : '',
             'metas': response.excludeMetas ? 'n' : '',
             'site': response.siteName,
-            'id': response.queryId,
+            'id': response.revisionId,
             'slug': ''
         });
 

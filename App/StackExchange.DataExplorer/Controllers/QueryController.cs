@@ -92,17 +92,20 @@ namespace StackExchange.DataExplorer.Controllers
                         new
                         {
                             query = queryId,
-                            root = parent != null ? (int?)parent.Id : null,
+                            root = parent != null ? (int?)parent.RootId : null,
                             owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
                             ip = GetRemoteIP(),
                             creation = saveTime = DateTime.UtcNow
                         }
                     ).First();
 
-                    if (parent == null)
+                    var revision = new Revision
                     {
-                        SaveMetadata(revisionId, title, description, true);
-                    }
+                        Id = revisionId,
+                        RootId = parent != null ? (int?)parent.RootId : null
+                    };
+
+                    SaveMetadata(revision, title, description);
                 }
                 else
                 {
@@ -148,6 +151,10 @@ namespace StackExchange.DataExplorer.Controllers
                 );
 
                 var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
+
+                // It might be bad that we have to do this here
+                results.RevisionId = revisionId;
+
                 QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, query.Id);
 
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
@@ -177,12 +184,7 @@ namespace StackExchange.DataExplorer.Controllers
                     throw new ApplicationException("Invalid revision ID");
                 }
 
-                if (!revision.IsRoot())
-                {
-                    revisionId = revision.RootId.Value;
-                }
-
-                SaveMetadata(revisionId, title, description, false);
+                SaveMetadata(revision, title, description);
             }
             catch (ApplicationException ex)
             {
@@ -371,61 +373,64 @@ namespace StackExchange.DataExplorer.Controllers
             return Json(response);
         }
 
-        private void SaveMetadata(int rootId, string title, string description, bool isNew)
+        private void SaveMetadata(Revision revision, string title, string description)
         {
-            if (isNew)
+            Metadata metadata = null;
+
+            if (!CurrentUser.IsAnonymous)
+            {
+                metadata = Current.DB.Query<Metadata>(@"
+                    SELECT
+                        *
+                    FROM
+                        Metadata
+                    WHERE
+                        RevisionId = @revision AND
+                        OwnerId = @owner",
+                    new
+                    {
+                        revision = revision.RootId,
+                        owner = CurrentUser.Id
+                    }
+                ).FirstOrDefault();
+            }
+
+            // We always save a metadata for anonymous users since they don't have an
+            // actual revision history that we're associating the metadata with
+            if (CurrentUser.IsAnonymous || metadata == null)
             {
                 Current.DB.Execute(@"
                     INSERT INTO Metadata(
-                        Id, Title, Description
+                        RevisionId, OwnerId, Title, Description,
+                        LastActivity, Votes, Views
                     ) VALUES(
-                        @id, @title, @description
+                        @revision, @owner, @title, @description,
+                        @activity, 0, 0
                     )",
                     new
                     {
-                        id = rootId,
+                        revision = CurrentUser.IsAnonymous ? revision.Id : revision.RootId,
+                        owner = CurrentUser.IsAnonymous ? (int?)null : CurrentUser.Id,
                         title = title,
-                        description = description
+                        description = description,
+                        activity = DateTime.UtcNow
                     }
                 );
             }
-            else
+            else if (metadata.Title != title || metadata.Description != description)
             {
-                // Currently we only allow the author of the original revision to change
-                // the metadata, but people might be annoyed by this inflexibility...
-                int isOwner = Current.DB.Query<int>(@"
-                    SELECT
-                        COUNT(Id)
-                    FROM
-                        Revisions
-                    WHERE
-                        Id = @revision AND
-                        CreatorId = @user",
-                    new
-                    {
-                        revision = rootId,
-                        user = CurrentUser.Id
-                    }
-                ).First();
-
-                if (isOwner == 0)
-                {
-                    throw new ApplicationException("You are not the owner!");
-                }
-
                 Current.DB.Execute(@"
                     UPDATE
                         Metadata
                     SET
-                        Title = @title,
-                        Description = @description
+                        Title = @title, Description = @description
                     WHERE
-                        Id = @revision",
+                        Id = @id",
                     new
                     {
+                        id = metadata.Id,
                         title = title,
-                        description = description,
-                        revision = rootId
+                        description = description
                     }
                 );
             }
