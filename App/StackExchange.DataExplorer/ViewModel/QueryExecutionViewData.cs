@@ -96,6 +96,11 @@ namespace StackExchange.DataExplorer.ViewModel
 
         private string StripInitialComments(string str)
         {
+            if (str == null)
+            {
+                return "";
+            }
+
             var sb = new StringBuilder();
 
             bool atStart = true;

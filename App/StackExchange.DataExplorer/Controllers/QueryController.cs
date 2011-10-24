@@ -57,7 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
                 // We only create revisions if something actually changed.
                 // We'll log it as an execution anyway if applicable, so the user will
                 // still get a link in their profile, just not their own revision.
-                if (!(parent != null && query != null && query.Id == parent.Id))
+                if (!(parent != null && query != null && query.Id == parent.QueryId))
                 {
                     if (query == null)
                     {
@@ -267,7 +267,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            ViewData["query_action"] = "save/" + Site.Id + (!revision.IsRoot() ? "/" + revision.RootId : "");
+            ViewData["query_action"] = "save/" + Site.Id +  "/" + revision.RootId;
             ViewData["revision"] = revision;
             ViewData["cached_results"] = QueryUtil.GetCachedResults(
                 new ParsedQuery(revision.Query.QueryBody, Request.Params),
