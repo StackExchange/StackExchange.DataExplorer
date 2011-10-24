@@ -35,6 +35,10 @@ namespace StackExchange.DataExplorer.Helpers
                                                                                                ResultColumnType.Number
                                                                                                },
                                                                                            {
+                                                                                               typeof (decimal),
+                                                                                               ResultColumnType.Number
+                                                                                               },
+                                                                                           {
                                                                                                typeof (string),
                                                                                                ResultColumnType.Text
                                                                                                },
