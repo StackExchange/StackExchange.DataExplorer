@@ -23,22 +23,59 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             var revision = QueryUtil.GetFeaturedCompleteRevision(ownerId, rootId);
-            
+
+            return ShowCommon(revision, slug, true);
+        }
+
+        [Route(@"{sitename}/query/{revisionId:\d+}/{slug?}")]
+        public ActionResult Show(string sitename, int revisionId, string slug)
+        {
+            Site = GetSite(sitename);
+
+            if (Site == null)
+            {
+                return PageNotFound();
+            }
+
+            var revision = QueryUtil.GetCompleteRevision(revisionId);
+
+            return ShowCommon(revision, slug, false);
+        }
+
+        private ActionResult ShowCommon(Revision revision, string slug, bool latest)
+        {
             if (revision == null)
             {
                 return PageNotFound();
             }
 
             var title = revision.Metadata.Title;
-
-            // if this user has a display name, and the title is missing or does not match, permanently redirect to it
-            if (title.URLFriendly().HasValue() && (string.IsNullOrEmpty(slug) || slug != title.URLFriendly()))
-            {
-                return PageMovedPermanentlyTo(string.Format("/{0}/query/show/{1}/{2}", sitename, rootId, title.URLFriendly()) + Request.Url.Query);
-            }
+            int rootId = revision.OwnerId != null ? revision.RootId.Value : revision.Id;
+            int ownerId = revision.OwnerId ?? 0;
 
             SetHeader(title);
             SelectMenuItem("Queries");
+
+            title = title.URLFriendly();
+
+            // if this user has a display name, and the title is missing or does not match, permanently redirect to it
+            if (title.HasValue() && (string.IsNullOrEmpty(slug) || slug != title))
+            {
+                string url = "/{0}/query/{2}/{3}";
+
+                if (latest)
+                {
+                    url = "/{0}/query/{1}/{2}/{3}";
+                }
+
+                return PageMovedPermanentlyTo(string.Format(url, new object[] {
+                    Site.Name.ToLower(),
+                    ownerId,
+                    rootId,
+                    title
+                }) + Request.Url.Query);
+            }
+
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
 
             // Need to revamp voting process
@@ -49,8 +86,8 @@ namespace StackExchange.DataExplorer.Controllers
                     Votes
                 WHERE
                     RootId = @root AND
-                    OwnerId = @owner AND
-                    VoteTypeId = @voteType",
+                    VoteTypeId = @voteType AND
+                    OwnerId " + (ownerId > 0 ? "= @owner" : "IS NULL"),
                 new
                 {
                     root = rootId,
@@ -73,9 +110,9 @@ namespace StackExchange.DataExplorer.Controllers
                         Votes
                     WHERE
                         RootId = @root AND
-                        OwnerId = @owner AND
                         VoteTypeId = @voteType AND
-                        UserId = @user",
+                        UserId = @user AND
+                        OwnerId " + (ownerId > 0 ? "= @owner" : "IS NULL"),
                    new
                    {
                        root = rootId,
@@ -101,7 +138,7 @@ namespace StackExchange.DataExplorer.Controllers
                 QueryViewTracker.TrackQueryView(GetRemoteIP(), rootId, ownerId);
             }
 
-            return View(revision);
+            return View("Viewer", revision);
         }
 
         [Route("saved_query/delete", HttpVerbs.Post)]
