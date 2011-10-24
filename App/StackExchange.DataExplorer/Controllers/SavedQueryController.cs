@@ -13,7 +13,7 @@ namespace StackExchange.DataExplorer.Controllers
     public class SavedQueryController : StackOverflowController
     {
         [Route(@"{sitename}/query/{ownerId:\d+}/{rootId:\d+}/{slug?}")]
-        public ActionResult Show(string sitename, int ownerId, int rootId, string slug)
+        public ActionResult ShowLatest(string sitename, int ownerId, int rootId, string slug)
         {
             Site = GetSite(sitename);
 

@@ -106,16 +106,17 @@ namespace StackExchange.DataExplorer.Controllers
                     };
 
                     SaveMetadata(revision, title, description);
+
+                    results.RevisionId = revisionId;
                 }
                 else
                 {
                     queryId = query.Id;
+                    results.RevisionId = parentId.Value;
                 }
 
                 QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, queryId);
 
-                // Need to fix up the way we pass back results
-                results.RevisionId = revisionId;
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
             }

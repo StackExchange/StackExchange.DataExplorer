@@ -1,7 +1,22 @@
-﻿@model StackExchange.DataExplorer.Models.SavedQuery
+﻿@model StackExchange.DataExplorer.Models.Revision
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Models
 @{
     Layout = "~/Views/Shared/Query.cshtml";
-    this.SetPageTitle(Model.Title + " - Stack Exchange Data Explorer");
+    this.SetPageTitle(Model.Metadata.Title + " - Stack Exchange Data Explorer");
+    
+    string sql = null, name = null, description = null;
+
+    sql = Model.Query.QueryBody;
+    name = Model.Metadata.Title;
+    description = Model.Metadata.Description;
+
+    sql = Html.Encode(sql);
 }
+
+@section Metadata
+{
+    <p>@description</p>
+}
+
+<pre id="queryBodyText"><code>@sql</code></pre>

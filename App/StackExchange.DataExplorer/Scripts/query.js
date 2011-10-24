@@ -14,6 +14,10 @@
             target = $(target);
         }
 
+        if (!target.length) {
+            return;
+        }
+
         field = target;
         editor = CodeMirror.fromTextArea(target[0], {
             'mode': 'text/x-t-sql',
@@ -69,7 +73,7 @@
     }
 
     function onError(line) {
-        if (!DataExplorer.options.enableAdvancedSqlErrors) {
+        if (!DataExplorer.options.enableAdvancedSqlErrors || !editor) {
             return;
         }
 
@@ -135,7 +139,8 @@ DataExplorer.ready(function () {
             'enableCellNavigation': false,
             'enableColumnReorder': false
         },
-        error = $('#error-message');
+        error = $('#error-message'),
+        form = $('#runQueryForm');
 
     DataExplorer.QueryEditor.create('#sql', function (editor) {
         var wrapper, resizer, border = 2,
@@ -218,11 +223,11 @@ DataExplorer.ready(function () {
     });
 
     $('.miniTabs').tabs();
-    $('#runQueryForm').submit(function () {
+    form.submit(function () {
         $('.report-option').fadeOut();
         error.fadeOut();
 
-        var data, self = $(this), sql = DataExplorer.QueryEditor.value();
+        var data, sql = DataExplorer.QueryEditor.value();
 
         if (ensureAllParamsEntered(sql)) {
             $('#loading').show();
@@ -231,7 +236,7 @@ DataExplorer.ready(function () {
             $.ajax({
                 'type': 'POST',
                 'url': this.action,
-                'data': self.serialize(),
+                'data': form.serialize(),
                 'success': parseQueryResponse,
                 'cache': false,
             });
@@ -255,7 +260,14 @@ DataExplorer.ready(function () {
             return displayCaptcha();
         }
 
-        var records = 0, results, height = 0, maxHeight = 500;
+        var action = form[0].action, records = 0,
+            results, height = 0, maxHeight = 500;
+
+        if (/.*?\/\d+\/\d+$/.test(action)) {
+            action = action.substring(0, action.lastIndexOf("/"));
+        }
+
+        form[0].action = action + '/' + response.revisionId;
 
         if (response.resultSets.length) {
             results = response.resultSets[0];
