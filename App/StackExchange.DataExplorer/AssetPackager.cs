@@ -57,8 +57,15 @@ namespace StackExchange.DataExplorer
                 new Dictionary<string, AssetCollection>
                     {
                         {
+                            "flot", new AssetCollection
+                                        {
+                                            "/Scripts/flot/jquery.flot.js"
+                                        }
+                        },
+                        {
                             "viewer", new AssetCollection
                                           {
+                                              "/Scripts/date.js",
                                               "/Scripts/codemirror/stringstream.js",
                                               "/Scripts/codemirror/tokenize.js",
                                               "/Scripts/codemirror/highlight.js",
@@ -73,6 +80,7 @@ namespace StackExchange.DataExplorer
                         {
                             "editor", new AssetCollection
                                           {
+                                              "/Scripts/date.js",
                                               "/Scripts/jquery.rule.js",
                                               "/Scripts/jquery.textarearesizer.js",
                                               "/Scripts/jquery.event.drag-1.5.js",
@@ -83,9 +91,9 @@ namespace StackExchange.DataExplorer
                                           }
                             },
                             
-                            { "jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js")
+                            { "jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.6.4.min.js")
                                        {
-                                           "/Scripts/jquery-1.4.2.js"
+                                           "/Scripts/jquery-1.6.4.js"
                                        }
                             },
  

@@ -401,11 +401,11 @@
     <Content Include="Views\Shared\User.cshtml" />
     <Content Include="Views\Shared\Captcha.cshtml" />
     <Content Include="packages.config" />
-    <Content Include="Views\Shared\_MINIPROFILER UPDATED Layout.cshtml" />
     <Content Include="Views\Admin\FindDuplicateUsers.cshtml" />
     <Content Include="Views\Admin\FindDuplicateWhitelistOpenIds.cshtml" />
     <Content Include="Views\Admin\MergeUsers.cshtml" />
     <Content Include="Views\Admin\FindDuplicateUserOpenIds.cshtml" />
+    <Content Include="Views\Shared\QueryResults.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">

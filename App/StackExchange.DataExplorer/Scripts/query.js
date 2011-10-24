@@ -1,16 +1,22 @@
 ﻿$.fn.tabs = function () {
-  $(this).delegate("a:not(.youarehere)", "click", function () {
-    $(this.hash).show();
-    $(this).addClass("youarehere")
-           .siblings(".youarehere")
-           .removeClass("youarehere").each(function () {
-             $(this.hash).hide();
-           });
-  }).delegate("a", "click", function () {
-    return false;
-  });
+    $(this).delegate("a:not(.youarehere)", "click", function () {
+        if (this.id == "graphTabButton") {
+            $("#gridStats").hide();
+        } else {
+            $("#gridStats").show();
+        }
+        $(this.hash).show();
+        $(this).addClass("youarehere")
+               .siblings(".youarehere")
+               .removeClass("youarehere").each(function () {
+                   $(this.hash).hide();
+               });
+    }).delegate("a", "click", function () {
+        return false;
+    });
 };
 
+var showingGraph = false;
 
 function encodeColumn(s) {
     if (s != null && s.replace != null) {
@@ -106,6 +112,82 @@ function displayCaptcha() {
     $("#btn-captcha").click(captcha);
 }
 
+function isGraph(resultSet) {
+    return resultSet.columns.length == 2 &&
+        (resultSet.columns[0]["type"] == 'Date' || resultSet.columns[0]["type"] == 'Number') &&
+        resultSet.columns[1]["type"] == 'Number'
+}
+
+function showTooltip(x, y, contents) {
+    $('<div id="tooltip">' + contents + '<\/div>').css({
+        position: 'absolute',
+        display: 'none',
+        top: y + 5,
+        left: x + 5,
+        border: '1px solid #fdd',
+        padding: '2px',
+        'background-color': '#fee',
+        opacity: 0.80
+    }).appendTo("body").fadeIn(200);
+}
+
+function addCommas(nStr) {
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
+}
+
+function bindToolTip(graph, suffix) {
+    var previousPoint = null;
+    var lastCall = 0;
+    graph.bind("plothover", function (event, pos, item) {
+
+        var toolTip;
+
+        if (item) {
+
+            if (previousPoint == null || previousPoint[0] != item.datapoint[0] || previousPoint[1] != item.datapoint[1]) {
+                previousPoint = item.datapoint;
+
+                $("#tooltip").remove();
+                var x = item.datapoint[0].toFixed(2),
+                    y = item.datapoint[1].toFixed(2);
+
+                showTooltip(item.pageX - 10, item.pageY - 40, addCommas(parseInt(y)) + suffix);
+            }
+        }
+        else {
+            if (previousPoint != null) {
+                $("#tooltip").remove();
+            }
+            previousPoint = null;
+        }
+
+    });
+}
+
+function renderGraph(resultSet) {
+
+    var options = {
+        legend: { position: "nw" },
+        grid: { hoverable: true },
+        selection: { mode: "x" },
+        series: { lines: { show: true }, points: { show: true} }
+    };
+    if (resultSet.columns[0]["type"] == 'Date') {
+        options.xaxis = { mode: "time" };
+    }
+    var graph = $("#graph");
+    $.plot(graph, [resultSet.rows], options);
+    bindToolTip(graph, "");
+}
+
 function gotResults(results) {
 
     $(".loading").hide();
@@ -117,6 +199,21 @@ function gotResults(results) {
     }
 
     current_results = results;
+
+    if (results.resultSets && isGraph(results.resultSets[0])) {
+        $('#graphTabButton').show();
+        var width = document.documentElement.clientWidth;
+        if (width < 950) { width = 950; }
+        $("#graph").width(width - 90);
+        $("#queryResults").width(width - 70);
+        $("#gridStats").width(width - 80);
+        showingGraph = true;
+        renderGraph(results.resultSets[0]);
+    }
+    else {
+        showingGraph = false;
+        $('#graphTabButton').hide();
+    }
 
     if (results.error != null) {
         $("#queryErrorBox").show();
@@ -246,8 +343,12 @@ function gotResults(results) {
                 data = tags.join(" ");
                 hasTags = true;
             } else {
-                data = (encodeColumn(col));
-                if (col != null && col.toString().length > maxWidths[c]) maxWidths[c] = col.toString().length;
+                if (results.resultSets[0].columns[c]["type"] == "Date") {
+                    data = (new Date(col)).toString("yyyy-MM-dd HH:mm:ss");
+                } else {
+                    data = (encodeColumn(col));
+                }
+                if (data != null && data.toString().length > maxWidths[c]) maxWidths[c] = data.toString().length;
             }
             row[c] = data;
         }
@@ -366,15 +467,17 @@ function forwardEvent(event, element) {
 }
 
 $(function () {
-  $("#grid").resize(function () {
-    var width = 0;
-    $(".slick-header-column").each(function () { width += $(this).outerWidth(); });
-    $.data(this, "width", width)
-  }).add(window).resize(function () {
-    var width = $("#grid").data("width"), docWidth = document.documentElement.clientWidth - 80;
-    if(width > docWidth) width = docWidth - 80;
-    if(width < 950) width = 950;
-    $("#queryResults").width(width + 20);
-    $("#gridStats").width(width + 10);
-  });
+    $("#grid").resize(function () {
+        var width = 0;
+        $(".slick-header-column").each(function () { width += $(this).outerWidth(); });
+        $.data(this, "width", width)
+    }).add(window).resize(function () {
+        var width = $("#grid").data("width"), docWidth = document.documentElement.clientWidth - 80;
+        if (width > docWidth) width = docWidth - 80;
+        if (width < 950) width = 950;
+        if (!showingGraph) {
+               $("#queryResults").width(width + 20);
+               $("#gridStats").width(width + 10);
+        }
+    });
 });
