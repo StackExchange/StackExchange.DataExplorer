@@ -173,7 +173,13 @@ String.prototype.format = function (replacements) {
             var regex = new RegExp(":" + replacement + ';?', 'g');
 
             result = result.replace(regex, function (match, optional) {
-                return replacements[replacement] || "";
+                var sub = replacements[replacement];
+
+                if (!sub && sub !== 0) {
+                    sub = "";
+                }
+
+                return sub;
             });
         }
     }
