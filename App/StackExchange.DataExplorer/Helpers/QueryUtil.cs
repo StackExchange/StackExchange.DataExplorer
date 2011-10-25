@@ -39,7 +39,7 @@ namespace StackExchange.DataExplorer.Helpers
                 return null;
             }
 
-            return Current.DB.Query<CachedResult>(@"
+            var cache = Current.DB.Query<CachedResult>(@"
                 SELECT
                     *
                 FROM
@@ -53,6 +53,18 @@ namespace StackExchange.DataExplorer.Helpers
                     site = siteId
                 }
             ).FirstOrDefault();
+
+            if (cache != null && AppSettings.AutoExpireCacheMinutes >= 0 && cache.CreationDate != null)
+            {
+                if (cache.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
+                {
+                    Current.DB.Execute("DELETE CachedResults WHERE Id = @id", new { id = cache.Id });
+
+                    cache = null;
+                }
+            }
+
+            return cache;
         }
 
         /// <summary>

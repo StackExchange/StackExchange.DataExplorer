@@ -66,6 +66,7 @@
                 <div class="miniTabs">
                     <a id="resultsetTab" href="#resultset">Results</a>
                     <a id="messagesTab" href="#messages">Messages</a>
+                    <a id="graphTab" class="optional" href="#graph">Graph</a>
                     <a id="executionPlanTab" class="optional" href="#executionPlan">Execution Plan</a>
                 </div>
                 <div id="result-stats" class="right-group">
@@ -78,7 +79,9 @@
         <div id="resultset" class="panel"></div>
         <pre id="messages" class="panel"><code></code></pre>
         <div id="executionPlan" class="panel"></div>
+        <div id="graph" class="panel"></div>
     </div>
 </div>
 @Html.Raw(AssetPackager.ScriptSrc("jquery.validate"))
 @Html.Raw(AssetPackager.ScriptSrc("query"))
+@Html.Raw(AssetPackager.ScriptSrc("flot"))

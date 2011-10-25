@@ -236,7 +236,7 @@ DataExplorer.ready(function () {
 
         // Ugh, this is ugly, need to rework this soon
         if (DataExplorer.QueryEditor.exists()) {
-            DataExplorer.QueryEditor.value();
+            sql = DataExplorer.QueryEditor.value();
         } else {
             // This is a pretty big assumption
             sql = $('#queryBodyText').text();
@@ -470,9 +470,6 @@ DataExplorer.ready(function () {
         }
     }
 });
-
-
-var showingGraph = false;
 
 function encodeColumn(s) {
     if (s != null && s.replace != null) {

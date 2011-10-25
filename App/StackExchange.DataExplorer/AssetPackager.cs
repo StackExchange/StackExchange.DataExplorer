@@ -66,7 +66,7 @@ namespace StackExchange.DataExplorer
                         {
                             "/Scripts/flot/jquery.flot.js"
                         }
-                    }
+                    },
                     {
                         "master", new AssetCollection
                         {
