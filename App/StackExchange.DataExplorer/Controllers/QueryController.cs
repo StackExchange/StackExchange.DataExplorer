@@ -83,9 +83,9 @@ namespace StackExchange.DataExplorer.Controllers
 
                     revisionId = (int)Current.DB.Query<decimal>(@"
                         INSERT INTO Revisions(
-                            QueryId, RootId, OwnerId, OwnerIP, CreationDate
+                            QueryId, RootId, ParentId, OwnerId, OwnerIP, CreationDate
                         ) VALUES(
-                            @query, @root, @owner, @ip, @creation
+                            @query, @root, @parent, @owner, @ip, @creation
                         )
 
                         SELECT SCOPE_IDENTITY()",
@@ -93,6 +93,7 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             query = queryId,
                             root = parent != null ? (int?)parent.RootId : null,
+                            parent = parentId,
                             owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
                             ip = GetRemoteIP(),
                             creation = saveTime = DateTime.UtcNow

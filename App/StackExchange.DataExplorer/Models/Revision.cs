@@ -6,6 +6,7 @@ namespace StackExchange.DataExplorer.Models
     {
         public int Id { get; set; }
         public int QueryId { get; set; }
+        public int? ParentId { get; set; }
         public int? OwnerId { get; set; }
         public string OwnerIP { get; set; }
         public bool IsFeature { get; set; }
