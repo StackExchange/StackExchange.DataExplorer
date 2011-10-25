@@ -28,8 +28,8 @@ if (typeof (QP) == "undefined" || !QP) {
             // Chrome is usually too quick with document.ready
             window.setTimeout(function() {
                 var context = canvasElm.getContext("2d");
-                canvasElm.width = root.outerWidth(true);
-                canvasElm.height = root.outerHeight(true);
+                canvasElm.width = root[0].scrollWidth || root.outerWidth(true);
+                canvasElm.height = root[0].scrollHeight || root.outerHeight(true);
                 var offset = canvas.offset();
 
                 $(".qp-tr", root).each(function() {
