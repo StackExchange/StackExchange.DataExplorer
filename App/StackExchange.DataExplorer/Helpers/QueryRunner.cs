@@ -436,6 +436,10 @@ namespace StackExchange.DataExplorer.Helpers
         public static QueryResults GetSingleSiteResults(ParsedQuery query, Site site, User user)
         {
             QueryResults results = null;
+            var timer = new Stopwatch();
+
+            timer.Start();
+
             var cache = QueryUtil.GetCachedResults(query, site.Id);
 
             if (cache != null)
@@ -450,12 +454,18 @@ namespace StackExchange.DataExplorer.Helpers
                 }
             }
 
+            timer.Stop();
+
             if (results == null)
             {
                 results = ExecuteNonCached(query, site, user);
                 results.FromCache = false;
 
                 AddResultToCache(results, query, site, cache != null);
+            }
+            else
+            {
+                results.ExecutionTime = timer.ElapsedMilliseconds;
             }
 
             results.Url = site.Url;

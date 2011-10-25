@@ -772,6 +772,10 @@ ul.linkbar li {
   margin-bottom: 8px;
 }
 
+#query-results {
+  margin-top: 15px;
+}
+
 #query-results .subheader {
   margin-bottom: 5px;  
 }
@@ -789,11 +793,13 @@ ul.linkbar li {
   padding-top: 5px;
 }
 
-#result-stats span {
+#result-stats .stats {
   color: #606060;
   display: inline-block;
   font-weight: bold;
   padding: 6px 0px 6px 0px;
+  text-align: right;
+  width: 250px;
 }
 
 #query-results .download-button {

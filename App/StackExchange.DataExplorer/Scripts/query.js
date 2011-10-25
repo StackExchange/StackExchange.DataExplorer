@@ -278,7 +278,8 @@ DataExplorer.ready(function () {
 
         DataExplorer.template('#result-stats span', 'text', {
             'records': records,
-            'time': response.executionTime
+            'time': response.executionTime === 0 ? "<1" : response.executionTime,
+            'cached': response.fromCache ? ' (cached)' : ''
         });
 
         DataExplorer.template('a.templated', 'href', {
