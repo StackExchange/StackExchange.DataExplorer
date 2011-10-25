@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using StackExchange.DataExplorer.Models;
+using Dapper;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -31,6 +32,10 @@ namespace StackExchange.DataExplorer.Helpers
                                                                                                },
                                                                                            {
                                                                                                typeof (double),
+                                                                                               ResultColumnType.Number
+                                                                                               },
+                                                                                           {
+                                                                                               typeof (decimal),
                                                                                                ResultColumnType.Number
                                                                                                },
                                                                                            {
@@ -281,6 +286,9 @@ namespace StackExchange.DataExplorer.Helpers
             using (SqlConnection cnn = site.GetConnection())
             {
                 cnn.Open();
+
+                // well we do not want to risk blocking, if somebody needs to change this we will need to add a setting
+                cnn.Execute("set transaction isolation level read uncommitted");
 
                 var timer = new Stopwatch();
                 timer.Start();

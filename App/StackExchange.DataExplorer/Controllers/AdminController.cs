@@ -55,7 +55,15 @@ namespace StackExchange.DataExplorer.Controllers
             return View();
         }
 
-        [Route("admin/refresh_stats", HttpVerbs.Post)]
+        [Route("admin/clear-cache")]
+        public ActionResult ClearCache()
+        {
+            Current.DB.Execute("truncate table CachedResults");
+            Current.DB.Execute("truncate table CachedPlans");
+            return Redirect("/admin");
+        }
+
+        [Route("admin/refresh-stats", HttpVerbs.Post)]
         public ActionResult RefreshStats()
         {
             foreach (Site site in Current.DB.Sites)
@@ -63,7 +71,7 @@ namespace StackExchange.DataExplorer.Controllers
                 site.UpdateStats();
             }
 
-            Current.DB.ExecuteCommand("DELETE FROM CachedResults");
+            Current.DB.Execute("DELETE FROM CachedResults");
 
             return Content("sucess");
         }

@@ -44,32 +44,6 @@ namespace StackExchange.DataExplorer.Controllers
                 Identifier id;
                 if (Identifier.TryParse(Request.Form["openid_identifier"], out id))
                 {
-                    if (AppSettings.EnableWhiteList)
-                    {
-                        var claimedId = Models.User.NormalizeOpenId(id.ToString().ToLower());
-                        var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList where lower(OpenId) = @claimedId", new {claimedId}).FirstOrDefault();
-                        if (whiteListEntry == null || !whiteListEntry.Approved)
-                        {
-                            if (whiteListEntry == null)
-                            {
-                                // add a non approved entry to the list
-                                whiteListEntry = new OpenIdWhiteList()
-                                {
-                                    Approved = false,
-                                    CreationDate = DateTime.UtcNow,
-                                    OpenId = claimedId,
-                                    IpAddress = Request.UserHostAddress
-                                };
-
-                                Current.DB.OpenIdWhiteLists.InsertOnSubmit(whiteListEntry);
-                                Current.DB.SubmitChanges();
-                            }
-
-                            // not allowed in 
-                            return TextPlain("Not allowed");
-                        }
-                    }
-
                     try
                     {
                         IAuthenticationRequest request = openid.CreateRequest(Request.Form["openid_identifier"]);
@@ -102,9 +76,49 @@ namespace StackExchange.DataExplorer.Controllers
                 switch (response.Status)
                 {
                     case AuthenticationStatus.Authenticated:
-                        var sreg = response.GetExtension<ClaimsResponse>();
-                        User user = null;
+
                         var claimedId = Models.User.NormalizeOpenId(response.ClaimedIdentifier.ToString().ToLower());
+                        var sreg = response.GetExtension<ClaimsResponse>();
+
+                        if (AppSettings.EnableWhiteList)
+                        {
+                            string lookupClaim = claimedId;
+
+                            // google
+                            if (claimedId.StartsWith(@"http://google.com/accounts/o8/id") && !claimedId.Contains("@") && sreg.Email != null && sreg.Email.Length > 2)
+                            {
+                                lookupClaim = "email:" + sreg.Email;
+                            }
+
+                            if (IsVerifiedEmailProvider(claimedId) && sreg.Email != null && sreg.Email.Length > 2)
+                            {
+                                lookupClaim = "email:" + sreg.Email;
+                            }
+
+                            var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList where lower(OpenId) = @lookupClaim", new { lookupClaim }).FirstOrDefault();
+                            if (whiteListEntry == null || !whiteListEntry.Approved)
+                            {
+                                if (whiteListEntry == null)
+                                {
+                                    // add a non approved entry to the list
+                                    whiteListEntry = new OpenIdWhiteList()
+                                    {
+                                        Approved = false,
+                                        CreationDate = DateTime.UtcNow,
+                                        OpenId = lookupClaim,
+                                        IpAddress = Request.UserHostAddress
+                                    };
+
+                                    Current.DB.OpenIdWhiteLists.InsertOnSubmit(whiteListEntry);
+                                    Current.DB.SubmitChanges();
+                                }
+
+                                // not allowed in 
+                                return TextPlain("Not allowed");
+                            }
+                        }
+
+                        User user = null;
                         var openId = Current.DB.UserOpenIds.Where(o => o.OpenIdClaim == claimedId).FirstOrDefault();
 
                         if (!CurrentUser.IsAnonymous)
@@ -195,6 +209,9 @@ namespace StackExchange.DataExplorer.Controllers
         private bool IsVerifiedEmailProvider(string identifier)
         {
             identifier = identifier.ToLowerInvariant();
+
+            if (identifier.Contains("@")) return false;
+
             if (identifier.StartsWith(@"https://www.google.com/accounts/o8/id")) return true;
             if (identifier.StartsWith(@"https://me.yahoo.com")) return true;
             if (identifier.Contains(@"//www.google.com/profiles/")) return true;

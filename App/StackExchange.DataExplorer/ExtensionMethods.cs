@@ -208,9 +208,9 @@ namespace StackExchange.DataExplorer
         /// <summary>
         /// Returns a unix Epoch time given a Date
         /// </summary>
-        public static long ToEpochTime(this DateTime dt)
+        public static long ToJavascriptTime(this DateTime dt)
         {
-            return (long) (dt - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            return (long) (dt - new DateTime(1970, 1, 1, 0, 0, 0)).TotalMilliseconds;
         }
 
         /// <summary>

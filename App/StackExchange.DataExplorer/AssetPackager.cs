@@ -62,6 +62,12 @@ namespace StackExchange.DataExplorer
                 return new Dictionary<string, AssetCollection>
                 {
                     {
+                        "flot", new AssetCollection
+                        {
+                            "/Scripts/flot/jquery.flot.js"
+                        }
+                    }
+                    {
                         "master", new AssetCollection
                         {
                             "/Scripts/master.js"
@@ -70,6 +76,7 @@ namespace StackExchange.DataExplorer
                     {
                         "query", new AssetCollection
                         {
+                            "/Scripts/date.js",
                             "/Scripts/jquery.textarearesizer.js",
                             "/Scripts/jquery.event.drag-2.0.js",
                             "/Scripts/slick.grid.js",

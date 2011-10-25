@@ -32,6 +32,9 @@ namespace StackExchange.DataExplorer
         [Default("")]
         public static string RecaptchaPrivateKey { get; private set; }
 
+        [Default(-1)]
+        public static int AutoExpireCacheMinutes { get; private set; }
+
         public static void Refresh()
         {
             var data = Current.DB.AppSettings.ToDictionary(v => v.Setting, v => v.Value);
@@ -46,6 +49,15 @@ namespace StackExchange.DataExplorer
                         bool parsed = false;
                         Boolean.TryParse(overrideData, out parsed);
                         property.SetValue(null, parsed, null);
+                    }
+
+                    if (property.PropertyType == typeof(int))
+                    {
+                        int parsed = -1;
+                        if (int.TryParse(overrideData, out parsed))
+                        {
+                            property.SetValue(null, parsed, null);
+                        }
                     }
 
                     if (property.PropertyType == typeof(string))

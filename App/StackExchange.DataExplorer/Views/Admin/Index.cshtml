@@ -1,10 +1,13 @@
 ﻿@using StackExchange.DataExplorer
 @{this.SetPageTitle("Stack Exchange Data Explorer Administration - Stack Exchange Data Explorer");}
+<p>
 <ul>
-    <li id="refreshStats"><span style="display: none;">refreshing...</span> <a href="/admin/refresh_stats">
+    <li id="refreshStats"><span style="display: none;">refreshing...</span> <a href="/admin/refresh-stats">
         Update site statistics</a> (will update front page stats)</li>
-    <li><a href="/admin/whitelist">whitelist</a></li>
+    <li><a href="/admin/whitelist">Whitelist</a></li>
+    <li><a href="/admin/clear-cache">Clear Cache</a></li>
 </ul>
+</p>
 <script type="text/javascript">
     $(document).ready(function () {
         $("#refreshStats a").click(function () {

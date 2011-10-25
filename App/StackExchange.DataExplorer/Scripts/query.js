@@ -297,6 +297,10 @@ DataExplorer.ready(function () {
         } else {
             
         }
+        
+        if (results && isGraph(results)) {
+            renderGraph(results);
+        }
 
         if (response.executionPlan && QP && typeof QP.drawLines === 'function') {
             $('#executionPlan').html(response.executionPlan);
@@ -408,6 +412,8 @@ DataExplorer.ready(function () {
                         return linkFormatter('/questions/');
                     case 'suggestedEdits':
                         return linkFormatter('/suggested-edits/');
+                    case 'date':
+                        return dateFormatter;
                 }
             }
 
@@ -416,6 +422,14 @@ DataExplorer.ready(function () {
 
         function defaultFormatter(row, cell, value, column, context) {
             return value ? encodeColumn(value) : "";
+        }
+        
+        function dateFormatter(row, cell, value, column, context) {
+            if (!value) {
+                return defaultFormatter(row, cell, value, column, context);
+            }
+            
+            return (new Date(value)).toString("yyyy-MM-dd HH:mm:ss");
         }
 
         function tagFormatter(row, cell, value, column, context) {
@@ -458,6 +472,7 @@ DataExplorer.ready(function () {
 });
 
 
+var showingGraph = false;
 
 function encodeColumn(s) {
     if (s != null && s.replace != null) {
@@ -551,6 +566,107 @@ function displayCaptcha() {
     };
 
     $("#btn-captcha").click(captcha);
+}
+
+function isGraph(resultSet) {
+
+    var graph = true;
+
+    for (var i = 0; i < resultSet.columns.length; i++) {
+        var type = resultSet.columns[i]["type"];
+        if (i != 0 && type == 'Date') {
+            graph = false;
+            break;
+        }
+        if (type != 'Number' && type != 'Date') {
+            graph = false;
+            break;
+        } 
+    }
+    return graph;
+}
+
+function showTooltip(x, y, contents) {
+    $('<div id="tooltip">' + contents + '<\/div>').css({
+        position: 'absolute',
+        display: 'none',
+        top: y + 5,
+        left: x + 5,
+        border: '1px solid #fdd',
+        padding: '2px',
+        'background-color': '#fee',
+        opacity: 0.80
+    }).appendTo("body").fadeIn(200);
+}
+
+function addCommas(nStr) {
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
+}
+
+function bindToolTip(graph, suffix) {
+    var previousPoint = null;
+    var lastCall = 0;
+    graph.bind("plothover", function (event, pos, item) {
+
+        var toolTip;
+
+        if (item) {
+
+            if (previousPoint == null || previousPoint[0] != item.datapoint[0] || previousPoint[1] != item.datapoint[1]) {
+                previousPoint = item.datapoint;
+
+                $("#tooltip").remove();
+                var x = item.datapoint[0].toFixed(2),
+                    y = item.datapoint[1].toFixed(2);
+
+                showTooltip(item.pageX - 10, item.pageY - 40, addCommas(parseInt(y)) + suffix);
+            }
+        }
+        else {
+            if (previousPoint != null) {
+                $("#tooltip").remove();
+            }
+            previousPoint = null;
+        }
+
+    });
+}
+
+function renderGraph(resultSet) {
+
+    var options = {
+        legend: { position: "nw" },
+        grid: { hoverable: true },
+        selection: { mode: "x" },
+        series: { lines: { show: true }, points: { show: true} }
+    };
+    if (resultSet.columns[0]["type"] == 'Date') {
+        options.xaxis = { mode: "time" };
+    }
+    var graph = $("#graph");
+
+    var series = [];
+
+    for (var col = 1; col < resultSet.columns.length; col++) {
+        series.push([]);
+    }
+
+    for (var row = 0; row < resultSet.rows.length; row++) {
+        for (var col = 1; col < resultSet.columns.length; col++) {
+            series[col - 1].push([resultSet.rows[row][0], resultSet.rows[row][col]]);
+        }
+    }
+
+    $.plot(graph, series, options);
+    bindToolTip(graph, "");
 }
 
 function ensureAllParamsEntered(query) {
