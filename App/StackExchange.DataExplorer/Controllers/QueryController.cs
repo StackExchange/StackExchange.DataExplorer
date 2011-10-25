@@ -116,6 +116,11 @@ namespace StackExchange.DataExplorer.Controllers
                     results.RevisionId = parentId.Value;
                 }
 
+                if (title != null)
+                {
+                    results.Slug = title.URLFriendly();
+                }
+
                 QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, queryId);
 
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible

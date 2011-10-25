@@ -198,7 +198,7 @@ String.prototype.from = function (char, inclusive) {
         return this;
     }
 
-    return this.substring(char - (inclusive ? 0 : 1));
+    return this.substring(char + (inclusive ? 0 : 1));
 }
 
 String.prototype.asVariable = function () {

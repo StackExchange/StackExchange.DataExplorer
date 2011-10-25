@@ -9,6 +9,10 @@
             'description': null
         };
 
+    function exists() {
+        return !!editor;
+    }
+
     function create(target, callback) {
         if (typeof target === 'string') {
             target = $(target);
@@ -127,7 +131,8 @@
         'create': create,
         'value': getValue,
         'change': registerHandler,
-        'error': onError
+        'error': onError,
+        'exists': exists
     };
 })();
 
@@ -227,9 +232,17 @@ DataExplorer.ready(function () {
         $('.report-option').fadeOut();
         error.fadeOut();
 
-        var data, sql = DataExplorer.QueryEditor.value();
+        var data, sql = null;
 
-        if (ensureAllParamsEntered(sql)) {
+        // Ugh, this is ugly, need to rework this soon
+        if (DataExplorer.QueryEditor.exists()) {
+            DataExplorer.QueryEditor.value();
+        } else {
+            // This is a pretty big assumption
+            sql = $('#queryBodyText').text();
+        }
+
+        if (sql && ensureAllParamsEntered(sql)) {
             $('#loading').show();
             //self.find('input').prop('disabled', true);
 
@@ -238,6 +251,11 @@ DataExplorer.ready(function () {
                 'url': this.action,
                 'data': form.serialize(),
                 'success': parseQueryResponse,
+                'error': function () {
+                    $('#loading').hide();
+
+                    showError({ 'error': "Something unexpected went wrong while running your query. Don't worry, blame is already being assigned." });
+                },
                 'cache': false,
             });
         }
@@ -247,6 +265,9 @@ DataExplorer.ready(function () {
     $('#query-results').bind('show', function (event) {
         $('.download-button', this).hide();
         $(event.target.href.from('#') + 'Button').show();
+    });
+    $('#executionPlanTab').click(function () {
+        QP.drawLines();
     });
 
     function parseQueryResponse(response) {
@@ -261,10 +282,11 @@ DataExplorer.ready(function () {
         }
 
         var action = form[0].action, records = 0,
-            results, height = 0, maxHeight = 500;
+            results, height = 0, maxHeight = 500,
+            slug = response.slug;
 
         if (/.*?\/\d+\/\d+$/.test(action)) {
-            action = action.substring(0, action.lastIndexOf("/"));
+            action = action.substring(0, action.lastIndexOf('/'));
         }
 
         form[0].action = action + '/' + response.revisionId;
@@ -274,6 +296,16 @@ DataExplorer.ready(function () {
             records = results.rows.length;
         } else {
             
+        }
+
+        if (response.executionPlan && QP && typeof QP.drawLines === 'function') {
+            $('#executionPlan').html(response.executionPlan);
+        }
+
+        if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
+            slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
+        } else if (slug && slug.indexOf('/') !== 0) {
+            slug = '/' + slug;
         }
 
         DataExplorer.template('#result-stats span', 'text', {
@@ -287,7 +319,7 @@ DataExplorer.ready(function () {
             'metas': response.excludeMetas ? 'n' : '',
             'site': response.siteName,
             'id': response.revisionId,
-            'slug': ''
+            'slug': slug
         });
 
         $('#query-results .miniTabs a.optional').each(function () {

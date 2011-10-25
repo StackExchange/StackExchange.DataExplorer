@@ -818,6 +818,10 @@ ul.linkbar li {
   background-position: 4px -54px;
 }
 
+#executionPlanButton.download-button {
+  background-position: 4px -82px;
+}
+
 #resultset {
   cursor: default;
   height: 500px;
@@ -1045,6 +1049,7 @@ font-weight:bold;
 
 #loading {
   display: none;
+  margin-top: 15px;
 }
 
 #loading img { 

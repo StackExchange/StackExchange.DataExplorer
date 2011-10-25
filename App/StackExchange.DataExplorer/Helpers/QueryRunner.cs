@@ -451,6 +451,12 @@ namespace StackExchange.DataExplorer.Helpers
                     results.Truncated = cache.Truncated;
                     results.Messages = cache.Messages;
                     results.FromCache = true;
+
+                    // If we didn't ask for the execution plan, don't return it
+                    if (!query.IncludeExecutionPlan)
+                    {
+                        results.ExecutionPlan = null;
+                    }
                 }
             }
 

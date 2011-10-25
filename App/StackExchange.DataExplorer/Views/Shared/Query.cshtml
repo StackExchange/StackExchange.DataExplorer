@@ -48,7 +48,7 @@
                 continue;
             }
             <li>
-                <a class="site templated" href="/@site.Name.ToLower()/query/:id/:slug" title="View results on @site.LongName">
+                <a class="site templated" href="/@site.Name.ToLower()/query/:id:slug" title="View results on @site.LongName">
                     <img src="@site.IconUrl" alt="@site.LongName" width="16" height="16" />
                 </a>
             </li>
@@ -66,7 +66,7 @@
                 <div class="miniTabs">
                     <a id="resultsetTab" href="#resultset">Results</a>
                     <a id="messagesTab" href="#messages">Messages</a>
-                    <a id="executionPlanTab" class="optional" href="#executionPlan" onclick="QP.drawLines();">Execution Plan</a>
+                    <a id="executionPlanTab" class="optional" href="#executionPlan">Execution Plan</a>
                 </div>
                 <div id="result-stats" class="right-group">
                     <a id="resultsetButton" class="download-button templated" title="Download results as CSV" href="/:site/:metas:multi;csv/:id">Download CSV</a>

@@ -131,7 +131,7 @@ namespace StackExchange.DataExplorer.Controllers
             ViewData["QueryVoting"] = voting;
             ViewData["Sites"] = Current.DB.Sites.ToList();
             ViewData["cached_results"] = cachedResults;
-            ViewData["query_action"] = "run";
+            ViewData["query_action"] = "run/" + Site.Id + "/" + revision.Id;
 
             if (!IsSearchEngine())
             {
