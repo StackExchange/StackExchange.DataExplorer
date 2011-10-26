@@ -317,9 +317,9 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (order_by == "recent")
             {
-                queries = Current.DB.Query<Metadata, User, QueryExecutionViewData>(@"
+                queries = Current.DB.Query<Metadata, Query, User, QueryExecutionViewData>(@"
                     SELECT
-                        metadata.*, [user].*
+                        metadata.*, query.*, [user].*
                     FROM
                         (
                             SELECT
@@ -336,18 +336,22 @@ namespace StackExchange.DataExplorer.Controllers
                         Metadata metadata
                     ON
                         metadata.id = ids.id
+                    JOIN
+                        Queries query
+                    ON
+                        query.Id = metadata.LastQueryId
                     LEFT OUTER JOIN
                         Users [user]
                     ON
                         metadata.OwnerId = [user].Id
                     ORDER BY
                         metadata.LastActivity DESC",
-                    (metadata, user) =>
+                    (metadata, query, user) =>
                     {
                         return new QueryExecutionViewData
                         {
                             Id = metadata.RevisionId,
-                            Name = metadata.Title,
+                            Name = metadata.Title.IsNullOrEmptyReturn(query.AsTitle()),
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
@@ -361,11 +365,15 @@ namespace StackExchange.DataExplorer.Controllers
             }
             else if (order_by == "everything")
             {
-                queries = Current.DB.Query<Revision, Metadata, User, QueryExecutionViewData>(@"
+                queries = Current.DB.Query<Revision, Query, Metadata, User, QueryExecutionViewData>(@"
                     SELECT
                         *
                     FROM
                         Revisions revision
+                    JOIN
+                        Queries query
+                    ON
+                        query.Id = revision.QueryId
                     JOIN
                         Metadata metadata
                     ON 
@@ -387,12 +395,12 @@ namespace StackExchange.DataExplorer.Controllers
                         revision.OwnerId = [user].Id
                     ORDER BY
                         revision.CreationDate DESC",
-                    (revision, metadata, user) =>
+                    (revision, query, metadata, user) =>
                     {
                         return new QueryExecutionViewData
                         {
                             Id = revision.Id,
-                            Name = metadata.Title,
+                            Name = metadata.Title.IsNullOrEmptyReturn(query.AsTitle()),
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
@@ -416,11 +424,15 @@ namespace StackExchange.DataExplorer.Controllers
                     fallback = "Votes";
                 }
 
-                queries = Current.DB.Query<Metadata, User, QueryExecutionViewData>(String.Format(@"
+                queries = Current.DB.Query<Metadata, Query, User, QueryExecutionViewData>(String.Format(@"
                     SELECT
                         *
                     FROM
                         Metadata metadata
+                    JOIN
+                        Queries query
+                    ON
+                        query.Id = metadata.LastQueryId
                     LEFT OUTER JOIN
                         Users [user]
                     ON
@@ -430,10 +442,10 @@ namespace StackExchange.DataExplorer.Controllers
                     ORDER BY
                         metadata.{0} DESC,
                         metadata.{1} DESC", primary, fallback),
-                    (metadata, user) => {
+                    (metadata, query, user) => {
                         return new QueryExecutionViewData {
                             Id = metadata.RevisionId,
-                            Name = metadata.Title,
+                            Name = metadata.Title.IsNullOrEmptyReturn(query.AsTitle()),
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,

@@ -103,7 +103,8 @@ namespace StackExchange.DataExplorer.Controllers
                     var revision = new Revision
                     {
                         Id = revisionId,
-                        RootId = parent != null ? (int?)parent.RootId : null
+                        RootId = parent != null ? (int?)parent.RootId : null,
+                        QueryId = queryId
                     };
 
                     SaveMetadata(revision, title, description, true);
@@ -409,10 +410,10 @@ namespace StackExchange.DataExplorer.Controllers
                 Current.DB.Execute(@"
                     INSERT INTO Metadata(
                         RevisionId, OwnerId, Title, Description,
-                        LastActivity, Votes, Views
+                        LastQueryId, LastActivity, Votes, Views
                     ) VALUES(
                         @revision, @owner, @title, @description,
-                        @activity, 0, 0
+                        @query, @activity, 0, 0
                     )",
                     new
                     {
@@ -420,6 +421,7 @@ namespace StackExchange.DataExplorer.Controllers
                         owner = CurrentUser.IsAnonymous ? (int?)null : CurrentUser.Id,
                         title = title,
                         description = description,
+                        query = revision.QueryId,
                         activity = DateTime.UtcNow
                     }
                 );
@@ -430,7 +432,8 @@ namespace StackExchange.DataExplorer.Controllers
                     UPDATE
                         Metadata
                     SET
-                        Title = @title, Description = @description, LastActivity = @activity
+                        Title = @title, Description = @description,
+                        LastQueryId = @query, LastActivity = @activity
                     WHERE
                         Id = @id",
                     new
@@ -438,6 +441,7 @@ namespace StackExchange.DataExplorer.Controllers
                         id = metadata.Id,
                         title = title,
                         description = description,
+                        query = revision.Id,
                         activity = DateTime.UtcNow
                     }
                 );
