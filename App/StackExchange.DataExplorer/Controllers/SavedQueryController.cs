@@ -262,6 +262,16 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
+            QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);
+
+            if (string.IsNullOrEmpty(order_by))
+            {
+                if (searchCriteria.IsValid)
+                    order_by = searchCriteria.IsFeatured ? "featured" : "recent";
+                else
+                    order_by = "featured";
+            }
+
             ViewData["Site"] = Site;
             SelectMenuItem("Queries");
             SetHeader(
@@ -302,16 +312,6 @@ namespace StackExchange.DataExplorer.Controllers
                     Selected = (order_by == "everything")
                 }
             );
-
-            QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);
-
-            if (string.IsNullOrEmpty(order_by))
-            {
-                if (searchCriteria.IsValid)
-                    order_by = searchCriteria.IsFeatured ? "featured" : "recent";
-                else
-                    order_by = "featured";
-            }
 
             IEnumerable<QueryExecutionViewData> queries;
 
