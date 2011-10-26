@@ -147,8 +147,12 @@ namespace StackExchange.DataExplorer.Controllers
         {
             if (Current.User.IsAdmin)
             {
-                Current.DB.SavedQueries.FirstOrDefault(q => q.Id == id).IsFeatured = feature;
-                Current.DB.SubmitChanges();
+                Revision revision = QueryUtil.GetCompleteRevision(id);
+
+                if (revision != null)
+                {
+                    Current.DB.Execute("UPDATE Metadata SET Featured = 1 WHERE Id = @id", new { id = revision.Metadata.Id });
+                }
             }
 
             return Content("success");
