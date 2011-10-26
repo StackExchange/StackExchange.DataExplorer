@@ -103,7 +103,9 @@ namespace StackExchange.DataExplorer.Controllers
 
             var voting = new QueryVoting
             {
-                TotalVotes = totalVotes
+                TotalVotes = totalVotes,
+                RevisionId = revision.Id,
+                ReadOnly = revision.OwnerId == CurrentUser.Id
             };
 
             if (!Current.User.IsAnonymous)

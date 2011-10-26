@@ -73,72 +73,140 @@
         });
     }
 
-    function DeferredRequest(settings) {
-        if (!(this instanceof DeferredRequest)) {
-            return new DeferredRequest(settings);
-        }
-
-        var options = $.extend({
-                'delay': 950,
-                'type': 'post'
-            }, settings),
-            pending = null,
-            dispatched = false,
-            deferred = null;
-
-        $(document).bind('unload', function () {
-            request(true);
-        });
-
-        this.request = function rerequest(data) {
-            if (pending) {
-                clearTimeout(pending);
-            }
-
-            if (!dispatched) {
-                options.data = data;
-                pending = setTimeout(request, options.delay);
-            } else {
-                deferred = function () {
-                    rerequest(data);
-                };
-            }
-        }
-
-        function request(synchronous) {
-            dispatched = true;
-            synchronous = !!synchronous;
-
-            $.ajax({
-                'async': synchronous,
-                'data': options.data,
-                'type': options.type,
-                'url': options.url,
-                'success': response
-            });
-        }
-
-        function response(response) {
-            if (options.callback) {
-                options.callback(response);
-            }
-
-            dispatched = false;
-
-            if (deferred) {
-                deferred();
-            }
-        }
-    }
-
     return {
         'init': init,
         'ready': ready,
         'options': options,
-        'template': template,
-        'DeferredRequest': DeferredRequest
+        'template': template
     };
 })();
+
+DataExplorer.DeferredRequest = function DeferredRequest(settings) {
+    if (!(this instanceof DeferredRequest)) {
+        return new DeferredRequest(settings);
+    }
+
+    var options = $.extend({
+        'delay': 950,
+        'type': 'post'
+    }, settings),
+            pending = null,
+            dispatched = false,
+            deferred = null;
+
+    $(document).bind('unload', function () {
+        request(true);
+    });
+
+    this.request = function rerequest(data) {
+        if (pending) {
+            clearTimeout(pending);
+        }
+
+        if (!dispatched) {
+            options.data = data;
+            pending = setTimeout(request, options.delay);
+        } else {
+            deferred = function () {
+                rerequest(data);
+            };
+        }
+    }
+
+    function request(synchronous) {
+        dispatched = true;
+        synchronous = !!synchronous;
+
+        $.ajax({
+            'async': synchronous,
+            'data': options.data,
+            'type': options.type,
+            'url': options.url,
+            'success': response
+        });
+    }
+
+    function response(response) {
+        if (options.callback) {
+            options.callback(response);
+        }
+
+        dispatched = false;
+
+        if (deferred) {
+            deferred();
+        }
+    }
+}
+
+DataExplorer.Voting = (function () {
+    var id, error, counter, star,
+        voted = false, pending = false;
+
+    function init(target, revision, vote, readOnly) {
+        target = $(target);
+
+        if (readOnly) {
+            // We might want to do something like pop up an error about how
+            // they can't vote on their own query here
+
+            return;
+        }
+
+        id = revision;
+        voted = vote;
+
+        star = target.find('span').click(click);
+        counter = target.find('.favoritecount');
+        error = target.find('.error-notification');
+    }
+
+    function click(event) {
+        if (!DataExplorer.options.User.isAuthenticated) {
+            error.show();
+
+            return;
+        }
+
+        if (pending) {
+            return;
+        }
+
+        pending = true;
+
+        $('/vote/' + id, { 'voteType': 'favorite' }, function (response) {
+            if (typeof response === 'object' && response.success) {
+                var count = parseInt(counter.text());
+
+                voted = !voted;
+
+                if (!voted) {
+                    counter.removeClass('favoritecount-selected');
+                    counter.text(count - 1);
+                    star.removeClass('star-on');
+                    star.addClass('star-off');
+                } else {
+                    counter.addClass('favoritecount-selected');
+                    counter.text(count + 1);
+                    star.removeClass('star-off');
+                    star.addClass('star-on');
+                }
+            }
+
+            pending = false;
+        });
+    }
+
+    return {
+        'init': init
+    }
+})();
+
+DataExplorer.ready(function () {
+    $(document).delegate('.error-notification', 'click', function () {
+        $(this).hide();
+    });
+});
 
 $.fn.tabs = function () {
     return this.delegate("a:not(.youarehere)", "click", function () {
