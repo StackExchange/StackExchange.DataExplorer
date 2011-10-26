@@ -9,8 +9,8 @@ namespace StackExchange.DataExplorer.Controllers
     public class VoteController : StackOverflowController
     {
         [HttpPost]
-        [Route(@"vote/{id:\d+}/{ownerId?:\d+}")]
-        public ActionResult Vote(int id, string voteType, int? ownerId)
+        [Route(@"vote/{id:\d+}")]
+        public ActionResult Vote(int id, string voteType)
         {
             if (Current.User.IsAnonymous || ownerId == CurrentUser.Id)
             {
@@ -19,6 +19,13 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (voteType == "favorite")
             {
+                Revision revision = QueryUtil.GetBasicRevision(id);
+
+                if (revision == null)
+                {
+                    return Json(new { error = true });
+                }
+
                 Vote vote = Current.DB.Query<Vote>(@"
                     SELECT
                         *
@@ -28,12 +35,12 @@ namespace StackExchange.DataExplorer.Controllers
                         VoteTypeId = @vote AND
                         RootId = @root AND
                         UserId = @user AND
-                        OwnerId " + (ownerId.HasValue ? " = @owner" : " IS NULL"),
+                        OwnerId " + (revision.OwnerId != null ? " = @owner" : " IS NULL"),
                     new
                     {
                         vote = (int)VoteType.Favorite,
                         root = id,
-                        owner = ownerId,
+                        owner = revision.OwnerId,
                         user = CurrentUser.Id
                     }
                 ).FirstOrDefault();
@@ -50,7 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             vote = (int)VoteType.Favorite,
                             root = id,
-                            owner = ownerId,
+                            owner = revision.OwnerId,
                             user = CurrentUser.Id,
                             creation = DateTime.UtcNow
                         }
