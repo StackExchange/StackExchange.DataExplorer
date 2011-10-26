@@ -451,7 +451,7 @@ namespace StackExchange.DataExplorer.Controllers
                         id = metadata.Id,
                         title = title,
                         description = description,
-                        query = revision.Id,
+                        query = revision.QueryId,
                         activity = DateTime.UtcNow
                     }
                 );
