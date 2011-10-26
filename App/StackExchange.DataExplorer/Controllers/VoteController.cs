@@ -75,12 +75,12 @@ namespace StackExchange.DataExplorer.Controllers
                         Votes = Votes + @change
                     WHERE
                         RevisionId = @root AND
-                        OwnerId " + (ownerId.HasValue ? " = @owner" : " IS NULL"),
+                        OwnerId " + (revision.OwnerId != null ? " = @owner" : " IS NULL"),
                     new
                     {
                         change = vote == null ? 1 : -1,
                         root = id,
-                        owner = ownerId
+                        owner = revision.OwnerId
                     }
                 );
             }
