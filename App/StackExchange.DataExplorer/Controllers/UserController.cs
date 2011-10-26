@@ -150,16 +150,16 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     new SubHeaderViewData
                     {
-                        Description = "saved",
-                        Title = "Saved Queries",
+                        Description = "mine",
+                        Title = "Queries you've worked on",
                         Href =
-                            "/users/" + user.Id + "?order_by=saved",
+                            "/users/" + user.Id + "?order_by=mine",
                         Selected = (order_by == "saved")
                     },
                     new SubHeaderViewData
                     {
                         Description = "favorite",
-                        Title = "Favorite Queries",
+                        Title = "Your favorite queries",
                         Href =
                             "/users/" + user.Id +
                             "?order_by=favorite",
@@ -168,7 +168,7 @@ namespace StackExchange.DataExplorer.Controllers
                     new SubHeaderViewData
                     {
                         Description = "recent",
-                        Title = "Recent Queries",
+                        Title = "Queries you've recently ran",
                         Href =
                             "/users/" + user.Id + "?order_by=recent",
                         Selected = (order_by == "recent")
@@ -180,56 +180,146 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (order_by == "recent")
             {
-                queries = Current.DB.Query<Metadata, QueryExecution, QueryExecutionViewData>(@"
-                    ",
-                    (metadata, execution) =>
+                queries = Current.DB.Query<Metadata, QueryExecution, Site, Query, QueryExecutionViewData>(@"
+                    SELECT
+                        metadata.*, execution.*, site.*, query.*
+                    FROM
+                        QueryExecutions execution
+                    JOIN
+                        Revisions
+                    ON
+                        execution.RevisionId = Revisions.Id AND execution.UserId = @user
+                    JOIN
+                        Sites site
+                    ON
+                        site.Id = execution.SiteId
+                    JOIN
+                        Queries query
+                    ON
+                        query.Id = execution.QueryId
+                    JOIN
+                        Metadata metadata
+                    ON
+                        (
+                            metadata.RevisionId = Revisions.RootId AND
+                            metadata.OwnerId = Revisions.OwnerId
+                        ) OR (
+                            metadata.RevisionId = Revisions.Id AND
+                            metadata.OwnerId = Revisions.OwnerId AND
+                            Revisions.RootId IS NULL
+                        ) OR (
+                            metadata.RevisionId = Revisions.Id AND
+                            metadata.OwnerId IS NULL AND
+                            Revisions.OwnerId IS NULL
+                        )
+                    ORDER BY execution.LastRun DESC",
+                    (metadata, execution, site, query) =>
                     {
                         return new QueryExecutionViewData
                         {
-
+                            Id = execution.RevisionId,
+                            Name = metadata.Title,
+                            DefaultName = query.AsTitle(),
+                            Description = metadata.Description,
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = false
                         };
+                    },
+                    new
+                    {
+                        user = id
                     }
                 );
             }
             else if (order_by == "favorite")
             {
-                queries = from v in db.Votes
-                            join e in db.SavedQueries on v.SavedQueryId equals e.Id
-                            join q in db.Queries on e.QueryId equals q.Id
-                            join s in db.Sites on e.SiteId equals s.Id
-                            where v.UserId == id && v.VoteTypeId == (int) VoteType.Favorite
-                            orderby e.LastEditDate descending
-                            select new QueryExecutionViewData
-                                        {
-                                            LastRun = e.LastEditDate ?? DateTime.Now,
-                                            SiteName = s.Name.ToLower(),
-                                            SQL = q.QueryBody,
-                                            Id = e.Id,
-                                            Name = e.Title,
-                                            Description = e.Description
-                                        };
+                queries = Current.DB.Query<Metadata>(@"
+                    SELECT
+                        metadata.*
+                    FROM
+                        Votes
+                    JOIN
+                        Metadata metadata
+                    ON
+                        Votes.RootId = metadata.RevisionId AND
+                        (
+                            Votes.OwnerId = metadata.OwnerId OR
+                            (Votes.OwnerId IS NULL AND metadata.OwnerID IS NULL)
+                        ) AND
+                        Votes.UserId = @user AND
+                        Votes.VoteTypeId = @vote",
+                    new
+                    {
+                        user = id,
+                        vote = (int)VoteType.Favorite
+                    }
+                ).Select<Metadata, QueryExecutionViewData>(
+                    (metadata) =>
+                    {
+                        return new QueryExecutionViewData
+                        {
+                            Id = metadata.RevisionId,
+                            Name = metadata.Title,
+                            // Figuring out the correct SQL-title here is an absolute pain,
+                            // so either we need to store it as an updatable default in
+                            // the metadata, or write the query to figure out which query
+                            // we should be pulling
+                            DefaultName = "unknown title",
+                            Description = metadata.Description,
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = true
+                        };
+                    }
+                );
             }
             else
             {
-                queries = from e in db.SavedQueries
-                            join q in db.Queries on e.QueryId equals q.Id
-                            join s in db.Sites on e.SiteId equals s.Id
-                            where e.UserId == id && !(e.IsDeleted ?? false)
-                            orderby e.LastEditDate descending
-                            select new QueryExecutionViewData
-                                        {
-                                            LastRun = e.LastEditDate ?? DateTime.Now,
-                                            SiteName = s.Name.ToLower(),
-                                            SQL = q.QueryBody,
-                                            Id = e.Id,
-                                            Name = e.Title,
-                                            Description = e.Description
-                                        };
+                queries = Current.DB.Query<Metadata>(@"
+                    SELECT
+                        *
+                    FROM
+                        Metadata
+                    WHERE
+                        OwnerId = @user
+                    ORDER BY
+                        LastActivity",
+                    new
+                    {
+                        user = id
+                    }
+                ).Select<Metadata, QueryExecutionViewData>(
+                    (metadata) =>
+                    {
+                        return new QueryExecutionViewData
+                        {
+                            Id = metadata.RevisionId,
+                            Name = metadata.Title,
+                            // Same excuse as above
+                            DefaultName = "unknown title",
+                            Description = metadata.Description,
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = true
+                        };
+                    }
+                );
             }
 
-            QueryExecutionViewData[] queriesArray = queries.Take(50).ToArray();
+            QueryExecutionViewData[] queriesArray = queries.ToArray();
 
             ViewData["Queries"] = queriesArray;
+
             if (queriesArray.Length == 0)
             {
                 if (order_by == "recent")
@@ -259,14 +349,15 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     if (user.Id == CurrentUser.Id)
                     {
-                        ViewData["EmptyMessage"] = "You have no saved queries, you can save any query after you run it";
+                        ViewData["EmptyMessage"] = "You haven't edited any queries";
                     }
                     else
                     {
-                        ViewData["EmptyMessage"] = "No saved queries";
+                        ViewData["EmptyMessage"] = "No queries";
                     }
                 }
             }
+
             return View(user);
         }
     }
