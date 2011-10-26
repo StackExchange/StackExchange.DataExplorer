@@ -12,7 +12,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"vote/{id:\d+}")]
         public ActionResult Vote(int id, string voteType)
         {
-            if (Current.User.IsAnonymous || ownerId == CurrentUser.Id)
+            if (Current.User.IsAnonymous)
             {
                 return new EmptyResult();
             }
@@ -21,7 +21,7 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 Revision revision = QueryUtil.GetBasicRevision(id);
 
-                if (revision == null)
+                if (revision == null || revision.OwnerId == CurrentUser.Id)
                 {
                     return Json(new { error = true });
                 }
