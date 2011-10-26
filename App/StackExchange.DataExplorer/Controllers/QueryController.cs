@@ -139,6 +139,11 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"query/run/{siteId:\d+}/{revisionId:\d+}")]
         public ActionResult Execute(int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
         {
+            if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
+            {
+                return Json(new { captcha = true });
+            }
+
             ActionResult response = null;
 
             try
