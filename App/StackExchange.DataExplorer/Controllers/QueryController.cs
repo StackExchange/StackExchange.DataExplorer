@@ -106,7 +106,7 @@ namespace StackExchange.DataExplorer.Controllers
                         RootId = parent != null ? (int?)parent.RootId : null
                     };
 
-                    SaveMetadata(revision, title, description);
+                    SaveMetadata(revision, title, description, true);
 
                     results.RevisionId = revisionId;
                 }
@@ -191,7 +191,7 @@ namespace StackExchange.DataExplorer.Controllers
                     throw new ApplicationException("Invalid revision ID");
                 }
 
-                SaveMetadata(revision, title, description);
+                SaveMetadata(revision, title, description, false);
             }
             catch (ApplicationException ex)
             {
@@ -380,7 +380,7 @@ namespace StackExchange.DataExplorer.Controllers
             return Json(response);
         }
 
-        private void SaveMetadata(Revision revision, string title, string description)
+        private void SaveMetadata(Revision revision, string title, string description, bool updateWithoutChange)
         {
             Metadata metadata = null;
 
@@ -424,20 +424,21 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 );
             }
-            else if (metadata.Title != title || metadata.Description != description)
+            else if (updateWithoutChange || metadata.Title != title || metadata.Description != description)
             {
                 Current.DB.Execute(@"
                     UPDATE
                         Metadata
                     SET
-                        Title = @title, Description = @description
+                        Title = @title, Description = @description, LastActivity = @activity
                     WHERE
                         Id = @id",
                     new
                     {
                         id = metadata.Id,
                         title = title,
-                        description = description
+                        description = description,
+                        activity = DateTime.UtcNow
                     }
                 );
             }
