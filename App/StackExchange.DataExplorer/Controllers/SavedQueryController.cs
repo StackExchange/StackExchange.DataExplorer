@@ -53,6 +53,11 @@ namespace StackExchange.DataExplorer.Controllers
             int rootId = revision.OwnerId != null ? revision.RootId.Value : revision.Id;
             int ownerId = revision.OwnerId ?? 0;
 
+            if (title.IsNullOrEmpty())
+            {
+                title = revision.Query.AsTitle();
+            }
+
             SetHeader(title);
             SelectMenuItem("Queries");
 
