@@ -9,50 +9,73 @@ namespace StackExchange.DataExplorer.Controllers
     public class VoteController : StackOverflowController
     {
         [HttpPost]
-        [Route(@"vote/{id:\d+}")]
-        public ActionResult Vote(int id, string voteType)
+        [Route(@"vote/{id:\d+}/{ownerId?:\d+}")]
+        public ActionResult Vote(int id, string voteType, int? ownerId)
         {
-            if (Current.User.IsAnonymous)
+            if (Current.User.IsAnonymous || ownerId == CurrentUser.Id)
             {
                 return new EmptyResult();
             }
 
-            DBContext db = Current.DB;
-
             if (voteType == "favorite")
             {
-                Vote vote = db.Votes.FirstOrDefault(v => v.SavedQueryId == id
-                                                         && v.UserId == Current.User.Id
-                                                         && v.VoteTypeId == (int) VoteType.Favorite);
+                Vote vote = Current.DB.Query<Vote>(@"
+                    SELECT
+                        *
+                    FROM
+                        Votes
+                    WHERE
+                        VoteTypeId = @vote AND
+                        RootId = @root AND
+                        UserId = @user AND
+                        OwnerId " + (ownerId.HasValue ? " = @owner" : " IS NULL"),
+                    new
+                    {
+                        vote = (int)VoteType.Favorite,
+                        root = id,
+                        owner = ownerId,
+                        user = CurrentUser.Id
+                    }
+                ).FirstOrDefault();
 
                 if (vote == null)
                 {
-                    vote = new Vote
-                               {
-                                   SavedQueryId = id,
-                                   VoteTypeId = (int) VoteType.Favorite,
-                                   UserId = Current.User.Id,
-                                   CreationDate = DateTime.UtcNow
-                               };
-                    db.Votes.InsertOnSubmit(vote);
+                    Current.DB.Execute(@"
+                        INSERT INTO Votes(
+                            OwnerId, RootId, UserId, VoteTypeId, CreationDate
+                        ) VALUES(
+                            @owner, @root, @user, @vote, @creation
+                        )",
+                        new
+                        {
+                            vote = (int)VoteType.Favorite,
+                            root = id,
+                            owner = ownerId,
+                            user = CurrentUser.Id,
+                            creation = DateTime.UtcNow
+                        }
+                    );
                 }
                 else
                 {
-                    db.Votes.DeleteOnSubmit(vote);
+                    Current.DB.Execute("DELETE Votes WHERE Id = @id", new { id = vote.Id });
                 }
 
-                db.SubmitChanges();
-
-                var favoriteCounts = from v in db.Votes
-                                     where v.VoteTypeId == (int) VoteType.Favorite && v.SavedQueryId == id
-                                     group v by v.SavedQueryId
-                                     into g
-                                     select new {Id = g.Key, Count = g.Count()};
-
-                SavedQuery savedQuery = db.SavedQueries.First(q => q.Id == id);
-                var firstCount = favoriteCounts.FirstOrDefault();
-                savedQuery.FavoriteCount = firstCount == null ? 0 : firstCount.Count;
-                db.SubmitChanges();
+                Current.DB.Execute(@"
+                    UPDATE
+                        Metadata
+                    SET
+                        Votes = Votes + @change
+                    WHERE
+                        RevisionId = @root AND
+                        OwnerId " + (ownerId.HasValue ? " = @owner" : " IS NULL"),
+                    new
+                    {
+                        change = vote == null ? 1 : -1,
+                        root = id,
+                        owner = ownerId
+                    }
+                );
             }
 
             return Json(new {success = true});
