@@ -39,9 +39,6 @@ namespace StackExchange.DataExplorer.Models
     partial void InsertSite(Site instance);
     partial void UpdateSite(Site instance);
     partial void DeleteSite(Site instance);
-    partial void InsertSavedQuery(SavedQuery instance);
-    partial void UpdateSavedQuery(SavedQuery instance);
-    partial void DeleteSavedQuery(SavedQuery instance);
     partial void InsertVote(Vote instance);
     partial void UpdateVote(Vote instance);
     partial void DeleteVote(Vote instance);
@@ -113,14 +110,6 @@ namespace StackExchange.DataExplorer.Models
 			get
 			{
 				return this.GetTable<Site>();
-			}
-		}
-		
-		public System.Data.Linq.Table<SavedQuery> SavedQueries
-		{
-			get
-			{
-				return this.GetTable<SavedQuery>();
 			}
 		}
 		
@@ -375,8 +364,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		private System.Nullable<bool> _HideSchema;
 		
-		private EntitySet<SavedQuery> _SavedQueries;
-		
 		private EntitySet<UserOpenId> _UserOpenIds;
 		
     #region Extensibility Method Definitions
@@ -417,7 +404,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		public User()
 		{
-			this._SavedQueries = new EntitySet<SavedQuery>(new Action<SavedQuery>(this.attach_SavedQueries), new Action<SavedQuery>(this.detach_SavedQueries));
 			this._UserOpenIds = new EntitySet<UserOpenId>(new Action<UserOpenId>(this.attach_UserOpenIds), new Action<UserOpenId>(this.detach_UserOpenIds));
 			OnCreated();
 		}
@@ -722,19 +708,6 @@ namespace StackExchange.DataExplorer.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_SavedQuery", Storage="_SavedQueries", ThisKey="Id", OtherKey="UserId")]
-		public EntitySet<SavedQuery> SavedQueries
-		{
-			get
-			{
-				return this._SavedQueries;
-			}
-			set
-			{
-				this._SavedQueries.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_UserOpenId", Storage="_UserOpenIds", ThisKey="Id", OtherKey="UserId")]
 		public EntitySet<UserOpenId> UserOpenIds
 		{
@@ -766,18 +739,6 @@ namespace StackExchange.DataExplorer.Models
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
-		}
-		
-		private void attach_SavedQueries(SavedQuery entity)
-		{
-			this.SendPropertyChanging();
-			entity.User = this;
-		}
-		
-		private void detach_SavedQueries(SavedQuery entity)
-		{
-			this.SendPropertyChanging();
-			entity.User = null;
 		}
 		
 		private void attach_UserOpenIds(UserOpenId entity)
@@ -833,8 +794,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		private string _ImageBackgroundColor;
 		
-		private EntitySet<SavedQuery> _SavedQueries;
-		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -877,7 +836,6 @@ namespace StackExchange.DataExplorer.Models
 		
 		public Site()
 		{
-			this._SavedQueries = new EntitySet<SavedQuery>(new Action<SavedQuery>(this.attach_SavedQueries), new Action<SavedQuery>(this.detach_SavedQueries));
 			OnCreated();
 		}
 		
@@ -1217,463 +1175,6 @@ namespace StackExchange.DataExplorer.Models
 					this._ImageBackgroundColor = value;
 					this.SendPropertyChanged("ImageBackgroundColor");
 					this.OnImageBackgroundColorChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Site_SavedQuery", Storage="_SavedQueries", ThisKey="Id", OtherKey="SiteId")]
-		public EntitySet<SavedQuery> SavedQueries
-		{
-			get
-			{
-				return this._SavedQueries;
-			}
-			set
-			{
-				this._SavedQueries.Assign(value);
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_SavedQueries(SavedQuery entity)
-		{
-			this.SendPropertyChanging();
-			entity.Site = this;
-		}
-		
-		private void detach_SavedQueries(SavedQuery entity)
-		{
-			this.SendPropertyChanging();
-			entity.Site = null;
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.SavedQueries")]
-	public partial class SavedQuery : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private System.Nullable<int> _QueryId;
-		
-		private System.Nullable<int> _UserId;
-		
-		private System.Nullable<int> _SiteId;
-		
-		private string _Title;
-		
-		private string _Description;
-		
-		private System.Nullable<System.DateTime> _CreationDate;
-		
-		private System.Nullable<System.DateTime> _LastEditDate;
-		
-		private System.Nullable<bool> _IsFeatured;
-		
-		private System.Nullable<bool> _IsSkipped;
-		
-		private System.Nullable<bool> _IsDeleted;
-		
-		private int _FavoriteCount;
-		
-		private bool _IsFirst;
-		
-		private EntityRef<User> _User;
-		
-		private EntityRef<Site> _Site;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnQueryIdChanging(System.Nullable<int> value);
-    partial void OnQueryIdChanged();
-    partial void OnUserIdChanging(System.Nullable<int> value);
-    partial void OnUserIdChanged();
-    partial void OnSiteIdChanging(System.Nullable<int> value);
-    partial void OnSiteIdChanged();
-    partial void OnTitleChanging(string value);
-    partial void OnTitleChanged();
-    partial void OnDescriptionChanging(string value);
-    partial void OnDescriptionChanged();
-    partial void OnCreationDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnCreationDateChanged();
-    partial void OnLastEditDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnLastEditDateChanged();
-    partial void OnIsFeaturedChanging(System.Nullable<bool> value);
-    partial void OnIsFeaturedChanged();
-    partial void OnIsSkippedChanging(System.Nullable<bool> value);
-    partial void OnIsSkippedChanged();
-    partial void OnIsDeletedChanging(System.Nullable<bool> value);
-    partial void OnIsDeletedChanged();
-    partial void OnFavoriteCountChanging(int value);
-    partial void OnFavoriteCountChanged();
-    partial void OnIsFirstChanging(bool value);
-    partial void OnIsFirstChanged();
-    #endregion
-		
-		public SavedQuery()
-		{
-			this._User = default(EntityRef<User>);
-			this._Site = default(EntityRef<Site>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int Id
-		{
-			get
-			{
-				return this._Id;
-			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_QueryId", DbType="Int")]
-		public System.Nullable<int> QueryId
-		{
-			get
-			{
-				return this._QueryId;
-			}
-			set
-			{
-				if ((this._QueryId != value))
-				{
-					this.OnQueryIdChanging(value);
-					this.SendPropertyChanging();
-					this._QueryId = value;
-					this.SendPropertyChanged("QueryId");
-					this.OnQueryIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserId", DbType="Int")]
-		public System.Nullable<int> UserId
-		{
-			get
-			{
-				return this._UserId;
-			}
-			set
-			{
-				if ((this._UserId != value))
-				{
-					if (this._User.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnUserIdChanging(value);
-					this.SendPropertyChanging();
-					this._UserId = value;
-					this.SendPropertyChanged("UserId");
-					this.OnUserIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SiteId", DbType="Int")]
-		public System.Nullable<int> SiteId
-		{
-			get
-			{
-				return this._SiteId;
-			}
-			set
-			{
-				if ((this._SiteId != value))
-				{
-					if (this._Site.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnSiteIdChanging(value);
-					this.SendPropertyChanging();
-					this._SiteId = value;
-					this.SendPropertyChanged("SiteId");
-					this.OnSiteIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Title", DbType="NVarChar(100)")]
-		public string Title
-		{
-			get
-			{
-				return this._Title;
-			}
-			set
-			{
-				if ((this._Title != value))
-				{
-					this.OnTitleChanging(value);
-					this.SendPropertyChanging();
-					this._Title = value;
-					this.SendPropertyChanged("Title");
-					this.OnTitleChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Description", DbType="NVarChar(1000)")]
-		public string Description
-		{
-			get
-			{
-				return this._Description;
-			}
-			set
-			{
-				if ((this._Description != value))
-				{
-					this.OnDescriptionChanging(value);
-					this.SendPropertyChanging();
-					this._Description = value;
-					this.SendPropertyChanged("Description");
-					this.OnDescriptionChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreationDate", DbType="DateTime")]
-		public System.Nullable<System.DateTime> CreationDate
-		{
-			get
-			{
-				return this._CreationDate;
-			}
-			set
-			{
-				if ((this._CreationDate != value))
-				{
-					this.OnCreationDateChanging(value);
-					this.SendPropertyChanging();
-					this._CreationDate = value;
-					this.SendPropertyChanged("CreationDate");
-					this.OnCreationDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LastEditDate", DbType="DateTime")]
-		public System.Nullable<System.DateTime> LastEditDate
-		{
-			get
-			{
-				return this._LastEditDate;
-			}
-			set
-			{
-				if ((this._LastEditDate != value))
-				{
-					this.OnLastEditDateChanging(value);
-					this.SendPropertyChanging();
-					this._LastEditDate = value;
-					this.SendPropertyChanged("LastEditDate");
-					this.OnLastEditDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsFeatured", DbType="Bit")]
-		public System.Nullable<bool> IsFeatured
-		{
-			get
-			{
-				return this._IsFeatured;
-			}
-			set
-			{
-				if ((this._IsFeatured != value))
-				{
-					this.OnIsFeaturedChanging(value);
-					this.SendPropertyChanging();
-					this._IsFeatured = value;
-					this.SendPropertyChanged("IsFeatured");
-					this.OnIsFeaturedChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsSkipped", DbType="Bit")]
-		public System.Nullable<bool> IsSkipped
-		{
-			get
-			{
-				return this._IsSkipped;
-			}
-			set
-			{
-				if ((this._IsSkipped != value))
-				{
-					this.OnIsSkippedChanging(value);
-					this.SendPropertyChanging();
-					this._IsSkipped = value;
-					this.SendPropertyChanged("IsSkipped");
-					this.OnIsSkippedChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsDeleted", DbType="Bit")]
-		public System.Nullable<bool> IsDeleted
-		{
-			get
-			{
-				return this._IsDeleted;
-			}
-			set
-			{
-				if ((this._IsDeleted != value))
-				{
-					this.OnIsDeletedChanging(value);
-					this.SendPropertyChanging();
-					this._IsDeleted = value;
-					this.SendPropertyChanged("IsDeleted");
-					this.OnIsDeletedChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FavoriteCount", DbType="Int")]
-		public int FavoriteCount
-		{
-			get
-			{
-				return this._FavoriteCount;
-			}
-			set
-			{
-				if ((this._FavoriteCount != value))
-				{
-					this.OnFavoriteCountChanging(value);
-					this.SendPropertyChanging();
-					this._FavoriteCount = value;
-					this.SendPropertyChanged("FavoriteCount");
-					this.OnFavoriteCountChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsFirst", DbType="bit")]
-		public bool IsFirst
-		{
-			get
-			{
-				return this._IsFirst;
-			}
-			set
-			{
-				if ((this._IsFirst != value))
-				{
-					this.OnIsFirstChanging(value);
-					this.SendPropertyChanging();
-					this._IsFirst = value;
-					this.SendPropertyChanged("IsFirst");
-					this.OnIsFirstChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_SavedQuery", Storage="_User", ThisKey="UserId", OtherKey="Id", IsForeignKey=true)]
-		public User User
-		{
-			get
-			{
-				return this._User.Entity;
-			}
-			set
-			{
-				User previousValue = this._User.Entity;
-				if (((previousValue != value) 
-							|| (this._User.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._User.Entity = null;
-						previousValue.SavedQueries.Remove(this);
-					}
-					this._User.Entity = value;
-					if ((value != null))
-					{
-						value.SavedQueries.Add(this);
-						this._UserId = value.Id;
-					}
-					else
-					{
-						this._UserId = default(Nullable<int>);
-					}
-					this.SendPropertyChanged("User");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Site_SavedQuery", Storage="_Site", ThisKey="SiteId", OtherKey="Id", IsForeignKey=true)]
-		public Site Site
-		{
-			get
-			{
-				return this._Site.Entity;
-			}
-			set
-			{
-				Site previousValue = this._Site.Entity;
-				if (((previousValue != value) 
-							|| (this._Site.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Site.Entity = null;
-						previousValue.SavedQueries.Remove(this);
-					}
-					this._Site.Entity = value;
-					if ((value != null))
-					{
-						value.SavedQueries.Add(this);
-						this._SiteId = value.Id;
-					}
-					else
-					{
-						this._SiteId = default(Nullable<int>);
-					}
-					this.SendPropertyChanged("Site");
 				}
 			}
 		}

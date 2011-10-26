@@ -191,9 +191,11 @@ namespace StackExchange.DataExplorer.Models
             queryExecutions.ForEach(qe => qe.UserId = masterId);
 
             // Saved Queries
+            /*
             var savedQueries = db.SavedQueries.Where(sq => sq.UserId == mergeId).ToList();
             log.AppendLine(string.Format("Moving {0} saved queries over", savedQueries.Count));
             savedQueries.ForEach(sq => sq.UserId = masterId);
+            */
 
             // User Open Ids
             var userOpenIds = db.UserOpenIds.Where(uoi => uoi.UserId == masterId).ToList();

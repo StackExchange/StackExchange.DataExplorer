@@ -26,7 +26,6 @@
       <Column Name="LastActivityDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="LastSeenDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="HideSchema" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
-      <Association Name="User_SavedQuery" Member="SavedQueries" ThisKey="Id" OtherKey="UserId" Type="SavedQuery" />
       <Association Name="User_UserOpenId" Member="UserOpenIds" ThisKey="Id" OtherKey="UserId" Type="UserOpenId" />
     </Type>
   </Table>
@@ -49,26 +48,6 @@
       <Column Name="TotalTags" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="LastPost" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="ImageBackgroundColor" Type="System.String" DbType="varchar(6)" CanBeNull="true" UpdateCheck="Never" />
-      <Association Name="Site_SavedQuery" Member="SavedQueries" ThisKey="Id" OtherKey="SiteId" Type="SavedQuery" />
-    </Type>
-  </Table>
-  <Table Name="dbo.SavedQueries" Member="SavedQueries">
-    <Type Name="SavedQuery">
-      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="QueryId" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="UserId" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="SiteId" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
-      <Column Name="Description" Type="System.String" DbType="NVarChar(1000)" CanBeNull="true" />
-      <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="LastEditDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="IsFeatured" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
-      <Column Name="IsSkipped" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
-      <Column Name="IsDeleted" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
-      <Column Name="FavoriteCount" Type="System.Int32" DbType="Int" CanBeNull="false" />
-      <Column Name="IsFirst" Type="System.Boolean" DbType="bit" CanBeNull="false" />
-      <Association Name="User_SavedQuery" Member="User" ThisKey="UserId" OtherKey="Id" Type="User" IsForeignKey="true" />
-      <Association Name="Site_SavedQuery" Member="Site" ThisKey="SiteId" OtherKey="Id" Type="Site" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.Votes" Member="Votes">
