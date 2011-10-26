@@ -385,6 +385,16 @@ namespace StackExchange.DataExplorer.Controllers
         {
             Metadata metadata = null;
 
+            if (title.IsNullOrEmpty())
+            {
+                title = null;
+            }
+
+            if (description.IsNullOrEmpty())
+            {
+                description = null;
+            }
+
             if (!CurrentUser.IsAnonymous)
             {
                 metadata = Current.DB.Query<Metadata>(@"

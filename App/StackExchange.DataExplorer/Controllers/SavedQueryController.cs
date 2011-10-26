@@ -351,7 +351,8 @@ namespace StackExchange.DataExplorer.Controllers
                         return new QueryExecutionViewData
                         {
                             Id = metadata.RevisionId,
-                            Name = metadata.Title.IsNullOrEmptyReturn(query.AsTitle()),
+                            Name = metadata.Title,
+                            DefaultName = query.AsTitle(),
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
@@ -400,7 +401,8 @@ namespace StackExchange.DataExplorer.Controllers
                         return new QueryExecutionViewData
                         {
                             Id = revision.Id,
-                            Name = metadata.Title.IsNullOrEmptyReturn(query.AsTitle()),
+                            Name = metadata.Title,
+                            DefaultName = query.AsTitle(),
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
@@ -445,7 +447,8 @@ namespace StackExchange.DataExplorer.Controllers
                     (metadata, query, user) => {
                         return new QueryExecutionViewData {
                             Id = metadata.RevisionId,
-                            Name = metadata.Title.IsNullOrEmptyReturn(query.AsTitle()),
+                            Name = metadata.Title,
+                            DefaultName = query.AsTitle(),
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
