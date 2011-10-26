@@ -237,9 +237,9 @@ namespace StackExchange.DataExplorer.Controllers
             }
             else if (order_by == "favorite")
             {
-                queries = Current.DB.Query<Metadata>(@"
+                queries = Current.DB.Query<Metadata, Query, QueryExecutionViewData>(@"
                     SELECT
-                        metadata.*
+                        metadata.*, query.*
                     FROM
                         Votes
                     JOIN
@@ -251,59 +251,56 @@ namespace StackExchange.DataExplorer.Controllers
                             (Votes.OwnerId IS NULL AND metadata.OwnerID IS NULL)
                         ) AND
                         Votes.UserId = @user AND
-                        Votes.VoteTypeId = @vote",
+                        Votes.VoteTypeId = @vote
+                    JOIN
+                        Queries query
+                    ON
+                        metadata.LastQueryId = query.Id", // Strictly speaking this join is incorrect, but
+                                                          // if you couldn't be bothered to put in a title
+                                                          // I think (hope) it's "good enough"
+                    (metadata, query) =>
+                    {
+                        return new QueryExecutionViewData
+                        {
+                            Id = metadata.RevisionId,
+                            Name = metadata.Title,
+                            DefaultName = query.AsTitle(),
+                            Description = metadata.Description,
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = true
+                        };
+                    },
                     new
                     {
                         user = id,
                         vote = (int)VoteType.Favorite
                     }
-                ).Select<Metadata, QueryExecutionViewData>(
-                    (metadata) =>
-                    {
-                        return new QueryExecutionViewData
-                        {
-                            Id = metadata.RevisionId,
-                            Name = metadata.Title,
-                            // Figuring out the correct SQL-title here is an absolute pain,
-                            // so either we need to store it as an updatable default in
-                            // the metadata, or write the query to figure out which query
-                            // we should be pulling
-                            DefaultName = "unknown title",
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            Creator = user,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = true
-                        };
-                    }
                 );
             }
             else
             {
-                queries = Current.DB.Query<Metadata>(@"
+                queries = Current.DB.Query<Metadata, Query, QueryExecutionViewData>(@"
                     SELECT
                         *
                     FROM
-                        Metadata
-                    WHERE
-                        OwnerId = @user
+                        Metadata metadata
+                    JOIN
+                        Queries query
+                    ON
+                        metadata.LastQueryId = query.Id AND OwnerId = @user
                     ORDER BY
-                        LastActivity",
-                    new
-                    {
-                        user = id
-                    }
-                ).Select<Metadata, QueryExecutionViewData>(
-                    (metadata) =>
+                        metadata.LastActivity",
+                    (metadata, query) =>
                     {
                         return new QueryExecutionViewData
                         {
                             Id = metadata.RevisionId,
                             Name = metadata.Title,
-                            // Same excuse as above
-                            DefaultName = "unknown title",
+                            DefaultName = query.AsTitle(),
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
@@ -312,6 +309,10 @@ namespace StackExchange.DataExplorer.Controllers
                             SiteName = Site.Name.ToLower(),
                             UseLatestLink = true
                         };
+                    },
+                    new
+                    {
+                        user = id
                     }
                 );
             }
