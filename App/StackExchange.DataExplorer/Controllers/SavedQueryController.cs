@@ -160,8 +160,10 @@ namespace StackExchange.DataExplorer.Controllers
         {
             if (Current.User.IsAdmin)
             {
+                /*
                 Current.DB.SavedQueries.FirstOrDefault(q => q.Id == id).IsSkipped = skip;
                 Current.DB.SubmitChanges();
+                 */
             }
 
             return Content("success");
