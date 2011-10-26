@@ -481,16 +481,6 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeaderInfo(null);
         }
 
-        private Query FindQuery(int id)
-        {
-            return Current.DB.Queries.FirstOrDefault(q => q.Id == id);
-        }
-
-        private SavedQuery FindSavedQuery(int id)
-        {
-            return Current.DB.SavedQueries.FirstOrDefault(s => s.Id == id);
-        }
-
         private void SetHeaderInfo(int? edit)
         {
             if (edit != null)
