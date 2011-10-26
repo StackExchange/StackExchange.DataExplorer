@@ -237,7 +237,42 @@ namespace StackExchange.DataExplorer.Controllers
 
             IEnumerable<QueryExecutionViewData> queries;
 
-            if (order_by == "recent")
+            if (order_by == "featured")
+            {
+                queries = Current.DB.Query<Metadata, Query, User, QueryExecutionViewData>(@"
+                    SELECT
+                        *
+                    FROM
+                        Metadata metadata
+                    JOIN
+                        Queries query
+                    ON
+                        query.Id = metadata.LastQueryId
+                    LEFT OUTER JOIN
+                        Users [user]
+                    ON
+                        metadata.OwnerId = [user].Id
+                    ORDER BY
+                        metadata.LastActivity DESC",
+                    (metadata, query, user) =>
+                    {
+                        return new QueryExecutionViewData
+                        {
+                            Id = metadata.RevisionId,
+                            Name = metadata.Title,
+                            DefaultName = query.AsTitle(),
+                            Description = metadata.Description,
+                            FavoriteCount = metadata.Votes,
+                            Views = metadata.Views,
+                            LastRun = metadata.LastActivity,
+                            Creator = user,
+                            SiteName = Site.Name.ToLower(),
+                            UseLatestLink = true
+                        };
+                    }
+                );
+            }
+            else if (order_by == "recent")
             {
                 queries = Current.DB.Query<Metadata, Query, User, QueryExecutionViewData>(@"
                     SELECT
