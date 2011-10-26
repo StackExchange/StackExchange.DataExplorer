@@ -310,7 +310,7 @@ namespace StackExchange.DataExplorer.Models
 
         public int SavedQueriesCount
         {
-            get { return Current.DB.Query<int>("select count(*) from SavedQueries where UserId = @userId", new { userId = Id }).FirstOrDefault(); }
+            get { return Current.DB.Query<int>("SELECT COUNT(*) FROM Metadata WHERE OwnerId = @userId", new { userId = Id }).FirstOrDefault(); }
         }
 
         public int QueryExecutionsCount
