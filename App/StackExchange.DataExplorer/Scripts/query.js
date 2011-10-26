@@ -297,14 +297,6 @@ DataExplorer.ready(function () {
         } else {
             
         }
-        
-        if (results && isGraph(results)) {
-            renderGraph(results);
-        }
-
-        if (response.executionPlan && QP && typeof QP.drawLines === 'function') {
-            $('#executionPlan').html(response.executionPlan);
-        }
 
         if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
             slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
@@ -326,32 +318,46 @@ DataExplorer.ready(function () {
             'slug': slug
         });
 
+        response.graph = isGraph(results);
+
         $('#query-results .miniTabs a.optional').each(function () {
             $(this).toggle(!!response[this.href.from('#', false)]);
         });
 
+        $('#query-results .miniTabs a:first').click();
+
         // We have to start showing the contents so that SlickGrid can figure
         // out the heights of its components correctly
-        $('.result-option').fadeIn();
-
-        prepareTable($('#resultset'), results, response);
-        
-        // Currently this always gives us 500 because it's what #resultset has
-        // set in CSS. SlickGrid needs the explicit height to render correctly
-        // though, so once we figure out how to resize #resultset dynamically
-        // then this will be a bit more useful.
-        $('#query-results .panel').each(function () {
-            var currentHeight = $(this).height();
-
-            if (currentHeight >= maxHeight) {
-                height = maxHeight;
-                return false;
+        $('.result-option').fadeIn('fast').promise().done(function () {
+            if (response.graph) {
+                // Work-around for the div being display: none; originally
+                $('#graphTab').click();
+                renderGraph(results);
             }
 
-            height = Math.max(currentHeight, height);
-        }).animate({ 'height': Math.min(height, maxHeight) });
+            $('#query-results .miniTabs a:first').click();
 
-        $('#query-results .miniTabs a:first').click();
+            if (response.executionPlan && QP && typeof QP.drawLines === 'function') {
+                $('#executionPlan').html(response.executionPlan);
+            }
+
+            prepareTable($('#resultset'), results, response);
+        
+            // Currently this always gives us 500 because it's what #resultset has
+            // set in CSS. SlickGrid needs the explicit height to render correctly
+            // though, so once we figure out how to resize #resultset dynamically
+            // then this will be a bit more useful.
+            $('#query-results .panel').each(function () {
+                var currentHeight = $(this).height();
+
+                if (currentHeight >= maxHeight) {
+                    height = maxHeight;
+                    return false;
+                }
+
+                height = Math.max(currentHeight, height);
+            }).animate({ 'height': Math.min(height, maxHeight) });
+        });
     }
 
     function showError(response) {

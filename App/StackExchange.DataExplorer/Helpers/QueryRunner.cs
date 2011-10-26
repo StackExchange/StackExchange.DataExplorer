@@ -416,7 +416,7 @@ namespace StackExchange.DataExplorer.Helpers
                                 if (col is DateTime)
                                 {
                                     var date = (DateTime)col;
-                                    col = date.ToString("yyyy-MM-dd H:mm:ss");
+                                    col = date.ToJavascriptTime();
                                 }
                                 row.Add(col);
                             }

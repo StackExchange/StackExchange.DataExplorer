@@ -827,6 +827,11 @@ ul.linkbar li {
   height: 500px;
 }
 
+#graph {
+  width: 960px;
+  height: 500px;
+}
+
 p.tagline{
   color: #666;
 }
