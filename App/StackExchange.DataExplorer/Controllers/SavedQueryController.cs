@@ -108,7 +108,7 @@ namespace StackExchange.DataExplorer.Controllers
                 ReadOnly = revision.OwnerId == CurrentUser.Id
             };
 
-            if (!Current.User.IsAnonymous)
+            if (!Current.User.IsAnonymous && revision.OwnerId != CurrentUser.Id)
             {
                 voting.HasVoted = Current.DB.Query<Vote>(@"
                     SELECT
@@ -145,7 +145,23 @@ namespace StackExchange.DataExplorer.Controllers
                 QueryViewTracker.TrackQueryView(GetRemoteIP(), rootId, ownerId);
             }
 
-            return View("Viewer", revision);
+            var viewmodel = new QueryExecutionViewData
+            {
+                QueryVoting = voting,
+                Id = revision.Id,
+                Name = revision.Metadata.Title,
+                DefaultName = revision.Query.AsTitle(),
+                Description = revision.Metadata.Description,
+                FavoriteCount = revision.Metadata.Votes,
+                Views = revision.Metadata.Views,
+                LastRun = revision.Metadata.LastActivity,
+                Creator = revision.Owner,
+                SiteName = Site.Name.ToLower(),
+                SQL = revision.Query.QueryBody,
+                UseLatestLink = false
+            };
+
+            return View("Viewer", viewmodel);
         }
 
         [HttpPost]
@@ -254,7 +270,7 @@ namespace StackExchange.DataExplorer.Controllers
                     JOIN
                         Queries query
                     ON
-                        query.Id = metadata.LastQueryId
+                        query.Id = metadata.LastQueryId AND metadata.Featured = 1
                     LEFT OUTER JOIN
                         Users [user]
                     ON

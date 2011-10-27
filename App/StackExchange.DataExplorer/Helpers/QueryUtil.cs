@@ -75,7 +75,7 @@ namespace StackExchange.DataExplorer.Helpers
         public static Revision GetCompleteRevision(int revisionId)
         {
             // The metadata join condition is pretty ugly...
-            return Current.DB.Query<Revision, Query, Metadata, Revision>(@"
+            return Current.DB.Query<Revision, Query, Metadata, User, Revision>(@"
                 SELECT
                     *
                 FROM
@@ -98,11 +98,16 @@ namespace StackExchange.DataExplorer.Helpers
                         metadata.RevisionId = revision.Id AND
                         metadata.OwnerId IS NULL AND
                         revision.OwnerId IS NULL
-                    )",
-                (revision, query, metadata) =>
+                    )
+                LEFT OUTER JOIN
+                    Users [user]
+                ON
+                    revision.OwnerId = [user].Id",
+                (revision, query, metadata, user) =>
                 {
                     revision.Query = query;
                     revision.Metadata = metadata;
+                    revision.Owner = user;
 
                     return revision;
                 },
@@ -123,7 +128,7 @@ namespace StackExchange.DataExplorer.Helpers
         /// <returns></returns>
         public static Revision GetFeaturedCompleteRevision(int userId, int rootId)
         {
-            return Current.DB.Query<Revision, Query, Metadata, Revision>(@"
+            return Current.DB.Query<Revision, Query, Metadata, User, Revision>(@"
                 SELECT
                     *
                 FROM
@@ -139,13 +144,18 @@ namespace StackExchange.DataExplorer.Helpers
                 ON
                     (metadata.RevisionId = @root OR metadata.RevisionId = revision.RootId) AND
                     metadata.OwnerId = @owner
+                LEFT OUTER JOIN
+                    Users [user]
+                ON
+                    revision.OwnerId = [user].Id
                 ORDER BY
                     revision.IsFeature DESC, revision.CreationDate DESC
                 ",
-                (revision, query, metadata) =>
+                (revision, query, metadata, user) =>
                 {
                     revision.Query = query;
                     revision.Metadata = metadata;
+                    revision.Owner = user;
 
                     return revision;
                 },

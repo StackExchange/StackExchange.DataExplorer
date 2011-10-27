@@ -7,18 +7,21 @@ namespace StackExchange.DataExplorer.ViewModel
     public struct QueryExecutionViewData
     {
         private string name;
+        private QueryVoting voting;
 
         public QueryVoting QueryVoting
         {
             get
             {
-                return new QueryVoting
-                           {
-                               HasVoted = false,
-                               TotalVotes = FavoriteCount,
-                               ReadOnly = true
-                           };
+                return voting ?? new QueryVoting
+                {
+                    HasVoted = false,
+                    TotalVotes = FavoriteCount,
+                    ReadOnly = true
+                };
             }
+
+            set { voting = value; }
         }
 
         public string Name
@@ -37,28 +40,33 @@ namespace StackExchange.DataExplorer.ViewModel
         {
             get
             {
-                // {0} - Site Name
-                // {1} - Revision / Root ID
-                // {2} - User ID
-                // {3} - Slug
-                string format = "/{0}/query/";
-
-                if (UseLatestLink && Creator != null)
-                {
-                    format += "{2}/{1}{3}";
-                }
-                else
-                {
-                    format += "{1}{3}";
-                }
-
-                return string.Format(format, new object[] {
-                    SiteName,
-                    Id,
-                    Creator != null ? Creator.Id : 0,
-                    name != null ? "/" + name.URLFriendly() : ""
-                });
+                return URLWithStub(null);
             }
+        }
+
+        public string URLWithStub(string stub)
+        {
+            // {0} - Site Name
+            // {1} - Revision / Root ID
+            // {2} - User ID
+            // {3} - Slug
+            string format = "/{0}/query/" + (stub != null ? stub + "/" : "");
+
+            if (UseLatestLink && Creator != null)
+            {
+                format += "{2}/{1}{3}";
+            }
+            else
+            {
+                format += "{1}{3}";
+            }
+
+            return string.Format(format, new object[] {
+                SiteName,
+                Id,
+                Creator != null ? Creator.Id : 0,
+                name != null && stub == null ? "/" + name.URLFriendly() : ""
+            });
         }
 
         public bool Featured { get; set; }

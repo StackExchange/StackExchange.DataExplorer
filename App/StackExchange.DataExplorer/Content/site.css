@@ -1415,9 +1415,14 @@ font-weight:bold;
 
 #queryBodyText {
   line-height: 15px;
-  margin-bottom: 15px;
+  margin-bottom: 30px;
+  padding: 8px 8px 8px 8px;
 }
 
+#edit-link {
+  float: right;
+  margin-right: 0px;
+}
 
 .user-details td {
   padding-bottom: 10px;
