@@ -10,6 +10,9 @@
     @Html.Raw(AssetPackager.LinkCss("query"))
 }
 
+<style type="text/css">
+    @Html.Raw(Current.Controller.Site.TagCss)
+</style>
 <div id="query">
     <form id="runQueryForm" action="/query/@ViewData["query_action"]" method='post'>
         <div id="metadata">

@@ -142,7 +142,8 @@ DataExplorer.ready(function () {
         metadata = $('#query-metadata .info'),
         gridOptions = {
             'enableCellNavigation': false,
-            'enableColumnReorder': false
+            'enableColumnReorder': false,
+            'enableCellRangeSelection': false
         },
         error = $('#error-message'),
         form = $('#runQueryForm');
@@ -357,6 +358,10 @@ DataExplorer.ready(function () {
 
                 height = Math.max(currentHeight, height);
             }).animate({ 'height': Math.min(height, maxHeight) });
+
+            $('html, body').animate({
+                scrollTop: $("#query-results").offset().top - 10
+            }, 500);
         });
     }
 
@@ -375,30 +380,44 @@ DataExplorer.ready(function () {
     // Note that we destroy resultset in this function!
     function prepareTable(target, resultset, response) {
         var grid, columns = resultset.columns, rows = resultset.rows,
-            row, options;
-
-        for (var i = 0; i < columns.length; ++i) {
-            columns[i] = {
-                'cssClass': columns[i].type === 'Number' ? 'number' : 'text',
-                'id': columns[i].name.asVariable(),
-                'name': columns[i].name,
-                'field': columns[i].name.asVariable(),
-                'type': columns[i].type.asVariable()
-            };
-        }
+            row, options, hasTags = false, widths = [];
 
         for (var i = 0; i < rows.length; ++i) {
             row = {};
 
             for (var c = 0; c < columns.length; ++c) {
-                row[columns[c].field] = rows[i][c];
+                row[columns[c].name.asVariable()] = rows[i][c];
+
+                if (rows[i][c] && (!widths[c] || rows[i][c].length > widths[c])) {
+                    widths[c] = rows[i][c].length;
+                }
             }
 
             rows[i] = row;
         }
 
+        for (var i = 0; i < columns.length; ++i) {
+            if (columns[i].type === 'Date') {
+                widths[i] = 14;
+            }
+
+            columns[i] = {
+                'cssClass': columns[i].type === 'Number' ? 'number' : 'text',
+                'id': columns[i].name.asVariable(),
+                'name': columns[i].name,
+                'field': columns[i].name.asVariable(),
+                'type': columns[i].type.asVariable(),
+                'width': Math.min(widths[i] || 5, 25) * 12 
+            };
+
+            if (columns[i].field === 'tags' || columns[i].field === 'tagName') {
+                hasTags = true;
+            }
+        }
+
         options = $.extend({}, gridOptions, {
-            'formatterFactory': new ColumnFormatter(response.url)
+            'formatterFactory': new ColumnFormatter(response.url),
+            'rowHeight': hasTags ? 35 : 25
         });
 
         grid = new Slick.Grid(target, rows, columns, options);
@@ -506,9 +525,7 @@ function splitTags(s) {
 var current_results;
 
 function scrollToResults() {
-    //var target_offset = $("#toolbar").offset();
-    //var target_top = target_offset.top - 10;
-    //$('html, body').animate({ scrollTop: target_top }, 500);
+
 }
 
 // this is from SO 901115
