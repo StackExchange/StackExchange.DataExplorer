@@ -46,7 +46,7 @@
         @Html.Partial("Captcha", Current.NewRecaptchControl())
     }
         <ul id="site-selector" class="result-option">
-        @foreach (Site site in (IEnumerable<Site>)ViewData["Sites"])
+        @foreach (Site site in Site.GetSites())
         {
             if (site.Id == Current.Controller.Site.Id)
             {

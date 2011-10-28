@@ -50,6 +50,24 @@ namespace StackExchange.DataExplorer.Models
             return new SqlConnection(ConnectionString);
         }
 
+        public static IEnumerable<Site> GetSites()
+        {
+            // Could/should probably just cache this somewhere
+            return Current.DB.Query<Site>(@"
+                SELECT
+                    sites.*
+                FROM
+                    Sites sites
+                JOIN
+                    Sites mains
+                ON
+                    REPLACE(sites.Url, 'http://meta.', 'http://') = mains.Url
+                ORDER BY
+                    mains.TotalQuestions DESC,
+                    CHARINDEX('http://meta.', sites.Url)"
+            );
+        }
+
         public void UpdateStats()
         {
             using (SqlConnection cnn = GetConnection())
