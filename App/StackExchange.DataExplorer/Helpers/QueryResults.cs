@@ -117,6 +117,7 @@ namespace StackExchange.DataExplorer.Helpers
                 return this;
             }
 
+            this.Messages = cache.Messages;
             this.ResultSets = JsonConvert.DeserializeObject<List<ResultSet>>(cache.Results);
             this.ExecutionPlan = cache.ExecutionPlan;
 

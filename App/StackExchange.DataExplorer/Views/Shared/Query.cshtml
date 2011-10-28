@@ -3,6 +3,8 @@
 @using StackExchange.DataExplorer.Models
 @{
     Layout = "~/Views/Shared/Master.cshtml";
+
+    var cache = ViewData["cached_results"] as QueryResults;
 }
 
 @section AdditionalStyles
@@ -88,3 +90,13 @@
 @Html.Raw(AssetPackager.ScriptSrc("jquery.validate"))
 @Html.Raw(AssetPackager.ScriptSrc("query"))
 @Html.Raw(AssetPackager.ScriptSrc("flot"))
+@if (cache != null)
+{
+<script type="text/javascript">
+    DataExplorer.ready(function () {
+        if (loadCachedResults) {
+            loadCachedResults(@Html.Raw(cache.ToJson().Replace("/", "\\/")));
+        }
+    });
+</script>
+}

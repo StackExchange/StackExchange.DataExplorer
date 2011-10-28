@@ -137,8 +137,18 @@ namespace StackExchange.DataExplorer.Controllers
 
             ViewData["QueryVoting"] = voting;
             ViewData["Sites"] = Current.DB.Sites.ToList();
-            ViewData["cached_results"] = cachedResults;
             ViewData["query_action"] = "run/" + Site.Id + "/" + revision.Id;
+
+            if (cachedResults != null)
+            {
+                ViewData["cached_results"] = new QueryResults
+                {
+                    RevisionId = revision.Id,
+                    SiteId = Site.Id,
+                    SiteName = Site.Name,
+                    Slug = revision.Metadata.Title.URLFriendly()
+                }.WithCache(cachedResults);
+            }
 
             if (!IsSearchEngine())
             {

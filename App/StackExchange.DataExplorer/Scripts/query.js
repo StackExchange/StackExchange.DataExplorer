@@ -365,6 +365,9 @@ DataExplorer.ready(function () {
         });
     }
 
+    // Temporary workaround
+    window.loadCachedResults = parseQueryResponse;
+
     function showError(response) {
         if (response && !response.error) {
             return false;

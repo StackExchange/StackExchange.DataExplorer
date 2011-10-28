@@ -181,7 +181,6 @@ namespace StackExchange.DataExplorer.Controllers
             return response;
         }
 
-
         [HttpPost]
         [Route(@"query/update/{revisionId:\d+}")]
         public ActionResult UpdateMetadata(int revisionId, string title, string description)
@@ -282,10 +281,6 @@ namespace StackExchange.DataExplorer.Controllers
 
             ViewData["query_action"] = "save/" + Site.Id +  "/" + revision.RootId;
             ViewData["revision"] = revision;
-            ViewData["cached_results"] = QueryUtil.GetCachedResults(
-                new ParsedQuery(revision.Query.QueryBody, Request.Params),
-                Site.Id
-            );
 
             return View("Editor", Site);
         }
