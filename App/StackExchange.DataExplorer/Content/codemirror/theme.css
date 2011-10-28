@@ -1,23 +1,26 @@
-.cm-s-default span.cm-keyword    { color: #0000FF; }
 .cm-s-default span.cm-atom       { color: #219;    }
-.cm-s-default span.cm-number     { color: #008B8B; }
 .cm-s-default span.cm-def        { color: #00f;    }
-.cm-s-default span.cm-variable   { color: #650000; }
-.cm-s-default span.cm-variable-2 { color: #800080; }
 .cm-s-default span.cm-variable-3 { color: #0a5;    }
 .cm-s-default span.cm-property   { color: black;   }
-.cm-s-default span.cm-operator   { color: #999999; }
-.cm-s-default span.cm-comment    { color: #008000; }
 .cm-s-default span.cm-string     { color: #a11;    }
 .cm-s-default span.cm-string-2   { color: #f50;    }
 .cm-s-default span.cm-meta       { color: #555;    }
 .cm-s-default span.cm-error      { color: #f00;    }
 .cm-s-default span.cm-qualifier  { color: #555;    }
-.cm-s-default span.cm-builtin    { color: #8C4D03; }
 .cm-s-default span.cm-bracket    { color: #cc7;    }
 .cm-s-default span.cm-tag        { color: #170;    }
 .cm-s-default span.cm-attribute  { color: #00c;    }
-.cm-s-default span.cm-sql-word   { color: #000000; }
+
+.cm-s-default span.cm-sql-var      { color: #650000; }
+.cm-s-default span.cm-sql-type     { color: #800080; }
+.cm-s-default span.cm-sql-comment  { color: #008000; }
+.cm-s-default span.cm-sql-operator { color: #999999; }
+.cm-s-default span.cm-sql-number   { color: #008B8B; }
+.cm-s-default span.cm-sql-function { color: #8C4D03; }
+.cm-s-default span.cm-sql-keyword  { color: #0000FF; }
+.cm-s-default span.cm-sql-literal  { color: #008000; }
+.cm-s-default span.cm-sql-word     { color: #000000; }
+
 .cm-s-default .error-line { 
   background-color: #F5E9E9;
   border-radius: 3px 3px;

@@ -1,20 +1,19 @@
-﻿// Adapted version of the PL/SQL highlighter
-// See http://codemirror.net/mode/plsql/index.html
-CodeMirror.defineMode("sqlvariant", function (config, parserConfig) {
+﻿// See https://github.com/myape/CodeMirror2/blob/0b109319eda1e12f9d1a7024c7be640eda21ae36/mode/sql/sql.js
+CodeMirror.defineMode("sql", function (config, parserConfig) {
     var indentUnit = config.indentUnit,
-        keywords = parserConfig.keywords || {},
-        functions = parserConfig.functions || {},
-        types = parserConfig.types || {},
-        sqlplus = parserConfig.sqlplus || {},
-        multiLineStrings = parserConfig.multiLineStrings,
-        isOperatorChar = /[+\-*&%=<>!?:\/|]/,
-        type;
+        keywords = parserConfig.keywords,
+        functions = parserConfig.functions,
+        types = parserConfig.types,
+        operators = parserConfig.operators,
+        multiLineStrings = parserConfig.multiLineStrings;
+    var isOperatorChar = /[+\-*&%=<>!?:\/|]/;
 
     function chain(stream, state, f) {
         state.tokenize = f;
         return f(stream, state);
     }
 
+    var type;
     function ret(tp, style) {
         type = tp;
         return style;
@@ -23,15 +22,21 @@ CodeMirror.defineMode("sqlvariant", function (config, parserConfig) {
     function tokenBase(stream, state) {
         var ch = stream.next();
         // start of string?
-        if (ch == '"' || ch == "'")
+        if (ch == '"' || ch == "'" || ch == "`") {
             return chain(stream, state, tokenString(ch));
-        // is it one of the special signs []{}().,;? Seperator?
-        else if (/[\[\]{}\(\),;\.]/.test(ch))
+        }
+        // is it one of the special signs []{}().? 
+        else if (/[\[\]{}\(\)\.]/.test(ch)) {
             return ret(ch);
+        }
+        // Seperator?
+        else if (ch == "," || ch == ";") {
+            return "sql-separator";
+        }
         // start of a number value?
         else if (/\d/.test(ch)) {
-            stream.eatWhile(/[\w\.]/);
-            return ret("number", "number");
+            stream.eatWhile(/[\w\.]/)
+            return ret("number", "sql-number");
         }
         // multi line comment or simple operator?
         else if (ch == "/") {
@@ -40,44 +45,52 @@ CodeMirror.defineMode("sqlvariant", function (config, parserConfig) {
             }
             else {
                 stream.eatWhile(isOperatorChar);
-                return ret("operator", "operator");
+                return ret("operator", "sql-operator");
             }
         }
         // single line comment or simple operator?
         else if (ch == "-") {
             if (stream.eat("-")) {
                 stream.skipToEnd();
-                return ret("comment", "comment");
-            }
-            else {
+                return ret("comment", "sql-comment");
+            } else {
                 stream.eatWhile(isOperatorChar);
-                return ret("operator", "operator");
+                return ret("operator", "sql-operator");
             }
         }
-        // pl/sql variable?
+        // another single line comment
+        else if (ch == '#') {
+            stream.skipToEnd();
+            return ret("comment", "sql-comment");
+        }
+        // sql variable?
         else if (ch == "@" || ch == "$") {
             stream.eatWhile(/[\w\d\$_]/);
-            return ret("word", "variable");
+            return ret("word", "sql-var");
         }
         // is it a operator?
         else if (isOperatorChar.test(ch)) {
             stream.eatWhile(isOperatorChar);
-            return ret("operator", "operator");
+            return ret("operator", "sql-operator");
         }
-        else {
+        // a punctuation?
+        else if (/[()]/.test(ch)) {
+            return "sql-punctuation";
+        } else {
             // get the whole word
             stream.eatWhile(/[\w\$_]/);
             // is it one of the listed keywords?
-            if (keywords && keywords.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "keyword");
+            if (keywords && keywords.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "sql-keyword");
             // is it one of the listed functions?
-            if (functions && functions.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "builtin");
+            if (functions && functions.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "sql-function");
             // is it one of the listed types?
-            if (types && types.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "variable-2");
+            if (types && types.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "sql-type");
             // is it one of the listed sqlplus keywords?
-            if (sqlplus && sqlplus.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "variable-3");
+            if (operators && operators.propertyIsEnumerable(stream.current().toLowerCase())) return ret("keyword", "sql-operators");
             // default: just a "word"
             return ret("word", "sql-word");
         }
+
     }
 
     function tokenString(quote) {
@@ -89,7 +102,8 @@ CodeMirror.defineMode("sqlvariant", function (config, parserConfig) {
             }
             if (end || !(escaped || multiLineStrings))
                 state.tokenize = tokenBase;
-            return ret("string", "sql-string");
+            var style = quote == "`" ? "sql-quoted-word" : "sql-literal";
+            return ret("string", style);
         };
     }
 
@@ -111,6 +125,7 @@ CodeMirror.defineMode("sqlvariant", function (config, parserConfig) {
         startState: function (basecolumn) {
             return {
                 tokenize: tokenBase,
+                indented: 0,
                 startOfLine: true
             };
         },
@@ -119,7 +134,9 @@ CodeMirror.defineMode("sqlvariant", function (config, parserConfig) {
             if (stream.eatSpace()) return null;
             var style = state.tokenize(stream, state);
             return style;
-        }
+        },
+        electricChars: ")"
+
     };
 });
 
@@ -129,102 +146,60 @@ CodeMirror.defineMode("sqlvariant", function (config, parserConfig) {
         for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
         return obj;
     }
+    var cKeywords =
+        "alter grant revoke primary key table start top " +
+        "transaction select update insert delete create describe " +
+        "from into values where join inner left natural and " +
+        "or in not xor like using on order group by " +
+        "asc desc limit offset union all as distinct set " +
+        "commit rollback replace view database separator if " +
+        "exists null truncate status show lock unique having " +
+        "drop procedure begin end delimiter call else leave " +
+        "declare temporary then case when with";
 
-    var cKeywords, cFunctions, cTypes, cSqlplus;
 
-    cKeywords = "abort accept access add all alter and any array arraylen as asc assert assign at attributes audit " +
-        "authorization avg " +
-        "base_table begin between binary_integer body boolean by " +
-        "case cast char char_base check close cluster clusters colauth column comment commit compress connect " +
-        "connected constant constraint crash create current currval cursor " +
-        "data_base database date dba deallocate debugoff debugon decimal declare default definition delay delete " +
-        "desc digits dispose distinct do drop " +
-        "else elsif enable end entry escape exception exception_init exchange exclusive exists exit external " +
-        "fast fetch file for force form from function " +
-        "generic goto grant group " +
-        "having " +
-        "identified if immediate in increment index indexes indicator initial initrans insert interface intersect " +
-        "into is " +
-        "key " +
-        "level library like limited local lock log logging long loop " +
-        "master maxextents maxtrans member minextents minus mislabel mode modify multiset " +
-        "new next no noaudit nocompress nologging noparallel not nowait number_base " +
-        "object of off offline on online only open option or order out " +
-        "package parallel partition pctfree pctincrease pctused pls_integer positive positiven pragma primary prior " +
-        "private privileges procedure public " +
-        "raise range raw read rebuild record ref references refresh release rename replace resource restrict return " +
-        "returning reverse revoke rollback row rowid rowlabel rownum rows run " +
-        "savepoint schema segment select separate session set share snapshot some space split sql start statement " +
-        "storage subtype successful synonym " +
-        "tabauth table tables tablespace task terminate then to trigger truncate type " +
-        "union unique unlimited unrecoverable unusable update use using " +
-        "validate value values variable view views " +
-        "when whenever where while with work";
+    var cFunctions =
+        "abs acos adddate aes_encrypt aes_decrypt ascii " +
+        "asin atan atan2 avg benchmark bin bit_and " +
+        "bit_count bit_length bit_or cast ceil ceiling " +
+        "char_length character_length coalesce concat concat_ws " +
+        "connection_id conv convert cos cot count curdate " +
+        "current_date current_time current_timestamp current_user " +
+        "curtime database date_add date_format date_sub " +
+        "dayname dayofmonth dayofweek dayofyear decode degrees " +
+        "des_encrypt des_decrypt elt encode encrypt exp " +
+        "export_set extract field find_in_set floor format " +
+        "found_rows from_days from_unixtime get_lock greatest " +
+        "group_unique_users hex ifnull inet_aton inet_ntoa instr " +
+        "interval is_free_lock isnull last_insert_id lcase least " +
+        "left length ln load_file locate log log2 log10 " +
+        "lower lpad ltrim make_set master_pos_wait max md5 " +
+        "mid min mod monthname now nullif oct octet_length " +
+        "ord password period_add period_diff pi position " +
+        "pow power quarter quote radians rand release_lock " +
+        "repeat reverse right round rpad rtrim sec_to_time " +
+        "session_user sha sha1 sign sin soundex space sqrt " +
+        "std stddev strcmp subdate substring substring_index " +
+        "sum sysdate system_user tan time_format time_to_sec " +
+        "to_days trim ucase unique_users unix_timestamp upper " +
+        "user version week weekday yearweek ntile";
 
-    cFunctions = "abs acos add_months ascii asin atan atan2 average " +
-        "bfilename " +
-        "ceil chartorowid chr concat convert cos cosh count " +
-        "decode deref dual dump dup_val_on_index " +
-        "empty error exp " +
-        "false floor found " +
-        "glb greatest " +
-        "hextoraw " +
-        "initcap instr instrb isopen " +
-        "last_day least lenght lenghtb ln lower lpad ltrim lub " +
-        "make_ref max min mod months_between " +
-        "new_time next_day nextval nls_charset_decl_len nls_charset_id nls_charset_name nls_initcap nls_lower " +
-        "nls_sort nls_upper nlssort no_data_found notfound null nvl " +
-        "others " +
-        "power " +
-        "rawtohex reftohex round rowcount rowidtochar rpad rtrim " +
-        "sign sin sinh soundex sqlcode sqlerrm sqrt stddev substr substrb sum sysdate " +
-        "tan tanh to_char to_date to_label to_multi_byte to_number to_single_byte translate true trunc " +
-        "uid upper user userenv " +
-        "variance vsize";
+    var cTypes =
+        "bigint binary bit blob bool char character date " +
+        "datetime dec decimal double enum float float4 float8 " +
+        "int int1 int2 int3 int4 int8 integer long longblob " +
+        "longtext mediumblob mediumint mediumtext middleint nchar " +
+        "numeric real set smallint text time timestamp tinyblob " +
+        "tinyint tinytext varbinary varchar year";
 
-    cTypes = "bfile blob " +
-        "character clob " +
-        "dec " +
-        "float " +
-        "int integer " +
-        "mlslabel " +
-        "natural naturaln nchar nclob number numeric nvarchar2 " +
-        "real rowtype " +
-        "signtype smallint string " +
-        "varchar varchar2";
+    var cOperators =
+        ":= < <= == <> > >= like rlike in xor between";
 
-    cSqlplus = "appinfo arraysize autocommit autoprint autorecovery autotrace " +
-        "blockterminator break btitle " +
-        "cmdsep colsep compatibility compute concat copycommit copytypecheck " +
-        "define describe " +
-        "echo editfile embedded escape exec execute " +
-        "feedback flagger flush " +
-        "heading headsep " +
-        "instance " +
-        "linesize lno loboffset logsource long longchunksize " +
-        "markup " +
-        "native newpage numformat numwidth " +
-        "pagesize pause pno " +
-        "recsep recsepchar release repfooter repheader " +
-        "serveroutput shiftinout show showmode size spool sqlblanklines sqlcase sqlcode sqlcontinue sqlnumber " +
-        "sqlpluscompatibility sqlprefix sqlprompt sqlterminator suffix " +
-        "tab term termout time timing trimout trimspool ttitle " +
-        "underline " +
-        "verify version " +
-        "wrap";
-
-    CodeMirror.defineMIME("text/x-plsql", {
-        name: "sqlvariant",
+    CodeMirror.defineMIME("text/x-t-sql", {
+        name: "sql",
         keywords: keywords(cKeywords),
         functions: keywords(cFunctions),
         types: keywords(cTypes),
-        sqlplus: keywords(cSqlplus)
-    });
-
-    CodeMirror.defineMIME("text/x-t-sql", {
-        name: "sqlvariant",
-        keywords: keywords(cKeywords),
-        functions: keywords(cFunctions),
-        types: keywords(cTypes)
+        operators: keywords(cOperators)
     });
 } ());
