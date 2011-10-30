@@ -22,7 +22,7 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
     function tokenBase(stream, state) {
         var ch = stream.next();
         // start of string?
-        if (ch == '"' || ch == "'" || ch == "`") {
+        if (ch == "'") {
             return chain(stream, state, tokenString(ch));
         }
         // is it one of the special signs []{}().? 
@@ -59,10 +59,13 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
             }
         }
         // another single line comment
+        // Should turn this into a token for magic variables if we can
+        /*
         else if (ch == '#') {
             stream.skipToEnd();
             return ret("comment", "sql-comment");
         }
+        */
         // sql variable?
         else if (ch == "@" || ch == "$") {
             stream.eatWhile(/[\w\d\$_]/);
@@ -97,6 +100,7 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
         return function (stream, state) {
             var escaped = false, next, end = false;
             while ((next = stream.next()) != null) {
+                // This isn't how T-SQL strings work, need to fix
                 if (next == quote && !escaped) { end = true; break; }
                 escaped = !escaped && next == "\\";
             }
@@ -200,6 +204,7 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
         keywords: keywords(cKeywords),
         functions: keywords(cFunctions),
         types: keywords(cTypes),
-        operators: keywords(cOperators)
+        operators: keywords(cOperators),
+        multiLineStrings: true
     });
 } ());
