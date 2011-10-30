@@ -185,7 +185,6 @@
     <Compile Include="Models\Query.cs" />
     <Compile Include="Models\QueryExecution.cs" />
     <Compile Include="Models\Revision.cs" />
-    <Compile Include="Models\SaveQueryMetadata.cs" />
     <Compile Include="Models\Site.cs" />
     <Compile Include="Models\StackEntities\StackExchangeData.Designer.cs">
       <AutoGen>True</AutoGen>
