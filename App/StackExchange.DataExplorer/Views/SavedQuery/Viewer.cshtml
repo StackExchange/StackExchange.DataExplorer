@@ -1,0 +1,18 @@
+﻿@model StackExchange.DataExplorer.ViewModel.QueryExecutionViewData
+@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Models
+@{
+    Layout = "~/Views/Shared/Query.cshtml";
+    this.SetPageTitle(Model.Name + " - Stack Exchange Data Explorer");
+}
+
+@section Metadata
+{
+    @Html.Partial("QueryVoting", Model.QueryVoting)
+    <p>@Model.Description</p>
+}
+
+<pre id="queryBodyText"><code>@Model.SQL</code></pre>
+<ul id="editor-toolbar" class="linkbar">
+    <li id="edit-link"><a href="@Model.URLWithStub("edit")">edit this query</a></li>
+</ul>

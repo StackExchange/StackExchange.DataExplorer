@@ -179,9 +179,11 @@ namespace StackExchange.DataExplorer.Models
             log.AppendLine(string.Format("Beginning merge of {0} into {1}", mergeId, masterId));
 
             // Queries
+            /*
             var queries = db.Queries.Where(q => q.CreatorId == mergeId).ToList();
             log.AppendLine(string.Format("Moving {0} queries over", queries.Count));
             queries.ForEach(q => q.CreatorId = masterId);
+            */
 
             // Query Executions
             var queryExecutions = db.QueryExecutions.Where(qe => qe.UserId == mergeId).ToList();
@@ -189,9 +191,11 @@ namespace StackExchange.DataExplorer.Models
             queryExecutions.ForEach(qe => qe.UserId = masterId);
 
             // Saved Queries
+            /*
             var savedQueries = db.SavedQueries.Where(sq => sq.UserId == mergeId).ToList();
             log.AppendLine(string.Format("Moving {0} saved queries over", savedQueries.Count));
             savedQueries.ForEach(sq => sq.UserId = masterId);
+            */
 
             // User Open Ids
             var userOpenIds = db.UserOpenIds.Where(uoi => uoi.UserId == masterId).ToList();
@@ -306,7 +310,7 @@ namespace StackExchange.DataExplorer.Models
 
         public int SavedQueriesCount
         {
-            get { return Current.DB.Query<int>("select count(*) from SavedQueries where UserId = @userId", new { userId = Id }).FirstOrDefault(); }
+            get { return Current.DB.Query<int>("SELECT COUNT(*) FROM Metadata WHERE OwnerId = @userId", new { userId = Id }).FirstOrDefault(); }
         }
 
         public int QueryExecutionsCount

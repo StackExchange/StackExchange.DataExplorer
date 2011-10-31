@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -91,6 +92,8 @@ namespace StackExchange.DataExplorer.Helpers
         public bool Truncated { get; set; }
         public string Slug { get; set; }
         public bool TextOnly { get; set; }
+        public int RevisionId { get; set; }
+        public bool FromCache { get; set; }
 
         /// <summary>
         /// Execution time in Millisecs
@@ -105,6 +108,20 @@ namespace StackExchange.DataExplorer.Helpers
         public static QueryResults FromJson(string json)
         {
             return JsonConvert.DeserializeObject<QueryResults>(json, GetSettings());
+        }
+
+        public QueryResults WithCache(CachedResult cache)
+        {
+            if (cache == null || cache.Results == null)
+            {
+                return this;
+            }
+
+            this.Messages = cache.Messages;
+            this.ResultSets = JsonConvert.DeserializeObject<List<ResultSet>>(cache.Results);
+            this.ExecutionPlan = cache.ExecutionPlan;
+
+            return this;
         }
 
         public QueryResults ToTextResults()
@@ -312,6 +329,15 @@ namespace StackExchange.DataExplorer.Helpers
                     Newtonsoft.Json.Formatting.Indented,
                     GetSettings()
                 );
+        }
+
+        public string GetJsonResults()
+        {
+            return JsonConvert.SerializeObject(
+                this.ResultSets,
+                Newtonsoft.Json.Formatting.None,
+                GetSettings()
+            );
         }
     }
 }

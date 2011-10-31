@@ -13,7 +13,20 @@
     @RenderSection("additionalStyles", required: false)
 
     @Html.Raw(AssetPackager.ScriptSrc("jquery"))
-    @MvcMiniProfiler.MiniProfiler.RenderIncludes() 
+    @Html.Raw(AssetPackager.ScriptSrc("master"))
+    @MvcMiniProfiler.MiniProfiler.RenderIncludes()
+
+    <script type="text/javascript">
+        DataExplorer.init({
+            'User.id': @(Current.User.IsAnonymous ? "null" : Current.User.Id.ToString()),
+            'User.guessedID': @(ViewData["GuessedUserId"] != null ? ViewData["GuessedUserId"] : "null"),
+            'User.hideSchema': @((Current.User.HideSchema == true).ToString().ToLower()),
+            'User.isAuthenticated': @((!Current.User.IsAnonymous).ToString().ToLower()),
+            'Site.id': @(Current.Controller.Site != null ? Current.Controller.Site.Id.ToString() : "null"),
+            'enableEditorSuggestions': @(AppSettings.EnableEditorSuggestions.ToString().ToLower()),
+            'enableAdvancedSqlErrors': @(AppSettings.EnableAdvancedSqlErrors.ToString().ToLower())
+        });
+    </script>
 </head>
 <body>
     <div class="page">
@@ -29,7 +42,7 @@
                     {
                         <span id="search">
                             <form method="get" action="/@site.Name.ToLower()/queries">
-                            @Html.TextBox("q", "search", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, onfocus = "if (this.value=='search') this.value=''", onblur = "if (this.value='') this.value='search'" })
+                            @Html.TextBox("q", "", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, placeholder = "search" })
                             </form>
                         </span>
                     }
@@ -94,11 +107,11 @@
                 </div>
             </div>
             <div id="footer-flair">
-                <a href="http://creativecommons.org/licenses/by-sa/2.5/" class="cc-wiki-link"></a>
+                <a href="http://creativecommons.org/licenses/by-sa/3.0/" class="cc-wiki-link"></a>
             </div>
             <div id="copyright">
                 site design / logo &copy; @DateTime.UtcNow.Year stack exchange inc; <a href="/questions-all">
-                    user contributions</a> licensed under <a href="http://creativecommons.org/licenses/by-sa/2.5/"
+                    user contributions</a> licensed under <a href="http://creativecommons.org/licenses/by-sa/3.0/"
                         rel="license">cc-wiki</a> with <a href="http://blog.stackoverflow.com/2009/06/attribution-required/"
                             rel="license">attribution required</a>
             </div>

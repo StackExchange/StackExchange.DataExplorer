@@ -33,6 +33,20 @@ namespace StackExchange.DataExplorer.Helpers
         private static readonly Regex SplitOnGoRegex = new Regex(@"^\s*GO\s*$",
                                                                  RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
+        public ParsedQuery(string sql, NameValueCollection requestParams, bool crossSite, bool excludeMetas)
+            : this(sql, requestParams, false, crossSite, excludeMetas)
+        {
+
+        }
+
+        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan, bool crossSite, bool excludeMetas)
+            : this(sql, requestParams)
+        {
+            IncludeExecutionPlan = executionPlan;
+            IsCrossSite = crossSite;
+            ExcludesMetas = excludeMetas;
+        }
+
         public ParsedQuery(string sql, NameValueCollection requestParams)
         {
             Parse(sql, requestParams);
@@ -47,6 +61,44 @@ namespace StackExchange.DataExplorer.Helpers
         public string Description { get; private set; }
 
         public bool AllParamsSet { get; private set; }
+
+        private bool includeExecutionPlan = false;
+
+        /// <summary>
+        /// Whether or not running this query should produce an execution plan
+        /// </summary>
+        public bool IncludeExecutionPlan {
+            get
+            {
+                return !IsCrossSite && includeExecutionPlan;
+            }
+
+            private set
+            {
+                includeExecutionPlan = value;
+            }
+        }
+
+        /// <summary>
+        /// Whether or not this query should be executed across all sites
+        /// </summary>
+        public bool IsCrossSite { get; private set; }
+
+        private bool excludesMetas = false;
+
+        /// <summary>
+        /// Whether or not this query should exclude meta sites, if it should be executed across all sites
+        /// </summary>
+        public bool ExcludesMetas {
+            get {
+                return IsCrossSite && excludesMetas;
+            }
+
+            private set
+            {
+                excludesMetas = value;
+            }
+        }
 
         public string ErrorMessage { get; private set; }
 

@@ -6,91 +6,80 @@ namespace StackExchange.DataExplorer.ViewModel
 {
     public struct QueryExecutionViewData
     {
-        private string description;
         private string name;
+        private QueryVoting voting;
 
         public QueryVoting QueryVoting
         {
             get
             {
-                return new QueryVoting
-                           {
-                               HasVoted = false,
-                               TotalVotes = FavoriteCount,
-                               ReadOnly = true
-                           };
+                return voting ?? new QueryVoting
+                {
+                    HasVoted = false,
+                    TotalVotes = FavoriteCount,
+                    ReadOnly = true
+                };
             }
+
+            set { voting = value; }
         }
-
-        public bool Featured { get; set; }
-        public bool Skipped { get; set; }
-
-        public DateTime LastRun { get; set; }
-        public string SiteName { get; set; }
-
-        public int FavoriteCount { get; set; }
-
-        public User Creator { get; set; }
-
-        public int Views { get; set; }
 
         public string Name
         {
-            get { return name ?? ShortSqlExcerpt; }
-            set { name = value; }
+            get
+            {
+                return name ?? DefaultName;
+            }
+            set
+            {
+                name = value.IsNullOrEmpty() ? null : value;
+            }
         }
-
-        public string Description
-        {
-            get { return description ?? StripInitialComments(SQL); }
-            set { description = value; }
-        }
-
-        public string SQL { get; set; }
-        public int Id { get; set; }
 
         public string Url
         {
             get
             {
-                string prefix = UrlPrefix ?? "s";
-                return "/" + SiteName + "/" + prefix + "/" + Id + "/" + Name.URLFriendly();
+                return URLWithStub(null);
             }
         }
 
-        private string ShortSqlExcerpt
+        public string URLWithStub(string stub)
         {
-            get
+            // {0} - Site Name
+            // {1} - Revision / Root ID
+            // {2} - User ID
+            // {3} - Slug
+            string format = "/{0}/query/" + (stub != null ? stub + "/" : "");
+
+            if (UseLatestLink && Creator != null)
             {
-                string str = StripInitialComments(SQL);
-                if (str.Length > 80)
-                {
-                    str = str.Substring(0, 80);
-                    str += " ...";
-                }
-                return str.Replace("\n", " ").Replace("\r", "");
+                format += "{2}/{1}{3}";
             }
-        }
-
-        public string UrlPrefix { get; set; }
-
-        private string StripInitialComments(string str)
-        {
-            var sb = new StringBuilder();
-
-            bool atStart = true;
-            foreach (string line in str.Split('\n'))
+            else
             {
-                if (atStart && (line.StartsWith("--") || line.Trim() == ""))
-                {
-                    continue;
-                }
-                atStart = false;
-                sb.AppendLine(line);
+                format += "{1}{3}";
             }
 
-
-            return sb.ToString();
+            return string.Format(format, new object[] {
+                SiteName,
+                Id,
+                Creator != null ? Creator.Id : 0,
+                name != null && stub == null ? "/" + name.URLFriendly() : ""
+            });
         }
+
+        public bool Featured { get; set; }
+        public bool Skipped { get; set; }
+        public bool UseLatestLink { get; set; }
+        public DateTime LastRun { get; set; }
+        public string SiteName { get; set; }
+        public int FavoriteCount { get; set; }
+        public User Creator { get; set; }
+        public int Views { get; set; }
+        public string DefaultName { get; set; }
+        public string Description { get; set; }
+        public string SQL { get; set; }
+        public int Id { get; set; }
     }
 }

@@ -1,52 +1,27 @@
-﻿using System.Text;
-using StackExchange.DataExplorer.Helpers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 
 namespace StackExchange.DataExplorer.Models
 {
     public partial class Query
     {
-        public string BodyWithoutComments
-        {
-            get
-            {
-                var pq = new ParsedQuery(QueryBody, null);
-                return pq.ExecutionSql;
-            }
-        }
+        private static readonly int TITLE_LENGTH = 60;
 
-        public void UpdateQueryBodyComment()
+        public string AsTitle()
         {
-            var buffer = new StringBuilder();
+            var lines = QueryBody.Split('\n');
+            string title = "";
 
-            if (Name != null)
+            for (var i = 0; i < lines.Length && title.Length < TITLE_LENGTH; ++i)
             {
-                buffer.Append(ToComment(Name));
-                buffer.Append("\n");
+                if (!lines[i].TrimStart().StartsWith("--")) {
+                    title += lines[i].Trim() + " ";
+                }
             }
 
-
-            if (Description != null)
-            {
-                buffer.Append(ToComment(Description));
-                buffer.Append("\n");
-            }
-
-            buffer.Append("\n");
-            buffer.Append(BodyWithoutComments);
-
-            QueryBody = buffer.ToString();
-        }
-
-        private string ToComment(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return "";
-            if (text != null) text = text.Trim();
-
-            string rval = text.Replace("\r\n", "\n");
-            rval = "-- " + rval;
-            rval = rval.Replace("\n", "\n-- ");
-
-            return rval;
+            return title.TruncateWithEllipsis(TITLE_LENGTH);
         }
     }
 }

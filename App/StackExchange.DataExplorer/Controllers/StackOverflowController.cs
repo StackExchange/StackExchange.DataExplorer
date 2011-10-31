@@ -65,6 +65,17 @@ namespace StackExchange.DataExplorer.Controllers
             return Current.DB.Query<Models.Site>("select * from Sites where lower(Name) = @sitename", new { sitename }).FirstOrDefault(); 
         }
 
+        public Site GetSite(int siteId)
+        {
+            return Current.DB.Query<Site>(
+                "SELECT * FROM Sites WHERE Id = @site",
+                new
+                {
+                    site = siteId
+                }
+            ).FirstOrDefault();
+        }
+
 
 #if DEBUG
         private Stopwatch watch;
@@ -170,26 +181,6 @@ namespace StackExchange.DataExplorer.Controllers
         public void SetHeader(string title, params SubHeaderViewData[] tabs)
         {
             ViewData["Header"] = new SubHeader(title) {Items = tabs};
-        }
-
-        protected CachedResult GetCachedResults(Query query)
-        {
-            if (query == null) return null;
-            return QueryRunner.GetCachedResults(new ParsedQuery(query.QueryBody, Request.Params), Site);
-        }
-
-        /// <summary>
-        /// Retrieves a cached execution plan for a query
-        /// </summary>
-        /// <param name="query">Query to retrieve the cached plan for.</param>
-        /// <returns>Cached execution plan, or null if no plan exists in the cache.</returns>
-        protected CachedPlan GetCachedPlan(Query query)
-        {
-            if (query == null)
-            {
-                return null;
-            }
-            return QueryRunner.GetCachedPlan( new ParsedQuery(query.QueryBody, Request.Params), Site);
         }
 
         /// <summary>

@@ -11,274 +11,451 @@ namespace StackExchange.DataExplorer.Controllers
     public class QueryController : StackOverflowController
     {
         [HttpPost]
-        [Route("query/{siteId}")]
-        public ActionResult Execute(string sql, int siteId, string resultsToText, string showExecutionPlan, int? savedQueryId, string allDBs, string excludeMetas)
+        [Route(@"query/save/{siteId:\d+}/{parentId?:\d+}")]
+        public ActionResult Create(string sql, string title, string description, int siteId, int? parentId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
         {
-
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
                 return Json(new { captcha = true });
             }
 
-            var site = Current.DB.Query<Site>(
-                "SELECT * FROM Sites WHERE Id = @site",
-                new
-                {
-                    site = siteId
-                }
-            ).First();
-
-            ActionResult rval;
-
-            if (savedQueryId != null)
-            {
-                sql = Current.DB.SavedQueries.First(q => q.Id == savedQueryId.Value).Query.QueryBody;
-            }
-
-            var parsedQuery = new ParsedQuery(sql, Request.Params);
+            ActionResult response = null;
 
             try
             {
-                if (!parsedQuery.AllParamsSet)
-                {
-                    if (!string.IsNullOrEmpty(parsedQuery.ErrorMessage))
-                    {
-                        throw new ApplicationException(parsedQuery.ErrorMessage);
-                    }
+                Revision parent = null;
 
-                    throw new ApplicationException("All parameters must be set!");
+                if (parentId.HasValue)
+                {
+                    parent = QueryUtil.GetBasicRevision(parentId.Value);
+
+                    if (parent == null)
+                    {
+                        throw new ApplicationException("Invalid revision ID");
+                    }
                 }
 
-                QueryResults results;
+                var parsedQuery = new ParsedQuery(
+                    sql,
+                    Request.Params,
+                    withExecutionPlan == true,
+                    crossSite == true,
+                    excludeMetas == true
+                );
+                var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
+                var query = Current.DB.Query<Query>(
+                    "SELECT * FROM Queries WHERE QueryHash = @hash",
+                    new
+                    {
+                        hash = parsedQuery.Hash
+                    }
+                ).FirstOrDefault();
 
-                if (allDBs == "true")
+                int revisionId = 0, queryId;
+                DateTime saveTime;
+
+                // We only create revisions if something actually changed.
+                // We'll log it as an execution anyway if applicable, so the user will
+                // still get a link in their profile, just not their own revision.
+                if (!(parent != null && query != null && query.Id == parent.QueryId))
                 {
-                    results = QueryRunner.GetMultiSiteResults(parsedQuery, CurrentUser, excludeMetas == "true");
+                    if (query == null)
+                    {
+                        queryId = (int)Current.DB.Query<decimal>(@"
+                            INSERT INTO Queries(
+                                QueryHash, QueryBody
+                            ) VALUES(
+                                @hash, @body
+                            )
+
+                            SELECT SCOPE_IDENTITY()",
+                            new
+                            {
+                                hash = parsedQuery.Hash,
+                                body = parsedQuery.RawSql
+                            }
+                        ).First();
+                    }
+                    else
+                    {
+                        queryId = query.Id;
+                    }
+
+                    revisionId = (int)Current.DB.Query<decimal>(@"
+                        INSERT INTO Revisions(
+                            QueryId, RootId, ParentId, OwnerId, OwnerIP, CreationDate
+                        ) VALUES(
+                            @query, @root, @parent, @owner, @ip, @creation
+                        )
+
+                        SELECT SCOPE_IDENTITY()",
+                        new
+                        {
+                            query = queryId,
+                            root = parent != null ? (int?)parent.RootId : null,
+                            parent = parentId,
+                            owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
+                            ip = GetRemoteIP(),
+                            creation = saveTime = DateTime.UtcNow
+                        }
+                    ).First();
+
+                    var revision = new Revision
+                    {
+                        Id = revisionId,
+                        RootId = parent != null ? (int?)parent.RootId : null,
+                        QueryId = queryId
+                    };
+
+                    SaveMetadata(revision, title, description, true);
+
+                    results.RevisionId = revisionId;
                 }
                 else
                 {
-                    results = QueryRunner.GetSingleSiteResults(parsedQuery, site, CurrentUser, showExecutionPlan == "true");
-
-
-                    if (resultsToText == "true")
-                    {
-                        results = results.ToTextResults();
-                    }
-
-					// Execution plans are cached as XML
-                    if (showExecutionPlan == "true")
-                    {
-                        results = results.TransformQueryPlan();
-                    }
+                    queryId = query.Id;
+                    results.RevisionId = parentId.Value;
                 }
 
-                // well there is an annoying XSS condition here 
-                rval = Content(results.ToJson().Replace("/", "\\/"), "application/json");
+                if (title != null)
+                {
+                    results.Slug = title.URLFriendly();
+                }
 
-                QueryRunner.LogQueryExecution(CurrentUser, site, parsedQuery, results);
+                QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, queryId);
+
+                // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
+                response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                var result = new Dictionary<string, string>();
-                var sqlException = e as SqlException;
-                if (sqlException != null)
-                {
-                    result["error"] = sqlException.Message;
-                }
-                else
-                {
-                    result["error"] = e.Message;
-                }
-                rval = Json(result);
+                response = TransformExecutionException(ex);
             }
 
-            return rval;
+            return response;
         }
 
-
-        [Route(@"{sitename}/mcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowmCsv(string sitename, int queryId)
+        [HttpPost]
+        [Route(@"query/run/{siteId:\d+}/{revisionId:\d+}")]
+        public ActionResult Execute(int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
         {
-            Query query = FindQuery(queryId);
+            if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
+            {
+                return Json(new { captcha = true });
+            }
+
+            ActionResult response = null;
+
+            try
+            {
+                var query = QueryUtil.GetQueryForRevision(revisionId);
+
+                if (query == null)
+                {
+                    throw new ApplicationException("Invalid revision ID");
+                }
+
+                var parsedQuery = new ParsedQuery(
+                    query.QueryBody,
+                    Request.Params,
+                    withExecutionPlan == true,
+                    crossSite == true,
+                    excludeMetas == true
+                );
+
+                var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
+
+                // It might be bad that we have to do this here
+                results.RevisionId = revisionId;
+
+                QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, query.Id);
+
+                // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
+                response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
+            }
+            catch (Exception ex)
+            {
+                response = TransformExecutionException(ex);
+            }
+
+            return response;
+        }
+
+        [HttpPost]
+        [Route(@"query/update/{revisionId:\d+}")]
+        public ActionResult UpdateMetadata(int revisionId, string title, string description)
+        {
+            ActionResult response = null;
+
+            try
+            {
+                Revision revision = QueryUtil.GetBasicRevision(revisionId);
+
+                if (revision == null)
+                {
+                    throw new ApplicationException("Invalid revision ID");
+                }
+
+                SaveMetadata(revision, title, description, false);
+            }
+            catch (ApplicationException ex)
+            {
+                response = TransformExecutionException(ex);
+            }
+
+            return response;
+        }
+
+        [Route(@"{sitename}/csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowSingleSiteCsv(string sitename, int revisionId)
+        {
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
+
+            if (query == null)
+            {
+                return PageNotFound();
+            }
+
+            CachedResult cachedResults = QueryUtil.GetCachedResults(
+                new ParsedQuery(query.QueryBody, Request.Params),
+                Site.Id
+            );
+
+            return new CsvResult(cachedResults.Results);
+        }
+
+        [Route(@"{sitename}/mcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteCsv(string sitename, int revisionId)
+        {
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
 
             if (query == null)
             {
                 return PageNotFound();
             }
             
-            var json = QueryRunner.GetMultiSiteResults(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, false).ToJson();
+            var json = QueryRunner.GetMultiSiteResults(
+                new ParsedQuery(query.QueryBody, Request.Params, true, false),
+                CurrentUser
+            ).ToJson();
 
             return new CsvResult(json);
         }
 
-        [Route(@"{sitename}/nmcsv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShownmCsv(string sitename, int queryId)
+        [Route(@"{sitename}/nmcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteWithoutMetaCsv(string sitename, int revisionId)
         {
-            Query query = FindQuery(queryId);
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
 
             if (query == null)
             {
                 return PageNotFound();
             }
 
-            var json = QueryRunner.GetMultiSiteResults(new ParsedQuery(query.BodyWithoutComments, Request.Params), CurrentUser, true).ToJson();
+            var json = QueryRunner.GetMultiSiteResults(
+                new ParsedQuery(query.QueryBody, Request.Params, true, true),
+                CurrentUser
+            ).ToJson();
 
             return new CsvResult(json);
         }
-      
-      
-        [Route(@"{sitename}/csv/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowCsv(string sitename, int queryId)
-        {
-            Query query = FindQuery(queryId);
 
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            TrackQueryView(queryId);
-            CachedResult cachedResults = GetCachedResults(query);
-            return new CsvResult(cachedResults.Results);
-        }
-
-        [Route(@"{sitename}/qte/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult EditText(string sitename, int savedQueryId)
+        [Route(@"{sitename}/query/edit/{revisionId:\d+}/{slug?}")]
+        public ActionResult Edit(string sitename, int revisionId)
         {
             bool foundSite = SetCommonQueryViewData(sitename);
+
             if (!foundSite)
             {
                 return PageNotFound();
             }
 
-            SetHeaderInfo(savedQueryId);
+            SetHeaderInfo(revisionId);
 
-            SavedQuery savedQuery = FindSavedQuery(savedQueryId);
+            Revision revision = QueryUtil.GetCompleteRevision(revisionId);
 
-            if (savedQuery == null)
+            if (revision == null)
             {
                 return PageNotFound();
             }
 
-            savedQuery.UpdateQueryBodyComment();
+            ViewData["query_action"] = "save/" + Site.Id +  "/" + revision.RootId;
+            ViewData["revision"] = revision;
 
-            ViewData["query"] = savedQuery.Query;
-
-            CachedResult cachedResults = GetCachedResults(savedQuery.Query);
-
-            if (cachedResults != null && cachedResults.Results != null)
-            {
-                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
-            }
-
-            ViewData["cached_results"] = cachedResults;
-
-            return View("New", Site);
-        }
-
-        [Route(@"{sitename}/qe/{savedQueryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult Edit(string sitename, int savedQueryId)
-        {
-            bool foundSite = SetCommonQueryViewData(sitename);
-            if (!foundSite)
-            {
-                return PageNotFound();
-            }
-
-            SetHeaderInfo(savedQueryId);
-
-            SavedQuery savedQuery = FindSavedQuery(savedQueryId);
-
-            if (savedQuery == null)
-            {
-                return PageNotFound();
-            }
-
-            savedQuery.UpdateQueryBodyComment();
-
-            ViewData["query"] = savedQuery.Query;
-            ViewData["cached_results"] = GetCachedResults(savedQuery.Query);
-
-            return View("New", Site);
-        }
-
-
-        [Route(@"{sitename}/qt/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowText(string sitename, int queryId)
-        {
-            bool foundSite = SetCommonQueryViewData(sitename);
-            if (!foundSite)
-            {
-                return PageNotFound();
-            }
-
-            Query query = FindQuery(queryId);
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            TrackQueryView(queryId);
-
-            ViewData["query"] = query;
-            CachedResult cachedResults = GetCachedResults(query);
-            if (cachedResults != null && cachedResults.Results != null)
-            {
-                cachedResults.Results = QueryResults.FromJson(cachedResults.Results).ToTextResults().ToJson();
-            }
-
-            ViewData["cached_results"] = cachedResults;
-            return View("New", Site);
-        }
-
-        [Route(@"{sitename}/q/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult Show(string sitename, int queryId)
-        {
-            bool foundSite = SetCommonQueryViewData(sitename);
-            if (!foundSite)
-            {
-                return PageNotFound();
-            }
-
-            Query query = FindQuery(queryId);
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            ViewData["query"] = query;
-            TrackQueryView(queryId);
-            ViewData["cached_results"] = GetCachedResults(query);
-            return View("New", Site);
+            return View("Editor", Site);
         }
 
         /// <summary>
         /// Download a query execution plan as xml.
         /// </summary>
-        [Route(@"{sitename}/plan/{queryId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowPlan(string sitename, int queryId)
+        [Route(@"{sitename}/plan/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowPlan(string sitename, int revisionId)
         {
-            Query query = FindQuery(queryId);
+            Query query = QueryUtil.GetQueryForRevision(revisionId);
+
             if (query == null)
             {
                 return PageNotFound();
             }
 
-            CachedPlan cachedPlan = GetCachedPlan(query);
-            if (cachedPlan == null)
+            CachedResult cache = QueryUtil.GetCachedResults(
+                new ParsedQuery(query.QueryBody, Request.Params),
+                Site.Id
+            );
+
+            if (cache == null || cache.ExecutionPlan == null)
             {
                 return PageNotFound();
             }
 
-            return new QueryPlanResult(cachedPlan.Plan);
+            return new QueryPlanResult(cache.ExecutionPlan);
         }
 
         [Route("{sitename}/query/new", RoutePriority.Low)]
         public ActionResult New(string sitename)
         {
             bool foundSite = SetCommonQueryViewData(sitename);
-            
-            return foundSite?View(Site):PageNotFound();
+
+            if (!foundSite)
+            {
+                return PageNotFound();
+            }
+
+            ViewData["query_action"] = "save/" + Site.Id;
+
+            return View("Editor", Site);
+        }
+
+        private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, bool textResults)
+        {
+            QueryResults results = null;
+
+            if (!query.AllParamsSet)
+            {
+                throw new ApplicationException(!string.IsNullOrEmpty(query.ErrorMessage) ?
+                    query.ErrorMessage : "All parameters must be set!");
+            }
+
+            Site site = GetSite(siteId);
+
+            if (site == null)
+            {
+                throw new ApplicationException("Invalid site ID");
+            }
+
+            if (!query.IsCrossSite)
+            {
+                results = QueryRunner.GetSingleSiteResults(query, site, CurrentUser);
+            }
+            else
+            {
+                results = QueryRunner.GetMultiSiteResults(query, CurrentUser);
+                textResults = true;
+            }
+
+            if (textResults)
+            {
+                results = results.ToTextResults();
+            }
+
+            if (query.IncludeExecutionPlan)
+            {
+                results = results.TransformQueryPlan();
+            }
+
+            return results;
+        }
+
+        private ActionResult TransformExecutionException(Exception ex)
+        {
+            var response = new Dictionary<string, string>();
+            var sqlex = ex as SqlException;
+
+            if (sqlex != null)
+            {
+                response["line"] = sqlex.LineNumber.ToString();
+            }
+
+            response["error"] = ex.Message;
+
+            return Json(response);
+        }
+
+        private void SaveMetadata(Revision revision, string title, string description, bool updateWithoutChange)
+        {
+            Metadata metadata = null;
+
+            if (title.IsNullOrEmpty())
+            {
+                title = null;
+            }
+
+            if (description.IsNullOrEmpty())
+            {
+                description = null;
+            }
+
+            if (!CurrentUser.IsAnonymous)
+            {
+                metadata = Current.DB.Query<Metadata>(@"
+                    SELECT
+                        *
+                    FROM
+                        Metadata
+                    WHERE
+                        RevisionId = @revision AND
+                        OwnerId = @owner",
+                    new
+                    {
+                        revision = revision.RootId,
+                        owner = CurrentUser.Id
+                    }
+                ).FirstOrDefault();
+            }
+
+            // We always save a metadata for anonymous users since they don't have an
+            // actual revision history that we're associating the metadata with
+            if (CurrentUser.IsAnonymous || metadata == null)
+            {
+                Current.DB.Execute(@"
+                    INSERT INTO Metadata(
+                        RevisionId, OwnerId, Title, Description,
+                        LastQueryId, LastActivity, Votes, Views
+                    ) VALUES(
+                        @revision, @owner, @title, @description,
+                        @query, @activity, 0, 0
+                    )",
+                    new
+                    {
+                        revision = CurrentUser.IsAnonymous ? revision.Id : revision.RootId,
+                        owner = CurrentUser.IsAnonymous ? (int?)null : CurrentUser.Id,
+                        title = title,
+                        description = description,
+                        query = revision.QueryId,
+                        activity = DateTime.UtcNow
+                    }
+                );
+            }
+            else if (updateWithoutChange || metadata.Title != title || metadata.Description != description)
+            {
+                Current.DB.Execute(@"
+                    UPDATE
+                        Metadata
+                    SET
+                        Title = @title, Description = @description,
+                        LastQueryId = @query, LastActivity = @activity
+                    WHERE
+                        Id = @id",
+                    new
+                    {
+                        id = metadata.Id,
+                        title = title,
+                        description = description,
+                        query = revision.QueryId,
+                        activity = DateTime.UtcNow
+                    }
+                );
+            }
         }
 
         private bool SetCommonQueryViewData(string sitename)
@@ -299,28 +476,9 @@ namespace StackExchange.DataExplorer.Controllers
             return true;
         }
 
-        private void TrackQueryView(int id)
-        {
-            if (!IsSearchEngine())
-            {
-                QueryViewTracker.TrackQueryView(GetRemoteIP(), id);
-            }
-        }
-
-
         private void SetHeaderInfo()
         {
             SetHeaderInfo(null);
-        }
-
-        private Query FindQuery(int id)
-        {
-            return Current.DB.Queries.FirstOrDefault(q => q.Id == id);
-        }
-
-        private SavedQuery FindSavedQuery(int id)
-        {
-            return Current.DB.SavedQueries.FirstOrDefault(s => s.Id == id);
         }
 
         private void SetHeaderInfo(int? edit)
