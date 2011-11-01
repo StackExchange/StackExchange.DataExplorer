@@ -827,6 +827,19 @@ ul.linkbar li {
   height: 500px;
 }
 
+#query-params .form-row {
+  clear: both;
+}
+
+#query-params .form-row label {
+  float: left;
+  width: 9.5em;
+}
+
+#query-options {
+  clear: both;
+}
+
 #graph {
   width: 960px;
   height: 500px;
