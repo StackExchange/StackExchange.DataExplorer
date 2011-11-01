@@ -560,20 +560,20 @@ ul.site-list .desc {
   margin-bottom: 10px;
 }
 
+#query .right-group {
+  float: right;
+  margin-left: 0px;
+  width: 29.4%;
+}
 
 #schema {
   background-color: #F7F7F7;
   border: 1px solid #CCCCCC;
-  border-left-width: 0px;
   border-top-color: #999999;
   cursor: default;
-  display: block;
-  float: right;
   list-style-type: none;
-  margin-left: -1px;
   overflow: auto;
   padding-left: 0px;
-  width: 30%;
 }
 
 #schema .schema-table {
@@ -795,7 +795,7 @@ ul.linkbar li {
 
 #result-stats .stats {
   color: #606060;
-  display: inline-block;
+  display: none;
   font-weight: bold;
   padding: 6px 0px 6px 0px;
   text-align: right;
@@ -806,7 +806,6 @@ ul.linkbar li {
   background: transparent url('images/sprites.png') no-repeat scroll 0px 0px;
   border-radius: 5px 5px;
   display: inline-block;
-  margin-right: 15px;
   padding: 6px 7px 6px 24px;
 }
 
@@ -825,6 +824,21 @@ ul.linkbar li {
 #resultset {
   cursor: default;
   height: 500px;
+  border: 1px solid #D3D3D3;
+  border-top-width: 0px;
+}
+
+#resultset .slick-cell {
+  
+}
+
+#resultset .slick-row.even {
+  background-image: none;
+}
+
+#resultset .slick-row.odd {
+  background-color: #FAFAFA;
+  background-image: none;
 }
 
 #graph {
