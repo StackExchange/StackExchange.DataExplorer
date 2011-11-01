@@ -7,7 +7,7 @@ BEGIN
 		[Results] [nvarchar](max) NOT NULL,
 		[ExecutionPlan] [nvarchar](max) NULL,
 		[Messages] [nvarchar](max) NULL,
-		[Truncated] [bit] NOT NULL,
+		[Truncated] [bit] NOT NULL default(0),
 		[CreationDate] [datetime] NOT NULL,
 	 CONSTRAINT [PK_CachedResults] PRIMARY KEY CLUSTERED 
 	(
@@ -17,9 +17,10 @@ BEGIN
 END
 ELSE
 BEGIN
-	ALTER TABLE [dbo].[CachedResults] ADD ExecutionPlan nvarchar(max) NULL
-	ALTER TABLE [dbo].[CachedResults] ADD Truncated bit NOT NULL
-	ALTER TABLE [dbo].[CachedResults] ADD [Messages] nvarchar(max) NULL
+	if not exists (select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = 'CachedResults' and COLUMN_NAME = 'ExecutionPlan')
+		ALTER TABLE [dbo].[CachedResults] ADD ExecutionPlan nvarchar(max) NULL
+	if not exists (select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = 'CachedResults' and COLUMN_NAME = 'Truncated')
+		ALTER TABLE [dbo].[CachedResults] ADD Truncated bit NOT NULL default(0)
+	if not exists (select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = 'CachedResults' and COLUMN_NAME = 'Messages')
+		ALTER TABLE [dbo].[CachedResults] ADD [Messages] nvarchar(max) NULL
 END
-
-ALTER TABLE [dbo].[CachedResults] ADD  CONSTRAINT [DF_CachedResults_Truncated]  DEFAULT ((0)) FOR [Truncated]

@@ -15,7 +15,19 @@ BEGIN
 END
 ELSE
 BEGIN
-	ALTER TABLE [dbo].[Votes] ADD OwnerId int NOT NULL
-	ALTER TABLE [dbo].[Votes] ADD RootId int NOT NULL
-	ALTER TABLE [dbo].[Votes] DROP SavedQueryId
+	if not exists (select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = 'Votes' and COLUMN_NAME = 'OwnerId')
+		ALTER TABLE [dbo].[Votes] ADD OwnerId int NOT NULL default(-1)
+	if not  exists (select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = 'Votes' and COLUMN_NAME = 'RootId')
+		ALTER TABLE [dbo].[Votes] ADD RootId int NOT NULL default(-1)
+	
+	if exists (select 1 from sys.indexes where name = 'queryIdx' and object_id = object_id('Votes'))
+		drop index Votes.queryIdx
+		
+	if exists (select 1 from sys.indexes where name = 'queryIdx2' and object_id = object_id('Votes'))
+		drop index Votes.queryIdx2
+	
+	if exists (select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = 'Votes' and COLUMN_NAME = 'SavedQueryId')
+		ALTER TABLE [dbo].[Votes] DROP column SavedQueryId
 END
+
+
