@@ -666,7 +666,7 @@ function bindToolTip(graph, suffix) {
 function renderGraph(resultSet) {
 
     var options = {
-        legend: { position: "nw" },
+        legend: { position: "ne" },
         grid: { hoverable: true },
         selection: { mode: "x" },
         series: { lines: { show: true }, points: { show: true} }
@@ -679,12 +679,17 @@ function renderGraph(resultSet) {
     var series = [];
 
     for (var col = 1; col < resultSet.columns.length; col++) {
+        series.push({label: resultSet.columns[col].name, data: []});
+    }
+
+
+    for (var col = 1; col < resultSet.columns.length; col++) {
         series.push([]);
     }
 
     for (var row = 0; row < resultSet.rows.length; row++) {
         for (var col = 1; col < resultSet.columns.length; col++) {
-            series[col - 1].push([resultSet.rows[row][0], resultSet.rows[row][col]]);
+            series[col - 1].data.push([resultSet.rows[row][0], resultSet.rows[row][col]]);
         }
     }
 
