@@ -144,6 +144,7 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VoteController.cs" />
     <Compile Include="Current.cs" />
+    <Compile Include="Dapper\Contrib\SqlMapperExtensions.cs" />
     <Compile Include="Dapper\SqlMapper.cs" />
     <Compile Include="DefaultAttribute.cs" />
     <Compile Include="ExtensionMethods.cs" />
