@@ -79,7 +79,7 @@
         'options': options,
         'template': template
     };
-})();
+})(), _textContent = 'textContent' in document.createElement('span') ? 'textContent' : 'innerText';
 
 DataExplorer.DeferredRequest = function DeferredRequest(settings) {
     if (!(this instanceof DeferredRequest)) {
@@ -285,3 +285,77 @@ String.prototype.asVariable = function () {
 
     return result;
 }
+
+if (!Date.now) {
+    Date.now = function () {
+        return +new Date();
+    }
+}
+
+Date.parseTimestamp = (function () {
+    var implementation = function (timestamp) {
+        return new Date(timestamp);
+    };
+
+    try {
+        implementation('2011-01-01 12:00:00Z');
+    } catch (ex) {
+        implementation = function (timestamp) {
+            var bits = timestamp.split(/[-: Z]/);
+
+            // We only care about local and UTC, so assume non-local is always UTC
+            if (typeof bits[7] === 'undefined') {
+                return new Date(
+                    parseInt(bits[0], 10),
+                    parseInt(bits[1], 10),
+                    parseInt(bits[2], 10),
+                    parseInt(bits[3], 10),
+                    parseInt(bits[4], 10),
+                    parseInt(bits[5], 10)
+                );
+            } else {
+                return new Date(Date.UTC(
+                    parseInt(bits[0], 10),
+                    parseInt(bits[1], 10),
+                    parseInt(bits[2], 10),
+                    parseInt(bits[3], 10),
+                    parseInt(bits[4], 10),
+                    parseInt(bits[5], 10)
+                ));
+            }
+        }
+    }
+
+    return implementation;
+})();
+
+Date.prototype.toRelativeTimeMini = (function () {
+    months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+    return function () {
+        var delta = (Date.now() - this) / 1000,
+            rendered = "",
+            minute = 60, hour = 60 * minute, day = 24 * hour,
+            minutes = this.getUTCMinutes();
+
+        if (delta < 5) {
+            rendered = 'just now';
+        } else if (delta < minute) {
+            rendered = Math.round(delta) + 's ago';
+        } else if (delta < hour) {
+            rendered = Math.round(delta / minute) + 'm ago';
+        } else if (delta < day) {
+            rendered = Math.round(delta / hour) + 'h ago';
+        } else {
+            delta = Math.round(delta / day);
+
+            if (delta <= 2) {
+                rendered = delta + 'd ago';
+            } else if (delta <= 330) {
+                rendered = months[this.getUTCMonth()] + ' ' + this.getUTCDate() + ' at ' + this.getUTCHours() + ':' + (minutes < 10 ? '0' : '') + minutes;
+            }
+        }
+
+        return rendered;
+    };
+})();

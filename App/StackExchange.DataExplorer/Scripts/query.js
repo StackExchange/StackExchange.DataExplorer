@@ -138,6 +138,7 @@
 
 DataExplorer.ready(function () {
     var schema = $('#schema'),
+        history = $('#history'),
         panel = $('#query .left-group'),
         metadata = $('#query-metadata .info'),
         gridOptions = {
@@ -165,18 +166,21 @@ DataExplorer.ready(function () {
             wrapper = $(editor.getScrollerElement());
         }
 
-        resizer = $('#wrapper').TextAreaResizer(function () {
-            var height = resizer.height();
+        function resize () {
+            var available = resizer.height(),
+                remaining = available - history.outerHeight(true);
 
-            schema.height(height - border);
+            schema.height(remaining);
 
             if (wrapper) {
-                wrapper.height(height - 10);
+                wrapper.height(available - 10);
                 editor.refresh();
             }
-        });
+        }
 
-        schema.height(resizer.height() - border);
+        resizer = $('#wrapper').TextAreaResizer(resize);
+        resize();
+        
         schema.addClass('cm-s-' + editor.getOption('theme') + '');
         schema.delegate('.schema-table', 'click', function () {
             var self = $(this);
@@ -317,6 +321,19 @@ DataExplorer.ready(function () {
             'site': response.siteName,
             'id': response.revisionId,
             'slug': slug
+        });
+
+        if (response.created) {
+            var title = response.created.replace(/\.\d+Z/, 'Z'),
+                href = "/" + response.siteName + "/query/edit/" + response.revisionId,
+                classes = "selected";
+
+            history.children('.selected').removeClass('selected');
+            history.prepend('<li class="' + classes + '"><a href="' + href + '">' + response.revisionId + '<span class="relativetime" title="' + title + '"></span></a></li>');
+        }
+
+        history.find('.relativetime').each(function () {
+            this[_textContent] = Date.parseTimestamp(this.title).toRelativeTimeMini();
         });
 
         response.graph = isGraph(results);

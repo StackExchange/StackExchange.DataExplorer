@@ -283,6 +283,7 @@
     <Content Include="robots.txt" />
     <Compile Include="ViewModel\QueryExecutionViewData.cs" />
     <Compile Include="ViewModel\QueryVoting.cs" />
+    <Compile Include="ViewModel\RevisionHistory.cs" />
     <Compile Include="ViewModel\SubHeader.cs" />
     <Compile Include="ViewModel\SubHeaderViewData.cs" />
   </ItemGroup>
@@ -401,6 +402,7 @@
     <Content Include="Views\SavedQuery\Viewer.cshtml" />
     <Content Include="Views\Admin\FindDuplicateUserOpenIds.cshtml" />
     <Content Include="Views\Shared\QueryResults.cshtml" />
+    <Content Include="Views\Shared\RevisionHistory.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\DBContext.dbml.layout">

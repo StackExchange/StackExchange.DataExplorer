@@ -167,6 +167,18 @@ namespace StackExchange.DataExplorer.Helpers
             ).FirstOrDefault();
         }
 
+        public static IEnumerable<Revision> GetRevisionHistory(int rootId, int userId)
+        {
+            return Current.DB.Query<Revision>(
+                "SELECT * FROM Revisions WHERE (RootId = @root OR Id = @root) AND OwnerId = @owner ORDER BY CreationDate DESC",
+                new
+                {
+                    root = rootId,
+                    owner = userId
+                }
+            );
+        }
+
         /// <summary>
         /// Retrieves the Query linked to the provided revision
         /// </summary>

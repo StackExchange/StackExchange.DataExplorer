@@ -92,8 +92,12 @@ namespace StackExchange.DataExplorer.Helpers
         public bool Truncated { get; set; }
         public string Slug { get; set; }
         public bool TextOnly { get; set; }
+        public int? ParentId { get; set; }
         public int RevisionId { get; set; }
         public bool FromCache { get; set; }
+
+        [JsonConverter(typeof(IsoDateTimeConverter))]
+        public DateTime Created { get; set; }
 
         /// <summary>
         /// Execution time in Millisecs
@@ -140,6 +144,9 @@ namespace StackExchange.DataExplorer.Helpers
             results.MultiSite = MultiSite;
             results.ExcludeMetas = ExcludeMetas;
             results.ExecutionPlan = this.ExecutionPlan;
+            results.ParentId = ParentId;
+            results.RevisionId = RevisionId;
+            results.Created = Created;
 
             results.Messages = FormatTextResults(Messages, ResultSets);
 
@@ -163,6 +170,9 @@ namespace StackExchange.DataExplorer.Helpers
             returnValue.ExcludeMetas = this.ExcludeMetas;
             returnValue.ResultSets = this.ResultSets;
             returnValue.Messages = this.Messages;
+            returnValue.ParentId = ParentId;
+            returnValue.RevisionId = RevisionId;
+            returnValue.Created = Created;
 
             returnValue.ExecutionPlan = TransformPlan(this.ExecutionPlan);
 

@@ -110,11 +110,17 @@ namespace StackExchange.DataExplorer.Controllers
                     SaveMetadata(revision, title, description, true);
 
                     results.RevisionId = revisionId;
+                    results.Created = saveTime;
                 }
                 else
                 {
                     queryId = query.Id;
                     results.RevisionId = parentId.Value;
+                }
+
+                if (parent != null)
+                {
+                    results.ParentId = parent.Id;
                 }
 
                 if (title != null)
@@ -279,8 +285,13 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            ViewData["query_action"] = "save/" + Site.Id +  "/" + revision.RootId;
+            ViewData["query_action"] = "save/" + Site.Id +  "/" + revision.Id;
             ViewData["revision"] = revision;
+
+            if (!CurrentUser.IsAnonymous)
+            {
+                ViewData["history"] = QueryUtil.GetRevisionHistory(revision.RootId.Value, CurrentUser.Id);
+            }
 
             return View("Editor", Site);
         }
