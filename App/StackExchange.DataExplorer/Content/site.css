@@ -831,7 +831,7 @@ ul.linkbar li {
   margin-bottom: 5px;  
 }
 
-#query-results .subheader .group {
+#query-results .subheader .group, #execution-stats {
   width: 960px;
   margin: 0px auto 0px auto;
 }
@@ -840,23 +840,18 @@ ul.linkbar li {
   margin-left: 0px;
 }
 
-#result-stats {
-  padding-top: 5px;
-}
-
-#result-stats .stats {
+#execution-stats {
   color: #606060;
-  display: none;
   font-weight: bold;
   padding: 6px 0px 6px 0px;
   text-align: right;
-  width: 250px;
 }
 
 #query-results .download-button {
   background: transparent url('images/sprites.png') no-repeat scroll 0px 0px;
   border-radius: 5px 5px;
-  display: inline-block;
+  float: right;
+  margin-top: 5px;
   padding: 6px 7px 6px 24px;
 }
 

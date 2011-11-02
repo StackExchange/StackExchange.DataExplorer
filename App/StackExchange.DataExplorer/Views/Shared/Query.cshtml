@@ -74,17 +74,15 @@
                     <a id="graphTab" class="optional" href="#graph">Graph</a>
                     <a id="executionPlanTab" class="optional" href="#executionPlan">Execution Plan</a>
                 </div>
-                <div id="result-stats" class="right-group">
-                    <a id="resultsetButton" class="download-button templated" title="Download results as CSV" href="/:site/:metas:multi;csv/:id">Download CSV</a>
-                    <a id="executionPlanButton" class="download-button templated" title="Download execution plan as XML" href="/:site/:metas:multi;plan/:id">Download XML</a>
-                    <span class="stats">:records rows returned in :time ms:cached</span>
-                </div>
+                <a id="resultsetButton" class="download-button templated" title="Download results as CSV" href="/:site/:metas:multi;csv/:id">Download CSV</a>
+                <a id="executionPlanButton" class="download-button templated" title="Download execution plan as XML" href="/:site/:metas:multi;plan/:id">Download XML</a>
             </div>
         </div>
         <div id="resultset" class="panel"></div>
         <pre id="messages" class="panel"><code></code></pre>
         <div id="executionPlan" class="panel"></div>
         <div id="graph" class="panel"></div>
+        <div id="execution-stats">:records rows returned in :time ms:cached</div>
     </div>
 </div>
 @Html.Raw(AssetPackager.ScriptSrc("jquery.validate"))

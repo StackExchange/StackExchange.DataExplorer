@@ -311,7 +311,7 @@ DataExplorer.ready(function () {
             slug = '/' + slug;
         }
 
-        DataExplorer.template('#result-stats span', 'text', {
+        DataExplorer.template('#execution-stats', 'text', {
             'records': records,
             'time': response.executionTime === 0 ? "<1" : response.executionTime,
             'cached': response.fromCache ? ' (cached)' : ''
