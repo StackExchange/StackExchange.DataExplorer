@@ -872,11 +872,17 @@ ul.linkbar li {
   background-position: 4px -82px;
 }
 
+#query-results .panel {
+  border: 1px solid #D3D3D3;
+}
+
 #resultset {
   cursor: default;
   height: 500px;
-  border: 1px solid #D3D3D3;
-  border-top-width: 0px;
+}
+
+#resultset .slick-header {
+  border-top-color: transparent;
 }
 
 #resultset .slick-cell {
