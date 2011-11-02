@@ -53,14 +53,6 @@ namespace StackExchange.DataExplorer.Controllers
             int rootId = revision.OwnerId != null ? revision.RootId.Value : revision.Id;
             int ownerId = revision.OwnerId ?? 0;
 
-            if (title.IsNullOrEmpty())
-            {
-                title = revision.Query.AsTitle();
-            }
-
-            SetHeader(title);
-            SelectMenuItem("Queries");
-
             title = title.URLFriendly();
 
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
@@ -76,10 +68,18 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageMovedPermanentlyTo(string.Format(url, new object[] {
                     Site.Name.ToLower(),
                     ownerId,
-                    rootId,
+                    latest ? rootId : revision.Id,
                     title
                 }) + Request.Url.Query);
             }
+
+            if (title.IsNullOrEmpty())
+            {
+                title = revision.Query.AsTitle();
+            }
+
+            SetHeader(title);
+            SelectMenuItem("Queries");
 
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
 
