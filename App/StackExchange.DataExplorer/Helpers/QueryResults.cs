@@ -97,7 +97,7 @@ namespace StackExchange.DataExplorer.Helpers
         public bool FromCache { get; set; }
 
         [JsonConverter(typeof(IsoDateTimeConverter))]
-        public DateTime Created { get; set; }
+        public DateTime? Created { get; set; }
 
         /// <summary>
         /// Execution time in Millisecs
