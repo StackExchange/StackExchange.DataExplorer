@@ -195,7 +195,7 @@ DataExplorer.ready(function () {
                 schema.show();
                 history.show();
             });
-            toggle.text("hide schema ►").removeClass('hidden');
+            toggle.text("hide sidebar").removeClass('hidden');
 
             if (schemaPreference) {
                 schemaPreference.request({ 'value': false });
@@ -212,7 +212,7 @@ DataExplorer.ready(function () {
                 panel.css('width', '100%');
             }
 
-            toggle.text("◄ show schema").addClass('hidden');
+            toggle.text("show sidebar").addClass('hidden');
 
             if (schemaPreference) {
                 schemaPreference.request({ 'value': true });

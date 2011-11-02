@@ -653,8 +653,16 @@ ul.site-list .desc {
 }
 
 #schema-toggle {
+  background: transparent url('images/sprites.png') no-repeat scroll 100% -212px;
   float: right;
   margin-right: 0px;
+  padding-right: 18px;
+}
+
+#schema-toggle.hidden {
+  background-position: 0px -230px;
+  padding-left: 18px;
+  padding-right: 0px;
 }
 
 #schema-toggle:hover {
