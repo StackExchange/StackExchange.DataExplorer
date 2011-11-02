@@ -2,26 +2,29 @@
 @using StackExchange.DataExplorer;
 @using StackExchange.DataExplorer.Helpers;
 
-<ul id="history" class="right-group">
-@if (Model.History != null)
-{
-    int? currentId = Model.Current != null ? Model.Current.Id : (int?)null;
-    int? parentId = null;
-    int lastId = Model.History.Last().Id;
-    
-    foreach (var revision in Model.History)
+<div id="history" class="right-group">
+    <span class="heading">Your Revisions</span>
+    <ul>
+    @if (Model.History != null)
     {
-        var slug = "";
-        var divergent = revision.Id == parentId;
+        int? currentId = Model.Current != null ? Model.Current.Id : (int?)null;
+        int? parentId = null;
+        int lastId = Model.History.Last().Id;
+    
+        foreach (var revision in Model.History)
+        {
+            var slug = "";
+            var divergent = revision.Id == parentId;
 
-        parentId = revision.ParentId; 
+            parentId = revision.ParentId; 
 
-        if (revision.Metadata != null && !revision.Metadata.Title.IsNullOrEmpty()) {
-            slug = "/" + revision.Metadata.Title.URLFriendly();
+            if (revision.Metadata != null && !revision.Metadata.Title.IsNullOrEmpty()) {
+                slug = "/" + revision.Metadata.Title.URLFriendly();
+            }
+        <li class="revision@(currentId == revision.Id ? " selected" : "")@(divergent ? " divergent" : "")@(lastId == revision.Id ? " last" : "")">
+            <a href="/@Model.SiteName.ToLower()/query/edit/@revision.Id@slug">@revision.Id@Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())</a>
+        </li>
         }
-    <li class="revision@(currentId == revision.Id ? " selected" : "")@(divergent ? " divergent" : "")@(lastId == revision.Id ? " last" : "")">
-        <a href="/@Model.SiteName.ToLower()/query/edit/@revision.Id@slug">@revision.Id@Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())</a>
-    </li>
     }
-}
-</ul>
+    </ul>
+</div>

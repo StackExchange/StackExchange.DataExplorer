@@ -568,16 +568,16 @@ ul.site-list .desc {
   list-style-type: none;
   margin-bottom: 0px;
   margin-left: 0px;
-  overflow: auto;
   padding-left: 0px;
   width: 29.4%;
 }
 
 #schema.right-group {
   border-top-color: #999999;
+  overflow: auto;
 }
 
-#schema .schema-table {
+#schema .schema-table, #history .heading {
   background-color: #F7F7F7;
   color: #606060;
   cursor: pointer;
@@ -612,8 +612,18 @@ ul.site-list .desc {
 }
 
 #history {
-  height: 200px;
   margin-top: 4px;
+}
+
+#history .heading {
+  cursor: default;
+}
+
+#history ul {
+  height: 185px;
+  margin: 0px;
+  overflow: auto;
+  padding: 0px;
 }
 
 #history li {
