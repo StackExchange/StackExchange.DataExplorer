@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
+using Dapper.Contrib.Extensions;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
-using System.Collections.Generic;
+
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -159,12 +161,12 @@ namespace StackExchange.DataExplorer.Controllers
                 QueryVoting = voting,
                 Id = revision.Id,
                 Name = revision.Metadata.Title,
-                DefaultName = revision.Query.AsTitle(),
                 Description = revision.Metadata.Description,
                 FavoriteCount = revision.Metadata.Votes,
                 Views = revision.Metadata.Views,
                 LastRun = revision.Metadata.LastActivity,
-                Creator = revision.Owner,
+                CreatorId = revision.Owner != null ? revision.Owner.Id : (int?)null,
+                CreatorLogin = revision.Owner != null ? revision.Owner.Login : null,
                 SiteName = Site.Name.ToLower(),
                 SQL = revision.Query.QueryBody,
                 UseLatestLink = false
@@ -267,196 +269,121 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             );
 
-            IEnumerable<QueryExecutionViewData> queries;
+            pagesize = Math.Max(Math.Min(pagesize ?? 50, 100), 10);
+            page = Math.Max(page ?? 1, 1);
 
-            if (order_by == "featured")
+            int start = ((page.Value - 1) * pagesize.Value) + 1;
+            int finish = page.Value * pagesize.Value;
+            bool useLatest = true;
+            var builder = new SqlBuilder();
+            var pager = builder.AddTemplate(@"
+                SELECT
+                    *
+                FROM    
+                    (
+                        SELECT
+                            /**select**/, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
+                        FROM
+                            Metadata metadata
+                            /**join**/
+                            /**leftjoin**/
+                            /**where**/
+                    ) AS results
+                WHERE
+                    RowNumber BETWEEN @start AND @finish
+                ORDER BY
+                    RowNumber",
+                new { start = start, finish = finish }
+            );
+            var counter = builder.AddTemplate("SELECT COUNT(*) FROM Metadata metadata /**join**/ /**leftjoin**/ /**where**/");
+
+            if (order_by != "everything")
             {
-                queries = Current.DB.Query<Metadata, Query, User, QueryExecutionViewData>(@"
-                    SELECT
-                        *
-                    FROM
-                        Metadata metadata
-                    JOIN
-                        Queries query
-                    ON
-                        query.Id = metadata.LastQueryId AND metadata.Featured = 1
-                    LEFT OUTER JOIN
-                        Users [user]
-                    ON
-                        metadata.OwnerId = [user].Id
-                    ORDER BY
-                        metadata.LastActivity DESC",
-                    (metadata, query, user) =>
+                builder.Select("metadata.RevisionId AS Id");
+                builder.Select("metadata.LastActivity AS LastRun");
+                builder.Join("Queries query ON query.Id = metadata.LastQueryId");
+                builder.LeftJoin("Users [user] ON metadata.OwnerId = [user].Id");
+
+                if (order_by == "featured" || order_by == "recent")
+                {
+                    if (order_by == "featured")
                     {
-                        return new QueryExecutionViewData
-                        {
-                            Id = metadata.RevisionId,
-                            Name = metadata.Title,
-                            DefaultName = query.AsTitle(),
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            Creator = user,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = true
-                        };
+                        builder.Where("metadata.Featured = 1");
                     }
-                );
-            }
-            else if (order_by == "recent")
-            {
-                queries = Current.DB.Query<Metadata, Query, User, QueryExecutionViewData>(@"
-                    SELECT
-                        metadata.*, query.*, [user].*
-                    FROM
-                        (
-                            SELECT
-	                            MAX(metadata.Id) AS Id
-                            FROM
-	                            Metadata metadata
-                            JOIN
-	                            Revisions revisions
-                            ON
-	                            metadata.RevisionId = revisions.Id
-                            GROUP BY ISNULL(revisions.RootId, revisions.Id)
-                        ) ids
-                    JOIN
-                        Metadata metadata
-                    ON
-                        metadata.id = ids.id
-                    JOIN
-                        Queries query
-                    ON
-                        query.Id = metadata.LastQueryId
-                    LEFT OUTER JOIN
-                        Users [user]
-                    ON
-                        metadata.OwnerId = [user].Id
-                    ORDER BY
-                        metadata.LastActivity DESC",
-                    (metadata, query, user) =>
+
+                    builder.OrderBy("metadata.LastActivity DESC");
+                }
+                else
+                {
+                    int threshold = 0;
+
+                    if (order_by == "popular")
                     {
-                        return new QueryExecutionViewData
-                        {
-                            Id = metadata.RevisionId,
-                            Name = metadata.Title,
-                            DefaultName = query.AsTitle(),
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            Creator = user,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = true
-                        };
+                        builder.Where("metadata.Views > @threshold", new { threshold = threshold });
+                        builder.OrderBy("metadata.Views DESC");
+                        builder.OrderBy("metadata.Votes DESC");
                     }
-                );
+                    else
+                    {
+                        builder.Where("metadata.Votes > @threshold", new { threshold = threshold });
+                        builder.OrderBy("metadata.Votes DESC");
+                        builder.OrderBy("metadata.Views DESC");
+                    }
+                }
             }
             else if (order_by == "everything")
             {
-                queries = Current.DB.Query<Revision, Query, Metadata, User, QueryExecutionViewData>(@"
-                    SELECT
-                        *
-                    FROM
-                        Revisions revision
-                    JOIN
-                        Queries query
-                    ON
-                        query.Id = revision.QueryId
-                    JOIN
-                        Metadata metadata
-                    ON 
-                        (
-                            metadata.RevisionId = revision.RootId AND
-                            metadata.OwnerId = revision.OwnerId
-                        ) OR (
-                            metadata.RevisionId = revision.Id AND
-                            metadata.OwnerId = revision.OwnerId AND
-                            revision.RootId IS NULL
-                        ) OR (
-                            metadata.RevisionId = revision.Id AND
-                            metadata.OwnerId IS NULL AND
-                            revision.OwnerId IS NULL
-                        )
-                    LEFT OUTER JOIN
-                        Users [user]
-                    ON
-                        revision.OwnerId = [user].Id
-                    ORDER BY
-                        revision.CreationDate DESC",
-                    (revision, query, metadata, user) =>
-                    {
-                        return new QueryExecutionViewData
-                        {
-                            Id = revision.Id,
-                            Name = metadata.Title,
-                            DefaultName = query.AsTitle(),
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            Creator = user,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = false
-                        };
-                    }
+                builder.Select("revision.Id AS Id");
+                builder.Select("revision.CreationDate AS LastRun");
+                builder.Join(@"
+                    Revisions revision ON 
+                    (
+                        metadata.RevisionId = revision.RootId AND
+                        metadata.OwnerId = revision.OwnerId
+                    ) OR (
+                        metadata.RevisionId = revision.Id AND
+                        metadata.OwnerId = revision.OwnerId AND
+                        revision.RootId IS NULL
+                    ) OR (
+                        metadata.RevisionId = revision.Id AND
+                        metadata.OwnerId IS NULL AND
+                        revision.OwnerId IS NULL
+                    )"
                 );
+                builder.Join("Queries query on query.Id = revision.QueryId");
+                builder.LeftJoin("Users [user] ON revision.OwnerId = [user].Id");
+                builder.OrderBy("revision.CreationDate DESC");
+
+                useLatest = false;
             }
-            else
+
+            builder.Select("[user].Id as CreatorId");
+            builder.Select("[user].Login as CreatorLogin");
+            builder.Select("metadata.Title AS Name");
+            builder.Select("metadata.[Description] AS [Description]");
+            builder.Select("metadata.Votes AS FavoriteCount");
+            builder.Select("metadata.Views AS Views");
+            builder.Select("query.QueryBody AS [SQL]");
+
+            if (searchCriteria.IsValid)
             {
-                // The default view is favorite
-                int threshold = 0;
-                string primary = "Votes";
-                string fallback = "Views";
-
-                if (order_by == "popular") {
-                    primary = "Views";
-                    fallback = "Votes";
-                }
-
-                queries = Current.DB.Query<Metadata, Query, User, QueryExecutionViewData>(String.Format(@"
-                    SELECT
-                        *
-                    FROM
-                        Metadata metadata
-                    JOIN
-                        Queries query
-                    ON
-                        query.Id = metadata.LastQueryId
-                    LEFT OUTER JOIN
-                        Users [user]
-                    ON
-                        metadata.OwnerId = [user].Id
-                    WHERE
-                        metadata.{0} > @threshold
-                    ORDER BY
-                        metadata.{0} DESC,
-                        metadata.{1} DESC", primary, fallback),
-                    (metadata, query, user) => {
-                        return new QueryExecutionViewData {
-                            Id = metadata.RevisionId,
-                            Name = metadata.Title,
-                            DefaultName = query.AsTitle(),
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            Creator = user,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = true
-                        };
-                    },
-                    new
-                    {
-                        threshold = threshold
-                    }
-                );
+                builder.Where("metadata.Title LIKE @search OR metadata.[Description] LIKE @search", new { search = '%' + searchCriteria.SearchTerm + '%' });
             }
 
-            int totalQueries = queries.Count();
-            int currentPerPage = Math.Max(pagesize ?? 50, 1);
-            int currentPage = Math.Max(page ?? 1, 1);
+            IEnumerable<QueryExecutionViewData> queries = Current.DB.Query<QueryExecutionViewData>(
+                pager.RawSql,
+                pager.Parameters
+            ).Select<QueryExecutionViewData, QueryExecutionViewData>(
+                (view) =>
+                {
+                    view.UseLatestLink = useLatest;
+                    view.SiteName = Site.Name.ToLower();
+
+                    return view;
+                }
+            );
+            int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
+            
             string href = "/" + Site.Name.ToLower() + "/queries?order_by=" + order_by;
 
             if (searchCriteria.IsValid)
@@ -465,23 +392,23 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             ViewData["SearchCriteria"] = searchCriteria;
-            ViewData["TotalQueries"] = totalQueries;
+            ViewData["TotalQueries"] = total;
             ViewData["PageNumbers"] = new PageNumber(
                 href + "&page=-1",
-                Convert.ToInt32(Math.Ceiling(totalQueries / (decimal)currentPerPage)),
-                currentPerPage,
-                currentPage - 1,
+                Convert.ToInt32(Math.Ceiling(total / (decimal)pagesize)),
+                pagesize.Value,
+                page.Value - 1,
                 "pager"
             );
             ViewData["PageSizer"] = new PageSizer(
                 href + "&pagesize=-1",
-                currentPage,
-                currentPerPage,
-                totalQueries,
+                page.Value,
+                pagesize.Value,
+                total,
                 "page-sizer fr"
             );
 
-            return View(queries.Skip((currentPage - 1) * currentPerPage).Take(currentPerPage));
+            return View(queries);
         }
     }
 }

@@ -11,12 +11,18 @@ namespace StackExchange.DataExplorer.Models
 
         public string AsTitle()
         {
-            var lines = QueryBody.Split('\n');
+            return SqlAsTitle(QueryBody);
+        }
+
+        public static string SqlAsTitle(string sql)
+        {
+            var lines = sql.Split('\n');
             string title = "";
 
             for (var i = 0; i < lines.Length && title.Length < TITLE_LENGTH; ++i)
             {
-                if (!lines[i].TrimStart().StartsWith("--")) {
+                if (!lines[i].TrimStart().StartsWith("--"))
+                {
                     title += lines[i].Trim() + " ";
                 }
             }

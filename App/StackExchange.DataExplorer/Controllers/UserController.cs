@@ -219,12 +219,13 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             Id = execution.RevisionId,
                             Name = metadata.Title,
-                            DefaultName = query.AsTitle(),
+                            SQL = query.QueryBody,
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
                             LastRun = metadata.LastActivity,
-                            Creator = user,
+                            CreatorId = user != null ? user.Id : (int?)null,
+                            CreatorLogin = user != null ? user.Login : null,
                             SiteName = Site.Name.ToLower(),
                             UseLatestLink = false
                         };
@@ -264,12 +265,13 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             Id = metadata.RevisionId,
                             Name = metadata.Title,
-                            DefaultName = query.AsTitle(),
+                            SQL = query.QueryBody,
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
                             LastRun = metadata.LastActivity,
-                            Creator = user,
+                            CreatorId = user != null ? user.Id : (int?)null,
+                            CreatorLogin = user != null ? user.Login : null,
                             SiteName = Site.Name.ToLower(),
                             UseLatestLink = true
                         };
@@ -300,12 +302,13 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             Id = metadata.RevisionId,
                             Name = metadata.Title,
-                            DefaultName = query.AsTitle(),
+                            SQL = query.QueryBody,
                             Description = metadata.Description,
                             FavoriteCount = metadata.Votes,
                             Views = metadata.Views,
                             LastRun = metadata.LastActivity,
-                            Creator = user,
+                            CreatorId = user != null ? user.Id : (int?)null,
+                            CreatorLogin = user != null ? user.Login : null,
                             SiteName = Site.Name.ToLower(),
                             UseLatestLink = true
                         };

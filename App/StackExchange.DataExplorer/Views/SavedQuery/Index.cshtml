@@ -111,9 +111,9 @@
                 </div>
                 <div class="user">
                     @Html.Raw(query.LastRun.ToRelativeTimeSpanMicro())
-                    @if (query.Creator != null)
+                    @if (query.CreatorId != null)
                     {
-                        <a href="/users/@query.Creator.Id">@query.Creator.Login</a>
+                        <a href="/users/@query.CreatorId">@query.CreatorLogin</a>
                     }
                 </div>
                 <div class="clear"></div>

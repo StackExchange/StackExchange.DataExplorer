@@ -28,7 +28,7 @@ namespace StackExchange.DataExplorer.ViewModel
         {
             get
             {
-                return name ?? DefaultName;
+                return name ?? Query.SqlAsTitle(SQL);
             }
             set
             {
@@ -52,7 +52,7 @@ namespace StackExchange.DataExplorer.ViewModel
             // {3} - Slug
             string format = "/{0}/query/" + (stub != null ? stub + "/" : "");
 
-            if (UseLatestLink && Creator != null)
+            if (UseLatestLink && CreatorId != null)
             {
                 format += "{2}/{1}{3}";
             }
@@ -64,20 +64,21 @@ namespace StackExchange.DataExplorer.ViewModel
             return string.Format(format, new object[] {
                 SiteName,
                 Id,
-                Creator != null ? Creator.Id : 0,
+                CreatorId ?? 0,
                 name != null && stub == null ? "/" + name.URLFriendly() : ""
             });
         }
 
+        public long RowNumber { get; set; }
         public bool Featured { get; set; }
         public bool Skipped { get; set; }
         public bool UseLatestLink { get; set; }
         public DateTime LastRun { get; set; }
-        public string SiteName { get; set; }
         public int FavoriteCount { get; set; }
-        public User Creator { get; set; }
+        public int? CreatorId { get; set; }
+        public string CreatorLogin { get; set; }
         public int Views { get; set; }
-        public string DefaultName { get; set; }
+        public string SiteName { get; set; }
         public string Description { get; set; }
         public string SQL { get; set; }
         public int Id { get; set; }
