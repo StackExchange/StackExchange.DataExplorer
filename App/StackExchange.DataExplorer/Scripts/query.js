@@ -193,6 +193,7 @@ DataExplorer.ready(function () {
         function showSchema() {
             panel.animate({ 'width': '70%' }, 'fast', function () {
                 schema.show();
+                history.show();
             });
             toggle.text("hide schema ►").removeClass('hidden');
 
@@ -203,6 +204,7 @@ DataExplorer.ready(function () {
 
         function hideSchema(immediately) {
             schema.hide();
+            history.hide();
             
             if (immediately !== true) {
                 panel.animate({ 'width': '100%' }, 'fast');
