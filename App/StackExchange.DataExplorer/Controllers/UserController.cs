@@ -142,7 +142,7 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeader(user.Login);
             SelectMenuItem("Users");
 
-            order_by = order_by ?? "saved";
+            order_by = order_by ?? "edited";
 
             ViewData["UserQueryHeaders"] = new SubHeader
             {
@@ -150,16 +150,16 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     new SubHeaderViewData
                     {
-                        Description = "mine",
-                        Title = "Queries you've worked on",
+                        Description = "edited",
+                        Title = "Recently edited queries",
                         Href =
-                            "/users/" + user.Id + "?order_by=mine",
+                            "/users/" + user.Id + "?order_by=edited",
                         Selected = (order_by == "saved")
                     },
                     new SubHeaderViewData
                     {
                         Description = "favorite",
-                        Title = "Your favorite queries",
+                        Title = "Favorite queries",
                         Href =
                             "/users/" + user.Id +
                             "?order_by=favorite",
@@ -168,7 +168,7 @@ namespace StackExchange.DataExplorer.Controllers
                     new SubHeaderViewData
                     {
                         Description = "recent",
-                        Title = "Queries you've recently ran",
+                        Title = "Recently executed queries",
                         Href =
                             "/users/" + user.Id + "?order_by=recent",
                         Selected = (order_by == "recent")

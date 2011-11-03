@@ -276,6 +276,7 @@
     <Content Include="Content\qp\qp.css" />
     <Content Include="Content\qp\qp.xslt" />
     <Content Include="Scripts\codemirror\codemirror.js" />
+    <Content Include="Scripts\codemirror\runmode.js" />
     <Content Include="Scripts\codemirror\sql.js" />
     <Content Include="Scripts\jquery-1.6.4.js" />
     <Content Include="Scripts\jquery.event.drag-2.0.js" />

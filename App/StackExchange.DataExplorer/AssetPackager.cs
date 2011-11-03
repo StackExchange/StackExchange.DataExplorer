@@ -82,6 +82,7 @@ namespace StackExchange.DataExplorer
                             "/Scripts/slick.grid.js",
                             "/Scripts/codemirror/codemirror.js",
                             "/Scripts/codemirror/sql.js",
+                            "/Scripts/codemirror/runmode.js",
                             "/Scripts/query.js",
                             "/Scripts/qp.js",
                         }

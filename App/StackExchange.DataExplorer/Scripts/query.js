@@ -7,6 +7,9 @@
         metadata = {
             'title': null,
             'description': null
+        },
+        options = {
+            'mode': 'text/x-t-sql'
         };
 
     function exists() {
@@ -23,11 +26,16 @@
         }
 
         field = target;
-        editor = CodeMirror.fromTextArea(target[0], {
-            'mode': 'text/x-t-sql',
-            'lineNumbers': true,
-            'onChange': onChange
-        });
+        target = target[0];
+
+        if (target.nodeName === 'TEXTAREA') {
+            editor = CodeMirror.fromTextArea(target, $.extend({}, options, {
+                'lineNumbers': true,
+                'onChange': onChange
+            }));
+        } else {
+            editor = CodeMirror.runMode(target[_textContent], options.mode, target);
+        }
 
         if (callback && typeof callback === 'function') {
             callback(editor);
@@ -149,6 +157,9 @@ DataExplorer.ready(function () {
         error = $('#error-message'),
         form = $('#runQueryForm');
 
+    DataExplorer.QueryEditor.create('#queryBodyText', function (editor) {
+        
+    });
     DataExplorer.QueryEditor.create('#sql', function (editor) {
         var wrapper, resizer, border = 2,
             toggle = $('#schema-toggle'),
