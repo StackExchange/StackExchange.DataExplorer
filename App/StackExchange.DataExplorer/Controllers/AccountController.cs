@@ -26,7 +26,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [Route("account/login", HttpVerbs.Get)]
-        public ActionResult Login()
+        public ActionResult Login(string returnUrl)
         {
             SetHeader(CurrentUser.IsAnonymous ? "Log in with OpenID" : "Log in below to change your OpenID");
 

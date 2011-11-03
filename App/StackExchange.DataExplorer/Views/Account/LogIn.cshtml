@@ -3,7 +3,7 @@
 <div class="page-description">
     <div class="form-error">
     </div>
-    <form id="openid_form" action="/user/authenticate" method="post">
+    <form id="openid_form" action="/user/authenticate?returnurl=@Request.Params["returnurl"]" method="post">
         <div id="openid_choice">
             <p>Click your <a href="http://openid.net/what/">OpenID</a> account provider</p>
             <div id="openid_btns"></div>

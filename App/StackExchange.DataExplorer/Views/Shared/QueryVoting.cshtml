@@ -5,7 +5,7 @@
     <div class="favoritecount"><strong class="@(Model.HasVoted?"favoritecount-selected":"")">@Model.TotalVotes</strong></div>
     <div class="error-notification supernovabg">
         <h2>
-            Please <a href="/account/login">login or register</a> to vote for this query.</h2>
+            Please <a href="/account/login?returnurl=@Request.RawUrl">login or register</a> to vote for this query.</h2>
         (click on this box to dismiss)
     </div>
     <script type="text/javascript">
