@@ -14,6 +14,6 @@ END
 ELSE
 BEGIN
 	ALTER TABLE [dbo].[QueryExecutions] ALTER COLUMN UserId int NULL
-	ALTER TABLE [dbo].[QueryExecutions] ADD RevisionId int NOT NULL
+	ALTER TABLE [dbo].[QueryExecutions] ADD RevisionId int NOT NULL default(-1)
 END
 
