@@ -75,6 +75,8 @@ namespace StackExchange.DataExplorer.Controllers
                 }) + Request.Url.Query);
             }
 
+            title = revision.Metadata.Title;
+
             if (title.IsNullOrEmpty())
             {
                 title = revision.Query.AsTitle();
