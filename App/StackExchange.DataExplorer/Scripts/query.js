@@ -1,8 +1,8 @@
 ﻿DataExplorer.QueryEditor = (function () {
-    var editor, field, activeError, params = {};
-        },
+    var editor, field, activeError, params = {},
         options = {
             'mode': 'text/x-t-sql'
+        };
 
     function exists() {
         return !!editor;
@@ -378,7 +378,6 @@ DataExplorer.ready(function () {
             wrapper = document.getElementById('query-params'),
             fieldList = wrapper.getElementsByTagName('input'),
             fields = {},
-            textContent = 'textContent' in wrapper ? 'textContent': 'innerText',
             field, name, label, row, value, hasValue, key, first;
 
         $(wrapper).toggle(!!params.count);
@@ -386,7 +385,7 @@ DataExplorer.ready(function () {
         for (var i = fieldList.length - 1; i > -1 ; --i) {
             field = fieldList.item(i);
             value = field.getAttribute('value');
-            name = field.name.substring('dyn'.length);
+            name = field.name;
 
             if (value && value.length && value != field.value) {
                 fields[name] = field.value; 
@@ -403,7 +402,7 @@ DataExplorer.ready(function () {
         for (var i = 0; i < ordered.length; ++i) {
             label = document.createElement('label');
             label.htmlFor = 'dynParam' + i;
-            label[textContent] = ordered[i].name;
+            label[_textContent] = ordered[i].name;
 
             value = fields[ordered[i].name] || ordered[i].auto;
             hasValue = !(!value &&
@@ -414,7 +413,7 @@ DataExplorer.ready(function () {
             }
 
             field = document.createElement('input');
-            field.name = 'dyn' + ordered[i].name;
+            field.name = ordered[i].name;
 
             if (!hasValue && ordered[i].name.toLowerCase() === 'userid') {
                 if (DataExplorer.options.User.isAuthenticated) {
@@ -478,7 +477,7 @@ DataExplorer.ready(function () {
         document.getElementById('messages').children[0][_textContent] = response.messages;
 
         if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
-            slug = window.location.pathname.substring(
+            slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
 
             if (/\d+/.test(slug)) {
                 slug = null;
