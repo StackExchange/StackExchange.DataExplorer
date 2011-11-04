@@ -316,6 +316,8 @@ DataExplorer.ready(function () {
             
         }
 
+        document.getElementById('messages').children[0][_textContent] = response.messages;
+
         if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
             slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
         } else if (slug && slug.indexOf('/') !== 0) {
@@ -342,7 +344,7 @@ DataExplorer.ready(function () {
                 classes = "selected";
 
             history.children('.selected').removeClass('selected');
-            history.prepend('<li class="' + classes + '"><a href="' + href + '">' + response.revisionId + '<span class="relativetime" title="' + title + '"></span></a></li>');
+            history.children('ul').prepend('<li class="' + classes + '"><a href="' + href + '">' + response.revisionId + '<span class="relativetime" title="' + title + '"></span></a></li>');
         }
 
         history.find('.relativetime').each(function () {
@@ -540,25 +542,6 @@ function encodeColumn(s) {
     } else {
         return s;
     }
-}
-
-function splitTags(s) {
-    if (s == null) return [];
-    var tmp = s.split("<");
-    var rval = [];
-    for (var i = 0; i < tmp.length; i++) {
-        if (tmp[i] != "") {
-            rval.push(tmp[i].replace(">", ""));
-        }
-    }
-
-    return rval;
-}
-
-var current_results;
-
-function scrollToResults() {
-
 }
 
 // this is from SO 901115
