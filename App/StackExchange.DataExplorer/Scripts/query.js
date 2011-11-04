@@ -157,9 +157,7 @@ DataExplorer.ready(function () {
         error = $('#error-message'),
         form = $('#runQueryForm');
 
-    DataExplorer.QueryEditor.create('#queryBodyText', function (editor) {
-        
-    });
+    DataExplorer.QueryEditor.create('#queryBodyText');
     DataExplorer.QueryEditor.create('#sql', function (editor) {
         var wrapper, resizer, border = 2,
             toggle = $('#schema-toggle'),
@@ -287,6 +285,31 @@ DataExplorer.ready(function () {
     $('#executionPlanTab').click(function () {
         QP.drawLines();
     });
+    $(window).resize(resizeResults);
+
+    function resizeResults() {
+        var defaultWidth = 950,
+            availableWidth = document.documentElement.clientWidth - 100,
+            grid = $('#resultset'),
+            gridWidth = grid.outerWidth(),
+            canvas = grid.find('.grid-canvas'),
+            canvasWidth = canvas.outerWidth(),
+            width = 0;
+
+        if (canvasWidth < defaultWidth || availableWidth < defaultWidth) {
+            grid.width(width = defaultWidth);
+        } else if (canvasWidth > availableWidth) {
+            grid.width(width = availableWidth);
+        } else {
+            grid.width(width = canvasWidth);
+        }
+
+        if (width === defaultWidth) {
+            grid.css('left', '0px');
+        } else {
+            grid.css('left', '-' + Math.round((width - defaultWidth) / 2) + 'px');
+        }
+    }
 
     function parseQueryResponse(response) {
         $('#loading').hide();
@@ -375,6 +398,7 @@ DataExplorer.ready(function () {
             }
 
             prepareTable($('#resultset'), results, response);
+            resizeResults();
         
             // Currently this always gives us 500 because it's what #resultset has
             // set in CSS. SlickGrid needs the explicit height to render correctly
@@ -456,6 +480,7 @@ DataExplorer.ready(function () {
         });
 
         grid = new Slick.Grid(target, rows, columns, options);
+        grid.onColumnsResized = resizeResults;
     }
 
     function ColumnFormatter(base) {
