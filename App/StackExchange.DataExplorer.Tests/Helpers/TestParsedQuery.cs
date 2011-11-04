@@ -65,7 +65,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
               .AppendLine("");
 
             var query = new ParsedQuery(sb.ToString(), null);
-            Assert.AreEqual(" select 2 \n -- select 1 ", query.RawSql);
+            Assert.AreEqual(" select 2 \n -- select 1 ", query.Sql);
         }
 
         [TestMethod]

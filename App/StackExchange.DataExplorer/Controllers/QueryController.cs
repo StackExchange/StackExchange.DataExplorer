@@ -72,7 +72,7 @@ namespace StackExchange.DataExplorer.Controllers
                             new
                             {
                                 hash = parsedQuery.Hash,
-                                body = parsedQuery.RawSql
+                                body = parsedQuery.Sql
                             }
                         ).First();
                     }

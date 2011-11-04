@@ -9,29 +9,33 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class ParsedQuery
     {
-        public const string DEFAULT_NAME = "Enter Query Title";
-        public const string DEFAULT_DESCRIPTION = "Enter Query Description";
+        private static readonly Regex ParamsRegex = new Regex(
+            @"##([a-zA-Z0-9]+)(?::([a-zA-Z]+))?(?:\?([^#]+))?##",
+            RegexOptions.Compiled
+        );
 
-        private static readonly Regex ParamsRegex = new Regex("##([a-zA-Z0-9]+):?([a-zA-Z]+)?##", RegexOptions.Compiled);
+        private static readonly Regex ValidIntRegex = new Regex(
+            @"\A[0-9]+\Z",
+            RegexOptions.Compiled | RegexOptions.Multiline
+        );
 
-        private static readonly Regex ValidIntRegex = new Regex(@"\A[0-9]+\Z",
-                                                                RegexOptions.Compiled | RegexOptions.Multiline);
+        private static readonly Regex ValidFloatRegex = new Regex(
+            @"\A[0-9]+(\.[0-9]+)?\Z",
+            RegexOptions.Compiled | RegexOptions.Multiline
+        );
 
-        private static readonly Regex ValidFloatRegex = new Regex(@"\A[0-9]+(\.[0-9]+)?\Z",
-                                                                  RegexOptions.Compiled | RegexOptions.Multiline);
+        private static readonly ParameterType[] ParameterTypes = new[]
+        {
+            new ParameterType("", _ => true, _ => _),
+            new ParameterType("int", data => ValidIntRegex.IsMatch(data), _ => _),
+            new ParameterType("string", _ => true, data => string.Format("'{0}'", data.Replace("'", "''"))),
+            new ParameterType("float", data => ValidFloatRegex.IsMatch(data), _ => _)
+        };
 
-
-        private static readonly ParameterType[] ParameterTypes =
-            new[]
-                {
-                    new ParameterType("", _ => true, _ => _),
-                    new ParameterType("int", data => ValidIntRegex.IsMatch(data), _ => _),
-                    new ParameterType("string", _ => true, data => string.Format("'{0}'", data.Replace("'", "''"))),
-                    new ParameterType("float", data => ValidFloatRegex.IsMatch(data), _ => _)
-                };
-
-        private static readonly Regex SplitOnGoRegex = new Regex(@"^\s*GO\s*$",
-                                                                 RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static readonly Regex SplitOnGoRegex = new Regex(
+            @"^\s*GO\s*$",
+            RegexOptions.IgnoreCase | RegexOptions.Multiline
+        );
 
         public ParsedQuery(string sql, NameValueCollection requestParams, bool crossSite, bool excludeMetas)
             : this(sql, requestParams, false, crossSite, excludeMetas)
@@ -50,11 +54,6 @@ namespace StackExchange.DataExplorer.Helpers
         public ParsedQuery(string sql, NameValueCollection requestParams)
         {
             Parse(sql, requestParams);
-        }
-
-        public static string DefaultComment
-        {
-            get { return string.Format("-- {0}\n-- {1}\n\n", DEFAULT_NAME, DEFAULT_DESCRIPTION); }
         }
 
         public string Name { get; private set; }
@@ -102,12 +101,6 @@ namespace StackExchange.DataExplorer.Helpers
 
         public string ErrorMessage { get; private set; }
 
-
-        /// <summary>
-        /// Original Sql with newlines normalized (no CR) not used for hashing
-        /// </summary>
-        public string RawSql { get; private set; }
-
         /// <summary>
         /// Sql with param placeholders, initial comment is stripped, newlines normalized and query is trimmed 
         ///   all final and initial empty lines are removed
@@ -151,63 +144,16 @@ namespace StackExchange.DataExplorer.Helpers
         /// </summary>
         public Guid ExecutionHash { get; private set; }
 
-        private void Parse(string rawSql, NameValueCollection requestParams)
+        private void Parse(string sql, NameValueCollection requestParams)
         {
-            var description = new StringBuilder();
-            bool gotDescription = false;
-
-            bool commentParsed = false;
-
-            var sqlWithoutComment = new StringBuilder();
-
-            bool gotName = false;
-
-            foreach (string line in rawSql.Split('\n'))
-            {
-                if (commentParsed || !line.StartsWith("--"))
-                {
-                    commentParsed = true;
-                    sqlWithoutComment.Append(line).Append("\n");
-                    continue;
-                }
-
-                string trimmed = line.Substring(2).Trim();
-
-                if (!gotName)
-                {
-                    gotName = true;
-                    if (trimmed != DEFAULT_NAME)
-                    {
-                        Name = trimmed;
-                    }
-                }
-                else
-                {
-                    if (trimmed == DEFAULT_DESCRIPTION)
-                    {
-                        continue;
-                    }
-
-                    if (gotDescription)
-                    {
-                        description.Append('\n');
-                    }
-                    description.Append(trimmed);
-                    gotDescription = true;
-                }
-            }
-
-            if (gotDescription)
-            {
-                Description = description.ToString();
-            }
-
-            RawSql = Normalize(rawSql);
-            Sql = Normalize(sqlWithoutComment.ToString());
-
             List<string> errors;
-            ExecutionSql = SubstituteParams(Sql, requestParams, out errors);
+            
+            Sql = Normalize(sql.Trim());
+            sql = ReduceAndPopulate(Sql, requestParams, out errors);
 
+            
+
+            ExecutionSql = SubstituteParams(Sql, requestParams, out errors);
             AllParamsSet = ParamsRegex.Matches(ExecutionSql).Count == 0 && errors.Count == 0;
 
             if (errors.Count > 0)
@@ -219,9 +165,10 @@ namespace StackExchange.DataExplorer.Helpers
             Hash = Util.GetMD5(Sql);
         }
 
-        private string SubstituteParams(string sql, NameValueCollection requestParams, out List<string> errorCollection)
+        private string SubstituteParams(string sql, NameValueCollection requestParams, out List<string> errors)
         {
-            errorCollection = new List<string>();
+            errors = new List<string>();
+            var defaults = new NameValueCollection();
 
             if (requestParams == null)
             {
@@ -243,13 +190,13 @@ namespace StackExchange.DataExplorer.Helpers
 
                 if (!CheckIfTypeIsKnown(type))
                 {
-                    errorCollection.Add(string.Format("Unknown parameter type {0}!", type));
+                    errors.Add(string.Format("Unknown parameter type {0}!", type));
                     continue;
                 }
 
                 if (!ValidateType(type, subst))
                 {
-                    errorCollection.Add(string.Format("Expected {0} to be of type {1}!", name, type));
+                    errors.Add(string.Format("Expected {0} to be of type {1}!", name, type));
                     continue;
                 }
 
@@ -268,6 +215,32 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             return sql;
+        }
+
+        private string ReduceAndPopulate(string sql, NameValueCollection requestParams, out List<string> errors)
+        {
+            errors = new List<string>();
+            var buffer = new StringBuilder();
+            bool started = false;
+
+            // The goal here is to reduce the SQL to as basic of a representation
+            // as possible. This involves removing comments and empty lines, as
+            // well as spaces and newlines that have no impact on the actual
+            // execution. Of course, due to multi-line strings and multi-line comments
+            // (among other things), this is a non-trivial task, so for now...just keep
+            // with the traditional "remove the leading comments" bit.
+            foreach (string line in sql.Split('\n'))
+            {
+                if (line.Trim().StartsWith("--") && !started)
+                {
+                    continue;
+                }
+
+                buffer.Append(line).Append("\n");
+                started = true;
+            }
+
+            return buffer.ToString();
         }
 
         private static bool CheckIfTypeIsKnown(string type)

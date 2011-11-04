@@ -1,16 +1,8 @@
 ﻿DataExplorer.QueryEditor = (function () {
-    var editor, field, activeError,
-        events = {
-            'description': [],
-            'title': []
-        },
-        metadata = {
-            'title': null,
-            'description': null
+    var editor, field, activeError, params = {};
         },
         options = {
             'mode': 'text/x-t-sql'
-        };
 
     function exists() {
         return !!editor;
@@ -53,6 +45,10 @@
     }
 
     function getValue() {
+        if (!exists()) {
+            return null;
+        }
+
         var value = editor.getValue();
 
         // Strip zero-width that randomly appears when copying text from the current
@@ -75,8 +71,6 @@
     }
 
     function onChange() {
-        parseMetadata();
-
         if (activeError !== null) {
             editor.setLineClass(activeError, null);
 
@@ -89,50 +83,105 @@
             return;
         }
 
-        activeError = +line + parseMetadata();
+        activeError = +line;
 
         editor.setLineClass(activeError, 'error-line');
     }
 
-    function parseMetadata() {
-        // Determine the offset
-        var offset = -1, lines = getValue().split("\n"), i,
-            comments = false, title, description;
+    function parseParameters(sql) {
+        // Until we fix this to handle the non-editor view too...
+        var value = sql || getValue(),
+            pattern = /##([A-Za-z0-9]+)(?::([^A-Za-z]+))?(?:\?([^#]+))?##/,
+            commented = 0, stringified = false,
+            params = { 'items': {}, 'count': 0 };
 
-        for (i = 0; i < lines.length; ++i) {
-            if (!comments && lines[i].indexOf('--') === 0) {
-                lines[i] = lines[i].substring(2).trim();
+        if (!value || !value.length) {
+            return;
+        }
 
-                if (i === 0) {
-                    title = lines[i];
-                } else {
-                    if (!description) {
-                        description = "";
-                    } else {
-                        description = description + "\n";
+        value = value.split("\n");
+
+        try {
+            for (var i = 0; i < value.length; ++i) {
+                parseLine(value[i]);
+            }
+        } catch (ex) {}
+
+        return params;
+
+        function parseLine(line, depth) {
+            var line = line.trim(), param,
+                endComment, endString,
+                startComment, startString;
+
+            if (typeof depth === 'undefined') {
+                depth = 0;
+            } else if (depth === 10) {
+                throw new Error("The query body is too incomprehensible to continue "
+                    + "parsing, or logic has failed us");
+            } else {
+                ++depth;
+            }
+
+            if (commented) {
+                if ((endComment = line.indexOf('*/')) !== -1) {
+                    commented += line.substring(0, endComment).split('/*').length - 1;
+                    line = line.substring(endComment + '*/'.length);
+
+                    if (--commented) {
+                        return parseLine(line, depth);
                     }
-
-                    description = description + lines[i];
+                }
+            } else if (stringified) {
+                if ((endString = line.indexOf("'")) === -1) {
+                    return;
                 }
 
-                offset++;
-            } else if (/^\s*$/.test(lines[i])) {
-                comments = true;
-                offset++;
+                line = line.substring(endString + 1);
+
+                if (line[0] === "'") {
+                    return parseLine(line.substring(1), depth);
+                }
+
+                stringified = false;
+            }
+
+            line = line.replace("''", '');
+            line = line.replace(/'[^']+'/, '');
+            line = line.split('--');
+            startString = line[0].indexOf("'");
+            startComment = line[0].indexOf('/*');
+
+            if (startString !== -1 || startComment !== -1) {
+                line = line.join('--');
+
+                if ((startString < startComment && startString !== -1) ||
+                        startComment === -1) {
+                    line = line.substring(0, startString);
+                    stringified = true;
+                } else {
+                    ++commented;
+                    parseLine(line.substring(startComment + '/*'.length), depth);
+                    line = line.substring(0, startComment);
+                }
             } else {
-                break;
+                line = line[0];
+            }
+
+            while (param = line.match(pattern)) {
+                params.items[param[1]] = params.items[param[1]] || {};
+
+                if (!params.items[param[1]].index) {
+                    params.items[param[1]].index = params.count;
+                    ++params.count;
+                }
+
+                params.items[param[1]].type = param[2] || params.items[param[1]].type;
+                params.items[param[1]].auto = param[3] || params.items[param[1]].auto;
+
+                line = line.substring(param.index + param[0].length);
             }
         }
-
-        if (title !== metadata.title) {
-            dispatch('title', metadata.title = title || "");
-        }
-
-        if (description !== metadata.description) {
-            dispatch('description', metadata.description = description || "");
-        }
-
-        return offset;
     }
 
     return {
@@ -140,7 +189,8 @@
         'value': getValue,
         'change': registerHandler,
         'error': onError,
-        'exists': exists
+        'exists': exists,
+        'parse': parseParameters
     };
 })();
 
@@ -244,6 +294,7 @@ DataExplorer.ready(function () {
     });
 
     $('.miniTabs').tabs();
+
     form.submit(function () {
         $('.report-option').fadeOut();
         error.fadeOut();
@@ -258,19 +309,24 @@ DataExplorer.ready(function () {
             sql = $('#queryBodyText').text();
         }
 
-        if (sql && ensureAllParamsEntered(sql)) {
+        if (sql && verifyParameters(sql)) {
+            form.find('input, button').prop('disabled', true);
+            
             $('#loading').show();
-            //self.find('input').prop('disabled', true);
-
+            
             $.ajax({
                 'type': 'POST',
                 'url': this.action,
                 'data': form.serialize(),
                 'success': parseQueryResponse,
                 'error': function () {
+                    showError({ 'error': "Something unexpected went wrong while running "
+                        + "your query. Don't worry, blame is already being assigned." });
+                },
+                'complete': function () {
                     $('#loading').hide();
 
-                    showError({ 'error': "Something unexpected went wrong while running your query. Don't worry, blame is already being assigned." });
+                    form.find('input, button').prop('disabled', false);
                 },
                 'cache': false,
             });
@@ -278,10 +334,12 @@ DataExplorer.ready(function () {
 
         return false;
     });
+
     $('#query-results').bind('show', function (event) {
         $('.download-button', this).hide();
         $(event.target.href.from('#') + 'Button').show();
     });
+
     $('#executionPlanTab').click(function () {
         QP.drawLines();
     });
@@ -311,9 +369,82 @@ DataExplorer.ready(function () {
         }
     }
 
-    function parseQueryResponse(response) {
-        $('#loading').hide();
+    // Ideally we can separate out the actual displaying bits so that the user
+    // doesn't have to click the button before getting the form.
+    function verifyParameters(sql) {
+        var params = DataExplorer.QueryEditor.parse(sql),
+            ordered = [],
+            complete = true,
+            wrapper = document.getElementById('query-params'),
+            fieldList = wrapper.getElementsByTagName('input'),
+            fields = {},
+            textContent = 'textContent' in wrapper ? 'textContent': 'innerText',
+            field, name, label, row, value, hasValue, key, first;
 
+        $(wrapper).toggle(!!params.count);
+
+        for (var i = fieldList.length - 1; i > -1 ; --i) {
+            field = fieldList.item(i);
+            value = field.getAttribute('value');
+            name = field.name.substring('dyn'.length);
+
+            if (value && value.length && value != field.value) {
+                fields[name] = field.value; 
+            }
+
+            field.parentNode.parentNode.removeChild(field.parentNode);
+        }
+
+        for (key in params.items) {
+            ordered[params.items[key].index] = params.items[key];
+            ordered[params.items[key].index].name = key;
+        }
+
+        for (var i = 0; i < ordered.length; ++i) {
+            label = document.createElement('label');
+            label.htmlFor = 'dynParam' + i;
+            label[textContent] = ordered[i].name;
+
+            value = fields[ordered[i].name] || ordered[i].auto;
+            hasValue = !(!value &&
+                    (typeof value === 'undefined' || value === null || value === ''));
+
+            if (complete) {
+                complete = hasValue;
+            }
+
+            field = document.createElement('input');
+            field.name = 'dyn' + ordered[i].name;
+
+            if (!hasValue && ordered[i].name.toLowerCase() === 'userid') {
+                if (DataExplorer.options.User.isAuthenticated) {
+                    hasValue = true;
+                    value = DataExplorer.options.User.guessedID;
+                }
+            }
+
+            if (hasValue) {
+                field.setAttribute('value', value);
+            } else if (!first) {
+                first = field;
+            }
+
+            row = document.createElement('div');
+            row.className = 'form-row';
+            row.appendChild(label);
+            row.appendChild(field);
+
+            wrapper.appendChild(row);
+        }
+
+        if (!complete && first) {
+            first.focus();
+        }
+
+        return complete;
+    }
+
+    function parseQueryResponse(response) {
         if (showError(response)) {
             return;
         }
@@ -347,7 +478,7 @@ DataExplorer.ready(function () {
         document.getElementById('messages').children[0][_textContent] = response.messages;
 
         if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
-            slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
+            slug = window.location.pathname.substring(
 
             if (/\d+/.test(slug)) {
                 slug = null;
@@ -593,9 +724,10 @@ function getParameterByName(name) {
 
 function populateParamsFromUrl() {
     $('#query-params input').each(function () {
-        var val = getParameterByName(this.name);
-        if (val != null && val.length > 0) {
-            $(this).val(getParameterByName(this.name));
+        var value = getParameterByName(this.name);
+
+        if (value != null && value.length > 0) {
+            this.value = value;
         }
     });
 }
@@ -743,59 +875,4 @@ function renderGraph(resultSet) {
 
     $.plot(graph, series, options);
     bindToolTip(graph, "");
-}
-
-function ensureAllParamsEntered(query) {
-    var pattern = /##([a-zA-Z0-9]+):?([a-zA-Z]+)?##/g;
-    var params = query.match(pattern);
-    if (params == null) params = [];
-
-    var div = $('#query-params');
-
-    var allParamsHaveValues = true;
-
-    for (var i = 0; i < params.length; i++) {
-        params[i] = params[i].substring(2, params[i].length - 2);
-        var colonPos = params[i].indexOf(":");
-        if (colonPos > 0) {
-            params[i] = params[i].substring(0, colonPos); 
-        }
-
-        var currentParam = div.find("input[name=" + params[i] + "]");
-        if (currentParam.length == 0) {
-            div.append("<p><label>" + params[i] + "</label>\n" +
-            "<input type=\"text\" name=\"" + params[i] + "\" value=\"\" /><div class='clear'></div></p>");
-            allParamsHaveValues = false;
-        } else {
-            if (currentParam.val().length == 0) {
-                allParamsHaveValues = false;
-            }
-        }
-    }
-
-    // remove extra params
-    div.children("p").each(function () {
-        var name = $(this).find('input').attr('name');
-        var found = false;
-        for (var i = 0; i < params.length; i++) {
-            found = params[i] == name;
-            if (found) break;
-        }
-        if (!found) {
-            $(this).remove();
-        } else {
-            // auto param 
-            if ($(this).find('input').val().length == 0 && name == "UserId") {
-                $(this).find('input').val(DataExplorer.options.User.guessedID);
-            }
-        }
-    });
-
-    div.toggle(params.length > 0);
-
-    if (params.length > 0 && !allParamsHaveValues) {
-        div.find('input:first').focus();
-    }
-
-    return allParamsHaveValues;
 }
