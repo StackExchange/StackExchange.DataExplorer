@@ -112,7 +112,12 @@
         function parseLine(line, depth) {
             var line = line.trim(), param,
                 endComment, endString,
-                startComment, startString;
+                startComment, startString,
+                substitutes = [];
+
+            if (!line) {
+                return;
+            }
 
             if (typeof depth === 'undefined') {
                 depth = 0;
@@ -134,9 +139,10 @@
                 }
             } else if (stringified) {
                 if ((endString = line.indexOf("'")) === -1) {
-                    return;
+                    return scan(line);
                 }
 
+                scan(line.substring(0, endString));
                 line = line.substring(endString + 1);
 
                 if (line[0] === "'") {
@@ -147,7 +153,11 @@
             }
 
             line = line.replace("''", '');
-            line = line.replace(/'[^']+'/, '');
+            line = line.replace(/'[^']+'/, function (match) {
+                substitutes.push(match);
+
+                return '~S' + (substitutes.length - 1);
+            });
             line = line.split('--');
             startString = line[0].indexOf("'");
             startComment = line[0].indexOf('/*');
@@ -157,18 +167,27 @@
 
                 if ((startString < startComment && startString !== -1) ||
                         startComment === -1) {
-                    line = line.substring(0, startString);
                     stringified = true;
                 } else {
                     ++commented;
                     parseLine(line.substring(startComment + '/*'.length), depth);
                     line = line.substring(0, startComment);
                 }
+            } else if (commented) {
+                return;
             } else {
                 line = line[0];
             }
 
-            while (param = line.match(pattern)) {
+            for (var i = 0; i < substitutes.length; ++i) {
+                line = line.replace('~S' + i, substitutes[i]);
+            }
+
+            scan(line);
+        }
+
+        function scan(segment) {
+            while (param = segment.match(pattern)) {
                 params.items[param[1]] = params.items[param[1]] || {};
 
                 if (!params.items[param[1]].index) {
@@ -179,7 +198,7 @@
                 params.items[param[1]].type = param[2] || params.items[param[1]].type;
                 params.items[param[1]].auto = param[3] || params.items[param[1]].auto;
 
-                line = line.substring(param.index + param[0].length);
+                segment = segment.substring(param.index + param[0].length);
             }
         }
     }
@@ -593,6 +612,8 @@ DataExplorer.ready(function () {
         }
 
         error.text(response.error).show();
+
+        return true;
     }
 
     // Note that we destroy resultset in this function!
