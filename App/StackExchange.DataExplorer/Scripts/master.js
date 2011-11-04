@@ -292,6 +292,39 @@ if (!Date.now) {
     }
 }
 
+window.location.param = (function () {
+    var cache = null;
+
+    return function (name) {
+        if (cache === null) {
+            cache = {};
+
+            if (window.location.search.length < 4) {
+                cache = false;
+
+                return;
+            }
+
+            var search = window.location.search.substring(1),
+                groups = search.split('&'), i;
+
+            for (i = 0; i < groups.length; ++i) {
+                search = groups[i].split('=');
+
+                if (search.length === 2 && search[0].length) {
+                    cache[search[0].toLowerCase()] = search[1];
+                }
+            }
+        }
+
+        if (cache === false) {
+            return;
+        }
+
+        return cache[name.toLowerCase()];
+    }
+})();
+
 Date.parseTimestamp = (function () {
     var implementation = function (timestamp) {
         return new Date(timestamp);

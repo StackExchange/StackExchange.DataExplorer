@@ -299,17 +299,7 @@ DataExplorer.ready(function () {
         $('.report-option').fadeOut();
         error.fadeOut();
 
-        var data, sql = null;
-
-        // Ugh, this is ugly, need to rework this soon
-        if (DataExplorer.QueryEditor.exists()) {
-            sql = DataExplorer.QueryEditor.value();
-        } else {
-            // This is a pretty big assumption
-            sql = $('#queryBodyText').text();
-        }
-
-        if (sql && verifyParameters(sql)) {
+        if (verifyParameters()) {
             form.find('input, button').prop('disabled', true);
             
             $('#loading').show();
@@ -371,7 +361,21 @@ DataExplorer.ready(function () {
 
     // Ideally we can separate out the actual displaying bits so that the user
     // doesn't have to click the button before getting the form.
-    function verifyParameters(sql) {
+    function verifyParameters() {
+        var sql = null;
+        
+        // Ugh, this is ugly, need to rework this soon
+        if (DataExplorer.QueryEditor.exists()) {
+            sql = DataExplorer.QueryEditor.value();
+        } else {
+            // This is a pretty big assumption
+            sql = $('#queryBodyText').text();
+        }
+
+        if (!sql) {
+            return false;
+        }
+
         var params = DataExplorer.QueryEditor.parse(sql),
             ordered = [],
             complete = true,
@@ -404,16 +408,18 @@ DataExplorer.ready(function () {
             label.htmlFor = 'dynParam' + i;
             label[_textContent] = ordered[i].name;
 
-            value = fields[ordered[i].name] || ordered[i].auto;
-            hasValue = !(!value &&
-                    (typeof value === 'undefined' || value === null || value === ''));
+            value = fields[ordered[i].name];
+            hasValue = !(!value && value !== 0);
 
-            if (complete) {
-                complete = hasValue;
+            if (!hasValue) {
+                value = window.location.param(ordered[i].name);
+                hasValue = !(!value && value !== 0);
             }
 
-            field = document.createElement('input');
-            field.name = ordered[i].name;
+            if (!hasValue) {
+                value = ordered[i].auto;
+                hasValue = !(!value && value !== 0);
+            }
 
             if (!hasValue && ordered[i].name.toLowerCase() === 'userid') {
                 if (DataExplorer.options.User.isAuthenticated) {
@@ -421,6 +427,13 @@ DataExplorer.ready(function () {
                     value = DataExplorer.options.User.guessedID;
                 }
             }
+
+            if (complete) {
+                complete = hasValue;
+            }
+
+            field = document.createElement('input');
+            field.name = ordered[i].name;
 
             if (hasValue) {
                 field.setAttribute('value', value);
@@ -562,7 +575,13 @@ DataExplorer.ready(function () {
     }
 
     // Temporary workaround
-    window.loadCachedResults = parseQueryResponse;
+    window.loadCachedResults = function (cache) {
+        verifyParameters();
+
+        if (cache) {
+            parseQueryResponse(cache);
+        }
+    }
 
     function showError(response) {
         if (response && !response.error) {
