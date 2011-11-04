@@ -53,7 +53,7 @@
                 continue;
             }
             <li>
-                <a class="site templated" href="/@site.Name.ToLower()/query/:id:slug" title="View results on @site.LongName">
+                <a class="site templated" href="/@site.Name.ToLower()/query/:id:slug:params" title="View results on @site.LongName">
                     <img src="@site.IconUrl" alt="@site.LongName" width="16" height="16" />
                 </a>
             </li>
@@ -74,8 +74,8 @@
                     <a id="graphTab" class="optional" href="#graph">Graph</a>
                     <a id="executionPlanTab" class="optional" href="#executionPlan">Execution Plan</a>
                 </div>
-                <a id="resultsetButton" class="download-button templated" title="Download results as CSV" href="/:site/:metas:multi;csv/:id">Download CSV</a>
-                <a id="executionPlanButton" class="download-button templated" title="Download execution plan as XML" href="/:site/:metas:multi;plan/:id">Download XML</a>
+                <a id="resultsetButton" class="download-button templated" title="Download results as CSV" href="/:site/:metas:multi;csv/:id:params">Download CSV</a>
+                <a id="executionPlanButton" class="download-button templated" title="Download execution plan as XML" href="/:site/:metas:multi;plan/:id:params">Download XML</a>
             </div>
         </div>
         <div id="resultset" class="panel"></div>

@@ -324,7 +324,12 @@ DataExplorer.ready(function () {
 
         var action = form[0].action, records = 0,
             results, height = 0, maxHeight = 500,
-            slug = response.slug;
+            slug = response.slug,
+            params = $('#query-params input[type="text"]').serialize();
+
+        if (params) {
+            params = '?' + params;
+        }
 
         if (/.*?\/\d+\/\d+$/.test(action)) {
             action = action.substring(0, action.lastIndexOf('/'));
@@ -343,6 +348,10 @@ DataExplorer.ready(function () {
 
         if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
             slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
+
+            if (/\d+/.test(slug)) {
+                slug = null;
+            }
         } else if (slug && slug.indexOf('/') !== 0) {
             slug = '/' + slug;
         }
@@ -358,7 +367,8 @@ DataExplorer.ready(function () {
             'metas': response.excludeMetas ? 'n' : '',
             'site': response.siteName,
             'id': response.revisionId,
-            'slug': slug
+            'slug': slug,
+            'params': params
         });
 
         if (response.created) {
@@ -366,7 +376,7 @@ DataExplorer.ready(function () {
                 href = "/" + response.siteName + "/query/edit/" + response.revisionId,
                 classes = "selected";
 
-            history.children('.selected').removeClass('selected');
+            history.find('.selected').removeClass('selected');
             history.children('ul').prepend('<li class="' + classes + '"><a href="' + href + '">' + response.revisionId + '<span class="relativetime" title="' + title + '"></span></a></li>');
         }
 
@@ -582,7 +592,7 @@ function getParameterByName(name) {
 }
 
 function populateParamsFromUrl() {
-    $('#query-params').find("p input").each(function () {
+    $('#query-params input').each(function () {
         var val = getParameterByName(this.name);
         if (val != null && val.length > 0) {
             $(this).val(getParameterByName(this.name));
