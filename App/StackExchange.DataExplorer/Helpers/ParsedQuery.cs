@@ -348,6 +348,10 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         buffer.Append('\n');
                     }
+                    else
+                    {
+                        buffer.Append(' ');
+                    }
 
                     if (remainder != null)
                     {
@@ -361,7 +365,7 @@ namespace StackExchange.DataExplorer.Helpers
                     ParseLine(line, 0);
                 }
 
-                result = buffer.ToString();
+                result = buffer.ToString().Trim();
 
                 foreach (string name in Parameters.Keys)
                 {

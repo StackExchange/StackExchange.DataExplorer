@@ -9,6 +9,32 @@ using System.Collections.Specialized;
 namespace StackExchange.DataExplorer.Tests.Helpers {
     [TestClass]
     public class TestParsedQuery {
+        [TestMethod]
+        public void TestSimpleParsing()
+        {
+            string sql = "SELECT TOP 10 * FROM Posts";
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.AreEqual(sql, query.Sql);
+            Assert.AreEqual(sql, query.ExecutionSql);
+        }
+
+        [TestMethod]
+        public void TestSimpleReductionParsing()
+        {
+            string sql = new StringBuilder()
+                .Append("SELECT\n")
+                .Append("  TOP 10 *\n")
+                .Append("FROM\n")
+                .Append("  Posts")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.AreEqual(sql, query.Sql);
+            Assert.AreEqual("SELECT TOP 10 * FROM Posts", query.ExecutionSql);
+        }
 
         [TestMethod]
         public void TestBatchSplitting() {
