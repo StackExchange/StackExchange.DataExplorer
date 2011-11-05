@@ -37,6 +37,27 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
+        public void TestCommentReductionParsing()
+        {
+            string sql = new StringBuilder()
+                .Append("-- A single line comment\n")
+                .Append("SELECT\n")
+                .Append("  TOP 10 * -- We only want the top 10\n")
+                .Append("FROM\n")
+                .Append("/* Posts */\n")
+                .Append("/*\n")
+                .Append("  Comments\n")
+                .Append(" */\n")
+                .Append("  Users")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.AreEqual(sql, query.Sql);
+            Assert.AreEqual("SELECT TOP 10 * FROM Users", query.ExecutionSql);
+        }
+
+        [TestMethod]
         public void TestBatchSplitting() {
             var query = new ParsedQuery("select 1\n  Go  \nselect 2\n1", null);
             var batches = query.ExecutionSqlBatches.ToArray();

@@ -342,15 +342,27 @@ namespace StackExchange.DataExplorer.Helpers
                         line = line.Replace("~S" + i, substitutions[i]);
                     }
 
-                    buffer.Append(ScanSegment(line));
-
-                    if (stringified)
+                    if (!stringified)
                     {
-                        buffer.Append('\n');
+                        line = line.Trim();
                     }
-                    else
+                    else if (startString != -1)
                     {
-                        buffer.Append(' ');
+                        line = line.TrimStart();
+                    }
+
+                    if (line.Length > 0 || stringified)
+                    {
+                        buffer.Append(ScanSegment(line));
+
+                        if (stringified)
+                        {
+                            buffer.Append('\n');
+                        }
+                        else
+                        {
+                            buffer.Append(' ');
+                        }
                     }
 
                     if (remainder != null)
