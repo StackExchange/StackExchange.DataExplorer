@@ -41,6 +41,26 @@ namespace StackExchange.DataExplorer
         }
 
         /// <summary>
+        /// Counts the number of occurences of the search string in this string
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="search"></param>
+        /// <returns></returns>
+        public static int OccurencesOf(this string s, string search)
+        {
+            int index = s.IndexOf(search), count = 0;
+
+            while (index > -1)
+            {
+                ++count;
+
+                index = s.IndexOf(search, index + search.Length);
+            }
+
+            return count;
+        }
+
+        /// <summary>
         /// Answers true if this String is either null or empty.
         /// </summary>
         /// <remarks>I'm so tired of typing String.IsNullOrEmpty(s)</remarks>

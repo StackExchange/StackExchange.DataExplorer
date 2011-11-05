@@ -10,7 +10,12 @@ namespace StackExchange.DataExplorer.Helpers
     public class ParsedQuery
     {
         private static readonly Regex ParamsRegex = new Regex(
-            @"##([a-zA-Z0-9]+)(?::([a-zA-Z]+))?(?:\?([^#]+))?##",
+            @"##(?<name>[a-zA-Z][a-zA-Z0-9]*)(?::(?<type>[a-zA-Z]+))?(?:\?(?<default>[^#]+))?##",
+            RegexOptions.Compiled
+        );
+
+        private static readonly Regex QuotesRegex = new Regex(
+            @"'[^']*'",
             RegexOptions.Compiled
         );
 
@@ -53,9 +58,13 @@ namespace StackExchange.DataExplorer.Helpers
 
         public ParsedQuery(string sql, NameValueCollection requestParams)
         {
+            Parameters = new Dictionary<string, QueryParameter>();
             Parse(sql, requestParams);
         }
 
+        public List<string> Errors { get; private set; }
+
+        public Dictionary<string, QueryParameter> Parameters { get; private set; }
         public string Name { get; private set; }
         public string Description { get; private set; }
 
@@ -133,7 +142,6 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-
         /// <summary>
         /// MD5 hash of Sql
         /// </summary>
@@ -145,30 +153,23 @@ namespace StackExchange.DataExplorer.Helpers
         public Guid ExecutionHash { get; private set; }
 
         private void Parse(string sql, NameValueCollection requestParams)
-        {
-            List<string> errors;
-            
+        {            
             Sql = Normalize(sql.Trim());
-            sql = ReduceAndPopulate(Sql, requestParams, out errors);
+            ExecutionSql = ReduceAndPopulate(Sql, requestParams);
+            AllParamsSet = Errors.Count == 0;
 
-            
-
-            ExecutionSql = SubstituteParams(Sql, requestParams, out errors);
-            AllParamsSet = ParamsRegex.Matches(ExecutionSql).Count == 0 && errors.Count == 0;
-
-            if (errors.Count > 0)
+            if (Errors.Count > 0)
             {
-                ErrorMessage = string.Join("\n", errors);
+                ErrorMessage = string.Join("\n", Errors);
             }
 
             ExecutionHash = Util.GetMD5(ExecutionSql);
             Hash = Util.GetMD5(Sql);
         }
 
-        private string SubstituteParams(string sql, NameValueCollection requestParams, out List<string> errors)
+        private string SubstituteParams(string sql, NameValueCollection requestParams)
         {
-            errors = new List<string>();
-            var defaults = new NameValueCollection();
+            Errors = new List<string>();
 
             if (requestParams == null)
             {
@@ -190,13 +191,13 @@ namespace StackExchange.DataExplorer.Helpers
 
                 if (!CheckIfTypeIsKnown(type))
                 {
-                    errors.Add(string.Format("Unknown parameter type {0}!", type));
+                    Errors.Add(string.Format("Unknown parameter type {0}!", type));
                     continue;
                 }
 
                 if (!ValidateType(type, subst))
                 {
-                    errors.Add(string.Format("Expected {0} to be of type {1}!", name, type));
+                    Errors.Add(string.Format("Expected {0} to be of type {1}!", name, type));
                     continue;
                 }
 
@@ -217,30 +218,246 @@ namespace StackExchange.DataExplorer.Helpers
             return sql;
         }
 
-        private string ReduceAndPopulate(string sql, NameValueCollection requestParams, out List<string> errors)
+        private string ReduceAndPopulate(string sql, NameValueCollection requestParams)
         {
-            errors = new List<string>();
-            var buffer = new StringBuilder();
-            bool started = false;
+            bool stringified = false;
+            int commented = 0;
+            string result = null;
 
-            // The goal here is to reduce the SQL to as basic of a representation
-            // as possible. This involves removing comments and empty lines, as
-            // well as spaces and newlines that have no impact on the actual
-            // execution. Of course, due to multi-line strings and multi-line comments
-            // (among other things), this is a non-trivial task, so for now...just keep
-            // with the traditional "remove the leading comments" bit.
-            foreach (string line in sql.Split('\n'))
+            // The goal here is to reduce the SQL to as basic of a representation as possible,
+            // without changing the actuale execution results.
+            try
             {
-                if (line.Trim().StartsWith("--") && !started)
+                Errors = new List<string>();
+                var buffer = new StringBuilder();
+                Action<string, int> ParseLine = null;
+
+                #region Inner Function: ParseLine
+
+                ParseLine = (line, depth) =>
                 {
-                    continue;
+                    int startComment, startString, startSingleComment, endComment, endString;
+
+                    if (line.Length == 0 || (!stringified && line.Trim().Length == 0))
+                    {
+                        return;
+                    }
+
+                    if (depth == 10)
+                    {
+                        // Should never happen, but if we get this deep it's just safer to bail
+                        throw new StackOverflowException("SQL reduction has likely gone wrong");
+                    }
+                    else
+                    {
+                        ++depth;
+                    }
+
+                    if (commented > 0)
+                    {
+                        endComment = line.IndexOf("*/");
+
+                        if (endComment != -1)
+                        {
+                            commented += line.Substring(0, endComment).OccurencesOf("/*") - 1;
+                            line = line.Substring(endComment + 2);
+
+                            if (commented > 0)
+                            {
+                                ParseLine(line, depth);
+
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            commented += line.OccurencesOf("/*");
+
+                            return;
+                        }
+                    }
+                    else if (stringified)
+                    {
+                        endString = line.IndexOf("'");
+
+                        if (endString == -1)
+                        {
+                            buffer.Append(ScanSegment(line)).Append('\n');
+
+                            return;
+                        }
+
+                        buffer.Append(ScanSegment(line.Substring(0, endString)));
+
+                        line = line.Substring(endString + 1);
+
+                        if (line[0] == '\'')
+                        {
+                            // We didn't actually end the string, because the single quote we
+                            // indexed before was actually escaping this single quote.
+                            buffer.Append('\'');
+                            ParseLine(line.Substring(1), depth);
+
+                            return;
+                        }
+
+                        stringified = false;
+                    }
+
+                    List<string> substitutions = new List<string>();
+                    string remainder = null;
+
+                    line = QuotesRegex.Replace(line, (match) =>
+                    {
+                        substitutions.Add(match.Value);
+
+                        return "~S" + (substitutions.Count - 1);
+                    });
+
+                    startSingleComment = line.IndexOf("--");
+                    startSingleComment = startSingleComment == -1 ? line.Length : startSingleComment;
+                    startString = line.IndexOf('\'', 0, startSingleComment);
+                    startComment = line.IndexOf("/*", 0, startSingleComment);
+
+                    if (startString != -1 || startComment != -1)
+                    {
+                        if ((startString < startComment && startString != -1) || startComment == -1)
+                        {
+                            stringified = true;
+                        }
+                        else
+                        {
+                            ++commented;
+                            remainder = line.Substring(startComment + 2);
+                            line = line.Substring(0, startComment);
+                        }
+                    }
+                    else
+                    {
+                        line = line.Substring(0, startSingleComment);
+                    }
+
+                    for (int i = 0; i < substitutions.Count; ++i)
+                    {
+                        line = line.Replace("~S" + i, substitutions[i]);
+                    }
+
+                    buffer.Append(ScanSegment(line));
+
+                    if (stringified)
+                    {
+                        buffer.Append('\n');
+                    }
+
+                    if (remainder != null)
+                    {
+                        ParseLine(remainder, depth);
+                    }
+                };
+                #endregion
+
+                foreach (string line in sql.Split('\n'))
+                {
+                    ParseLine(line, 0);
                 }
 
-                buffer.Append(line).Append("\n");
-                started = true;
+                result = buffer.ToString();
+
+                foreach (string name in Parameters.Keys)
+                {
+                    var parameter = Parameters[name];
+                    string value = requestParams[name];
+                    ParameterType type = null;
+
+                    if (!string.IsNullOrEmpty(parameter.Type))
+                    {
+                        type = GetType(parameter.Type);
+                    }
+
+                    if (!string.IsNullOrEmpty(parameter.Default) && type != null)
+                    {
+                        if (!type.Validator(parameter.Default))
+                        {
+                            Errors.Add(string.Format("Expected default value {0} for {1} to be of type {2}!",
+                                parameter.Default, name, type.TypeName));
+
+                            continue;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        Errors.Add(string.Format("Value for {0} was empty or not provided.", name));
+
+                        continue;
+                    }
+
+                    if (type != null)
+                    {
+                        if (!type.Validator(value))
+                        {
+                            Errors.Add(string.Format("Expected value for {0} to be of type {1}!",
+                                name, type.TypeName));
+
+                            continue;
+                        }
+
+                        value = type.Encoder(value);
+                    }
+
+                    result = result.Replace("##" + name + "##", value);
+                }
+            }
+            catch (StackOverflowException)
+            {
+                result = SubstituteParams(sql, requestParams);
             }
 
-            return buffer.ToString();
+            return result;
+        }
+
+        private string ScanSegment(string segment) {
+            MatchCollection matches = ParamsRegex.Matches(segment);
+            string scanned = segment;
+
+            foreach (Match match in matches)
+            {
+                string name = match.Groups["name"].Value;
+                QueryParameter parameter;
+
+                if (Parameters.ContainsKey(name))
+                {
+                    parameter = Parameters[name];
+                }
+                else
+                {
+                    parameter = new QueryParameter();
+                }
+
+                if (match.Groups["type"].Success)
+                {
+                    string type = match.Groups["type"].Value.ToLower();
+
+                    if (!CheckIfTypeIsKnown(type))
+                    {
+                        Errors.Add(string.Format("{0} has unknown parameter type {1}!", name, type));
+
+                        continue;
+                    }
+
+                    parameter.Type = type;
+                }
+
+                if (match.Groups["default"].Success)
+                {
+                    parameter.Default = match.Groups["default"].Value;
+                }
+
+                Parameters[name] = parameter;
+                scanned = scanned.ReplaceFirst(match.Value, "##" + name + "##");
+            }
+
+            return scanned;
         }
 
         private static bool CheckIfTypeIsKnown(string type)
@@ -248,16 +465,19 @@ namespace StackExchange.DataExplorer.Helpers
             return ParameterTypes.Any(p => p.TypeName == type);
         }
 
+        private static ParameterType GetType(string type)
+        {
+            return ParameterTypes.First(p => p.TypeName == type);
+        }
+
         private static bool ValidateType(string type, string data)
         {
-            ParameterType parameterType = ParameterTypes.First(p => p.TypeName == type);
-            return parameterType.Validator(data);
+            return GetType(type).Validator(data);
         }
 
         private static string EncodeType(string type, string data)
         {
-            ParameterType parameterType = ParameterTypes.First(p => p.TypeName == type);
-            return parameterType.Encoder(data);
+            return GetType(type).Encoder(data);
         }
 
 
@@ -291,6 +511,13 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             return normalized.Substring(0, endTrim + 1);
+        }
+
+        public struct QueryParameter
+        {
+            public string Type { get; set; }
+            public string Default { get; set; }
+            public string Value { get; set; }
         }
 
         #region Nested type: ParameterType
