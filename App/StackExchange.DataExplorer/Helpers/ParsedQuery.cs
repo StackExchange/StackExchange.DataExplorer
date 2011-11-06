@@ -44,7 +44,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static readonly HashSet<string> PreBreakWords = new HashSet<string>
         {
-            "SET", "DECLARE", "SELECT", "WITH", "INSERT", "GO"
+            "SET", "DECLARE", "SELECT", "WITH", "INSERT", "GO", "PRINT"
         };
 
         public ParsedQuery(string sql, NameValueCollection requestParams, bool crossSite, bool excludeMetas)
