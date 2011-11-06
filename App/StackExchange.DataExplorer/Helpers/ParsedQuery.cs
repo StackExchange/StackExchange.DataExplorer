@@ -376,9 +376,16 @@ namespace StackExchange.DataExplorer.Helpers
 
                             firstWord = firstWord.ToUpper();
 
-                            if (PreBreakWords.Contains(firstWord))
+                            if (PreBreakWords.Contains(firstWord) && buffer.Length > 0)
                             {
-                                buffer.Append('\n');
+                                if (buffer[buffer.Length - 1] == ' ')
+                                {
+                                    buffer[buffer.Length - 1] = '\n';
+                                }
+                                else
+                                {
+                                    buffer.Append('\n');
+                                }
                             }
                         }
 
