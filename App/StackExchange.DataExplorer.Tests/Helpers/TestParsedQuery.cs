@@ -16,7 +16,6 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             var query = new ParsedQuery(sql, null);
 
-            Assert.AreEqual(sql, query.Sql);
             Assert.AreEqual(sql, query.ExecutionSql);
         }
 
@@ -32,7 +31,6 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             var query = new ParsedQuery(sql, null);
 
-            Assert.AreEqual(sql, query.Sql);
             Assert.AreEqual("SELECT TOP 10 * FROM Posts", query.ExecutionSql);
         }
 
@@ -53,8 +51,22 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             var query = new ParsedQuery(sql, null);
 
-            Assert.AreEqual(sql, query.Sql);
             Assert.AreEqual("SELECT TOP 10 * FROM Users", query.ExecutionSql);
+        }
+
+        [TestMethod]
+        public void TestMultiLineStringReductionParsing()
+        {
+            string sql = new StringBuilder()
+                .Append("SELECT TOP 10 * FROM Posts WHERE Body LIKE '%\n")
+                .Append("   }%'\n")
+                .Append("WHERE\n")
+                .Append("  Id > 10")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.AreEqual("SELECT TOP 10 * FROM Posts WHERE Body LIKE '%\n   }%' WHERE Id > 10", query.ExecutionSql);
         }
 
         [TestMethod]

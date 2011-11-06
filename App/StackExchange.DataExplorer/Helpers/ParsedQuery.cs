@@ -287,11 +287,11 @@ namespace StackExchange.DataExplorer.Helpers
                             return;
                         }
 
-                        buffer.Append(ScanSegment(line.Substring(0, endString)));
+                        buffer.Append(ScanSegment(line.Substring(0, endString + 1)));
 
                         line = line.Substring(endString + 1);
 
-                        if (line[0] == '\'')
+                        if (line.Length > 0 && line[0] == '\'')
                         {
                             // We didn't actually end the string, because the single quote we
                             // indexed before was actually escaping this single quote.
@@ -299,6 +299,11 @@ namespace StackExchange.DataExplorer.Helpers
                             ParseLine(line.Substring(1), depth);
 
                             return;
+                        }
+                        else if (line.Length == 0)
+                        {
+                            // We run into spacing issues without this if this string terminates the line
+                            buffer.Append(" ");
                         }
 
                         stringified = false;
