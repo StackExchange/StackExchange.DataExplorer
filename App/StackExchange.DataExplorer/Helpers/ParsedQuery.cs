@@ -464,6 +464,7 @@ namespace StackExchange.DataExplorer.Helpers
                         value = type.Encoder(value);
                     }
 
+                    parameter.Value = value;
                     result = result.Replace("##" + name + "##", value);
                 }
             }
