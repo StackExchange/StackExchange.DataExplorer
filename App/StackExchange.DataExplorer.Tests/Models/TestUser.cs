@@ -31,15 +31,6 @@ namespace StackExchange.DataExplorer.Tests.Models {
         }
 
         [TestMethod]
-        public void TestUserNameExtrapolation() {
-            var u1 = User.CreateUser("", "a@a.com", "xyz");
-            var u2 = User.CreateUser(null, "a@ab.com", "xyz1");
-
-            Assert.AreEqual("a", u1.Login);
-            Assert.AreEqual("a1", u2.Login); 
-        }
-
-        [TestMethod]
         public void TestNoName() {
 
             Current.DB.Users.DeleteAllOnSubmit(Current.DB.Users.Where(u => u.Login.StartsWith("jon.doe")));
