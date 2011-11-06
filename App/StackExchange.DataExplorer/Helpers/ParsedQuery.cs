@@ -42,6 +42,11 @@ namespace StackExchange.DataExplorer.Helpers
             RegexOptions.IgnoreCase | RegexOptions.Multiline
         );
 
+        private static readonly HashSet<string> PreBreakWords = new HashSet<string>
+        {
+            "SET", "DECLARE", "SELECT", "WITH", "INSERT", "GO"
+        };
+
         public ParsedQuery(string sql, NameValueCollection requestParams, bool crossSite, bool excludeMetas)
             : this(sql, requestParams, false, crossSite, excludeMetas)
         {
@@ -68,7 +73,7 @@ namespace StackExchange.DataExplorer.Helpers
         public string Name { get; private set; }
         public string Description { get; private set; }
 
-        public bool AllParamsSet { get; private set; }
+        public bool IsExecutionReady { get; private set; }
 
         private bool includeExecutionPlan = false;
 
@@ -134,9 +139,10 @@ namespace StackExchange.DataExplorer.Helpers
                 foreach (string str in SplitOnGoRegex.Split(ExecutionSql))
                 {
                     string trimmed = str.Trim();
+
                     if (trimmed != "")
                     {
-                        yield return str;
+                        yield return trimmed;
                     }
                 }
             }
@@ -156,7 +162,7 @@ namespace StackExchange.DataExplorer.Helpers
         {            
             Sql = Normalize(sql.Trim());
             ExecutionSql = ReduceAndPopulate(Sql, requestParams);
-            AllParamsSet = Errors.Count == 0;
+            IsExecutionReady = Errors.Count == 0;
 
             if (Errors.Count > 0)
             {
@@ -358,6 +364,24 @@ namespace StackExchange.DataExplorer.Helpers
 
                     if (line.Length > 0 || stringified)
                     {
+                        if (!stringified)
+                        {
+                            int space = line.IndexOf(' ');
+                            string firstWord = line;
+
+                            if (space != -1)
+                            {
+                                firstWord = firstWord.Substring(0, space);
+                            }
+
+                            firstWord = firstWord.ToUpper();
+
+                            if (PreBreakWords.Contains(firstWord))
+                            {
+                                buffer.Append('\n');
+                            }
+                        }
+
                         buffer.Append(ScanSegment(line));
 
                         if (stringified)
@@ -387,7 +411,7 @@ namespace StackExchange.DataExplorer.Helpers
                 foreach (string name in Parameters.Keys)
                 {
                     var parameter = Parameters[name];
-                    string value = requestParams[name];
+                    string value = requestParams != null ? requestParams[name] : null;
                     ParameterType type = null;
 
                     if (!string.IsNullOrEmpty(parameter.Type))
@@ -399,7 +423,7 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         if (!type.Validator(parameter.Default))
                         {
-                            Errors.Add(string.Format("Expected default value {0} for {1} to be of type {2}!",
+                            Errors.Add(string.Format("Expected default value {0} for {1} to be a {2}!",
                                 parameter.Default, name, type.TypeName));
 
                             continue;
@@ -408,16 +432,23 @@ namespace StackExchange.DataExplorer.Helpers
 
                     if (string.IsNullOrEmpty(value))
                     {
-                        Errors.Add(string.Format("Value for {0} was empty or not provided.", name));
+                        if (!string.IsNullOrEmpty(parameter.Default))
+                        {
+                            value = parameter.Default;
+                        }
+                        else
+                        {
+                            Errors.Add(string.Format("Missing value for {0}!", name));
 
-                        continue;
+                            continue;
+                        }
                     }
 
                     if (type != null)
                     {
                         if (!type.Validator(value))
                         {
-                            Errors.Add(string.Format("Expected value for {0} to be of type {1}!",
+                            Errors.Add(string.Format("Expected value of {0} to be a {1}!",
                                 name, type.TypeName));
 
                             continue;

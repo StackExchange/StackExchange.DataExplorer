@@ -34,7 +34,7 @@ namespace StackExchange.DataExplorer.Helpers
         /// <returns>The cached results, or null if no results exist in the cache</returns>
         public static CachedResult GetCachedResults(ParsedQuery query, int siteId)
         {
-            if (query == null || !query.AllParamsSet)
+            if (query == null || !query.IsExecutionReady)
             {
                 return null;
             }

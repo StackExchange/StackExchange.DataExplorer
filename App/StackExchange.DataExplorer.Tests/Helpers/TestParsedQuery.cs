@@ -23,10 +23,10 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         public void TestSimpleReductionParsing()
         {
             string sql = new StringBuilder()
-                .Append("SELECT\n")
-                .Append("  TOP 10 *\n")
-                .Append("FROM\n")
-                .Append("  Posts")
+                .AppendLine("SELECT")
+                .AppendLine("  TOP 10 *")
+                .AppendLine("FROM")
+                .AppendLine("  Posts")
                 .ToString();
 
             var query = new ParsedQuery(sql, null);
@@ -38,15 +38,15 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         public void TestCommentReductionParsing()
         {
             string sql = new StringBuilder()
-                .Append("-- A single line comment\n")
-                .Append("SELECT\n")
-                .Append("  TOP 10 * -- We only want the top 10\n")
-                .Append("FROM\n")
-                .Append("/* Posts */\n")
-                .Append("/*\n")
-                .Append("  Comments\n")
-                .Append(" */\n")
-                .Append("  Users")
+                .AppendLine("-- A single line comment")
+                .AppendLine("SELECT")
+                .AppendLine("  TOP 10 * -- We only want the top 10")
+                .AppendLine("FROM")
+                .AppendLine("/* Posts */")
+                .AppendLine("/*")
+                .AppendLine("  Comments")
+                .AppendLine(" */")
+                .AppendLine("  Users")
                 .ToString();
 
             var query = new ParsedQuery(sql, null);
@@ -58,10 +58,10 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         public void TestMultiLineStringReductionParsing()
         {
             string sql = new StringBuilder()
-                .Append("SELECT TOP 10 * FROM Posts WHERE Body LIKE '%\n")
-                .Append("   }%'\n")
-                .Append("WHERE\n")
-                .Append("  Id > 10")
+                .AppendLine("SELECT TOP 10 * FROM Posts WHERE Body LIKE '%")
+                .AppendLine("   }%'")
+                .AppendLine("WHERE")
+                .AppendLine("  Id > 10")
                 .ToString();
 
             var query = new ParsedQuery(sql, null);
@@ -71,165 +71,274 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
         [TestMethod]
         public void TestBatchSplitting() {
-            var query = new ParsedQuery("select 1\n  Go  \nselect 2\n1", null);
+            string sql = new StringBuilder()
+                .AppendLine("SELECT 1")
+                .AppendLine("  GO  ")
+                .AppendLine("SELECT 2")
+                .AppendLine("1")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
             var batches = query.ExecutionSqlBatches.ToArray();
+
             Assert.AreEqual(2, batches.Length);
-            Assert.AreEqual("select 1\n", batches[0]);
-            Assert.AreEqual("\nselect 2\n1", batches[1]);
+            Assert.AreEqual("SELECT 1", batches[0]);
+            Assert.AreEqual("SELECT 2 1", batches[1]);
         }
 
         [TestMethod]
         public void TestBatchSplittingIgnoresComments() {
-            var query = new ParsedQuery("select 1\n--Go\nselect 2\n1", null);
+            string sql = new StringBuilder()
+                .AppendLine("SELECT 1")
+                .AppendLine("--Go")
+                .AppendLine("SELECT 2")
+                .AppendLine("1")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
             var batches = query.ExecutionSqlBatches.ToArray();
+
             Assert.AreEqual(1, batches.Length);
-            Assert.AreEqual("select 1\n--Go\nselect 2\n1", batches[0]);
+            Assert.AreEqual("SELECT 1\nSELECT 2 1", batches[0]);
        
         }
 
         [TestMethod]
         public void TestBatchSplittingIgnoresEmptyBatches() {
-            var query = new ParsedQuery("select 1\nGo", null);
+            string sql = new StringBuilder()
+                .AppendLine("SELECT 1")
+                .AppendLine("GO")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
             var batches = query.ExecutionSqlBatches.ToArray();
+
             Assert.AreEqual(1, batches.Length);
-            Assert.AreEqual("select 1\n", batches[0]);
-
-        }
-
-        
-        [TestMethod]
-        public void TestNameCommentIsPulledIntoName() {
-            var query = new ParsedQuery("-- hello world \nselect 1", null);
-            Assert.AreEqual("hello world", query.Name);
+            Assert.AreEqual("SELECT 1", batches[0]);
         }
 
         [TestMethod]
-        public void TestNameCommentIsPulledIntoDescription() {
-            var sb = new StringBuilder()
-                .AppendLine("--test")
-                .AppendLine("--desc1")
-                .AppendLine("--desc2")
-                .AppendLine("select 1");
+        public void TestWeDetectMissingParameterValues() {
+            string sql = "##a## ##b##";
 
-            var query = new ParsedQuery(sb.ToString(), null);
-            Assert.AreEqual("desc1\ndesc2", query.Description);
+            var parameters = new NameValueCollection
+            {
+                { "a", "1" },
+                { "b", "" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.IsFalse(query.IsExecutionReady);
+            Assert.AreEqual("Missing value for b!", query.Errors[0]);
         }
 
         [TestMethod]
-        public void TestRawSqlIsNormalized() {
-            var sb = new StringBuilder()
-              .AppendLine("")
-              .AppendLine(" select 2 ")
-              .AppendLine(" -- select 1 ")
-              .AppendLine("");
+        public void TestWeDetectAllParameters() {
+            string sql = "##a## ##b##";
 
-            var query = new ParsedQuery(sb.ToString(), null);
-            Assert.AreEqual(" select 2 \n -- select 1 ", query.Sql);
+            var parameters = new NameValueCollection
+            {
+                { "a", "1" },
+                { "b", "3" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.IsTrue(query.Parameters.ContainsKey("a"));
+            Assert.IsTrue(query.Parameters.ContainsKey("b"));
+            Assert.IsTrue(query.IsExecutionReady);
         }
 
         [TestMethod]
-        public void TestSqlStripsComments() {
-            var sb = new StringBuilder()
-              .AppendLine("--")
-              .AppendLine("--")
-              .AppendLine(" select 2 ")
-              .AppendLine(" -- select 1 ")
-              .AppendLine("");
-
-            var query = new ParsedQuery(sb.ToString(), null);
-            Assert.AreEqual(" select 2 \n -- select 1 ", query.Sql);
-        }
-
-        [TestMethod]
-        public void TestWeDetectMissingVars() {
-            var sb = new StringBuilder()
-                .AppendLine("##a## ##b##");
-
-            var collection = new NameValueCollection();
-            collection.Add("a", "1");
-            collection.Add("b", "");
-
-            var query = new ParsedQuery(sb.ToString(), collection);
-            Assert.IsFalse(query.AllParamsSet);
-        }
-
-        [TestMethod]
-        public void TestWeDetectAllParams() {
-
-            var collection = new NameValueCollection();
-            collection.Add("a", "1");
-            collection.Add("b", "3");
-
-            var query = new ParsedQuery("##a## ##b##", collection);
-            Assert.IsTrue(query.AllParamsSet);
-        }
-
-        [TestMethod]
-        public void TestIntParams()
+        public void TestWeIgnoreCommentedParameters()
         {
-            var collection = new NameValueCollection();
-            collection.Add("a", "1");
-            collection.Add("b", "3");
+            string sql = new StringBuilder()
+                .AppendLine("SELECT")
+                .AppendLine("  TOP ##TopCount##")
+                .AppendLine("FROM")
+                .AppendLine("  Posts")
+                .AppendLine("--WHERE UserId == ##UserId##")
+                .ToString();
 
-            var query = new ParsedQuery("##a:int## ##b##", collection);
-            Assert.IsTrue(query.AllParamsSet);
+            var parameters = new NameValueCollection
+            {
+                { "TopCount", "10" },
+                { "UserId", "1" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.IsTrue(query.Parameters.ContainsKey("TopCount"));
+            Assert.IsFalse(query.Parameters.ContainsKey("UserId"));
+            Assert.IsTrue(query.IsExecutionReady);
         }
 
         [TestMethod]
-        public void TestInvalidIntParams() {
-            var collection = new NameValueCollection();
-            collection.Add("a", "hello");
-            collection.Add("b", "3");
-
-            var query = new ParsedQuery("##a:int## ##b##", collection);
-            Assert.IsFalse(query.AllParamsSet);
-            Assert.AreEqual("Expected a to be an int!", query.ErrorMessage);
-        }
-
-        [TestMethod]
-        public void TestInvalidParamType()
+        public void TestWeParseParametersInMultiLineStrings()
         {
-            var collection = new NameValueCollection();
-            collection.Add("a", "hello");
+            string sql = new StringBuilder()
+                .AppendLine("SELECT * FROM Posts WHERE Body LIKE '%")
+                .AppendLine("##SearchTerm##'")
+                .ToString();
 
-            var query = new ParsedQuery("##a:frog##", collection);
-            Assert.AreEqual("Unknown parameter type frog!", query.ErrorMessage);
+            var parameters = new NameValueCollection
+            {
+                { "SearchTerm", "foobar" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.IsTrue(query.Parameters.ContainsKey("SearchTerm"));
+            Assert.AreEqual("SELECT * FROM Posts WHERE Body LIKE '%\nfoobar'", query.ExecutionSql);
+            Assert.IsTrue(query.IsExecutionReady);
+        }
+
+        [TestMethod]
+        public void TestInvalidParameterType()
+        {
+            string sql = "##a:frog##";
+
+            var parameters = new NameValueCollection
+            {
+                { "a", "thingadongdong" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.IsFalse(query.Parameters.ContainsKey("a"));
+            Assert.AreEqual("a has unknown parameter type frog!", query.ErrorMessage);
+            Assert.IsFalse(query.IsExecutionReady);
+        }
+
+        [TestMethod]
+        public void TestIntParameters()
+        {
+            string sql = "##a:int## ##b##";
+
+            var parameters = new NameValueCollection
+            {
+                { "a", "1" },
+                { "b", "3" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.AreEqual("int", query.Parameters["a"].Type);
+            Assert.AreEqual("1 3", query.ExecutionSql);
+            Assert.IsTrue(query.IsExecutionReady);
+        }
+
+        [TestMethod]
+        public void TestInvalidIntParameters() {
+            string sql = "##a:int## ##b##";
+
+            var parameters = new NameValueCollection
+            {
+                { "a", "hello" },
+                { "b", "3" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.AreEqual("Expected value of a to be a int!", query.ErrorMessage);
+            Assert.IsFalse(query.IsExecutionReady);
         }
 
         [TestMethod]
         public void TestStringEncoding()
         {
-            var collection = new NameValueCollection();
-            collection.Add("a", "I'm");
+            string sql = "SELECT * FROM Users WHERE Login = ##UserName:string##";
 
-            var query = new ParsedQuery("##a:string##", collection);
-            Assert.AreEqual("'I''m'", query.ExecutionSql);
+            var parameters = new NameValueCollection
+            {
+                { "UserName", "I'm a User's Name" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.AreEqual("SELECT * FROM Users WHERE Login = 'I''m a User''s Name'", query.ExecutionSql);
+            Assert.IsTrue(query.IsExecutionReady);
         }
 
         [TestMethod]
-        public void TestInvalidFloats() {
-            var collection = new NameValueCollection();
-            collection.Add("a", "1.");
-            collection.Add("b", "1.2.");
-            collection.Add("c", ".2");
-            collection.Add("d", "frog");
+        public void TestValidFloats()
+        {
+            string sql = "##a:float## ##b:float##";
 
-            var query = new ParsedQuery("##a:float## ##b:float## ##c:float## ##d:float##", collection);
-            Assert.AreEqual(@"Expected a to be of type float!
-Expected b to be of type float!
-Expected c to be of type float!
-Expected d to be of type float!".Replace("\r",""), query.ErrorMessage);
-        }
+            var parameters = new NameValueCollection
+            {
+                { "a", "1" },
+                { "b", "1.2" }
+            };
 
-        [TestMethod]
-        public void TestValidFloats() {
-            var collection = new NameValueCollection();
-            collection.Add("a", "1");
-            collection.Add("b", "1.2");
+            var query = new ParsedQuery(sql, parameters);
 
-            var query = new ParsedQuery("##a:float## ##b:float##", collection);
-            Assert.IsTrue(query.AllParamsSet);
+            Assert.AreEqual("float", query.Parameters["a"].Type);
             Assert.AreEqual(query.ExecutionSql, "1 1.2");
+            Assert.IsTrue(query.IsExecutionReady);
+        }
+
+        [TestMethod]
+        public void TestInvalidFloats()
+        {
+            string sql = "##a:float## ##b:float## ##c:float## ##d:float##";
+
+            var parameters = new NameValueCollection
+            {
+                { "a", "1." },
+                { "b", "1.2." },
+                { "c", ".2" },
+                { "d", "frog" }
+            };
+
+            var query = new ParsedQuery(sql, parameters);
+
+            Assert.AreEqual(4, query.Errors.Count);
+            Assert.AreEqual("Expected value of a to be a float!", query.Errors[0]);
+            Assert.AreEqual("Expected value of b to be a float!", query.Errors[1]);
+            Assert.AreEqual("Expected value of c to be a float!", query.Errors[2]);
+            Assert.AreEqual("Expected value of d to be a float!", query.Errors[3]);
+            Assert.IsFalse(query.IsExecutionReady);
+        }
+
+        [TestMethod]
+        public void TestDefaultParameterValue()
+        {
+            string sql = "SELECT * FROM Tags WHERE TagName = '##TagName?java##'";
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.IsTrue(query.Parameters.ContainsKey("TagName"));
+            Assert.AreEqual("java", query.Parameters["TagName"].Default);
+            Assert.AreEqual("SELECT * FROM Tags WHERE TagName = 'java'", query.ExecutionSql);
+            Assert.IsTrue(query.IsExecutionReady);
+        }
+
+        [TestMethod]
+        public void TestTypedDefaultParameterValue()
+        {
+            string sql = "SELECT * FROM Users WHERE Reputation > ##Reputation:int?101##";
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.IsTrue(query.Parameters.ContainsKey("Reputation"));
+            Assert.AreEqual("101", query.Parameters["Reputation"].Default);
+            Assert.AreEqual("SELECT * FROM Users WHERE Reputation > 101", query.ExecutionSql);
+            Assert.IsTrue(query.IsExecutionReady);
+        }
+
+        [TestMethod]
+        public void TestInvalidTypedDefaultParameterValue()
+        {
+            string sql = "SELECT * FROM Users WHERE Reputation > ##Reputation:int?trees##";
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.IsTrue(query.Parameters.ContainsKey("Reputation"));
+            Assert.AreEqual(1, query.Errors.Count);
+            Assert.AreEqual("Expected default value trees for Reputation to be a int!", query.Errors[0]);
+            Assert.IsFalse(query.IsExecutionReady);
         }
     }
 }

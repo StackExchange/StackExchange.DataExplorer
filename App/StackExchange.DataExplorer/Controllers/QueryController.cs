@@ -341,7 +341,7 @@ namespace StackExchange.DataExplorer.Controllers
         {
             QueryResults results = null;
 
-            if (!query.AllParamsSet)
+            if (!query.IsExecutionReady)
             {
                 throw new ApplicationException(!string.IsNullOrEmpty(query.ErrorMessage) ?
                     query.ErrorMessage : "All parameters must be set!");
