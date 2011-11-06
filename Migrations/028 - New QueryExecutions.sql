@@ -17,3 +17,9 @@ BEGIN
 	ALTER TABLE [dbo].[QueryExecutions] ADD RevisionId int NOT NULL default(-1)
 END
 
+CREATE UNIQUE CLUSTERED INDEX [idxUniqueQE] ON [dbo].[QueryExecutions]
+(
+	[UserId] ASC,
+	[RevisionId] ASC,
+	[QueryId] ASC
+) WITH (DROP_EXISTING = ON)
