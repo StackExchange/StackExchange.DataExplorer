@@ -1,1 +1,0 @@
-ALTER TABLE [dbo].[Users] ADD HideSchema bit NULL

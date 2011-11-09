@@ -55,3 +55,34 @@ BEGIN
 END
 
 GO
+
+IF OBJECT_ID('fnIndexExistsWith') IS NOT NULL
+BEGIN
+	DROP FUNCTION fnIndexExistsWith
+END
+
+GO
+
+CREATE FUNCTION fnIndexExistsWith(
+	@table_name nvarchar(max),
+	@index_name nvarchar(max),
+	@column_name nvarchar(max)
+)
+RETURNS BIT
+BEGIN
+	DECLARE @found bit = 0
+	
+	IF EXISTS (
+		SELECT 1 FROM sys.indexes
+		JOIN sys.index_columns ON sys.indexes.index_id = sys.index_columns.index_id
+		JOIN sys.columns ON sys.columns.column_id = sys.index_columns.column_id
+		WHERE sys.indexes.object_id = OBJECT_ID(@table_name) AND sys.indexes.name = @index_name AND sys.columns.name = @column_name
+	)
+	BEGIN
+		SET @found = 1
+	END
+	
+	RETURN @found
+END
+
+GO
