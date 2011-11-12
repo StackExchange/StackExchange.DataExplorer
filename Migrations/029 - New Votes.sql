@@ -5,7 +5,7 @@ IF dbo.fnColumnExists('Votes', 'RootId') = 0
 
 IF dbo.fnIndexExistsWith('Votes', 'queryIdx', 'SavedQueryId') = 1
 BEGIN
-	CREATE UNIQUE CLUSTERED INDEX [queryIdx] ON [dbo].[Votes]
+	CREATE UNIQUE INDEX [queryIdx] ON [dbo].[Votes]
 	(
 		[RootId] ASC,
 		[OwnerId] ASC,
@@ -13,5 +13,5 @@ BEGIN
 	) WITH (DROP_EXISTING = ON)
 END
 
-IF dbo.fnIndexExists('Votes','queryIdx2') = 0
+IF dbo.fnIndexExists('Votes','queryIdx2') = 1
 	DROP INDEX Votes.queryIdx2
