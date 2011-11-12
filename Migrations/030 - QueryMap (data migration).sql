@@ -6,11 +6,11 @@ BEGIN
 		Id int NOT NULL IDENTITY PRIMARY KEY,
 		OriginalId int NOT NULL,
 		SiteId int NULL,
-		MigratedQueryTypeId int NOT NULL,
+		MigrationType int NOT NULL,
 		RevisionId int NOT NULL,
     )
     
-    CREATE UNIQUE INDEX lookupIdx ON QueryMap(OriginalId, MigratedQueryTypeId);
+    CREATE UNIQUE INDEX lookupIdx ON QueryMap(OriginalId, MigrationType);
     
     -- Define the variables that map to data we care about
     DECLARE @queryId int;
@@ -72,7 +72,7 @@ BEGIN
 		);
 		
 		-- Create a mapping to the new revision
-		INSERT INTO QueryMap (OriginalId, SiteId, MigratedQueryTypeId, RevisionId) VALUES (
+		INSERT INTO QueryMap (OriginalId, SiteId, MigrationType, RevisionId) VALUES (
 			@queryId,
 			NULL,
 			1,
@@ -141,7 +141,7 @@ BEGIN
 		END
 		
 		-- Create a mapping to the new revision
-		INSERT INTO QueryMap (OriginalId, SiteId, MigratedQueryTypeId, RevisionId) VALUES (
+		INSERT INTO QueryMap (OriginalId, SiteId, MigrationType, RevisionId) VALUES (
 			@queryId,
 			@siteId,
 			2,

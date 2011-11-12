@@ -14,6 +14,24 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class SavedQueryController : StackOverflowController
     {
+        [Route(@"{sitename}/s/{queryId:\d+}/{slug?}")]
+        public ActionResult MapQuery(string sitename, int queryId, string slug)
+        {
+            Revision revision = QueryUtil.GetMigratedRevision(queryId, MigrationType.Saved);
+
+            if (revision == null)
+            {
+                return PageNotFound();
+            }
+
+            if (slug.HasValue())
+            {
+                slug = "/" + slug;
+            }
+
+            return new RedirectPermanentResult("/" + sitename + "/query/" + revision.OwnerId + "/" + revision.RootId + slug);
+        }
+
         [Route(@"{sitename}/query/{ownerId:\d+}/{rootId:\d+}/{slug?}")]
         public ActionResult ShowLatest(string sitename, int ownerId, int rootId, string slug)
         {

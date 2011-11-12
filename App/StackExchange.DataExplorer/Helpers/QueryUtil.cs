@@ -167,6 +167,28 @@ namespace StackExchange.DataExplorer.Helpers
             ).FirstOrDefault();
         }
 
+        public static Revision GetMigratedRevision(int id, MigrationType type)
+        {
+            return Current.DB.Query<Revision>(@"
+                SELECT
+                    Revisions.*
+                FROM
+                    Revisions
+                JOIN
+                    QueryMap
+                ON
+                    Revisions.Id = QueryMap.RevisionId
+                WHERE
+                    QueryMap.OriginalId = @original AND
+                    MigrationType = @type",
+                new
+                {
+                    original = id,
+                    type = (int)type
+                }
+            ).FirstOrDefault();
+        }
+
         public static IEnumerable<Revision> GetRevisionHistory(int rootId, int userId)
         {
             return Current.DB.Query<Revision>(

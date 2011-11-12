@@ -183,6 +183,7 @@
       <DependentUpon>DBContext.dbml</DependentUpon>
     </Compile>
     <Compile Include="Models\Metadata.cs" />
+    <Compile Include="Models\MigrationType.cs" />
     <Compile Include="Models\Query.cs" />
     <Compile Include="Models\QueryExecution.cs" />
     <Compile Include="Models\Revision.cs" />

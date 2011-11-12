@@ -266,6 +266,24 @@ namespace StackExchange.DataExplorer.Controllers
             return new CsvResult(json);
         }
 
+        [Route(@"{sitename}/q/{queryId:\d+}/{slug?}")]
+        public ActionResult MapQuery(string sitename, int queryId, string slug)
+        {
+            Revision revision = QueryUtil.GetMigratedRevision(queryId, MigrationType.Normal);
+
+            if (revision == null)
+            {
+                return PageNotFound();
+            }
+
+            if (slug.HasValue())
+            {
+                slug = "/" + slug;
+            }
+
+            return new RedirectPermanentResult("/" + sitename + "/query/" + revision.Id + slug);
+        }
+
         [Route(@"{sitename}/query/edit/{revisionId:\d+}/{slug?}")]
         public ActionResult Edit(string sitename, int revisionId)
         {
