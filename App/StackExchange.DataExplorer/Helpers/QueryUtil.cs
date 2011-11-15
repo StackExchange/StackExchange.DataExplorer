@@ -191,8 +191,40 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static IEnumerable<Revision> GetRevisionHistory(int rootId, int userId)
         {
-            return Current.DB.Query<Revision>(
-                "SELECT * FROM Revisions WHERE (RootId = @root OR Id = @root) AND OwnerId = @owner ORDER BY CreationDate DESC",
+            return Current.DB.Query<Revision, Query, Revision, User, Revision>(@"
+                SELECT
+                    revision.*, query.*, parent.*, [user].*
+                FROM
+                    Revisions revision
+                LEFT JOIN
+                    Revisions parent
+                ON
+                    revision.ParentId = parent.Id
+                LEFT JOIN
+                    Users [user]
+                ON
+                    parent.OwnerId = [user].Id
+                JOIN
+                    Queries query
+                ON
+                    revision.QueryId = query.Id
+                WHERE
+                    (revision.RootId = @root OR revision.Id = @root) AND
+                    revision.OwnerId = @owner
+                ORDER BY
+                    revision.CreationDate DESC",
+                (revision, query, parent, user) =>
+                {
+                    if (parent != null)
+                    {
+                        parent.Owner = user;
+                    }
+
+                    revision.Query = query;
+                    revision.Parent = parent;
+
+                    return revision;
+                },
                 new
                 {
                     root = rootId,

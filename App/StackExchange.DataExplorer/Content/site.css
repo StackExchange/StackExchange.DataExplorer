@@ -636,8 +636,24 @@ ul.site-list .desc {
   background-color: #FCFCE1; 
 }
 
-#history li:first-child {
+#history li:first-child, #history .forked + li {
   background-position: 3px -180px;
+}
+
+#history li.forked {
+  background-position: 3px -207px;
+}
+
+#history li.forked.parent {
+  background-position: 3px -237px;
+}
+
+#history li.forked + li.parent {
+  background-position: 3px -298px;
+}
+
+#history li.forked + li.forked.parent {
+  background-position: 3px -267px;
 }
 
 #history li.last {
@@ -655,6 +671,9 @@ ul.site-list .desc {
 #history li a {
   display: block;
   font-weight: bold;
+}
+
+#history li a span.revision-info {
   padding-left: 13px;
 }
 
@@ -663,16 +682,25 @@ ul.site-list .desc {
 }
 
 #schema-toggle {
-  background: transparent url('images/sprites.png') no-repeat scroll 100% -212px;
   float: right;
   margin-right: 0px;
-  padding-right: 18px;
 }
 
-#schema-toggle.hidden {
-  background-position: 0px -230px;
-  padding-left: 18px;
-  padding-right: 0px;
+#schema-toggle:after {
+  content: '>>';
+  font-size: 97%;
+  margin-left: 4px;
+}
+
+#schema-toggle.hidden:after {
+  content: '';
+  margin-left: 0px;
+}
+
+#schema-toggle.hidden:before {
+  content: '<<';
+  font-size: 97%;
+  margin-right: 4px;
 }
 
 #schema-toggle:hover {

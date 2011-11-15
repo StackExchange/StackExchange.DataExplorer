@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -846,5 +847,19 @@ namespace StackExchange.DataExplorer.Helpers
             return Regex.Replace(html, @"&amp;([^; ]+);", @"&$1;");
         }
 
+        public static string MakeClasses(Dictionary<string, bool> possibilities)
+        {
+            var buffer = new StringBuilder();
+
+            foreach (var possibility in possibilities)
+            {
+                if (possibility.Value)
+                {
+                    buffer.Append(" ").Append(possibility.Key);
+                }
+            }
+
+            return buffer.ToString();
+        }
     }
 }

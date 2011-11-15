@@ -132,6 +132,16 @@ namespace StackExchange.DataExplorer
             return s.HasValue() ? HtmlUtilities.URLFriendly(s) : s;
         }
 
+        public static string Slugify(this Metadata metadata)
+        {
+            if (metadata == null || metadata.Title.IsNullOrEmpty())
+            {
+                return "";
+            }
+
+            return "/" + metadata.Title.URLFriendly();
+        }
+
         /// <summary>
         /// returns Url Encoded string
         /// </summary>

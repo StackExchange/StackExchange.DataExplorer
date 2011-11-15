@@ -538,8 +538,19 @@ DataExplorer.ready(function () {
                 href = "/" + response.siteName + "/query/edit/" + response.revisionId,
                 classes = "selected";
 
+            if (response.parentId) {
+                history.find('#revision-' + response.parentId).addClass('parent');
+            }
+
             history.find('.selected').removeClass('selected');
-            history.children('ul').prepend('<li class="' + classes + '"><a href="' + href + '">' + response.revisionId + '<span class="relativetime" title="' + title + '"></span></a></li>');
+            history.children('ul').prepend(
+                '<li id="revision-' + response.revisionId + '" class="' + classes + '">' +
+                    '<a href="' + href + '">' +
+                        '<span class="revision-info">' + response.revisionId + '</span>' +
+                        '<span class="relativetime" title="' + title + '"></span>' + 
+                    '</a>' +
+                '</li>'
+            );
         }
 
         history.find('.relativetime').each(function () {

@@ -1,28 +1,41 @@
 ﻿@model StackExchange.DataExplorer.ViewModel.RevisionHistory
 @using StackExchange.DataExplorer;
 @using StackExchange.DataExplorer.Helpers;
+@using StackExchange.DataExplorer.ViewModel;
 
 <div id="history" class="right-group">
     <span class="heading">Your Revisions</span>
     <ul>
     @if (Model.History != null)
     {
-        int? currentId = Model.Current != null ? Model.Current.Id : (int?)null;
-        int? parentId = null;
-        int lastId = Model.History.Last().Id;
+        var history = Model.History.ToArray();
+        int? selected = Model.Current != null ? Model.Current.Id : (int?)null;
+        var parents = new HashSet<int>();
     
-        foreach (var revision in Model.History)
+        for (int i = 0; i < history.Length; ++i)
         {
-            var slug = "";
-            var divergent = revision.Id == parentId;
+            var previous = i > 0 ? history[i - 1] : null;
+            var current = history[i];
+            var next = i < history.Length - 1 ? history[i + 1] : null;
+            var forked = next != null && current.ParentId != next.Id;
+            var classes = new Dictionary<string, bool>
+            {
+                { "external", forked && current.Parent.OwnerId != Current.User.Id },
+                { "forked", forked },
+                { "last", i == history.Length - 1 },
+                { "parent", parents.Contains(current.Id) },
+                { "selected", selected == current.Id }
+            };
 
-            parentId = revision.ParentId; 
-
-            if (revision.Metadata != null && !revision.Metadata.Title.IsNullOrEmpty()) {
-                slug = "/" + revision.Metadata.Title.URLFriendly();
+            if (current.ParentId.HasValue)
+            {
+                parents.Add(current.ParentId.Value);
             }
-        <li class="revision@(currentId == revision.Id ? " selected" : "")@(divergent ? " divergent" : "")@(lastId == revision.Id ? " last" : "")">
-            <a href="/@Model.SiteName.ToLower()/query/edit/@revision.Id@slug">@revision.Id@Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())</a>
+        <li id="revision-@current.Id" class="revision@(HtmlUtilities.MakeClasses(classes))">
+            <a href="/@Model.SiteName.ToLower()/query/edit/@current.Id@current.Metadata.Slugify()" title="@current.Query.QueryBody">
+                <span class="revision-info" title="@current.ExplainOrigin(Current.User)">@current.Id</span>
+                @Html.Raw(current.CreationDate.ToRelativeTimeSpanMini())
+            </a>
         </li>
         }
     }

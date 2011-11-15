@@ -14,6 +14,7 @@ namespace StackExchange.DataExplorer.Models
         public Query Query { get; set; }
         public Metadata Metadata { get; set; }
         public User Owner { get; set; }
+        public Revision Parent { get; set; }
 
         private int? rootId = null;
         public int? RootId {
