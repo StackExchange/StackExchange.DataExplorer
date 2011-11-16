@@ -190,7 +190,7 @@
             while (param = segment.match(pattern)) {
                 params.items[param[1]] = params.items[param[1]] || {};
 
-                if (!params.items[param[1]].index) {
+                if (typeof params.items[param[1]].index === 'undefined') {
                     params.items[param[1]].index = params.count;
                     ++params.count;
                 }
@@ -319,6 +319,8 @@ DataExplorer.ready(function () {
         error.fadeOut();
 
         if (verifyParameters()) {
+            var data = form.serialize();
+
             form.find('input, button').prop('disabled', true);
             
             $('#loading').show();
@@ -326,7 +328,7 @@ DataExplorer.ready(function () {
             $.ajax({
                 'type': 'POST',
                 'url': this.action,
-                'data': form.serialize(),
+                'data': data,
                 'success': parseQueryResponse,
                 'error': function () {
                     showError({ 'error': "Something unexpected went wrong while running "
@@ -410,7 +412,7 @@ DataExplorer.ready(function () {
             value = field.getAttribute('value');
             name = field.name;
 
-            if (value && value.length && value != field.value) {
+            if (field.value && field.value.length && value != field.value) {
                 fields[name] = field.value; 
             }
 
@@ -441,7 +443,8 @@ DataExplorer.ready(function () {
             }
 
             if (!hasValue && ordered[i].name.toLowerCase() === 'userid') {
-                if (DataExplorer.options.User.isAuthenticated) {
+                if (DataExplorer.options.User.isAuthenticated &&
+                        DataExplorer.options.User.guessedID) {
                     hasValue = true;
                     value = DataExplorer.options.User.guessedID;
                 }
@@ -453,6 +456,7 @@ DataExplorer.ready(function () {
 
             field = document.createElement('input');
             field.name = ordered[i].name;
+            field.id = 'dynParam' + i;
 
             if (hasValue) {
                 field.setAttribute('value', value);
@@ -542,6 +546,7 @@ DataExplorer.ready(function () {
                 history.find('#revision-' + response.parentId).addClass('parent');
             }
 
+            history.find('.empty').remove();
             history.find('.selected').removeClass('selected');
             history.children('ul').prepend(
                 '<li id="revision-' + response.revisionId + '" class="' + classes + '">' +
@@ -551,6 +556,7 @@ DataExplorer.ready(function () {
                     '</a>' +
                 '</li>'
             );
+            history.find('li:last').addClass('last');
         }
 
         history.find('.relativetime').each(function () {

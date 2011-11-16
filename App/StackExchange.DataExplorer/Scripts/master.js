@@ -9,7 +9,7 @@
         if (typeof settings === 'object') {
             for (var setting in settings) {
                 if (settings.hasOwnProperty(setting)) {
-                    if (typeof settings[setting] === 'object') {
+                    if (settings[setting] && typeof settings[setting] === 'object') {
                         if (typeof options[setting] === 'object') {
                             $.extend(options[setting], settings[setting]);
                         }

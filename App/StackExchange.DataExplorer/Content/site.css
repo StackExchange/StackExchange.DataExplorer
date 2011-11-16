@@ -632,6 +632,11 @@ ul.site-list .desc {
   padding: 5px 8px 5px 8px;
 }
 
+#history li.empty {
+  background-image: none;
+  color: #606060;
+}
+
 #history li.selected {
   background-color: #FCFCE1; 
 }

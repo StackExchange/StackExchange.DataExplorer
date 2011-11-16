@@ -6,12 +6,12 @@
 <div id="history" class="right-group">
     <span class="heading">Your Revisions</span>
     <ul>
-    @if (Model.History != null)
+    @if (Model.History != null && Model.History.FirstOrDefault() != null)
     {
         var history = Model.History.ToArray();
         int? selected = Model.Current != null ? Model.Current.Id : (int?)null;
         var parents = new HashSet<int>();
-    
+
         for (int i = 0; i < history.Length; ++i)
         {
             var previous = i > 0 ? history[i - 1] : null;
@@ -38,6 +38,10 @@
             </a>
         </li>
         }
+    }
+    else
+    {
+        <li class="empty">Waiting for you to make your first edit&hellip;</li>
     }
     </ul>
 </div>
