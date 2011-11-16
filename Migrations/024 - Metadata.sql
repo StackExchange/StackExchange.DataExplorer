@@ -11,6 +11,8 @@ BEGIN
 		[Votes] [int] NOT NULL,
 		[Views] [int] NOT NULL,
 		[Featured] [bit] NOT NULL,
+		[Hidden] [bit] NOT NULL,
+		[First] [bit] NOT NULL
 	 CONSTRAINT [PK_Metadata] PRIMARY KEY CLUSTERED 
 	(
 		[Id] ASC
@@ -25,4 +27,10 @@ ALTER TABLE [dbo].[Metadata] ADD  CONSTRAINT [DF_Metadata_Views]  DEFAULT ((0)) 
 GO
 
 ALTER TABLE [dbo].[Metadata] ADD  CONSTRAINT [DF_Metadata_Featured]  DEFAULT ((0)) FOR [Featured]
+GO
+
+ALTER TABLE [dbo].[Metadata] ADD  CONSTRAINT [DF_Metadata_Hidden]  DEFAULT ((0)) FOR [Hidden]
+GO
+
+ALTER TABLE [dbo].[Metadata] ADD  CONSTRAINT [DF_Metadata_First]  DEFAULT ((0)) FOR [First]
 GO

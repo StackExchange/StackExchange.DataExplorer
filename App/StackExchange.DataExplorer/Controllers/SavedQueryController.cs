@@ -325,12 +325,15 @@ namespace StackExchange.DataExplorer.Controllers
                 builder.Select("metadata.LastActivity AS LastRun");
                 builder.Join("Queries query ON query.Id = metadata.LastQueryId");
                 builder.LeftJoin("Users [user] ON metadata.OwnerId = [user].Id");
+                builder.Where("metadata.Hidden = 0");
 
                 if (order_by == "featured" || order_by == "recent")
                 {
                     if (order_by == "featured")
                     {
                         builder.Where("metadata.Featured = 1");
+                        builder.Where("metadata.First = 1");
+                        builder.OrderBy("metadata.Votes DESC");
                     }
 
                     builder.OrderBy("metadata.LastActivity DESC");

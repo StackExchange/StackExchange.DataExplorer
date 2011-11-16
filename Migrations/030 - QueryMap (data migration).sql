@@ -28,6 +28,7 @@ BEGIN
     DECLARE @rootId int;
     DECLARE @ownerId int;
     DECLARE @savedId int;
+    DECLARE @first bit;
     
     -- Create a cursor to port over the raw query data
     DECLARE QueryCursor CURSOR FOR
@@ -60,7 +61,7 @@ BEGIN
 		END
 		
 		-- Create the revision's metadata
-		INSERT INTO Metadata (RevisionId, OwnerId, Title, [Description], LastQueryId, LastActivity, Votes, [Views], Featured) VALUES (
+		INSERT INTO Metadata (RevisionId, OwnerId, Title, [Description], LastQueryId, LastActivity, Votes, [Views], Featured, Hidden) VALUES (
 			@revisionId,
 			@creatorId,
 			@name,
@@ -69,7 +70,8 @@ BEGIN
 			@activity,
 			0,
 			@views,
-			0
+			0,
+			1
 		);
 		
 		-- Create a mapping to the new revision
@@ -88,19 +90,13 @@ BEGIN
 	
 	CLOSE QueryCursor; DEALLOCATE QueryCursor;
 	
-	DECLARE @DuplicateSaves TABLE (
-		Id int,
-		QueryId int,
-		OriginalId int
-	);
-	
 	-- Create a cursor to port over the saved query data
 	DECLARE SavedQueryCursor CURSOR FOR
-		SELECT Id, QueryId, UserId, SiteId, Title, [Description], FavoriteCount, IsFeatured, LastEditDate FROM SavedQueries WHERE (IsDeleted != 1 OR IsDeleted IS NULL) AND (IsSkipped != 1 OR IsSkipped IS NULL);
+		SELECT Id, QueryId, UserId, SiteId, Title, [Description], FavoriteCount, IsFeatured, IsFirst, LastEditDate FROM SavedQueries WHERE (IsDeleted != 1 OR IsDeleted IS NULL) AND (IsSkipped != 1 OR IsSkipped IS NULL);
 		
 	OPEN SavedQueryCursor;
 	
-	FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @votes, @featured, @activity;
+	FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @votes, @featured, @first, @activity;
 	
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -114,7 +110,9 @@ BEGIN
 				Title = @name,
 				[Description] = @description,
 				Votes = ISNULL(@votes, 0),
-				Featured = ISNULL(@featured, 0)
+				Featured = ISNULL(@featured, 0),
+				Hidden = 0,
+				[First] = @first
 			WHERE RevisionId = @revisionId AND OwnerId = @ownerId;
 		END
 		ELSE
@@ -132,16 +130,17 @@ BEGIN
 			SELECT @revisionId = SCOPE_IDENTITY();
 		
 			-- Create the revision's metadata
-			INSERT INTO Metadata (RevisionId, OwnerId, Title, [Description], LastQueryId, LastActivity, Votes, [Views], Featured) VALUES (
+			INSERT INTO Metadata (RevisionId, OwnerId, Title, [Description], LastQueryId, LastActivity, Votes, [Views], Featured, [First]) VALUES (
 				@revisionId,
 				@creatorId,
 				@name,
 				@description,
 				@queryId,
-				ISNULL((SELECT LastRun FROM QueryExecutions WHERE QueryId = @queryId AND UserId = @creatorId), @activity),
+				@activity,
 				ISNULL(@votes, 0),
 				@views,
-				ISNULL(@featured, 0)
+				ISNULL(@featured, 0),
+				ISNULL(@first, 0)
 			);
 			
 			-- Update the execution history
@@ -159,7 +158,7 @@ BEGIN
 			@revisionId
 		);
 	
-		FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @activity, @votes, @activity;
+		FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @votes, @featured, @first, @activity;
 	END
 	
 	CLOSE SavedQueryCursor; DEALLOCATE SavedQueryCursor;
@@ -176,4 +175,16 @@ BEGIN
 		Votes.UserId = Duplicates.UserId AND
 		(Votes.OwnerId = Duplicates.OwnerId OR (Votes.OwnerId IS NULL AND Duplicates.OwnerId IS NULL)) AND
 		Votes.Id != Duplicates.Id
+		
+	-- Update the vote totals
+	UPDATE
+		Metadata
+	SET
+		Votes = votes.Total
+	FROM
+		Metadata
+	JOIN
+		(SELECT COUNT(*) AS Total, RootId, OwnerId FROM Votes GROUP BY RootId, OwnerId) AS votes
+	ON
+		Metadata.RevisionId = votes.RootId AND Metadata.OwnerId = votes.OwnerId;
 END
