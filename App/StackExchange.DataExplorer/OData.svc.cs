@@ -46,7 +46,19 @@ namespace StackExchange.DataExplorer
 
 
         public static string GetRemoteIP() {
-            return GetRemoteIP(HttpContext.Current.Request.ServerVariables);
+            NameValueCollection ServerVaraibles;
+
+            // This is a nasty hack so we don't crash the non-request test cases
+            if (HttpContext.Current != null && HttpContext.Current.Request != null)
+            {
+                ServerVaraibles = HttpContext.Current.Request.ServerVariables;
+            }
+            else
+            {
+                ServerVaraibles = new NameValueCollection();
+            }
+
+            return GetRemoteIP(ServerVaraibles);
         }
 
         // This method is called only once to initialize service-wide policies.
