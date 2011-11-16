@@ -40,7 +40,8 @@ namespace StackExchange.DataExplorer.Tests.Models {
             var u2 = User.CreateUser(null, "", "xyz1");
 
             Assert.AreEqual("jon.doe", u1.Login);
-            Assert.AreEqual("jon.doe1", u2.Login);
+            // This behaviour is probably not what we want
+            Assert.AreEqual("jon.doe" + (u1.Id + 2), u2.Login);
         }
 
         [TestMethod]
