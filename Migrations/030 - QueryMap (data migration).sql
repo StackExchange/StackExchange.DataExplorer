@@ -25,6 +25,7 @@ BEGIN
     DECLARE @name nvarchar(100);
     DECLARE @description nvarchar(1000);
     DECLARE @revisionId int;
+    DECLARE @rootId int;
     DECLARE @ownerId int;
     DECLARE @savedId int;
     
@@ -50,7 +51,7 @@ BEGIN
 		
 		SELECT @revisionId = SCOPE_IDENTITY();
 		
-		IF @creatorId IS NULL
+		IF @creatorId IS NOT NULL
 		BEGIN
 			SELECT @execution = (SELECT LastRun FROM QueryExecutions WHERE QueryId = @queryId AND UserId = @creatorId);
 			
@@ -87,17 +88,24 @@ BEGIN
 	
 	CLOSE QueryCursor; DEALLOCATE QueryCursor;
 	
+	DECLARE @DuplicateSaves TABLE (
+		Id int,
+		QueryId int,
+		OriginalId int
+	);
+	
 	-- Create a cursor to port over the saved query data
 	DECLARE SavedQueryCursor CURSOR FOR
-		SELECT Id, QueryId, UserId, SiteId, Title, [Description], FavoriteCount, IsFeatured FROM SavedQueries WHERE (IsDeleted != 1 OR IsDeleted IS NULL) AND (IsSkipped != 1 OR IsSkipped IS NULL);
+		SELECT Id, QueryId, UserId, SiteId, Title, [Description], FavoriteCount, IsFeatured, LastEditDate FROM SavedQueries WHERE (IsDeleted != 1 OR IsDeleted IS NULL) AND (IsSkipped != 1 OR IsSkipped IS NULL);
 		
 	OPEN SavedQueryCursor;
 	
-	FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @votes, @featured;
+	FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @votes, @featured, @activity;
 	
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		SELECT @revisionId = Revisions.Id, @ownerId = OwnerId, @views = [Views] FROM Revisions JOIN Queries ON Revisions.QueryId = Queries.Id WHERE QueryId = @queryId;
+		SELECT @rootId = @revisionId;
 		
 		IF @ownerId = @creatorId
 		BEGIN
@@ -130,7 +138,7 @@ BEGIN
 				@name,
 				@description,
 				@queryId,
-				(SELECT LastRun FROM QueryExecutions WHERE QueryId = @queryId AND UserId = @creatorId),
+				ISNULL((SELECT LastRun FROM QueryExecutions WHERE QueryId = @queryId AND UserId = @creatorId), @activity),
 				ISNULL(@votes, 0),
 				@views,
 				ISNULL(@featured, 0)
@@ -140,16 +148,32 @@ BEGIN
 			UPDATE QueryExecutions SET RevisionId = @revisionId WHERE QueryId = @queryId AND UserId = @creatorId;
 		END
 		
+		-- Update any existing votes
+		UPDATE Votes SET RootId = @rootId, OwnerId = @creatorId WHERE SavedQueryId = @savedId;
+		
 		-- Create a mapping to the new revision
 		INSERT INTO QueryMap (OriginalId, SiteId, MigrationType, RevisionId) VALUES (
-			@queryId,
+			@savedId,
 			@siteId,
 			2,
 			@revisionId
 		);
 	
-		FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @activity, @votes;
+		FETCH NEXT FROM SavedQueryCursor INTO @savedId, @queryId, @creatorId, @siteId, @name, @description, @activity, @votes, @activity;
 	END
 	
 	CLOSE SavedQueryCursor; DEALLOCATE SavedQueryCursor;
+	
+	-- Nuke duplicate saved votes
+	DELETE FROM
+		Votes
+	FROM
+		(SELECT MAX(Id) Id, RootId, OwnerId, UserId FROM Votes GROUP BY RootId, OwnerId, UserId) Duplicates
+	JOIN
+		Votes
+	ON
+		Votes.RootId = Duplicates.RootId AND
+		Votes.UserId = Duplicates.UserId AND
+		(Votes.OwnerId = Duplicates.OwnerId OR (Votes.OwnerId IS NULL AND Duplicates.OwnerId IS NULL)) AND
+		Votes.Id != Duplicates.Id
 END
