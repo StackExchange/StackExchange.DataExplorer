@@ -296,29 +296,31 @@ namespace StackExchange.DataExplorer.Controllers
             int finish = page.Value * pagesize.Value;
             bool useLatest = true;
             var builder = new SqlBuilder();
-            var pager = builder.AddTemplate(@"
-                SELECT
-                    *
-                FROM    
-                    (
-                        SELECT
-                            /**select**/, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
-                        FROM
-                            Metadata metadata
-                            /**join**/
-                            /**leftjoin**/
-                            /**where**/
-                    ) AS results
-                WHERE
-                    RowNumber BETWEEN @start AND @finish
-                ORDER BY
-                    RowNumber",
-                new { start = start, finish = finish }
-            );
-            var counter = builder.AddTemplate("SELECT COUNT(*) FROM Metadata metadata /**join**/ /**leftjoin**/ /**where**/");
+            SqlBuilder.Template pager = null, counter = null;
 
             if (order_by != "everything")
             {
+                pager = builder.AddTemplate(@"
+                    SELECT
+                        *
+                    FROM    
+                        (
+                            SELECT
+                                /**select**/, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
+                            FROM
+                                Metadata metadata
+                                /**join**/
+                                /**leftjoin**/
+                                /**where**/
+                        ) AS results
+                    WHERE
+                        RowNumber BETWEEN @start AND @finish
+                    ORDER BY
+                        RowNumber",
+                    new { start = start, finish = finish }
+                );
+                counter = builder.AddTemplate("SELECT COUNT(*) FROM Metadata metadata /**join**/ /**leftjoin**/ /**where**/");
+
                 builder.Select("metadata.RevisionId AS Id");
                 builder.Select("metadata.LastActivity AS LastRun");
                 builder.Join("Queries query ON query.Id = metadata.LastQueryId");
@@ -353,10 +355,31 @@ namespace StackExchange.DataExplorer.Controllers
             }
             else if (order_by == "everything")
             {
+                pager = builder.AddTemplate(@"
+                    SELECT
+                        /**select**/
+                    FROM
+                        (
+                            SELECT
+                                Revisions.*, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
+                            FROM
+                                Revisions
+                        ) AS revision
+                    /**join**/
+                    /**leftjoin**/
+                    /**where**/
+                    WHERE
+                        RowNumber BETWEEN @start AND @finish
+                    ORDER BY
+                        RowNumber",
+                    new { start = start, finish = finish }
+                );
+                counter = builder.AddTemplate("SELECT COUNT(*) FROM Revisions");
+
                 builder.Select("revision.Id AS Id");
                 builder.Select("revision.CreationDate AS LastRun");
                 builder.Join(@"
-                    Revisions revision ON 
+                    Metadata metadata ON 
                     (
                         metadata.RevisionId = revision.RootId AND
                         metadata.OwnerId = revision.OwnerId
@@ -372,7 +395,7 @@ namespace StackExchange.DataExplorer.Controllers
                 );
                 builder.Join("Queries query on query.Id = revision.QueryId");
                 builder.LeftJoin("Users [user] ON revision.OwnerId = [user].Id");
-                builder.OrderBy("revision.CreationDate DESC");
+                builder.OrderBy("CreationDate DESC");
 
                 useLatest = false;
             }
