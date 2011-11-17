@@ -21,7 +21,7 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 Revision revision = QueryUtil.GetBasicRevision(id);
 
-                if (revision == null || revision.OwnerId == CurrentUser.Id)
+                if (revision == null)
                 {
                     return Json(new { error = true });
                 }
@@ -39,7 +39,7 @@ namespace StackExchange.DataExplorer.Controllers
                     new
                     {
                         vote = (int)VoteType.Favorite,
-                        root = id,
+                        root = revision.RootId,
                         owner = revision.OwnerId,
                         user = CurrentUser.Id
                     }
@@ -56,7 +56,7 @@ namespace StackExchange.DataExplorer.Controllers
                         new
                         {
                             vote = (int)VoteType.Favorite,
-                            root = id,
+                            root = revision.RootId,
                             owner = revision.OwnerId,
                             user = CurrentUser.Id,
                             creation = DateTime.UtcNow
@@ -79,7 +79,7 @@ namespace StackExchange.DataExplorer.Controllers
                     new
                     {
                         change = vote == null ? 1 : -1,
-                        root = id,
+                        root = revision.RootId,
                         owner = revision.OwnerId
                     }
                 );

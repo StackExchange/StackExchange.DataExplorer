@@ -127,10 +127,10 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 TotalVotes = totalVotes,
                 RevisionId = revision.Id,
-                ReadOnly = revision.OwnerId == CurrentUser.Id
+                ReadOnly = CurrentUser.IsAnonymous
             };
 
-            if (!Current.User.IsAnonymous && revision.OwnerId != CurrentUser.Id)
+            if (!Current.User.IsAnonymous)
             {
                 voting.HasVoted = Current.DB.Query<Vote>(@"
                     SELECT

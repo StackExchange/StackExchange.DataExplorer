@@ -147,9 +147,6 @@ DataExplorer.Voting = (function () {
         target = $(target);
 
         if (readOnly) {
-            // We might want to do something like pop up an error about how
-            // they can't vote on their own query here
-
             return;
         }
 
@@ -174,7 +171,7 @@ DataExplorer.Voting = (function () {
 
         pending = true;
 
-        $('/vote/' + id, { 'voteType': 'favorite' }, function (response) {
+        $.post('/vote/' + id, { 'voteType': 'favorite' }, function (response) {
             if (typeof response === 'object' && response.success) {
                 var count = parseInt(counter.text());
 
