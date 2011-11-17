@@ -252,18 +252,18 @@ String.prototype.format = function (replacements) {
     return result;
 }
 
-String.prototype.from = function (char, inclusive) {
-    char = this.indexOf(char);
+String.prototype.from = function (ch, inclusive) {
+    ch = this.indexOf(ch);
 
     if (typeof inclusive === 'undefined') {
         inclusive = true;
     }
 
-    if (char < 1) {
+    if (ch < 1) {
         return this;
     }
 
-    return this.substring(char + (inclusive ? 0 : 1));
+    return this.substring(ch + (inclusive ? 0 : 1));
 }
 
 String.prototype.asVariable = function () {
