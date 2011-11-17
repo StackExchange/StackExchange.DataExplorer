@@ -124,7 +124,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [Route(@"users/{id:INT}/{name?}")]
-        public ActionResult Show(int id, string name, string order_by)
+        public ActionResult Show(int id, string name, string order_by, int? page)
         {
             User user = Current.DB.Users.FirstOrDefault(row => row.Id == id);
             if (user == null)
@@ -154,7 +154,7 @@ namespace StackExchange.DataExplorer.Controllers
                         Title = "Recently edited queries",
                         Href =
                             "/users/" + user.Id + "?order_by=edited",
-                        Selected = (order_by == "saved")
+                        Selected = (order_by == "edited")
                     },
                     new SubHeaderViewData
                     {
@@ -175,6 +175,12 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 }
             };
+
+            page = Math.Max(page ?? 1, 1);
+            int? pagesize = 25; // In case we decide to make this a query param
+
+            int start = ((page.Value - 1) * pagesize.Value) + 1;
+            int finish = page.Value * pagesize.Value;
 
             IEnumerable<QueryExecutionViewData> queries;
 
