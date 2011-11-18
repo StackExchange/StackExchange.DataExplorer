@@ -334,18 +334,21 @@ DataExplorer.ready(function () {
                 'type': 'POST',
                 'url': this.action,
                 'data': data,
-                'success': parseQueryResponse,
-                'error': function () {
-                    showError({ 'error': "Something unexpected went wrong while running "
-                        + "your query. Don't worry, blame is already being assigned." });
-                },
-                'complete': function () {
-                    $('#loading').hide();
-
-                    form.find('input, button').prop('disabled', false);
-                },
+                'success': [cleanup, parseQueryResponse],
+                'error': [cleanup, fail],
                 'cache': false,
             });
+        }
+
+        function cleanup() {
+            $('#loading').hide();
+
+            form.find('input, button').prop('disabled', false);
+        }
+
+        function fail() {
+            showError({ 'error': "Something unexpected went wrong while running "
+                            + "your query. Don't worry, blame is already being assigned." });
         }
 
         return false;
@@ -462,6 +465,7 @@ DataExplorer.ready(function () {
             field = document.createElement('input');
             field.name = ordered[i].name;
             field.id = 'dynParam' + i;
+            field.type = 'text';
 
             if (hasValue) {
                 field.setAttribute('value', value);
