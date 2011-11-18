@@ -21,20 +21,38 @@ namespace StackExchange.DataExplorer.Helpers
             get
             {
                 var sb = new StringBuilder();
-                sb.AppendLine(String.Join(",",
-                                          resultSets[0].Columns.Select(col => col.Name).ToArray()));
-                sb.Append(String.Join(Environment.NewLine,
-                                      resultSets[0].Rows.Select(
-                                          row => "\"" + String.Join("\",\"",
-                                                             row.ToArray().Select(
-                                                                 c => c == null ? "" : c.ToString().Replace("\"", "\"\"")
-                                                                 ).ToArray()
-                                                     ) + "\""
-                                          ).ToArray()
-                              ));
+                sb.AppendLine(String.Join(",", resultSets[0].Columns.Select(col => col.Name).ToArray()));
+                sb.Append(
+                    String.Join(
+                        Environment.NewLine,
+                        resultSets[0].Rows.Select(
+                            row =>
+                            {
+                                var i = 0;
+
+                                return "\"" + String.Join("\",\"", row.Select(c => Prepare(c, i++)).ToArray()) + "\"";
+                            }
+                        ).ToArray()
+                    )
+                );
 
                 return sb.ToString();
             }
+        }
+
+        private string Prepare(object value, int index)
+        {
+            if (value == null)
+            {
+                return "";
+            }
+
+            if (resultSets[0].Columns[index].Type == ResultColumnType.Date)
+            {
+                return Util.FromJavaScriptTime((long)value).ToString("yyyy-MM-dd HH:mm:ss");
+            }
+
+            return value.ToString().Replace("\"", "\"\"");
         }
 
         public override void ExecuteResult(ControllerContext context)

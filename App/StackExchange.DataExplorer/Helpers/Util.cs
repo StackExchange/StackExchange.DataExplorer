@@ -21,5 +21,10 @@ namespace StackExchange.DataExplorer.Helpers
         {
             return FormsAuthentication.HashPasswordForStoringInConfigFile(str.ToLower().Trim(), "MD5").ToLower();
         }
+
+        public static DateTime FromJavaScriptTime(long milliseconds)
+        {
+            return (new DateTime(1970, 1, 1, 0, 0, 0, 0)).AddMilliseconds(milliseconds);
+        }
     }
 }

@@ -271,7 +271,14 @@ namespace StackExchange.DataExplorer.Helpers
                     string currentVal;
                     if (nativeTypes.Contains(resultSet.Columns[i].Type))
                     {
-                        currentVal = (col ?? "null").ToString();
+                        if (col != null && resultSet.Columns[i].Type == ResultColumnType.Date)
+                        {
+                            currentVal = Util.FromJavaScriptTime((long)col).ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                        else
+                        {
+                            currentVal = (col ?? "null").ToString();
+                        }
                     }
                     else
                     {
