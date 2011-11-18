@@ -362,7 +362,7 @@ DataExplorer.ready(function () {
     $(window).resize(resizeResults);
 
     function resizeResults() {
-        var defaultWidth = 960,
+        var defaultWidth = 958,
             availableWidth = document.documentElement.clientWidth - 100,
             grid = $('#resultSets'),
             gridWidth = grid.outerWidth(),
@@ -691,6 +691,7 @@ DataExplorer.ready(function () {
 
         grid = new Slick.Grid(target, rows, columns, options);
         grid.onColumnsResized = resizeResults;
+        grid.invalidate();
     }
 
     function ColumnFormatter(base) {

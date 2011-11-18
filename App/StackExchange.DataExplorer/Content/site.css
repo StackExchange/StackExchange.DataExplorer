@@ -906,7 +906,7 @@ ul.linkbar li {
   background-color: #F7F7F7;
 }
 
-#resultsetButton.download-button {
+#resultSetsButton.download-button {
   background-position: 4px -54px;
 }
 
@@ -918,24 +918,24 @@ ul.linkbar li {
   border: 1px solid #D3D3D3;
 }
 
-#resultset {
+#resultSets {
   cursor: default;
   height: 500px;
 }
 
-#resultset .slick-header {
+#resultSets .slick-header {
   border-top-color: transparent;
 }
 
-#resultset .slick-cell {
+#resultSets .slick-cell {
   
 }
 
-#resultset .slick-row.even {
+#resultSets .slick-row.even {
   background-image: none;
 }
 
-#resultset .slick-row.odd {
+#resultSets .slick-row.odd {
   background-color: #FAFAFA;
   background-image: none;
 }
