@@ -842,7 +842,7 @@ function displayCaptcha() {
 }
 
 function isGraph(resultSet) {
-    if (!resultSet) {
+    if (!resultSet || resultSet.columns.length < 2) {
         return false;
     }
 
