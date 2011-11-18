@@ -890,7 +890,7 @@ ul.linkbar li {
 #execution-stats {
   color: #606060;
   font-weight: bold;
-  padding: 6px 0px 6px 0px;
+  padding: 10px 0px 6px 0px;
   text-align: right;
 }
 
@@ -1323,6 +1323,7 @@ pre {
 #messages {
   background-color: #EEEEEE;
   font-size: 12px;
+  margin-bottom: 0px;
   padding-bottom: 0px;
   padding-top: 0px;
 }
