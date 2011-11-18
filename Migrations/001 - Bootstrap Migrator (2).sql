@@ -73,10 +73,14 @@ BEGIN
 	DECLARE @found bit = 0
 	
 	IF EXISTS (
-		SELECT 1 FROM sys.indexes
-		JOIN sys.index_columns ON sys.indexes.index_id = sys.index_columns.index_id
-		JOIN sys.columns ON sys.columns.column_id = sys.index_columns.column_id
-		WHERE sys.indexes.object_id = OBJECT_ID(@table_name) AND sys.indexes.name = @index_name AND sys.columns.name = @column_name
+		SELECT 1 FROM
+			sys.indexes JOIN
+			sys.index_columns ON sys.index_columns.index_id = sys.indexes.index_id AND sys.index_columns.object_id = sys.indexes.object_id JOIN
+			sys.columns ON sys.index_columns.column_id = sys.columns.column_id AND sys.index_columns.object_id = sys.columns.object_id
+		WHERE
+			sys.indexes.object_id = OBJECT_ID(@table_name) AND
+			sys.indexes.name = @index_name AND
+			sys.columns.name = @column_name
 	)
 	BEGIN
 		SET @found = 1
