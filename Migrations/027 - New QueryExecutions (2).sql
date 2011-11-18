@@ -1,5 +1,5 @@
 ALTER TABLE [dbo].[QueryExecutions] ALTER COLUMN UserId int NULL
-
+ 
 IF dbo.fnColumnExists('QueryExecutions', 'RevisionId') = 0
 	ALTER TABLE [dbo].[QueryExecutions] ADD RevisionId int NOT NULL default(-1)
 
