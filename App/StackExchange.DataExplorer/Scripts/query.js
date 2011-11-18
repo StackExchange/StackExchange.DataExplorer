@@ -717,7 +717,7 @@ DataExplorer.ready(function () {
         };
 
         function defaultFormatter(row, cell, value, column, context) {
-            return value ? encodeColumn(value) : "";
+            return (value || value === 0) ? encodeColumn(value) : "";
         }
         
         function dateFormatter(row, cell, value, column, context) {
