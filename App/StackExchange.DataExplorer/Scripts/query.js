@@ -1,11 +1,11 @@
 ﻿DataExplorer.QueryEditor = (function () {
-    var editor, field, activeError, params = {},
+    var editor, field, activeError, params = {}, query,
         options = {
             'mode': 'text/x-t-sql'
         };
 
     function exists() {
-        return !!editor;
+        return !!editor || !!query;
     }
 
     function create(target, callback) {
@@ -26,7 +26,8 @@
                 'onChange': onChange
             }));
         } else {
-            editor = CodeMirror.runMode(target[_textContent], options.mode, target);
+            query = target[_textContent];
+            editor = CodeMirror.runMode(query, options.mode, target);
         }
 
         if (callback && typeof callback === 'function') {
@@ -48,6 +49,10 @@
         if (!exists()) {
             return null;
         }
+
+        if (query) {
+            return query;
+        }   
 
         var value = editor.getValue();
 
@@ -357,9 +362,9 @@ DataExplorer.ready(function () {
     $(window).resize(resizeResults);
 
     function resizeResults() {
-        var defaultWidth = 950,
+        var defaultWidth = 960,
             availableWidth = document.documentElement.clientWidth - 100,
-            grid = $('#resultset'),
+            grid = $('#resultSets'),
             gridWidth = grid.outerWidth(),
             canvas = grid.find('.grid-canvas'),
             canvasWidth = canvas.outerWidth(),
@@ -491,7 +496,8 @@ DataExplorer.ready(function () {
         var action = form[0].action, records = 0,
             results, height = 0, maxHeight = 500,
             slug = response.slug,
-            params = $('#query-params input[type="text"]').serialize();
+            params = $('#query-params input[type="text"]').serialize(),
+            textOnly = false;
 
         if (params) {
             params = '?' + params;
@@ -507,7 +513,8 @@ DataExplorer.ready(function () {
             results = response.resultSets[0];
             records = results.rows.length;
         } else {
-            
+            textOnly = true;
+            response.resultSets = null;
         }
 
         document.getElementById('messages').children[0][_textContent] = response.messages;
@@ -563,13 +570,17 @@ DataExplorer.ready(function () {
             this[_textContent] = Date.parseTimestamp(this.title).toRelativeTimeMini();
         });
 
-        response.graph = isGraph(results);
+        response.graph = !textOnly && isGraph(results);
 
         $('#query-results .miniTabs a.optional').each(function () {
-            $(this).toggle(!!response[this.href.from('#', false)]);
+            $(this).toggleClass('hidden', !response[this.href.from('#', false)]);
         });
 
-        $('#query-results .miniTabs a:first').click();
+        function selectFirst() {
+            $('#query-results .miniTabs a:not(.hidden):first').click();
+        }
+
+        selectFirst();
 
         // We have to start showing the contents so that SlickGrid can figure
         // out the heights of its components correctly
@@ -580,14 +591,16 @@ DataExplorer.ready(function () {
                 renderGraph(results);
             }
 
-            $('#query-results .miniTabs a:first').click();
+            selectFirst();
 
             if (response.executionPlan && QP && typeof QP.drawLines === 'function') {
                 $('#executionPlan').html(response.executionPlan);
             }
 
-            prepareTable($('#resultset'), results, response);
-            resizeResults();
+            if (!textOnly) {
+                prepareTable($('#resultSets'), results, response);
+                resizeResults();
+            }
         
             // Currently this always gives us 500 because it's what #resultset has
             // set in CSS. SlickGrid needs the explicit height to render correctly
@@ -828,6 +841,9 @@ function displayCaptcha() {
 }
 
 function isGraph(resultSet) {
+    if (!resultSet) {
+        return false;
+    }
 
     var graph = true;
 

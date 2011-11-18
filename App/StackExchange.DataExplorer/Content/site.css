@@ -883,6 +883,10 @@ ul.linkbar li {
   margin-left: 0px;
 }
 
+#query-results .subheader .miniTabs a.hidden {
+  display: none;
+}
+
 #execution-stats {
   color: #606060;
   font-weight: bold;
@@ -1317,14 +1321,20 @@ pre {
 }
 
 #messages {
-  background-color: #FAFAFA;
+  background-color: #EEEEEE;
   font-size: 12px;
   padding-bottom: 0px;
   padding-top: 0px;
 }
 
 #messages code {
-  margin: 5px 0px 5px 0px;
+  background-color: transparent;
+  display: block;
+  padding: 7px 0px 7px 0px;
+}
+
+#query-results #graph.panel {
+  border-color: transparent;
 }
 
 #executionPlan {
