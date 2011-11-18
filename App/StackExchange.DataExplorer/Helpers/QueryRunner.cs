@@ -205,11 +205,13 @@ namespace StackExchange.DataExplorer.Helpers
                     QueryExecutions
                 WHERE
                     RevisionId = @revision AND
+                    QueryId = @query AND
                     SiteId = @site AND
                     UserId " + (user.IsAnonymous ? "IS NULL" : "= @user"),
                 new
                 {
                     revision = revisionId,
+                    query = queryId,
                     site = siteId,
                     user = user.Id
                 }
