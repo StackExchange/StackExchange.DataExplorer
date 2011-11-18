@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
+using Newtonsoft.Json;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -222,12 +223,33 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
+            var site = GetSite(sitename);
+
+            if (sitename == null)
+            {
+                return PageNotFound();
+            }
+
             CachedResult cachedResults = QueryUtil.GetCachedResults(
                 new ParsedQuery(query.QueryBody, Request.Params),
                 Site.Id
             );
+            List<ResultSet> resultSets;
 
-            return new CsvResult(cachedResults.Results);
+            if (cachedResults != null)
+            {
+                resultSets = JsonConvert.DeserializeObject<List<ResultSet>>(cachedResults.Results);
+            }
+            else
+            {
+                resultSets = QueryRunner.GetSingleSiteResults(
+                    new ParsedQuery(query.QueryBody, Request.Params),
+                    site,
+                    CurrentUser
+                ).ResultSets;
+            }
+
+            return new CsvResult(resultSets);
         }
 
         [Route(@"{sitename}/mcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
@@ -240,12 +262,12 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
             
-            var json = QueryRunner.GetMultiSiteResults(
+            var results = QueryRunner.GetMultiSiteResults(
                 new ParsedQuery(query.QueryBody, Request.Params, true, false),
                 CurrentUser
-            ).ToJson();
+            );
 
-            return new CsvResult(json);
+            return new CsvResult(results.ResultSets);
         }
 
         [Route(@"{sitename}/nmcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
@@ -258,12 +280,12 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var json = QueryRunner.GetMultiSiteResults(
+            var results = QueryRunner.GetMultiSiteResults(
                 new ParsedQuery(query.QueryBody, Request.Params, true, true),
                 CurrentUser
-            ).ToJson();
+            );
 
-            return new CsvResult(json);
+            return new CsvResult(results.ResultSets);
         }
 
         [Route(@"{sitename}/q/{queryId:\d+}/{slug?}")]

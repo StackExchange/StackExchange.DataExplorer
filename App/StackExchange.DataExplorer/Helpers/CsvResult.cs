@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -8,11 +9,11 @@ namespace StackExchange.DataExplorer.Helpers
 {
     internal class CsvResult : ActionResult
     {
-        private readonly QueryResults results;
+        private readonly List<ResultSet> resultSets;
 
-        public CsvResult(string json)
+        public CsvResult(List<ResultSet> results)
         {
-            results = QueryResults.FromJson(json);
+            resultSets = results;
         }
 
         public string RawCsv
@@ -21,9 +22,9 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 var sb = new StringBuilder();
                 sb.AppendLine(String.Join(",",
-                                          results.ResultSets[0].Columns.Select(col => col.Name).ToArray()));
+                                          resultSets[0].Columns.Select(col => col.Name).ToArray()));
                 sb.Append(String.Join(Environment.NewLine,
-                                      results.ResultSets[0].Rows.Select(
+                                      resultSets[0].Rows.Select(
                                           row => "\"" + String.Join("\",\"",
                                                              row.ToArray().Select(
                                                                  c => c == null ? "" : c.ToString().Replace("\"", "\"\"")
