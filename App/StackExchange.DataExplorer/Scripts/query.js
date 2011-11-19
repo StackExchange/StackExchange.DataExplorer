@@ -221,7 +221,7 @@
 DataExplorer.ready(function () {
     var schema = $('#schema'),
         history = $('#history'),
-        panel = $('#query .left-group'),
+        panel = $('#editor-panel'),
         metadata = $('#query-metadata .info'),
         gridOptions = {
             'enableCellNavigation': false,
@@ -249,19 +249,23 @@ DataExplorer.ready(function () {
             wrapper = $(editor.getScrollerElement());
         }
 
-        function resize () {
-            var available = resizer.height(),
-                remaining = available - history.outerHeight(true);
+        function resize (available) {
+            var remaining = available - history.outerHeight(true);
 
             schema.height(remaining);
 
             if (wrapper) {
-                wrapper.height(available - 10);
+                wrapper.height(available);
                 editor.refresh();
             }
         }
 
-        resizer = $('#wrapper').TextAreaResizer(resize);
+        resizer = $('#editor').TextAreaResizer(resize, { 
+            'useParentWidth': true,
+            'resizeWrapper': true,
+            'minHeight': 300,
+            'initCallback': true
+        });
         resize();
         
         schema.addClass('cm-s-' + editor.getOption('theme') + '');

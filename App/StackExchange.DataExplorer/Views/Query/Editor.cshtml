@@ -33,29 +33,28 @@
     <h2><input type="text" id="title" name="title" value="@name" size="40" placeholder="Enter a title for your query" /></h2>
 }
 
-<div class="left-group compact">
-    <div id="wrapper">
+<div id="editor">
+    <div id="editor-panel" class="left-group compact">
         <textarea id="sql" name="sql" rows="26">@Html.Raw(sql)</textarea>
     </div>
-    <ul id="editor-toolbar" class="linkbar">
-        <li id="permalink" class="result-option"><a class="templated" href="/:site/query/:id:slug:params">permalink</a></li>
-        <li id="schema-toggle">hide sidebar</li>
+    <ul id="schema" class="right-group">
+    @foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
+    {
+        <li>
+            <span class="schema-table">@table.Name</span>
+            <dl>
+            @for (int i = 0; i < table.ColumnNames.Count; i++)
+            {
+                <dt>@table.ColumnNames[i]</dt>
+                <dd class="cm-variable-2">@table.DataTypes[i]</dd>
+            }
+            </dl>
+        </li>
+    }
     </ul>
+    @Html.Partial("RevisionHistory", revisionHistory)
 </div>
-<ul id="schema" class="right-group">
-@foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
-{
-    <li>
-        <span class="schema-table">@table.Name</span>
-        <dl>
-        @for (int i = 0; i < table.ColumnNames.Count; i++)
-        {
-            <dt>@table.ColumnNames[i]</dt>
-            <dd class="cm-variable-2">@table.DataTypes[i]</dd>
-        }
-        </dl>
-    </li>
-}
+<ul id="editor-toolbar" class="linkbar compact">
+    <li id="permalink" class="result-option"><a class="templated" href="/:site/query/:id:slug:params">permalink</a></li>
+    <li id="schema-toggle">hide sidebar</li>
 </ul>
-@Html.Partial("RevisionHistory", revisionHistory)
-<div class="clear"></div>

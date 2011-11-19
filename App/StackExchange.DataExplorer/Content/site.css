@@ -745,6 +745,10 @@ ul.site-list .desc {
   padding: 3px 5px 3px 5px;
 }
 
+#editor {
+  margin-bottom: 30px;
+}
+
 #editor-toolbar {
   height: 1%;
   margin: -25px 0px 0px 0px;
@@ -960,6 +964,7 @@ div.grippie {
   border-color:#DDDDDD;
   border-style:solid;
   border-width:0pt 1px 1px;
+  clear: both;
   cursor:s-resize;
   height:9px;
   overflow:visible;
