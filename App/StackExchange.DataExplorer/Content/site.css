@@ -725,31 +725,24 @@ ul.site-list .desc {
 }
 
 #query-options label {
-  background: transparent url('images/sprites.png') no-repeat scroll 0px 1px;
-  color: #A7A7A7;
+  color: #000000;
   cursor: pointer;
   display: inline-block;
+  font-weight: normal;
   margin-left: 6px;
-  padding: 5px 0px 5px 20px;
+  padding: 5px 0px 5px 7px;
 }
 
-#query-options input {
-  display: none;
-}
-
-#query-options input:checked + label {
-  background-position: 0px -27px;
-  color: #0C57A0;
+#query-options label input {
+  float: left;
+  margin: 0px 5px 0px 0px;
 }
 
 #submit-query {
-  background: none repeat scroll 0 0 #0C57A0;
-  border-width: 0px;
-  color: #FFFFFF;
   cursor: pointer;
   font-weight: bold;
-  margin-left: 0px;
-  padding: 6px 12px 6px 12px;
+  margin: 0px;
+  padding: 3px 5px 3px 5px;
 }
 
 #editor-toolbar {
@@ -847,7 +840,7 @@ ul.linkbar li {
 
 #query-params{
   display: none;
-  margin-bottom: 8px;
+  margin-bottom: 15px;
 }
 
 #query-params h3 {
@@ -857,14 +850,13 @@ ul.linkbar li {
 #query-params label {
   display: block;
   float: left;
-  min-width: 100px;
-  padding: 12px 8px 0 0;
+  line-height: normal;
+  margin: 3px 0px 0px 6px;
+  padding: 3px;
 }
 
 #query-params input {
   display: block;
-  float: left;
-  margin-bottom: 8px;
 }
 
 #query-results {
