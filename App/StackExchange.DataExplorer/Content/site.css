@@ -939,7 +939,7 @@ ul.linkbar li {
 
 #query-params .form-row label {
   float: left;
-  width: 9.5em;
+  min-width: 9.5em;
 }
 
 #query-options {
