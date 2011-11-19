@@ -574,6 +574,7 @@ ul.site-list .desc {
 
 #schema.right-group {
   border-top-color: #999999;
+  height: 256px;
   overflow: auto;
 }
 

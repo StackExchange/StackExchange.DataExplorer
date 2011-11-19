@@ -271,7 +271,6 @@ DataExplorer.ready(function () {
             self.toggleClass('closed');
             self.next('dl').toggle();
         });
-        schema.find('.schema-table').click();
 
         function showSchema() {
             panel.animate({ 'width': '70%' }, 'fast', function () {
