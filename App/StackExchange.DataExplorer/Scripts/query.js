@@ -680,7 +680,14 @@ DataExplorer.ready(function () {
     // Note that we destroy resultset in this function!
     function prepareTable(target, resultset, response) {
         var grid, columns = resultset.columns, rows = resultset.rows,
-            row, options, hasTags = false, widths = [];
+            row, options, hasTags = false, widths = [],
+            sizerParent = document.createElement('div'),
+            sizer = document.createElement('span'),
+            maxWidth = 290;
+
+        sizerParent.className = 'offscreen ui-widget';
+        sizerParent.appendChild(sizer);
+        document.body.appendChild(sizerParent);
 
         for (var i = 0; i < rows.length; ++i) {
             row = {};
@@ -688,18 +695,38 @@ DataExplorer.ready(function () {
             for (var c = 0; c < columns.length; ++c) {
                 row[columns[c].name.asVariable()] = rows[i][c];
 
+                // Skip dates because we always know what length they'll be,
+                // ignoring the case of the completely blank column
+                if (columns[c].type === 'Date') {
+                    continue;
+                }
+
                 if (rows[i][c] && (!widths[c] || rows[i][c].length > widths[c])) {
-                    widths[c] = rows[i][c].length;
+                    sizer[_textContent] = rows[i][c];
+                    widths[c] = sizer.offsetWidth;
                 }
             }
 
             rows[i] = row;
         }
+        
+        console.log(widths);
 
         for (var i = 0; i < columns.length; ++i) {
             if (columns[i].type === 'Date') {
-                widths[i] = 14;
+                sizer[_textContent] = '9999-99-99 99:99:99';
+                widths[i] = sizer.offsetWidth;
             }
+
+            sizer[_textContent] = columns[i].name;
+
+            console.log(columns[i].name, sizer.offsetWidth, widths[i]);
+            
+            if (sizer.offsetWidth > widths[i]) {
+                widths[i] = sizer.offsetWidth;
+            }
+
+            console.log(widths);
 
             columns[i] = {
                 'cssClass': columns[i].type === 'Number' ? 'number' : 'text',
@@ -707,13 +734,15 @@ DataExplorer.ready(function () {
                 'name': columns[i].name,
                 'field': columns[i].name.asVariable(),
                 'type': columns[i].type.asVariable(),
-                'width': Math.min(widths[i] || 5, 25) * 12 
+                'width': Math.min((widths[i] || 50) + 16, maxWidth) 
             };
 
             if (columns[i].field === 'tags' || columns[i].field === 'tagName') {
                 hasTags = true;
             }
         }
+
+        document.body.removeChild(sizerParent);
 
         options = $.extend({}, gridOptions, {
             'formatterFactory': new ColumnFormatter(response.url),

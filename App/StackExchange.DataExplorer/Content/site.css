@@ -612,6 +612,7 @@ ul.site-list .desc {
   background-color: #FDFDFD;
   border-bottom: 1px solid #DFDFDF;
   color: #404040;
+  cursor: pointer;
   display: block;
   font-weight: bold;
   padding: 6px 8px 5px 8px;
@@ -955,6 +956,10 @@ ul.linkbar li {
   border-top-color: transparent;
 }
 
+#resultSets .slick-header-column {
+  text-align: center;
+}
+
 #resultSets .slick-cell {
   
 }
@@ -984,6 +989,12 @@ ul.linkbar li {
 #graph {
   width: 960px;
   height: 500px;
+}
+
+.offscreen {
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
 }
 
 p.tagline{

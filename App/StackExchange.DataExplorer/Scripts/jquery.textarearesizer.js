@@ -86,10 +86,6 @@
                 iMousePos = iThisMousePos - wrapper.offset().top,
                 resizing;
 
-            if (iMousePos > 253) {
-                console.log();
-            }
-
             if (iLastMousePos >= iThisMousePos) {
                 iMousePos -= 5;
             }
