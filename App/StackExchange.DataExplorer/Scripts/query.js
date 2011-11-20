@@ -235,6 +235,7 @@ DataExplorer.ready(function () {
     DataExplorer.QueryEditor.create('#sql', function (editor) {
         var wrapper, resizer, border = 2,
             toggle = $('#schema-toggle'),
+            toolbar = $('#editor-toolbar'),
             schemaPreference = null;
 
         if (DataExplorer.options.User.isAuthenticated) {
@@ -277,7 +278,7 @@ DataExplorer.ready(function () {
         });
 
         function showSchema() {
-            panel.animate({ 'width': '70%' }, 'fast', function () {
+            panel.add(toolbar).animate({ 'width': '70%' }, 'fast', function () {
                 schema.show();
                 history.show();
             });
@@ -293,9 +294,9 @@ DataExplorer.ready(function () {
             history.hide();
             
             if (immediately !== true) {
-                panel.animate({ 'width': '100%' }, 'fast');
+                panel.add(toolbar).animate({ 'width': '100%' }, 'fast');
             } else {
-                panel.css('width', '100%');
+                panel.add(toolbar).css('width', '100%');
             }
 
             toggle.text("show sidebar").addClass('hidden');
