@@ -233,7 +233,7 @@ DataExplorer.ready(function () {
 
     DataExplorer.QueryEditor.create('#queryBodyText');
     DataExplorer.QueryEditor.create('#sql', function (editor) {
-        var wrapper, resizer, border = 2,
+        var wrapper,
             toggle = $('#schema-toggle'),
             toolbar = $('#editor-toolbar'),
             schemaPreference = null;
@@ -250,25 +250,34 @@ DataExplorer.ready(function () {
             wrapper = $(editor.getScrollerElement());
         }
 
-        function resize (available) {
-            var remaining = available - history.outerHeight(true);
+        function resizePanel(available) {
+            var remaining = available - history.outerHeight(),
+                list = schema.children('ul'),
+                offset = schema.outerHeight() - list.height();
 
-            schema.height(remaining);
+            list.height(remaining - offset);
 
             if (wrapper) {
-                wrapper.height(available);
+                offset = wrapper.closest('.CodeMirror').outerHeight() - wrapper.height();
+                
+                wrapper.height(available - offset);
                 editor.refresh();
             }
         }
 
-        resizer = $('#editor').TextAreaResizer(resize, { 
-            'useParentWidth': true,
-            'resizeWrapper': true,
-            'minHeight': 300,
-            'initCallback': true
-        });
-        resize();
+        function resizeSchema() {
+            var available = panel.outerHeight(),
+                remaining = available - schema.outerHeight(),
+                list = history.children('ul'),
+                offset = history.outerHeight() - list.height();
 
+            list.height(remaining - offset);
+        }
+
+        schema.TextAreaResizer(resizeSchema, {
+            'offsetTop': schema.find('.heading').outerHeight(),
+            'resizeSelector': 'ul'
+        });
         schema.addClass('cm-s-' + editor.getOption('theme') + '');
         schema.delegate('.schema-table', 'click', function () {
             var self = $(this);
@@ -280,6 +289,15 @@ DataExplorer.ready(function () {
         });
         schema.find('.collapse').click(function () {
             schema.find('dl').hide();
+        });
+
+        // Set this resizer up after because the grippie adds height to the
+        // sidebar that we need to factor in
+        $('#editor').TextAreaResizer(resizePanel, { 
+            'useParentWidth': true,
+            'resizeWrapper': true,
+            'minHeight': 300,
+            'initCallback': true
         });
 
         function showSchema() {

@@ -20,7 +20,8 @@
         options = {
             'useParentWidth': false,
             'resizeWrapper': false,
-            'minHeight': 32
+            'minHeight': 32,
+            'offsetTop': 0
         };
 
     /* TextAreaResizer plugin */
@@ -33,15 +34,14 @@
                 opts = cb;
             }
 
-            new TextAreaResizer(this, opts);
+            new TextAreaResizer(this, $.extend({}, options, opts || {}));
         });
     };
 
     function TextAreaResizer(target, opts) {
         var grippie,
             iLastMousePos = 0,
-            options = $.extend({}, options, opts || {}),
-            offset = null,
+            options = opts,
             resizable,
             wrapper = $(target).addClass('processed');
 
@@ -51,7 +51,11 @@
         wrapper.append(grippie);
 
         if (!options.resizeWrapper) {
-            resizable = resizable.first();
+            if (!options.resizeSelector) {
+                resizable = resizable.first();
+            } else {
+                resizable = resizable.filter(options.resizeSelector);
+            }
         }
 
         if (!options.useParentWidth) {
@@ -64,7 +68,6 @@
 
         function startDrag(e) {
             iLastMousePos = mousePosition(e).y;
-            offset = wrapper.height() - iLastMousePos;
             // hack so it works with iframes
             overlay = $("<div id='overlay' style='position: absolute; zindex: 99; background-color: white; opacity:0.01; filter: alpha(opacity = 1); left:0; top:0;'>&nbsp;</div>");
 
@@ -80,8 +83,12 @@
 
         function performDrag(e) {
             var iThisMousePos = mousePosition(e).y,
-                iMousePos = offset + iThisMousePos,
+                iMousePos = iThisMousePos - wrapper.offset().top,
                 resizing;
+
+            if (iMousePos > 253) {
+                console.log();
+            }
 
             if (iLastMousePos >= iThisMousePos) {
                 iMousePos -= 5;
@@ -95,13 +102,10 @@
             iMousePos = iMousePos;
             resizing = options.resizeWrapper ? wrapper : resizable;
 
-            resizing.height(iMousePos + 'px');
+            resizing.height(iMousePos - options.offsetTop + 'px');
             overlay.height(wrapper.height());
 
             if (options.callback) {
-                console.log(iMousePos);
-                console.log((options.resizeWrapper ? grippie.outerHeight(true) : 0));
-
                 options.callback(iMousePos - (options.resizeWrapper ? grippie.outerHeight(true) : 0));
             }
 

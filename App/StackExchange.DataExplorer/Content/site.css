@@ -573,6 +573,7 @@ ul.site-list .desc {
 }
 
 #schema.right-group {
+  border-bottom-width: 0px;
   border-top-color: #999999;
 }
 
@@ -616,14 +617,15 @@ ul.site-list .desc {
   padding: 6px 8px 5px 8px;
 }
 
-#schema ul {
-  height: 256px;
-  margin: 0px;
-  overflow: auto;
+#schema .grippie {
+  border-left-width: 0px;
+  border-right-width: 0px;
 }
 
-#schema dl {
-
+#schema ul {
+  height: 229px;
+  margin: 0px;
+  overflow: auto;
 }
 
 #schema dl dt {
@@ -645,8 +647,8 @@ ul.site-list .desc {
   color: #800080;
 }
 
-#history {
-  margin-top: 4px;
+#history.right-group {
+  border-top-width: 0px;
 }
 
 #history ul {
