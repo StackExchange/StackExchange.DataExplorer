@@ -574,23 +574,56 @@ ul.site-list .desc {
 
 #schema.right-group {
   border-top-color: #999999;
-  height: 256px;
-  overflow: auto;
 }
 
-#schema .schema-table, #history .heading {
+#schema .heading, #history .heading {
   background-color: #F7F7F7;
   color: #606060;
-  cursor: pointer;
   border-bottom: 1px dotted #CCCCCC;
   display: block;
   font-weight: bold;
   padding: 6px 8px 5px 8px;
 }
 
-#schema dl {
-  border-left: 1px solid #EAEAEA;
+.heading .buttons {
+  float: right;
+}
+
+.heading .buttons .button {
+  background: transparent url('images/sprites.png') no-repeat scroll 0px 0px;
+  cursor: pointer;
+  float: left;
   margin-left: 4px;
+  overflow: hidden;
+  text-indent: -999em;
+  width: 12px;
+}
+
+.heading .buttons .collapse {
+  background-position: 0px -354px;
+}
+
+.heading .buttons .expand {
+  background-position: 0px -332px;
+}
+
+#schema .schema-table {
+  background-color: #FDFDFD;
+  border-bottom: 1px solid #DFDFDF;
+  color: #404040;
+  display: block;
+  font-weight: bold;
+  padding: 6px 8px 5px 8px;
+}
+
+#schema ul {
+  height: 256px;
+  margin: 0px;
+  overflow: auto;
+}
+
+#schema dl {
+
 }
 
 #schema dl dt {
@@ -614,10 +647,6 @@ ul.site-list .desc {
 
 #history {
   margin-top: 4px;
-}
-
-#history .heading {
-  cursor: default;
 }
 
 #history ul {
@@ -807,7 +836,7 @@ ul.linkbar li {
 }
 
 #sql{
-  height: 100%;
+  height: 480px;
   overflow: auto;
   width: 100%;
 }

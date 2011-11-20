@@ -268,13 +268,18 @@ DataExplorer.ready(function () {
             'initCallback': true
         });
         resize();
-        
+
         schema.addClass('cm-s-' + editor.getOption('theme') + '');
         schema.delegate('.schema-table', 'click', function () {
             var self = $(this);
 
-            self.toggleClass('closed');
             self.next('dl').toggle();
+        });
+        schema.find('.expand').click(function () {
+            schema.find('dl').show();
+        });
+        schema.find('.collapse').click(function () {
+            schema.find('dl').hide();
         });
 
         function showSchema() {

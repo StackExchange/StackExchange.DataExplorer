@@ -37,21 +37,29 @@
     <div id="editor-panel" class="left-group compact">
         <textarea id="sql" name="sql" rows="26">@Html.Raw(sql)</textarea>
     </div>
-    <ul id="schema" class="right-group">
-    @foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
-    {
-        <li>
-            <span class="schema-table">@table.Name</span>
-            <dl>
-            @for (int i = 0; i < table.ColumnNames.Count; i++)
-            {
-                <dt>@table.ColumnNames[i]</dt>
-                <dd class="cm-variable-2">@table.DataTypes[i]</dd>
-            }
-            </dl>
-        </li>
-    }
-    </ul>
+    <div id="schema" class="right-group">
+        <span class="heading">Database Schema
+            <span class="buttons">
+                <span class="button expand" title="expand all tables">expand</span>
+                <span class="button collapse" title="collapse all tables">collapse</span>
+            </span>
+        </span>
+        <ul>
+        @foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
+        {
+            <li>
+                <span class="schema-table">@table.Name</span>
+                <dl>
+                @for (int i = 0; i < table.ColumnNames.Count; i++)
+                {
+                    <dt>@table.ColumnNames[i]</dt>
+                    <dd class="cm-variable-2">@table.DataTypes[i]</dd>
+                }
+                </dl>
+            </li>
+        }
+        </ul>
+    </div>
     @Html.Partial("RevisionHistory", revisionHistory)
 </div>
 <ul id="editor-toolbar" class="linkbar compact">
