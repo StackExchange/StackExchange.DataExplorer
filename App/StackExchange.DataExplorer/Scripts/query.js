@@ -680,7 +680,7 @@ DataExplorer.ready(function () {
     // Note that we destroy resultset in this function!
     function prepareTable(target, resultset, response) {
         var grid, columns = resultset.columns, rows = resultset.rows,
-            row, options, hasTags = false, widths = [],
+            row, options, hasTags = false, widths = [], variables = [],
             sizerParent = document.createElement('div'),
             sizer = document.createElement('span'),
             maxWidth = 290;
@@ -693,7 +693,11 @@ DataExplorer.ready(function () {
             row = {};
 
             for (var c = 0; c < columns.length; ++c) {
-                row[columns[c].name.asVariable()] = rows[i][c];
+                if (!variables[c]) {
+                    variables[c] = columns[c].name.asVariable();
+                }
+
+                row[variables[c]] = rows[i][c];
 
                 // Skip dates because we always know what length they'll be,
                 // ignoring the case of the completely blank column
@@ -701,38 +705,38 @@ DataExplorer.ready(function () {
                     continue;
                 }
 
-                if (rows[i][c] && (!widths[c] || rows[i][c].length > widths[c])) {
-                    sizer[_textContent] = rows[i][c];
-                    widths[c] = sizer.offsetWidth;
+                if (rows[i][c] != null && i < 500 && (!widths[c] || widths[c] < maxWidth)) {
+                    if (rows[i][c].toString().length < 30) {
+                        sizer[_textContent] = rows[i][c];
+
+                        if (sizer.offsetWidth > (widths[c] || 0)) {
+                            widths[c] = sizer.offsetWidth;
+                        }
+                    } else {
+                        widths[c] = maxWidth;
+                    }
                 }
             }
 
             rows[i] = row;
         }
-        
-        console.log(widths);
 
         for (var i = 0; i < columns.length; ++i) {
             if (columns[i].type === 'Date') {
-                sizer[_textContent] = '9999-99-99 99:99:99';
-                widths[i] = sizer.offsetWidth;
+                widths[i] = 160;
             }
 
             sizer[_textContent] = columns[i].name;
-
-            console.log(columns[i].name, sizer.offsetWidth, widths[i]);
             
             if (sizer.offsetWidth > widths[i]) {
                 widths[i] = sizer.offsetWidth;
             }
 
-            console.log(widths);
-
             columns[i] = {
                 'cssClass': columns[i].type === 'Number' ? 'number' : 'text',
-                'id': columns[i].name.asVariable(),
+                'id': variables[i],
                 'name': columns[i].name,
-                'field': columns[i].name.asVariable(),
+                'field': variables[i],
                 'type': columns[i].type.asVariable(),
                 'width': Math.min((widths[i] || 50) + 16, maxWidth) 
             };
