@@ -129,7 +129,7 @@ namespace StackExchange.DataExplorer.Controllers
                     results.Slug = title.URLFriendly();
                 }
 
-                QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, queryId);
+                QueryRunner.LogQueryExecution(CurrentUser, siteId, results.RevisionId, queryId);
 
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
