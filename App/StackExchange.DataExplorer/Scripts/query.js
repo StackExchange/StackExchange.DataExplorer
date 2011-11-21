@@ -96,7 +96,7 @@
     function parseParameters(sql) {
         // Until we fix this to handle the non-editor view too...
         var value = sql || getValue(),
-            pattern = /##([a-zA-Z][A-Za-z0-9]*)(?::([^A-Za-z]+))?(?:\?([^#]+))?##/,
+            pattern = /##([a-zA-Z][A-Za-z0-9]*)(?::([A-Za-z]+))?(?:\?([^#]+))?##/,
             commented = 0, stringified = false,
             params = { 'items': {}, 'count': 0 };
 
@@ -447,7 +447,7 @@ DataExplorer.ready(function () {
             value = field.getAttribute('value');
             name = field.name;
 
-            if (field.value && field.value.length && value != field.value) {
+            if (field.value && field.value.length /*&& value != field.value*/) {
                 fields[name] = field.value; 
             }
 
