@@ -992,7 +992,7 @@ ul.linkbar li {
 }
 
 .offscreen {
-  width: 0px;
+  width: 400px;
   height: 0px;
   overflow: hidden;
 }

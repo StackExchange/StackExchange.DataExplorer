@@ -726,10 +726,14 @@ DataExplorer.ready(function () {
                 widths[i] = 160;
             }
 
-            sizer[_textContent] = columns[i].name;
-            
-            if (sizer.offsetWidth > widths[i]) {
-                widths[i] = sizer.offsetWidth;
+            if (columns[i].name.toLowerCase() === 'post link') {
+                widths[i] = maxWidth;
+            } else {
+                sizer[_textContent] = columns[i].name;
+
+                if (sizer.offsetWidth > widths[i]) {
+                    widths[i] = sizer.offsetWidth;
+                }
             }
 
             columns[i] = {
