@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq;
 using System.Web.Mvc;
+
+using Dapper.Contrib.Extensions;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
@@ -177,195 +179,133 @@ namespace StackExchange.DataExplorer.Controllers
             };
 
             page = Math.Max(page ?? 1, 1);
-            int? pagesize = 25; // In case we decide to make this a query param
+            int? pagesize = 15; // In case we decide to make this a query param
 
             int start = ((page.Value - 1) * pagesize.Value) + 1;
             int finish = page.Value * pagesize.Value;
-
-            IEnumerable<QueryExecutionViewData> queries;
+            bool useLatest = false;
+            string message;
+            var builder = new SqlBuilder();
+            var pager = builder.AddTemplate(@"
+                SELECT
+                    *
+                FROM
+                    (
+                        SELECT
+                            /**select**/, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
+                        FROM
+                            Queries query
+                            /**join**/
+                            /**leftjoin**/
+                            /**where**/
+                    ) AS results
+                WHERE
+                    RowNumber BETWEEN @start AND @finish
+                ORDER BY
+                    RowNumber",
+                new { start = start, finish = finish }
+            );
+            var counter = builder.AddTemplate("SELECT COUNT(*) FROM Queries query /**join**/ /**leftjoin**/ /**where**/");
 
             if (order_by == "recent")
             {
-                queries = Current.DB.Query<Metadata, QueryExecution, Site, Query, QueryExecutionViewData>(@"
-                    SELECT
-                        metadata.*, execution.*, site.*, query.*
-                    FROM
-                        QueryExecutions execution
-                    JOIN
-                        Revisions
-                    ON
-                        execution.RevisionId = Revisions.Id AND execution.UserId = @user
-                    JOIN
-                        Sites site
-                    ON
-                        site.Id = execution.SiteId
-                    JOIN
-                        Queries query
-                    ON
-                        query.Id = execution.QueryId
-                    JOIN
-                        Metadata metadata
-                    ON
-                        (
-                            metadata.RevisionId = Revisions.RootId AND
-                            metadata.OwnerId = Revisions.OwnerId
-                        ) OR (
-                            metadata.RevisionId = Revisions.Id AND
-                            metadata.OwnerId = Revisions.OwnerId AND
-                            Revisions.RootId IS NULL
-                        ) OR (
-                            metadata.RevisionId = Revisions.Id AND
-                            metadata.OwnerId IS NULL AND
-                            Revisions.OwnerId IS NULL
-                        )
-                    ORDER BY execution.LastRun DESC",
-                    (metadata, execution, site, query) =>
-                    {
-                        return new QueryExecutionViewData
-                        {
-                            Id = execution.RevisionId,
-                            Name = metadata.Title,
-                            SQL = query.QueryBody,
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            CreatorId = user != null ? user.Id : (int?)null,
-                            CreatorLogin = user != null ? user.Login : null,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = false
-                        };
-                    },
-                    new
-                    {
-                        user = id
-                    }
+                builder.Select("execution.RevisionId AS Id");
+                builder.Select("execution.LastRun");
+                builder.Select("site.Name AS SiteName");
+                builder.Join("QueryExecutions execution ON execution.QueryId = query.Id");
+                builder.Join("Sites site ON site.Id = execution.SiteId");
+                builder.Join("Revisions ON Revisions.Id = execution.RevisionId AND execution.UserId = @user", new { user = id });
+                builder.Join(@"
+                    Metadata metadata ON
+                    (
+                        metadata.RevisionId = Revisions.RootId AND
+                        metadata.OwnerId = Revisions.OwnerId
+                    ) OR (
+                        metadata.RevisionId = Revisions.Id AND
+                        metadata.OwnerId = Revisions.OwnerId AND
+                        Revisions.RootId IS NULL
+                    ) OR (
+                        metadata.RevisionId = Revisions.Id AND
+                        metadata.OwnerId IS NULL AND
+                        Revisions.OwnerId IS NULL
+                    )"
                 );
+                builder.OrderBy("execution.LastRun DESC");
+
+                message = user.Id == CurrentUser.Id ? 
+                    "You have never ran any queries" : "No queries ran recently";
             }
-            else if (order_by == "favorite")
+            else
             {
-                queries = Current.DB.Query<Metadata, Query, QueryExecutionViewData>(@"
-                    SELECT
-                        metadata.*, query.*
-                    FROM
-                        Votes
-                    JOIN
-                        Metadata metadata
-                    ON
+                builder.Select("metadata.RevisionId AS Id");
+                builder.Select("metadata.LastActivity AS LastRun");
+                builder.Join("Metadata metadata on metadata.LastQueryId = query.Id");
+
+                if (order_by == "favorite")
+                {
+                    builder.Join(@"
+                        Votes ON
                         Votes.RootId = metadata.RevisionId AND
                         (
                             Votes.OwnerId = metadata.OwnerId OR
                             (Votes.OwnerId IS NULL AND metadata.OwnerID IS NULL)
                         ) AND
                         Votes.UserId = @user AND
-                        Votes.VoteTypeId = @vote
-                    JOIN
-                        Queries query
-                    ON
-                        metadata.LastQueryId = query.Id", // Strictly speaking this join is incorrect, but
-                                                          // if you couldn't be bothered to put in a title
-                                                          // I think (hope) it's "good enough"
-                    (metadata, query) =>
-                    {
-                        return new QueryExecutionViewData
-                        {
-                            Id = metadata.RevisionId,
-                            Name = metadata.Title,
-                            SQL = query.QueryBody,
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            CreatorId = user != null ? user.Id : (int?)null,
-                            CreatorLogin = user != null ? user.Login : null,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = true
-                        };
-                    },
-                    new
-                    {
-                        user = id,
-                        vote = (int)VoteType.Favorite
-                    }
-                );
-            }
-            else
-            {
-                queries = Current.DB.Query<Metadata, Query, QueryExecutionViewData>(@"
-                    SELECT
-                        *
-                    FROM
-                        Metadata metadata
-                    JOIN
-                        Queries query
-                    ON
-                        metadata.LastQueryId = query.Id AND OwnerId = @user
-                    ORDER BY
-                        metadata.LastActivity",
-                    (metadata, query) =>
-                    {
-                        return new QueryExecutionViewData
-                        {
-                            Id = metadata.RevisionId,
-                            Name = metadata.Title,
-                            SQL = query.QueryBody,
-                            Description = metadata.Description,
-                            FavoriteCount = metadata.Votes,
-                            Views = metadata.Views,
-                            LastRun = metadata.LastActivity,
-                            CreatorId = user != null ? user.Id : (int?)null,
-                            CreatorLogin = user != null ? user.Login : null,
-                            SiteName = Site.Name.ToLower(),
-                            UseLatestLink = true
-                        };
-                    },
-                    new
-                    {
-                        user = id
-                    }
-                );
+                        Votes.VoteTypeId = @vote",
+                        new { user = id, vote = (int)VoteType.Favorite }
+                    );
+                    builder.OrderBy("metadata.Votes DESC");
+
+                    useLatest = true;
+                    message = user.Id == CurrentUser.Id ?
+                        "You have no favorite queries, click the star icon on a query to favorite it" : "No favorites";
+                } else {
+                    builder.Where("metadata.OwnerId = @user", new { user = id });
+                    builder.Where("metadata.Hidden = 0");
+                    builder.OrderBy("metadata.LastActivity DESC");
+
+                    message = user.Id == CurrentUser.Id ?
+                        "You haven't edited any queries" : "No queries";
+                }
             }
 
-            QueryExecutionViewData[] queriesArray = queries.ToArray();
+            builder.Select("[user].Id as CreatorId");
+            builder.Select("[user].Login as CreatorLogin");
+            builder.Select("metadata.Title AS Name");
+            builder.Select("metadata.[Description] AS [Description]");
+            builder.Select("metadata.Votes AS FavoriteCount");
+            builder.Select("metadata.Views AS Views");
+            builder.Select("query.QueryBody AS [SQL]");
+            builder.LeftJoin("Users [user] ON [user].Id = metadata.OwnerId");
 
-            ViewData["Queries"] = queriesArray;
+            var queries = Current.DB.Query<QueryExecutionViewData>(
+                pager.RawSql,
+                pager.Parameters
+            ).Select<QueryExecutionViewData, QueryExecutionViewData>(
+                (view) =>
+                {
+                    view.UseLatestLink = useLatest;
+                    view.SiteName = (view.SiteName ?? Site.Name).ToLower();
 
-            if (queriesArray.Length == 0)
+                    return view;
+                }
+            );
+            int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
+
+            string href = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + order_by;
+
+            ViewData["Queries"] = queries;
+            ViewData["PageNumbers"] = new PageNumber(
+                href + "&page=-1",
+                Convert.ToInt32(Math.Ceiling(total / (decimal)pagesize)),
+                pagesize.Value,
+                page.Value - 1,
+                "pager"
+            );
+
+            if (!queries.Any())
             {
-                if (order_by == "recent")
-                {
-                    if (user.Id == CurrentUser.Id)
-                    {
-                        ViewData["EmptyMessage"] = "You have never ran any queries";
-                    }
-                    else
-                    {
-                        ViewData["EmptyMessage"] = "No queries ran recently";
-                    }
-                }
-                else if (order_by == "favorite")
-                {
-                    if (user.Id == CurrentUser.Id)
-                    {
-                        ViewData["EmptyMessage"] =
-                            "You have no favorite queries, click the star icon on a query to favorite it";
-                    }
-                    else
-                    {
-                        ViewData["EmptyMessage"] = "No favorites";
-                    }
-                }
-                else
-                {
-                    if (user.Id == CurrentUser.Id)
-                    {
-                        ViewData["EmptyMessage"] = "You haven't edited any queries";
-                    }
-                    else
-                    {
-                        ViewData["EmptyMessage"] = "No queries";
-                    }
-                }
+                ViewData["EmptyMessage"] = message;
             }
 
             return View(user);

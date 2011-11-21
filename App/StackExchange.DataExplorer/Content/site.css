@@ -1468,6 +1468,10 @@ font-weight:bold;
   width:960px;
 }
 
+#profile {
+  margin-bottom: 40px;
+}
+
 
 .summarycount {
   color:#808185;

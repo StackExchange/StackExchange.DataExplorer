@@ -7,7 +7,7 @@
     bool isCurrentUser = Model.Id == Current.User.Id;
 }
 
-<div>
+<div id="profile">
     <table class="vcard">
         <tr>
             <td style="vertical-align:top; width:170px;">
@@ -93,5 +93,6 @@
     {
         <h3>@ViewData["EmptyMessage"]</h3>
     }
-    
+    @Html.Partial("PageNumbers", ViewData["PageNumbers"])
+    <div class="clear"></div>
 </div>
