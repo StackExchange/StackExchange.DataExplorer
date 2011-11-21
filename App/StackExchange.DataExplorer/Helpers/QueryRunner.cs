@@ -196,28 +196,28 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static void LogQueryExecution(User user, int siteId, int revisionId, int queryId)
         {
-            QueryExecution execution;
-
-            execution = Current.DB.Query<QueryExecution>(@"
-                SELECT
-                    *
-                FROM
-                    QueryExecutions
+            int updated = Current.DB.Query<int>(@"
+                UPDATE QueryExecutions SET
+                    ExecutionCount = ExecutionCount + 1,
+                    LastRun = @last
                 WHERE
                     RevisionId = @revision AND
                     QueryId = @query AND
                     SiteId = @site AND
-                    UserId " + (user.IsAnonymous ? "IS NULL" : "= @user"),
+                    UserId " + (user.IsAnonymous ? "IS NULL" : "= @user") + @"
+
+                SELECT @@ROWCOUNT",
                 new
                 {
                     revision = revisionId,
                     query = queryId,
                     site = siteId,
-                    user = user.Id
+                    user = user.Id,
+                    last = DateTime.UtcNow
                 }
             ).FirstOrDefault();
 
-            if (execution == null)
+            if (updated == 0)
             {
                 Current.DB.Execute(@"
                     INSERT INTO QueryExecutions(
@@ -234,21 +234,6 @@ namespace StackExchange.DataExplorer.Helpers
                         query = queryId,
                         site = siteId,
                         user = user.Id
-                    }
-                );
-            }
-            else
-            {
-                Current.DB.Execute(@"
-                    UPDATE QueryExecutions SET
-                        ExecutionCount = @count,
-                        LastRun = @last
-                    WHERE Id = @id",
-                    new
-                    {
-                        count = execution.ExecutionCount + 1,
-                        last = DateTime.UtcNow,
-                        id = execution.Id
                     }
                 );
             }
