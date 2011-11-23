@@ -679,8 +679,15 @@ DataExplorer.ready(function () {
 
     // Note that we destroy resultset in this function!
     function prepareTable(target, resultset, response) {
-        var grid, columns = resultset.columns, rows = resultset.rows,
-            row, options, hasTags = false, widths = [], variables = [],
+        var 
+            grid, 
+            columns = resultset.columns, 
+            rows = resultset.rows,
+            row, 
+            options, 
+            hasTags = false, 
+            widths = [], 
+            variables = [],
             sizerParent = document.createElement('div'),
             sizer = document.createElement('span'),
             maxWidth = 290;
@@ -694,9 +701,8 @@ DataExplorer.ready(function () {
 
             for (var c = 0; c < columns.length; ++c) {
                 if (!variables[c]) {
-                    variables[c] = columns[c].name.asVariable();
+                    variables[c] = "col" + c;
                 }
-
                 row[variables[c]] = rows[i][c];
 
                 // Skip dates because we always know what length they'll be,
@@ -717,7 +723,6 @@ DataExplorer.ready(function () {
                     }
                 }
             }
-
             rows[i] = row;
         }
 
