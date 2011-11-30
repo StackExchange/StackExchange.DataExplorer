@@ -167,7 +167,8 @@ namespace StackExchange.DataExplorer.Controllers
                     RevisionId = revision.Id,
                     SiteId = Site.Id,
                     SiteName = Site.Name,
-                    Slug = revision.Metadata.Title.URLFriendly()
+                    Slug = revision.Metadata.Title.URLFriendly(),
+                    Url = Site.Url
                 }.WithCache(cachedResults);
             }
 
