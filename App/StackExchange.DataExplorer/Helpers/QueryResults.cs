@@ -150,6 +150,12 @@ namespace StackExchange.DataExplorer.Helpers
 
             results.Messages = FormatTextResults(Messages, ResultSets);
 
+            // force the results tab in multi-site mode if it's a pivot table
+            if (ResultSets.Count == 1)
+            {
+                results.ResultSets = ResultSets;
+            }
+
             return results;
         }
 
