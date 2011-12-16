@@ -401,7 +401,8 @@ namespace StackExchange.DataExplorer.Controllers
             else
             {
                 results = QueryRunner.GetMultiSiteResults(query, CurrentUser);
-                textResults = true;
+                textResults = textResults || (results.ResultSets.Count != 1);
+                if (!textResults) results.Messages = QueryResults.FormatTextResults("", results.ResultSets);
             }
 
             if (textResults)

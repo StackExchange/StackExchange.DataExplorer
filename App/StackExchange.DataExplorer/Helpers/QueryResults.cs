@@ -150,12 +150,6 @@ namespace StackExchange.DataExplorer.Helpers
 
             results.Messages = FormatTextResults(Messages, ResultSets);
 
-            // force the results tab in multi-site mode if it's a pivot table
-            if (ResultSets.Count == 1)
-            {
-                results.ResultSets = ResultSets;
-            }
-
             return results;
         }
 
@@ -185,7 +179,7 @@ namespace StackExchange.DataExplorer.Helpers
             return returnValue;
         }
 
-        private static string FormatTextResults(string messages, List<ResultSet> resultSets)
+        public static string FormatTextResults(string messages, List<ResultSet> resultSets)
         {
             var buffer = new StringBuilder();
             int messagePosition = 0;
