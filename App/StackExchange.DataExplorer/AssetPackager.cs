@@ -79,6 +79,7 @@ namespace StackExchange.DataExplorer
                             "/Scripts/date.js",
                             "/Scripts/jquery.textarearesizer.js",
                             "/Scripts/jquery.event.drag-2.0.js",
+                            "/Scripts/slick.core.js",
                             "/Scripts/slick.grid.js",
                             "/Scripts/codemirror/codemirror.js",
                             "/Scripts/codemirror/sql.js",

@@ -33,8 +33,10 @@ namespace StackExchange.DataExplorer.Controllers
                 if (site == null)
                 {
                     int siteId = -1;
-                    Int32.TryParse((Session["SiteId"] ?? "").ToString(), out siteId);
-                    site = Current.DB.Query<Models.Site>("select * from Sites where Id = @siteId",new {siteId}).FirstOrDefault(); 
+                    if (Int32.TryParse((Session["SiteId"] ?? "").ToString(), out siteId))
+                    {
+                        site = Current.DB.Query<Models.Site>("select * from Sites where Id = @siteId", new { siteId }).FirstOrDefault();
+                    }
                     if (site == null)
                     {
                         site = Current.DB.Query<Models.Site>("select top 1 * from Sites order by TotalQuestions desc").Single();  

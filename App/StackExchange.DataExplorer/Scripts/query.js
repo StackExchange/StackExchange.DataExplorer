@@ -790,7 +790,7 @@ DataExplorer.ready(function () {
 
         function defaultFormatter(row, cell, value, column, context) {
             col = (value || value === 0) ? encodeColumn(value) : "";
-            if (col.substr(0, "http://".length) == "http://" || col.substr(0, "https://".length) == "https://") {
+            if (col.substr && (col.substr(0, "http://".length) == "http://" || col.substr(0, "https://".length) == "https://")) {
                 col = "<a href='" + col +"'>" + col + "</a>";
             }
             return col;

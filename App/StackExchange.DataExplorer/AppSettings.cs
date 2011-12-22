@@ -11,6 +11,10 @@ namespace StackExchange.DataExplorer
             Refresh(); 
         }
 
+        // guess the user id based on an email hash (only used on StackExchange dbs)
+        [Default(true)]
+        public static bool GuessUserId { get; private set; }
+
         [Default(false)]
         public static bool EnableWhiteList { get; private set; }
 

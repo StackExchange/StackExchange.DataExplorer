@@ -5,6 +5,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Web;
 using StackExchange.DataExplorer.Helpers;
+using Dapper;
+using System.Linq;
 
 namespace StackExchange.DataExplorer.Models
 {
@@ -102,7 +104,7 @@ namespace StackExchange.DataExplorer.Models
 
         public int? GuessUserId(User user)
         {
-            if (user.IsAnonymous) return null;
+            if (user.IsAnonymous || !AppSettings.GuessUserId) return null;
 
             string cacheKey = "UserIdForSite" + Id + "_" + user.Id;
 
@@ -134,13 +136,9 @@ namespace StackExchange.DataExplorer.Models
                 {
                     string hash = Util.GravatarHash(user.Email);
                     cnn.Open();
-                    SqlCommand cmd = cnn.CreateCommand();
-                    cmd.CommandText = "select top 1 Id from Users where EmailHash = @EmailHash order by Reputation desc";
-                    SqlParameter p = cmd.Parameters.Add("@EmailHash", SqlDbType.NVarChar);
-                    p.Value = hash;
                     try
                     {
-                        return (int?)cmd.ExecuteScalar();
+                        return cnn.Query<int?>("select top 1 Id from Users where EmailHash = @hash order by Reputation desc", new {hash}).FirstOrDefault();
                     }
                     catch
                     { 
