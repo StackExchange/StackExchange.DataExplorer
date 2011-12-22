@@ -76,9 +76,11 @@
     }
 
     function onChange() {
+        if (!DataExplorer.options.enableAdvancedSqlErrors)
+            return;
+
         if (activeError !== null) {
             editor.setLineClass(activeError, null);
-
             activeError = null;
         }
     }
@@ -87,9 +89,7 @@
         if (!DataExplorer.options.enableAdvancedSqlErrors || !editor) {
             return;
         }
-
         activeError = +line;
-
         editor.setLineClass(activeError, 'error-line');
     }
 
