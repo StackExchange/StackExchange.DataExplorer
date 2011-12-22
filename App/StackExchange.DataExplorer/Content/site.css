@@ -58,7 +58,6 @@ pre {
 background-color:#EEEEEE;
 font-family:Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;
 margin-bottom:10px;
-max-height:600px;
 overflow:auto;
 padding:5px;
 width:auto;
@@ -1354,7 +1353,6 @@ input, select, button {
 pre {
   font-family:Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;
   margin-bottom:10px;
-  max-height:600px;
   overflow:auto;
   padding:5px;
   width:auto;
@@ -1593,7 +1591,6 @@ font-weight:bold;
 #queryBodyText {
   line-height: 15px;
   margin-bottom: 30px;
-  max-height: 400px;
   padding: 8px 8px 8px 8px;
 }
 
