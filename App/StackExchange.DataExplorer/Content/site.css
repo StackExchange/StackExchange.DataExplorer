@@ -560,7 +560,7 @@ ul.site-list .desc {
 }
 
 #query .right-group {
-  background: #FDFDFD url('images/diagonal.png') repeat scroll 0px 0px;
+  background: #FDFDFD url('/content/images/diagonal.png') repeat scroll 0px 0px;
   border: 1px solid #CCCCCC;
   cursor: default;  
   float: right;
@@ -590,7 +590,7 @@ ul.site-list .desc {
 }
 
 .heading .buttons .button {
-  background: transparent url('images/sprites.png') no-repeat scroll 0px 0px;
+  background: transparent url('/content/images/sprites.png') no-repeat scroll 0px 0px;
   cursor: pointer;
   float: left;
   margin-left: 4px;
@@ -659,7 +659,7 @@ ul.site-list .desc {
 }
 
 #history li {
-  background: #FFFFFF url('images/sprites.png') no-repeat scroll 3px -154px;
+  background: #FFFFFF url('/content/images/sprites.png') no-repeat scroll 3px -154px;
   border-bottom: 1px dotted #CCCCCC;
   padding: 5px 8px 5px 8px;
 }
@@ -923,7 +923,7 @@ ul.linkbar li {
 }
 
 #query-results .download-button {
-  background: transparent url('images/sprites.png') no-repeat scroll 0px 0px;
+  background: transparent url('/content/images/sprites.png') no-repeat scroll 0px 0px;
   border-radius: 5px 5px;
   float: right;
   margin-top: 5px;
@@ -1001,7 +1001,7 @@ p.tagline{
 }
 
 div.grippie {
-  background:#EEEEEE url(/Content/images/grippie.png) no-repeat scroll center 2px;
+  background:#EEEEEE url(/content/images/grippie.png) no-repeat scroll center 2px;
   border-color:#DDDDDD;
   border-style:solid;
   border-width:0pt 1px 1px;
