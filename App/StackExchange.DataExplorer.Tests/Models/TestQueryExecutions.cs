@@ -16,7 +16,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
             string sql = "print 1 \nGO\nprint 2";
             var site = Current.DB.Sites.First();
             var user = User.CreateUser("Fred", "a@a.com", "xyzdsa");
-            var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user);
+            var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user, null);
 
             Assert.AreEqual(0, results.ResultSets.Count());
             Assert.AreEqual("1\r\n2\r\n", results.Messages);
@@ -28,7 +28,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
             string sql = "select 1 select 2";
             var site = Current.DB.Sites.First();
             var user = User.CreateUser("Fred", "a@a.com", "xyzdsa");
-            var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user);
+            var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user, null);
 
             Assert.AreEqual(2, results.ResultSets.Count());
         } 

@@ -244,9 +244,18 @@ namespace StackExchange.DataExplorer.Controllers
             if (string.IsNullOrEmpty(order_by))
             {
                 if (searchCriteria.IsValid)
+                {
                     order_by = searchCriteria.IsFeatured ? "featured" : "recent";
+                }
                 else
-                    order_by = "featured";
+                {
+                    order_by = CurrentUser.DefaultQuerySort ?? "featured";
+                }
+            }
+
+            if (!searchCriteria.IsValid)
+            {
+                CurrentUser.DefaultQuerySort = order_by;
             }
 
             ViewData["Site"] = Site;

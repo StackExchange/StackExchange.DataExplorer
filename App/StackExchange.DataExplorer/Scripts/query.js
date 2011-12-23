@@ -350,9 +350,39 @@ DataExplorer.ready(function () {
         $('.report-option').fadeOut();
         error.fadeOut();
 
+        var cleanup = function () {
+            $('#loading').hide();
+
+            form.find('input, button').prop('disabled', false);
+        }
+
+        var fail = function() {
+            showError({ 'error': "Something unexpected went wrong while running "
+                            + "your query. Don't worry, blame is already being assigned." });
+        }
+
+        var success = function(response) {
+            if (response.running === true)
+            {
+                setTimeout(function(){
+                       $.ajax({
+                            'type': 'GET',
+                            'url': '/query/job/' + response.job_id,
+                            'success': success,
+                            'error': [cleanup, fail],
+                            'cache': false,
+                        });  
+                }, 1500);
+            }
+            else 
+            {
+                cleanup();
+                parseQueryResponse(response);
+            }
+        }
+
         if (verifyParameters()) {
             var data = form.serialize();
-
             form.find('input, button').prop('disabled', true);
             
             $('#loading').show();
@@ -361,21 +391,10 @@ DataExplorer.ready(function () {
                 'type': 'POST',
                 'url': this.action,
                 'data': data,
-                'success': [cleanup, parseQueryResponse],
+                'success': success,
                 'error': [cleanup, fail],
                 'cache': false,
             });
-        }
-
-        function cleanup() {
-            $('#loading').hide();
-
-            form.find('input, button').prop('disabled', false);
-        }
-
-        function fail() {
-            showError({ 'error': "Something unexpected went wrong while running "
-                            + "your query. Don't worry, blame is already being assigned." });
         }
 
         return false;

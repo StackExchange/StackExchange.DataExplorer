@@ -11,6 +11,37 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class QueryController : StackOverflowController
     {
+
+        [Route(@"query/job/{guid}")]
+        public ActionResult PollJob(Guid guid)
+        {
+            var result = AsyncQueryRunner.PollJob(guid);
+            if (result == null)
+            {
+                return Json(new {error = "unknown job being polled!" });
+            }
+
+            if (result.State == AsyncQueryRunner.AsyncState.Failure)
+            {
+                return TransformExecutionException(result.Exception);
+            }
+
+            if (result.State == AsyncQueryRunner.AsyncState.Pending)
+            {
+                return Json(new { running = true, job_id = result.JobId });
+            }
+
+            try
+            {
+                return CompleteResponse(result.QueryResults, result.ParsedQuery, result.TextResults, result.Parent, result.Title, result.Description, result.Site.Id);
+            }
+            catch (Exception ex)
+            { 
+                return TransformExecutionException(ex);
+            }
+
+        }
+
         [HttpPost]
         [Route(@"query/save/{siteId:\d+}/{parentId?:\d+}")]
         public ActionResult Create(string sql, string title, string description, int siteId, int? parentId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
@@ -21,7 +52,6 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             ActionResult response = null;
-
             try
             {
                 Revision parent = null;
@@ -43,96 +73,28 @@ namespace StackExchange.DataExplorer.Controllers
                     crossSite == true,
                     excludeMetas == true
                 );
-                var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
-                var query = Current.DB.Query<Query>(
-                    "SELECT * FROM Queries WHERE QueryHash = @hash",
-                    new
-                    {
-                        hash = parsedQuery.Hash
-                    }
-                ).FirstOrDefault();
 
-                int revisionId = 0, queryId;
-                DateTime saveTime;
+                QueryResults results = null;
+                Site site = GetSite(siteId);
+                ValidateQuery(parsedQuery, site);
 
-                // We only create revisions if something actually changed.
-                // We'll log it as an execution anyway if applicable, so the user will
-                // still get a link in their profile, just not their own revision.
-                if (!(parent != null && query != null && query.Id == parent.QueryId))
+                var asyncResults = AsyncQueryRunner.Execute(parsedQuery, CurrentUser, site, title, description, parent, textResults == true);
+
+                if (asyncResults.State == AsyncQueryRunner.AsyncState.Failure)
                 {
-                    if (query == null)
-                    {
-                        queryId = (int)Current.DB.Query<decimal>(@"
-                            INSERT INTO Queries(
-                                QueryHash, QueryBody
-                            ) VALUES(
-                                @hash, @body
-                            )
+                    throw asyncResults.Exception; 
+                }
 
-                            SELECT SCOPE_IDENTITY()",
-                            new
-                            {
-                                hash = parsedQuery.Hash,
-                                body = parsedQuery.Sql
-                            }
-                        ).First();
-                    }
-                    else
-                    {
-                        queryId = query.Id;
-                    }
-
-                    revisionId = (int)Current.DB.Query<decimal>(@"
-                        INSERT INTO Revisions(
-                            QueryId, RootId, ParentId, OwnerId, OwnerIP, CreationDate
-                        ) VALUES(
-                            @query, @root, @parent, @owner, @ip, @creation
-                        )
-
-                        SELECT SCOPE_IDENTITY()",
-                        new
-                        {
-                            query = queryId,
-                            root = parent != null ? (int?)parent.RootId : null,
-                            parent = parentId,
-                            owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
-                            ip = GetRemoteIP(),
-                            creation = saveTime = DateTime.UtcNow
-                        }
-                    ).First();
-
-                    var revision = new Revision
-                    {
-                        Id = revisionId,
-                        RootId = parent != null ? (int?)parent.RootId : null,
-                        QueryId = queryId
-                    };
-
-                    SaveMetadata(revision, title, description, true);
-
-                    results.RevisionId = revisionId;
-                    results.Created = saveTime;
+                if (asyncResults.State == AsyncQueryRunner.AsyncState.Success)
+                {
+                    results = asyncResults.QueryResults;
                 }
                 else
                 {
-                    queryId = query.Id;
-                    results.RevisionId = parentId.Value;
+                    return Json(new {running = true, job_id = asyncResults.JobId});
                 }
 
-                if (parent != null)
-                {
-                    results.ParentId = parent.Id;
-                }
-
-                if (title != null)
-                {
-                    results.Slug = title.URLFriendly();
-                }
-
-                QueryRunner.LogQueryExecution(CurrentUser, siteId, results.RevisionId, queryId);
-
-                // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
-                response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
+                response = CompleteResponse(results, parsedQuery, textResults == true, parent, title, description, siteId);
             }
             catch (Exception ex)
             {
@@ -141,6 +103,110 @@ namespace StackExchange.DataExplorer.Controllers
 
             return response;
         }
+
+        private ActionResult CompleteResponse(
+            QueryResults results, 
+            ParsedQuery parsedQuery, 
+            bool textResults, 
+            Revision parent, 
+            string title, 
+            string description,
+            int siteId
+            )
+        {
+            results = TranslateResults(parsedQuery, textResults, results);
+
+            var query = Current.DB.Query<Query>(
+                "SELECT * FROM Queries WHERE QueryHash = @hash",
+                new
+                {
+                    hash = parsedQuery.Hash
+                }
+            ).FirstOrDefault();
+
+            int revisionId = 0, queryId;
+            DateTime saveTime;
+
+            // We only create revisions if something actually changed.
+            // We'll log it as an execution anyway if applicable, so the user will
+            // still get a link in their profile, just not their own revision.
+            if (parent == null || query == null || query.Id != parent.QueryId)
+            {
+                if (query == null)
+                {
+                    queryId = (int)Current.DB.Query<decimal>(@"
+                            INSERT INTO Queries(
+                                QueryHash, QueryBody
+                            ) VALUES(
+                                @hash, @body
+                            )
+
+                            SELECT SCOPE_IDENTITY()",
+                        new
+                        {
+                            hash = parsedQuery.Hash,
+                            body = parsedQuery.Sql
+                        }
+                    ).First();
+                }
+                else
+                {
+                    queryId = query.Id;
+                }
+
+                revisionId = (int)Current.DB.Query<decimal>(@"
+                        INSERT INTO Revisions(
+                            QueryId, RootId, ParentId, OwnerId, OwnerIP, CreationDate
+                        ) VALUES(
+                            @query, @root, @parent, @owner, @ip, @creation
+                        )
+
+                        SELECT SCOPE_IDENTITY()",
+                    new
+                    {
+                        query = queryId,
+                        root = parent != null ? (int?)parent.RootId : null,
+                        parent = parent == null ? (int?)null : parent.Id,
+                        owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
+                        ip = GetRemoteIP(),
+                        creation = saveTime = DateTime.UtcNow
+                    }
+                ).First();
+
+                var revision = new Revision
+                {
+                    Id = revisionId,
+                    RootId = parent != null ? (int?)parent.RootId : null,
+                    QueryId = queryId
+                };
+
+                SaveMetadata(revision, title, description, true);
+
+                results.RevisionId = revisionId;
+                results.Created = saveTime;
+            }
+            else
+            {
+                queryId = query.Id;
+                results.RevisionId = parent.Id;
+            }
+
+            if (parent != null)
+            {
+                results.ParentId = parent.Id;
+            }
+
+            if (title != null)
+            {
+                results.Slug = title.URLFriendly();
+            }
+
+            QueryRunner.LogQueryExecution(CurrentUser, siteId, results.RevisionId, queryId);
+
+            // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
+            return Content(results.ToJson().Replace("/", "\\/"), "application/json");
+        }
+
 
         [HttpPost]
         [Route(@"query/run/{siteId:\d+}/{revisionId:\d+}")]
@@ -242,7 +308,7 @@ namespace StackExchange.DataExplorer.Controllers
             }
             else
             {
-                resultSets = QueryRunner.GetSingleSiteResults(
+                resultSets = QueryRunner.GetResults(
                     new ParsedQuery(query.QueryBody, Request.Params),
                     site,
                     CurrentUser
@@ -261,9 +327,10 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return PageNotFound();
             }
-            
-            var results = QueryRunner.GetMultiSiteResults(
-                new ParsedQuery(query.QueryBody, Request.Params, true, false),
+
+            var results = QueryRunner.GetResults(
+                new ParsedQuery(query.QueryBody, Request.Params, crossSite: true, excludeMetas: false),
+                null,
                 CurrentUser
             );
 
@@ -280,8 +347,9 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var results = QueryRunner.GetMultiSiteResults(
-                new ParsedQuery(query.QueryBody, Request.Params, true, true),
+            var results = QueryRunner.GetResults(
+                new ParsedQuery(query.QueryBody, Request.Params, crossSite: true, excludeMetas: true),
+                null,
                 CurrentUser
             );
 
@@ -380,30 +448,18 @@ namespace StackExchange.DataExplorer.Controllers
         private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, bool textResults)
         {
             QueryResults results = null;
-
-            if (!query.IsExecutionReady)
-            {
-                throw new ApplicationException(!string.IsNullOrEmpty(query.ErrorMessage) ?
-                    query.ErrorMessage : "All parameters must be set!");
-            }
-
             Site site = GetSite(siteId);
+            ValidateQuery(query, site);
 
-            if (site == null)
-            {
-                throw new ApplicationException("Invalid site ID");
-            }
+            results = QueryRunner.GetResults(query, site, CurrentUser);
+            results = TranslateResults(query, textResults, results);
+            return results;
+        }
 
-            if (!query.IsCrossSite)
-            {
-                results = QueryRunner.GetSingleSiteResults(query, site, CurrentUser);
-            }
-            else
-            {
-                results = QueryRunner.GetMultiSiteResults(query, CurrentUser);
-                textResults = textResults || (results.ResultSets.Count != 1);
-                if (!textResults) results.Messages = QueryResults.FormatTextResults("", results.ResultSets);
-            }
+        private static QueryResults TranslateResults(ParsedQuery query, bool textResults, QueryResults results)
+        {
+            textResults = textResults || (results.ResultSets.Count != 1);
+            if (!textResults) results.Messages = QueryResults.FormatTextResults("", results.ResultSets);
 
             if (textResults)
             {
@@ -414,8 +470,21 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 results = results.TransformQueryPlan();
             }
-
             return results;
+        }
+
+        private static void ValidateQuery(ParsedQuery query, Site site)
+        {
+            if (!query.IsExecutionReady)
+            {
+                throw new ApplicationException(!string.IsNullOrEmpty(query.ErrorMessage) ?
+                    query.ErrorMessage : "All parameters must be set!");
+            }
+
+            if (site == null)
+            {
+                throw new ApplicationException("Invalid site ID");
+            }
         }
 
         private ActionResult TransformExecutionException(Exception ex)

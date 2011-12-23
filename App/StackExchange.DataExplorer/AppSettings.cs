@@ -11,6 +11,12 @@ namespace StackExchange.DataExplorer
             Refresh(); 
         }
 
+        [Default(120)]
+        public static int QueryTimeout { get; private set; }
+
+        [Default(2)]
+        public static int ConcurrentQueries { get; private set; }
+
         // guess the user id based on an email hash (only used on StackExchange dbs)
         [Default(true)]
         public static bool GuessUserId { get; private set; }

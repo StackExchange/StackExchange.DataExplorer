@@ -13,7 +13,6 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class QueryRunner
     {
-        private const int QUERY_TIMEOUT = 120;
         private const int MAX_RESULTS = 50000;
 
         private static readonly Dictionary<Type, ResultColumnType> ColumnTypeMap = new Dictionary<Type, ResultColumnType>
@@ -129,7 +128,7 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        public static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser)
+        private static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser, AsyncQueryRunner.AsyncResult result = null)
         {
             var sites = Current.DB.Sites.ToList();
             if (parsedQuery.ExcludesMetas)
@@ -139,7 +138,7 @@ namespace StackExchange.DataExplorer.Helpers
 
 
             var firstSite = sites.First();
-            var results = QueryRunner.GetSingleSiteResults(parsedQuery, firstSite, currentUser);
+            var results = QueryRunner.GetSingleSiteResults(parsedQuery, firstSite, currentUser, result);
             StringBuilder buffer = new StringBuilder();
 
             if (results.ResultSets.First().Columns.Where(c => c.Name == "Pivot").Any())
@@ -173,9 +172,14 @@ namespace StackExchange.DataExplorer.Helpers
                 AddBody(buffer, results, firstSite);
                 foreach (var s in sites.Skip(1))
                 {
+                    if (result != null && result.Cancelled)
+                    {
+                        break;
+                    }
+
                     try
                     {
-                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser).ToTextResults();
+                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser, result).ToTextResults();
                         results.ExecutionTime += tmp.ExecutionTime;
                         AddBody(buffer, tmp, s);
                     }
@@ -243,7 +247,7 @@ namespace StackExchange.DataExplorer.Helpers
             "Microsoft.Security", 
             "CA2100:Review SQL queries for security vulnerabilities", 
             Justification = "What else can I do, we are allowing users to run sql.")]
-        public static QueryResults ExecuteNonCached(ParsedQuery query, Site site, User user)
+        public static QueryResults ExecuteNonCached(ParsedQuery query, Site site, User user, AsyncQueryRunner.AsyncResult result)
         {
             var remoteIP = OData.GetRemoteIP(); 
             var key = "total-" + remoteIP;
@@ -306,7 +310,15 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         using (var command = new SqlCommand(batch, cnn))
                         {
-                            command.CommandTimeout = QUERY_TIMEOUT;
+                            if (result != null)
+                            {
+                                result.Command = command;
+                                if (result.Cancelled)
+                                {
+                                    continue;
+                                }
+                            }
+                            command.CommandTimeout = AppSettings.QueryTimeout;
                             PopulateResults(results, command, messages, query.IncludeExecutionPlan);
                         }
 
@@ -428,7 +440,19 @@ namespace StackExchange.DataExplorer.Helpers
             results.ExecutionPlan = plan.PlanXml;
         }
 
-        public static QueryResults GetSingleSiteResults(ParsedQuery query, Site site, User user)
+        public static QueryResults GetResults(ParsedQuery query, Site site, User user, AsyncQueryRunner.AsyncResult result = null)
+        {
+            if (query.IsCrossSite)
+            {
+                return GetMultiSiteResults(query, user, result);
+            }
+            else
+            {
+                return GetSingleSiteResults(query, site, user, result);
+            }
+        }
+
+        private static QueryResults GetSingleSiteResults(ParsedQuery query, Site site, User user, AsyncQueryRunner.AsyncResult result = null)
         {
             QueryResults results = null;
             var timer = new Stopwatch();
@@ -459,7 +483,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             if (results == null)
             {
-                results = ExecuteNonCached(query, site, user);
+                results = ExecuteNonCached(query, site, user, result);
                 results.FromCache = false;
 
                 AddResultToCache(results, query, site, cache != null);

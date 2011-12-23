@@ -25,7 +25,7 @@
       <Column Name="DOB" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="LastActivityDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="LastSeenDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="HideSchema" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Column Name="PreferencesRaw" Type="System.String" DbType="nvarchar(8000)" CanBeNull="true" />
       <Association Name="User_UserOpenId" Member="UserOpenIds" ThisKey="Id" OtherKey="UserId" Type="UserOpenId" />
     </Type>
   </Table>

@@ -15,7 +15,8 @@ namespace StackExchange.DataExplorer.Controllers
     {
         private static readonly HashSet<string> AllowedPreferences = new HashSet<string>
         {
-            "HideSchema"
+            "HideSchema",
+            "OrderBy"
         };
 
         [Route("users")]
@@ -119,8 +120,6 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 user.HideSchema = value == "true";
             }
-
-            Current.DB.SubmitChanges();
 
             return Content("ok");
         }
