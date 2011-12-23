@@ -279,7 +279,7 @@
     <Content Include="Scripts\codemirror\codemirror.js" />
     <Content Include="Scripts\codemirror\runmode.js" />
     <Content Include="Scripts\codemirror\sql.js" />
-    <Content Include="Scripts\jquery-1.6.4.js" />
+    <Content Include="Scripts\jquery-1.7.1.js" />
     <Content Include="Scripts\jquery.event.drag-2.0.js" />
     <Content Include="Scripts\master.js" />
     <Content Include="Scripts\openid-jquery.js" />

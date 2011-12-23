@@ -759,7 +759,8 @@ DataExplorer.ready(function () {
 
         options = $.extend({}, gridOptions, {
             'formatterFactory': new ColumnFormatter(response.url),
-            'rowHeight': hasTags ? 35 : 25
+            'rowHeight': hasTags ? 35 : 25, 
+            'enableTextSelectionOnCells' : true
         });
 
         grid = new Slick.Grid(target, rows, columns, options);
