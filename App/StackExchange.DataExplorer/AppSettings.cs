@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using Dapper;
+using StackExchange.DataExplorer.Helpers;
+using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer
 {
@@ -47,7 +50,7 @@ namespace StackExchange.DataExplorer
 
         public static void Refresh()
         {
-            var data = Current.DB.AppSettings.ToDictionary(v => v.Setting, v => v.Value);
+            var data = Current.DB.Query<AppSetting>("select * from AppSettings").ToDictionary(v => v.Setting, v => v.Value);
 
             foreach (var property in typeof(AppSettings).GetProperties(BindingFlags.Static | BindingFlags.Public))
             {

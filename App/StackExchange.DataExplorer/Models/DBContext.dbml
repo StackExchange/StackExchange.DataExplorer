@@ -1,14 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><Database Name="DataExplorerDev" Class="DBContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="WebSettings" ConnectionString="Data Source=.;Initial Catalog=DataExplorerDev;Integrated Security=True" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="AppConnection" Provider="System.Data.SqlClient" />
-  <Table Name="dbo.CachedResults" Member="CachedResults">
-    <Type Name="CachedResult">
-      <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
-      <Column Name="SiteId" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="Results" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
-      <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="Id" Type="System.Int32" DbType="int" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-    </Type>
-  </Table>
+  <Connection Mode="WebSettings" ConnectionString="Data Source=.;Initial Catalog=DataExplorer;Integrated Security=True" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="AppConnection" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Users" Member="Users">
     <Type Name="User">
       <Column Name="Id" AutoSync="Never" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -26,7 +17,6 @@
       <Column Name="LastActivityDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="LastSeenDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="PreferencesRaw" Type="System.String" DbType="nvarchar(8000)" CanBeNull="true" />
-      <Association Name="User_UserOpenId" Member="UserOpenIds" ThisKey="Id" OtherKey="UserId" Type="UserOpenId" />
     </Type>
   </Table>
   <Table Name="dbo.Sites" Member="Sites">
@@ -57,55 +47,6 @@
       <Column Name="UserId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="VoteTypeId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-    </Type>
-  </Table>
-  <Table Name="dbo.UserOpenId" Member="UserOpenIds">
-    <Type Name="UserOpenId">
-      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="UserId" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="OpenIdClaim" Type="System.String" DbType="NVarChar(450)" CanBeNull="true" />
-      <Association Name="User_UserOpenId" Member="User" ThisKey="UserId" OtherKey="Id" Type="User" IsForeignKey="true" />
-    </Type>
-  </Table>
-  <Table Name="dbo.OpenIdWhiteList" Member="OpenIdWhiteLists">
-    <Type Name="OpenIdWhiteList">
-      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="OpenId" Type="System.String" DbType="NVarChar(450)" CanBeNull="true" />
-      <Column Name="Approved" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="IpAddress" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
-      <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-    </Type>
-  </Table>
-  <Table Name="dbo.AppSettings" Member="AppSettings">
-    <Type Name="AppSetting">
-      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="Setting" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="Value" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
-    </Type>
-  </Table>
-  <Table Name="dbo.BlackList" Member="BlackLists">
-    <Type Name="BlackList">
-      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="IPAddress" Type="System.String" DbType="VarChar(15)" CanBeNull="true" />
-      <Column Name="CreationDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-    </Type>
-  </Table>
-  <Table Name="dbo.Queries" Member="Queries">
-    <Type Name="Query">
-      <Column Name="Id" Storage="_ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="QueryHash" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
-      <Column Name="QueryBody" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />
-    </Type>
-  </Table>
-  <Table Name="dbo.QueryExecutions" Member="QueryExecutions">
-    <Type Name="QueryExecution">
-      <Column Name="Id" Storage="_ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="QueryId" Storage="_RevisionID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="UserId" Storage="_UserID" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="SiteId" Storage="_SiteID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="FirstRun" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="LastRun" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="ExecutionCount" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
     </Type>
   </Table>
 </Database>

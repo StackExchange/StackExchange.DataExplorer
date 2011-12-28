@@ -101,7 +101,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 if (whiteListEntry == null)
                                 {
                                     // add a non approved entry to the list
-                                    whiteListEntry = new OpenIdWhiteList()
+                                    var newEntry = new 
                                     {
                                         Approved = false,
                                         CreationDate = DateTime.UtcNow,
@@ -109,8 +109,8 @@ namespace StackExchange.DataExplorer.Controllers
                                         IpAddress = Request.UserHostAddress
                                     };
 
-                                    Current.DB.OpenIdWhiteLists.InsertOnSubmit(whiteListEntry);
-                                    Current.DB.SubmitChanges();
+                                    Current.DB.Insert("OpenIdWhiteList", newEntry);
+ 
                                 }
 
                                 // not allowed in 
@@ -119,7 +119,7 @@ namespace StackExchange.DataExplorer.Controllers
                         }
 
                         User user = null;
-                        var openId = Current.DB.UserOpenIds.Where(o => o.OpenIdClaim == claimedId).FirstOrDefault();
+                        var openId = Current.DB.Query<UserOpenId>("select * from UserOpenId where OpenIdClaim = @claimedId", new {claimedId}).FirstOrDefault();
 
                         if (!CurrentUser.IsAnonymous)
                         {
@@ -130,9 +130,9 @@ namespace StackExchange.DataExplorer.Controllers
                             SetHeader("Log in below to change your OpenID");
                             return View("Login");
                           }
-                          openId = CurrentUser.UserOpenIds.FirstOrDefault();
+                          openId = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenId  where UserId = @Id", new {CurrentUser.Id}).First();
                           openId.OpenIdClaim = claimedId;
-                          Current.DB.SubmitChanges();
+                          Current.DB.Update("UserOpenId", openId);
                           user = CurrentUser;
                           returnUrl = "/user/" + user.Id;
                         }
@@ -144,11 +144,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 user = Current.DB.Users.FirstOrDefault(u => u.Email == sreg.Email);
                                 if (user != null)
                                 {
-                                    var o = new UserOpenId();
-                                    o.OpenIdClaim = claimedId;
-                                    o.User = user;
-                                    Current.DB.UserOpenIds.InsertOnSubmit(o);
-                                    Current.DB.SubmitChanges();
+                                    Current.DB.Insert("UserOpenId", new { UserId = user.Id, OpenIdClaim = claimedId });
                                 }
                             }
 
@@ -167,7 +163,7 @@ namespace StackExchange.DataExplorer.Controllers
                         }
                         else
                         {
-                            user = openId.User;
+                            user = Current.DB.Query<User>("select * from Users where Id = @UserId", new {openId.UserId}).FirstOrDefault();
                         }
 
                         string Groups = user.IsAdmin ? "Admin" : "";

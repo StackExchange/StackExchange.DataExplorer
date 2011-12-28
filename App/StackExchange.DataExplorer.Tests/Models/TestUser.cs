@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Transactions;
 using StackExchange.DataExplorer.Models;
 using System.Data.Common;
+using StackExchange.DataExplorer.Helpers;
 
 namespace StackExchange.DataExplorer.Tests.Models {
 
@@ -26,7 +27,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
             var u2 = Current.DB.Users.First(u => u.Login == "Fred");
             Assert.AreEqual("Fred", u2.Login);
 
-            var o = Current.DB.UserOpenIds.First(oid => oid.OpenIdClaim == "xyz");
+            var o = Current.DB.Query<UserOpenId>("select * from UserOpenId where OpenIdClaim = @claim", new {claim = "xyz"}).FirstOrDefault(); 
             Assert.AreEqual("xyz", o.OpenIdClaim);
         }
 

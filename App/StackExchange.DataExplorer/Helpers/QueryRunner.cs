@@ -160,7 +160,7 @@ namespace StackExchange.DataExplorer.Helpers
                         results.ExecutionTime += tmp.ExecutionTime;
                         MergePivot(s, results, tmp);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     { 
                         // don't blow up here ... just skip the site.
                     }
@@ -183,7 +183,7 @@ namespace StackExchange.DataExplorer.Helpers
                         results.ExecutionTime += tmp.ExecutionTime;
                         AddBody(buffer, tmp, s);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     { 
                         // don't blow up ... just skip the site
                     }
@@ -258,7 +258,7 @@ namespace StackExchange.DataExplorer.Helpers
             if (currentCount > 130)
             {
                 // clearly a robot, auto black list 
-                var b = new BlackList { CreationDate = DateTime.UtcNow, IPAddress = remoteIP };
+                Current.DB.Insert("BlackList", new { CreationDate = DateTime.UtcNow, IPAddress = remoteIP });
             }
 
             if (currentCount > 100)

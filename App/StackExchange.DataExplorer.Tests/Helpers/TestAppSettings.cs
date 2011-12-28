@@ -12,18 +12,11 @@ namespace StackExchange.DataExplorer.Tests.Util {
     {
         [TestMethod]
         public void TestBoolSetting() {
-            Current.DB.AppSettings.DeleteAllOnSubmit(Current.DB.AppSettings);
-            Current.DB.SubmitChanges();
-
+            Current.DB.Execute("delete from AppSettings");
             AppSettings.Refresh();
-
             Assert.IsFalse(AppSettings.EnableWhiteList);
-
-            Current.DB.AppSettings.InsertOnSubmit(new AppSetting { Setting = "EnableWhiteList", Value = "true" });
-            Current.DB.SubmitChanges();
-            
+            Current.DB.Insert("AppSettings", new { Setting = "EnableWhiteList", Value = "true" });
             AppSettings.Refresh();
-
             Assert.IsTrue(AppSettings.EnableWhiteList);
         }
     }

@@ -75,13 +75,7 @@ namespace StackExchange.DataExplorer.Models
 
             if (login.Length == 0)
             {
-                /* email scrubbing got people upset, so it is gone now
-                if (email != null)
-                    login = CleanLogin(email.Split('@')[0]);
-                 */
-
-                if (login.Length == 0)
-                    login = emptyLogin;
+                login = emptyLogin;
             }
 
             u.Login = login;
@@ -110,15 +104,10 @@ namespace StackExchange.DataExplorer.Models
                     success = true;
                 }
             }
+            
+            u.Id = Current.DB.Insert("Users", new {u.Email, u.Login }).Value;
+            Current.DB.Insert("UserOpenId", new {OpenIdClaim = openIdClaim, UserId = u.Id });
 
-            Current.DB.Users.InsertOnSubmit(u);
-
-            var o = new UserOpenId();
-            o.OpenIdClaim = openIdClaim;
-            o.User = u;
-
-            Current.DB.UserOpenIds.InsertOnSubmit(o);
-            Current.DB.SubmitChanges();
             return u;
         }
 
@@ -178,37 +167,34 @@ namespace StackExchange.DataExplorer.Models
 
             log.AppendLine(string.Format("Beginning merge of {0} into {1}", mergeId, masterId));
 
-            // Queries
-            /*
-            var queries = db.Queries.Where(q => q.CreatorId == mergeId).ToList();
-            log.AppendLine(string.Format("Moving {0} queries over", queries.Count));
-            queries.ForEach(q => q.CreatorId = masterId);
-            */
 
             // Query Executions
-            var queryExecutions = db.QueryExecutions.Where(qe => qe.UserId == mergeId).ToList();
+            var queryExecutions = db.Query<QueryExecution>("select * from QueryExecutions where UserId = @mergeId", new {mergeId}).ToList();
             log.AppendLine(string.Format("Moving {0} query executions over", queryExecutions.Count));
             queryExecutions.ForEach(qe => qe.UserId = masterId);
 
-            // Saved Queries
-            /*
-            var savedQueries = db.SavedQueries.Where(sq => sq.UserId == mergeId).ToList();
-            log.AppendLine(string.Format("Moving {0} saved queries over", savedQueries.Count));
-            savedQueries.ForEach(sq => sq.UserId = masterId);
-            */
 
             // User Open Ids
-            var userOpenIds = db.UserOpenIds.Where(uoi => uoi.UserId == masterId).ToList();
+            var userOpenIds = db.Query<UserOpenId>("select * from UserOpenId where UserId = @masterId", new { masterId }).ToList();
             var firstOpenId = userOpenIds.First();
             userOpenIds = userOpenIds.Skip(1).ToList();
             log.AppendLine(string.Format("Removing {0} inaccessible openids found for master", userOpenIds.Count));
-            userOpenIds.ForEach(uoi => log.AppendLine(string.Format("--Dropping {0} as an open id for the master user", uoi.OpenIdClaim)));
-            db.UserOpenIds.DeleteAllOnSubmit(userOpenIds);
 
-            userOpenIds = db.UserOpenIds.Where(uoi => uoi.UserId == mergeId).ToList();
+            foreach (var uoi in userOpenIds)
+            {
+                log.AppendLine(string.Format("--Dropping {0} as an open id for the master user", uoi.OpenIdClaim));
+                Current.DB.Execute("delete UserOpenId where Id = @Id", new {uoi.Id});
+            }
+            
+            userOpenIds = db.Query<UserOpenId>("select * from UserOpenId where UserId = @mergeId", new { mergeId }).ToList(); 
+            
             log.AppendLine(string.Format("Removing {0} openids for mergee", userOpenIds.Count));
-            userOpenIds.ForEach(uoi => log.AppendLine(string.Format("--Dropping {0} as an open id for the mergee", uoi.OpenIdClaim)));
-            db.UserOpenIds.DeleteAllOnSubmit(userOpenIds);
+            
+            foreach (var uoi in userOpenIds)
+            {
+                log.AppendLine(string.Format("--Dropping {0} as an open id for the mergee", uoi.OpenIdClaim));
+                Current.DB.Execute("delete UserOpenId where Id = @Id", new {uoi.Id});
+            }
 
             // User
             log.AppendLine("Moving user properties over");

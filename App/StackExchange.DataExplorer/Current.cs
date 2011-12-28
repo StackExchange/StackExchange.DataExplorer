@@ -128,6 +128,8 @@ namespace StackExchange.DataExplorer
                     {
                         CallContext.SetData("DB", result);
                     }
+
+                    Current.DB.Connection.Open();
                 }
 
                 return result;

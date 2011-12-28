@@ -25,19 +25,14 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/whitelist/approve/{id:int}", HttpVerbs.Post)]
         public ActionResult ApproveWhiteListEntry(int id)
         {
-            Current.DB.OpenIdWhiteLists.First(w => w.Id == id).Approved = true;
-            Current.DB.SubmitChanges();
-
+            Current.DB.Update("OpenIdWhiteList", new { Id = id, Approved = true });
             return Json("ok");
         }
 
         [Route("admin/whitelist/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveWhiteListEntry(int id)
         {
-            var entry = Current.DB.OpenIdWhiteLists.First(w => w.Id == id);
-            Current.DB.OpenIdWhiteLists.DeleteOnSubmit(entry);
-            Current.DB.SubmitChanges();
-
+            Current.DB.Execute("delete OpenIdWhiteList where Id = @id", new { id });
             return Json("ok");
         }
 
@@ -46,7 +41,7 @@ namespace StackExchange.DataExplorer.Controllers
         {
             SetHeader("Open Id Whitelist");
 
-            return View(Current.DB.OpenIdWhiteLists);
+            return View(Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList"));
         }
 
         [Route("admin")]
@@ -71,7 +66,8 @@ namespace StackExchange.DataExplorer.Controllers
                 site.UpdateStats();
             }
 
-            Current.DB.Execute("DELETE FROM CachedResults");
+            Current.DB.Execute("truncate table CachedResults");
+            Current.DB.Execute("truncate table CachedPlans");
 
             return Content("sucess");
         }
@@ -95,26 +91,46 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult FindDuplicateUsers(string sort)
         {
             var sorter = userSorts[sort ?? "oldest"];
-            var openids = Current.DB.UserOpenIds.ToList();
-            var dupeUsers = (from openid in openids
+            var openids = Current.DB.Query<UserOpenId>("select * from UserOpenId").ToList();
+
+            var dupeUserIds = (from openid in openids
                              group openid by Models.User.NormalizeOpenId(openid.OpenIdClaim)
                                  into grp
                                  where grp.Count() > 1
-                                 select new Tuple<string, IEnumerable<User>>(grp.Key, sorter(grp.Select(id => id.User)))).ToList();
+                                 select new Tuple<string, IEnumerable<int>>(grp.Key, grp.Select(id => id.UserId))).ToList();
+
             ViewBag.Sort = sort;
             ViewBag.Sorts = userSorts.Keys;
             SetHeader("Possible Duplicate Users");
-            return View(dupeUsers);
+
+            if (dupeUserIds.Count() > 0)
+            {
+
+                var userMap = Current.DB.Query<User>("select * from Users where Id in @Ids", new { Ids = dupeUserIds.Select(u => u.Item2).SelectMany(u => u) })
+                    .ToDictionary(u => u.Id);
+
+                var dupeUsers = dupeUserIds.Select(tuple => Tuple.Create(tuple.Item1, tuple.Item2.Select(id => userMap[id])));
+
+                return View(dupeUsers);
+            }
+            else
+            {
+                return View((object)null);
+            }
+
         }
 
         [Route("admin/normalize-openids")]
         public ActionResult NormalizeOpenIds()
         {
-            foreach (var openId in Current.DB.UserOpenIds)
+            foreach (var openId in Current.DB.Query<UserOpenId>("select * from UserOpenId"))
             {
-                openId.OpenIdClaim = Models.User.NormalizeOpenId(openId.OpenIdClaim);
+                var cleanClaim = Models.User.NormalizeOpenId(openId.OpenIdClaim);
+                if (cleanClaim != openId.OpenIdClaim)
+                {
+                    Current.DB.Update("OpenIdClaim", new {Id = openId.Id, OpenIdClaim = cleanClaim });
+                }
             }
-            Current.DB.SubmitChanges();
             return TextPlain("Done.");
         }
 
@@ -122,7 +138,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult FindDuplicateWhitelistOpenIds(string sort)
         {
             var sorter = whitelistSorts[sort ?? "approved"];
-            var whitelistOpenIds = Current.DB.OpenIdWhiteLists.ToList();
+            var whitelistOpenIds = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList").ToList();
             var dupeOpenIds = (from openid in whitelistOpenIds
                                group openid by Models.User.NormalizeOpenId(openid.OpenId)
                                    into grp
@@ -139,11 +155,14 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/normalize-whitelist-openids")]
         public ActionResult NormalizeWhitelistOpenIds()
         {
-            foreach (var openid in Current.DB.OpenIdWhiteLists)
+            foreach (var openid in Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList"))
             {
-                openid.OpenId = Models.User.NormalizeOpenId(openid.OpenId);
+                var newOpenId = Models.User.NormalizeOpenId(openid.OpenId);
+                if (openid.OpenId != newOpenId)
+                {
+                    Current.DB.Update("OpenIdWhiteList", new { Id = openid.Id, OpenId = newOpenId });
+                }
             }
-            Current.DB.SubmitChanges();
             return TextPlain("Done.");
         }
 
@@ -172,10 +191,12 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/find-dupe-user-openids")]
         public ActionResult FindDuplicateUserOpenIds()
         {
-            var dupes = (from uoi in Current.DB.UserOpenIds
+
+            var sql = "select * from UserOpenId where UserId in (select UserId from UserOpenId having count(*) > 0)";
+
+            var dupes = (from uoi in Current.DB.Query<UserOpenId>(sql)
                         group uoi by uoi.UserId
                         into grp
-                        where grp.Count() > 1
                         select new Tuple<int?, IEnumerable<UserOpenId>>(grp.Key, grp.Select(g=>g))).ToList();
             SetHeader("Possible Duplicate User OpenId records");
             return View(dupes);
@@ -185,10 +206,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/useropenid/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveUserOpenIdEntry(int id)
         {
-            var entry = Current.DB.UserOpenIds.First(uoi => uoi.Id == id);
-            Current.DB.UserOpenIds.DeleteOnSubmit(entry);
-            Current.DB.SubmitChanges();
-
+            Current.DB.Delete<UserOpenId>(id);
             return Json("ok");
         }
 

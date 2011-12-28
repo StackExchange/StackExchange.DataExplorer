@@ -9,6 +9,10 @@ namespace StackExchange.DataExplorer.Models
     {
         private static readonly int TITLE_LENGTH = 60;
 
+        public int Id { get; set; }
+        public Guid QueryHash { get; set; }
+        public string QueryBody { get; set; }
+
         public string AsTitle()
         {
             return SqlAsTitle(QueryBody);
