@@ -258,7 +258,7 @@ namespace StackExchange.DataExplorer.Helpers
             if (currentCount > 130)
             {
                 // clearly a robot, auto black list 
-                Current.DB.Insert("BlackList", new { CreationDate = DateTime.UtcNow, IPAddress = remoteIP });
+                Current.DB.Insert<BlackList>(new { CreationDate = DateTime.UtcNow, IPAddress = remoteIP });
             }
 
             if (currentCount > 100)

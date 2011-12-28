@@ -104,9 +104,9 @@ namespace StackExchange.DataExplorer.Models
                     success = true;
                 }
             }
-            
-            u.Id = Current.DB.Insert("Users", new {u.Email, u.Login }).Value;
-            Current.DB.Insert("UserOpenId", new {OpenIdClaim = openIdClaim, UserId = u.Id });
+
+            u.Id = Current.DB.Insert<User>(new { u.Email, u.Login }).Value;
+            Current.DB.Insert<UserOpenId>(new { OpenIdClaim = openIdClaim, UserId = u.Id });
 
             return u;
         }

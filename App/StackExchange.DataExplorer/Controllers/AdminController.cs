@@ -25,7 +25,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/whitelist/approve/{id:int}", HttpVerbs.Post)]
         public ActionResult ApproveWhiteListEntry(int id)
         {
-            Current.DB.Update("OpenIdWhiteList", new { Id = id, Approved = true });
+            Current.DB.Update<OpenIdWhiteList>(new { Id = id, Approved = true });
             return Json("ok");
         }
 
@@ -128,7 +128,7 @@ namespace StackExchange.DataExplorer.Controllers
                 var cleanClaim = Models.User.NormalizeOpenId(openId.OpenIdClaim);
                 if (cleanClaim != openId.OpenIdClaim)
                 {
-                    Current.DB.Update("OpenIdClaim", new {Id = openId.Id, OpenIdClaim = cleanClaim });
+                    Current.DB.Update<UserOpenId>(new {Id = openId.Id, OpenIdClaim = cleanClaim });
                 }
             }
             return TextPlain("Done.");
@@ -160,7 +160,7 @@ namespace StackExchange.DataExplorer.Controllers
                 var newOpenId = Models.User.NormalizeOpenId(openid.OpenId);
                 if (openid.OpenId != newOpenId)
                 {
-                    Current.DB.Update("OpenIdWhiteList", new { Id = openid.Id, OpenId = newOpenId });
+                    Current.DB.Update<OpenIdWhiteList>(new { Id = openid.Id, OpenId = newOpenId });
                 }
             }
             return TextPlain("Done.");

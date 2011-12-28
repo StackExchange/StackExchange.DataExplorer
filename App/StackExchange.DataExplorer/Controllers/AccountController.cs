@@ -109,7 +109,7 @@ namespace StackExchange.DataExplorer.Controllers
                                         IpAddress = Request.UserHostAddress
                                     };
 
-                                    Current.DB.Insert("OpenIdWhiteList", newEntry);
+                                    Current.DB.Insert<OpenIdWhiteList>(newEntry);
  
                                 }
 
@@ -132,7 +132,7 @@ namespace StackExchange.DataExplorer.Controllers
                           }
                           openId = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenId  where UserId = @Id", new {CurrentUser.Id}).First();
                           openId.OpenIdClaim = claimedId;
-                          Current.DB.Update("UserOpenId", openId);
+                          Current.DB.Update<UserOpenId>(openId);
                           user = CurrentUser;
                           returnUrl = "/user/" + user.Id;
                         }
@@ -144,7 +144,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 user = Current.DB.Users.FirstOrDefault(u => u.Email == sreg.Email);
                                 if (user != null)
                                 {
-                                    Current.DB.Insert("UserOpenId", new { UserId = user.Id, OpenIdClaim = claimedId });
+                                    Current.DB.Insert<UserOpenId>(new { UserId = user.Id, OpenIdClaim = claimedId });
                                 }
                             }
 

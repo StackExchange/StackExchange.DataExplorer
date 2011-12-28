@@ -33,8 +33,9 @@ namespace StackExchange.DataExplorer.Helpers
             return paramNames;
         }
         
-        public static int? Insert(this DBContext db, string table, dynamic data)
+        public static int? Insert<T>(this DBContext db, dynamic data)
         {
+            var table = DetermineTableName<T>(db);
             var o = (object)data;
             List<string> paramNames = GetParamNames(o);
 
@@ -46,8 +47,9 @@ namespace StackExchange.DataExplorer.Helpers
         }
 
 
-        public static int Update(this DBContext db, string table, dynamic data)
+        public static int Update<T>(this DBContext db, dynamic data)
         {
+            var table = DetermineTableName<T>(db);
             List<string> paramNames = GetParamNames(data);
 
             var builder = new StringBuilder();
