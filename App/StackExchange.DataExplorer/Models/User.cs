@@ -16,7 +16,6 @@ namespace StackExchange.DataExplorer.Models
         public DateTime? LastLogin { get; set; }
         public bool IsAdmin { get; set; }
         public string IPAddress { get; set; }
-        public bool IsModerator { get; set; }
         public DateTime? CreationDate { get; set; }
         public string AboutMe { get; set; }
         public string Website { get; set; }
@@ -230,7 +229,6 @@ namespace StackExchange.DataExplorer.Models
             if (masterUser.Email.IsNullOrEmpty() && !mergeUser.Email.IsNullOrEmpty()) masterUser.Email = mergeUser.Email;
             // if (masterUser.LastLogin.GetValueOrDefault() < mergeUser.LastLogin.GetValueOrDefault()) masterUser.LastLogin = mergeUser.LastLogin;
             if (!masterUser.IsAdmin && mergeUser.IsAdmin) masterUser.IsAdmin = true;
-            if (!masterUser.IsModerator && mergeUser.IsModerator) masterUser.IsModerator = true;
             if (masterUser.CreationDate.GetValueOrDefault() > mergeUser.CreationDate.GetValueOrDefault()) masterUser.CreationDate = mergeUser.CreationDate;
             if (masterUser.AboutMe.IsNullOrEmpty() && mergeUser.AboutMe.HasValue()) masterUser.AboutMe = mergeUser.AboutMe;
             if (masterUser.Website.IsNullOrEmpty() && mergeUser.Website.HasValue()) masterUser.Website = mergeUser.Website;
