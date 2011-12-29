@@ -10,8 +10,27 @@ using System.Linq;
 
 namespace StackExchange.DataExplorer.Models
 {
+    
     public partial class Site
     {
+        public int Id { get; set; }
+        public string TinyName { get; set; }
+        public string  Name { get; set; }
+        public string LongName { get; set; }
+        public string Url { get; set; }
+        public string ImageUrl { get; set; }
+        public string IconUrl { get; set; }
+        public string DatabaseName { get; set; }
+        public string Tagline { get; set; }
+        public string TagCss { get; set; }
+        public int? TotalQuestions { get; set; }
+        public int? TotalAnswers { get; set; }
+        public int? TotalUsers { get; set; }
+        public int? TotalComments { get; set; }
+        public int? TotalTags { get; set; }
+        public DateTime? LastPost { get; set; }
+        public string ImageBackgroundColor { get; set; }
+
         public string ImageCss
         {
             get
@@ -99,7 +118,7 @@ namespace StackExchange.DataExplorer.Models
                 TotalTags = (int) cmd.ExecuteScalar();
             }
 
-            Current.DB.SubmitChanges();
+            Current.DB.Sites.Update(Id, new {TotalQuestions, TotalAnswers, TotalComments, LastPost, TotalUsers, TotalTags });
         }
 
         public int? GuessUserId(User user)

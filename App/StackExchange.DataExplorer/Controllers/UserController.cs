@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Linq;
 using System.Web.Mvc;
-
-using Dapper.Contrib.Extensions;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
+using Dapper;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -22,15 +20,32 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("users")]
         public ActionResult Index(int? page)
         {
+            int perPage = 35;
             int currentPage = Math.Max(page ?? 1, 1);
 
             SetHeader("Users");
             SelectMenuItem("Users");
 
-            ViewData["PageNumbers"] = new PageNumber("/users?page=-1", Convert.ToInt32(Math.Ceiling(Current.DB.Users.Count() / 35m)), 50,
-                                                     currentPage - 1, "pager fr");
+            int total = Current.DB.Query<int>("select count(*) from Users").First();
+            var rows = Current.DB.Query<User>(@"select *, 
+	(select COUNT(*) from Metadata where OwnerId = Y.Id) SavedQueriesCount,
+	(select COUNT(*) from QueryExecutions  where UserId = Y.Id) QueryExecutionsCount  
+from 
+(
+	select * from
+	(	select 
+		ROW_NUMBER() over (order by Login asc) as Row, 
+		*
+		from Users 
+	) 
+	as X 
+	where Row > (@currentPage-1) * @perPage and Row <= @currentPage * @perPage
+) Y
+order by Row asc", new { currentPage, perPage });
 
-            PagedList<User> data = Current.DB.Users.OrderBy(u => u.Login).ToPagedList(currentPage, 35);
+
+            PagedList<User> data = new PagedList<Models.User>(rows, currentPage, perPage, false, total);
+
             return View(data);
         }
 
@@ -40,7 +55,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id, User updatedUser)
         {
-            User user = Current.DB.Users.First(u => u.Id == id);
+            User user = Current.DB.Users.Get(id);
 
             if (updatedUser.DOB < DateTime.Now.AddYears(-100) || updatedUser.DOB > DateTime.Now.AddYears(-6))
             {
@@ -60,7 +75,7 @@ namespace StackExchange.DataExplorer.Controllers
                     user.Website = HtmlUtilities.Safe(updatedUser.Website);
                     user.Location = HtmlUtilities.Safe(updatedUser.Location);
 
-                    Current.DB.SubmitChanges();
+                    Current.DB.Users.Update(user.Id, new { user.Login, user.AboutMe, user.DOB, user.Email, user.Website, user.Location });
 
                     return Redirect("/users/" + user.Id);
                 }
@@ -82,7 +97,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id)
         {
-            User user = Current.DB.Users.FirstOrDefault(u => u.Id == id);
+            User user = Current.DB.Users.Get(id);
             if (user == null)
             {
                 return PageNotFound();
@@ -109,7 +124,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return ContentError("Invalid preference");
             }
 
-            User user = Current.DB.Users.FirstOrDefault(u => u.Id == id);
+            User user = Current.DB.Users.Get(id);
 
             if (user == null || (user.Id != CurrentUser.Id && !CurrentUser.IsAdmin))
             {
@@ -127,7 +142,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"users/{id:INT}/{name?}")]
         public ActionResult Show(int id, string name, string order_by, int? page)
         {
-            User user = Current.DB.Users.FirstOrDefault(row => row.Id == id);
+            User user = Current.DB.Users.Get(id);
             if (user == null)
             {
                 return PageNotFound();
@@ -138,7 +153,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageMovedPermanentlyTo(string.Format("/users/{0}/{1}",user.Id, HtmlUtilities.URLFriendly(user.Login)) + Request.Url.Query);
             }
 
-            DBContext db = Current.DB;
+            Database db = Current.DB;
 
             SetHeader(user.Login);
             SelectMenuItem("Users");
@@ -291,16 +306,8 @@ namespace StackExchange.DataExplorer.Controllers
             );
             int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
 
-            string href = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + order_by;
-
-            ViewData["Queries"] = queries;
-            ViewData["PageNumbers"] = new PageNumber(
-                href + "&page=-1",
-                Convert.ToInt32(Math.Ceiling(total / (decimal)pagesize)),
-                pagesize.Value,
-                page.Value - 1,
-                "pager"
-            );
+            ViewData["Href"] = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + order_by;
+            ViewData["Queries"] = new PagedList<QueryExecutionViewData>(queries, page.Value, pagesize.Value, false, total);
 
             if (!queries.Any())
             {

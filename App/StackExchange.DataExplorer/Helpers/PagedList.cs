@@ -14,72 +14,48 @@ namespace StackExchange.DataExplorer.Helpers
 
     public class PagedList<T> : List<T>, IPagedList
     {
+        public PagedList() { }
+
+        public static PagedList<T> Map<U>(IEnumerable<U> raw, Func<IEnumerable<U>, IEnumerable<T>> mapper, int page, int perpage)
+        {
+            var filtered = mapper(raw.Skip((page - 1) * perpage).Take(perpage));
+            return new PagedList<T>(filtered, page, perpage, false, raw.Count());
+        }
+
+        // we need a distinct overload for IQueryable, so efficient paging queries can be created by linq2sql
         public PagedList(IQueryable<T> source, int index, int pageSize)
         {
             TotalCount = source.Count();
             PageSize = pageSize;
             SetPageIndex(index);
-            SetPageCount();
+            PageCount = GetPageCount();
 
-            AddRange(source.Skip(PageIndex*PageSize).Take(PageSize).ToList());
+            AddRange(source.Skip(PageIndex * PageSize).Take(PageSize).ToList());
         }
 
-        public PagedList(IEnumerable<T> source, int index, int pageSize)
+        public PagedList(IEnumerable<T> source, int index, int pageSize, bool forceIndexInBounds = false, int? prePagedTotalCount = null)
         {
-            TotalCount = source.Count();
+            TotalCount = prePagedTotalCount ?? source.Count();
             PageSize = pageSize;
+
+            // viewing outside the bounds
+            if (forceIndexInBounds && TotalCount > 0 && index * PageSize > TotalCount)
+            {
+                // so let them view the last page
+                index = GetPageCount();
+            }
+
             SetPageIndex(index);
-            SetPageCount();
+            PageCount = GetPageCount();
 
-            AddRange(source.Skip(PageIndex*PageSize).Take(PageSize).ToList());
-        }
-
-
-        /// <summary>
-        /// For API use - takes an already paged list with a known total count; doesn't do further paging operations.
-        /// </summary>
-        /// <remarks>
-        /// Allows this new PagedList to store the paging properties of a previous PagedList without calling Convert.
-        /// We need this when paging on the cached lists of post ids and converting them to Api Questions.
-        /// This is such an awful hack.
-        /// </remarks>
-        public PagedList(List<T> pagedSource, IPagedList other)
-        {
-            TotalCount = other.TotalCount;
-            PageSize = other.PageSize;
-            PageCount = other.PageCount;
-            PageIndex = other.PageIndex;
-            AddRange(pagedSource);
-        }
-
-        private PagedList()
-        {
-        }
-
-        public bool IsPreviousPage
-        {
-            get { return (PageIndex > 0); }
-        }
-
-        public bool IsNextPage
-        {
-            get { return (PageIndex*PageSize) <= TotalCount; }
-        }
-
-        #region IPagedList Members
-
-        public int TotalCount { get; set; }
-        public int PageCount { get; set; }
-        public int PageIndex { get; set; }
-        public int PageSize { get; set; }
-
-        #endregion
-
-        public IEnumerable<IEnumerable<T>> ToRows(int totalRows)
-        {
-            return this.Select((item, index) => new {Item = item, Index = index})
-                .GroupBy(o => o.Index%totalRows)
-                .Select(g => g.Select(o => o.Item));
+            if (prePagedTotalCount.HasValue)
+            {
+                AddRange(source);
+            }
+            else
+            {
+                AddRange(source.Skip(PageIndex * PageSize).Take(PageSize));
+            }
         }
 
         private void SetPageIndex(int index)
@@ -91,15 +67,50 @@ namespace StackExchange.DataExplorer.Helpers
         /// <summary>
         /// Should be called *after* TotalCount and PageSize have been initialized.
         /// </summary>
-        private void SetPageCount()
+        private int GetPageCount()
         {
-            int remainder = TotalCount%PageSize;
-            PageCount = (TotalCount/PageSize) + (remainder == 0 ? 0 : 1); // only need another page if we have spillover
+            if (PageSize == 0) // you get what you ask for
+                return 0;
+
+            var remainder = TotalCount % PageSize;
+            return (TotalCount / PageSize) + (remainder == 0 ? 0 : 1); // only need another page if we have spillover
         }
+
+        public IEnumerable<IEnumerable<T>> ToRows(int totalRows)
+        {
+            return this.Select((item, index) => new {Item = item, Index = index})
+                .GroupBy(o => o.Index%totalRows)
+                .Select(g => g.Select(o => o.Item));
+        }
+
+        /// <summary>
+        /// For API use - takes an already paged list with a known total count; doesn't do further paging operations.
+        /// </summary>
+        /// <remarks>
+        /// Allows this new PagedList to store the paging properties of a previous PagedList without calling Convert.
+        /// We need this when paging on the cached lists of post ids and converting them to Api Questions.
+        /// This is such an awful hack.
+        /// </remarks>
+        public PagedList(IEnumerable<T> pagedSource, IPagedList other)
+        {
+            TotalCount = other.TotalCount;
+            PageSize = other.PageSize;
+            PageCount = other.PageCount;
+            PageIndex = other.PageIndex;
+            AddRange(pagedSource);
+        }
+
+        public int TotalCount { get; set; }
+        public int PageCount { get; set; }
+        public int PageIndex { get; set; }
+        public int PageSize { get; set; }
+
+        public bool IsPreviousPage { get { return (PageIndex > 0); } }
+        public bool IsNextPage { get { return (PageIndex * PageSize) <= TotalCount; } }
 
 
         /// <summary>
-        /// Answers a new PagedList of <typeparamref name="TNew"/> that is created by calling <paramref name="converter"/> on
+        /// Returns a new PagedList of <typeparamref name="TNew"/> that is created by calling <paramref name="converter"/> on
         /// each element within this list's paging window.
         /// </summary>
         /// <typeparam name="TNew">The type that the resulting PagedList will be of.</typeparam>
@@ -108,15 +119,15 @@ namespace StackExchange.DataExplorer.Helpers
         {
             // retain all the paging properties
             var result = new PagedList<TNew>
-                             {
-                                 TotalCount = TotalCount,
-                                 PageCount = PageCount,
-                                 PageIndex = PageIndex,
-                                 PageSize = PageSize
-                             };
+            {
+                TotalCount = this.TotalCount,
+                PageCount = this.PageCount,
+                PageIndex = this.PageIndex,
+                PageSize = this.PageSize
+            };
 
             // call the converter to generate the data we want in the resulting list
-            foreach (T item in this)
+            foreach (var item in this)
             {
                 result.Add(converter(item));
             }
@@ -127,27 +138,17 @@ namespace StackExchange.DataExplorer.Helpers
 
     public static class PagedListExtensions
     {
-        public static IEnumerable<IEnumerable<T>> Transpose<T>(this IEnumerable<IEnumerable<T>> source)
-        {
-            return from row in source
-                   from col in row.Select(
-                       (x, i) => new KeyValuePair<int, T>(i, x))
-                   group col.Value by col.Key
-                   into c
-                   select c as IEnumerable<T>;
-        }
-
         public static PagedList<T> ToPagedList<T>(this IEnumerable<T> source, int index)
         {
             return ToPagedList(source, index, null);
         }
 
-        public static PagedList<T> ToPagedList<T>(this IEnumerable<T> source, int index, int? pageSize)
+        public static PagedList<T> ToPagedList<T>(this IEnumerable<T> source, int index, int? pageSize, bool forceIndexInBounds = false, int? prePagedTotalCount = null)
         {
             if (!pageSize.HasValue || pageSize.Value < 1)
                 pageSize = PageSizer.DefaultPageSize;
 
-            return new PagedList<T>(source, index, pageSize.Value);
+            return new PagedList<T>(source, index, pageSize.Value, forceIndexInBounds, prePagedTotalCount);
         }
 
         public static PagedList<T> ToPagedList<T>(this IQueryable<T> source, int index, int? pageSize)

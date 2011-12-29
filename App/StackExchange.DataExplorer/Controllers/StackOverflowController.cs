@@ -107,7 +107,7 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 CurrentUser.LastSeenDate = DateTime.UtcNow;
                 CurrentUser.IPAddress = GetRemoteIP();
-                Current.DB.SubmitChanges();
+                Current.DB.Users.Update(CurrentUser.Id, new { CurrentUser.LastSeenDate, CurrentUser.IPAddress });
             }
 
 
@@ -188,7 +188,7 @@ namespace StackExchange.DataExplorer.Controllers
         /// <summary>
         /// Gets the shared DataContext to be used by a Request's controllers.
         /// </summary>
-        public DBContext DB
+        public Database DB
         {
             get { return Current.DB; }
         }
@@ -295,7 +295,7 @@ namespace StackExchange.DataExplorer.Controllers
                 int id;
                 if (Int32.TryParse(User.Identity.Name, out id))
                 {
-                    User lookup = Current.DB.Users.FirstOrDefault(u => u.Id == id);
+                    User lookup = Current.DB.Users.Get(id);
                     if (lookup != null)
                     {
                         _currentUser = lookup;

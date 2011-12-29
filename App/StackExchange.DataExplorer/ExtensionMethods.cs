@@ -176,6 +176,7 @@ namespace StackExchange.DataExplorer
             return s.HasValue() ? Regex.IsMatch(s, @"^[=@+$!(]|.*?\.") : false;
         }
 
+        /*
         /// <summary>
         /// returns the DBContext used by this ViewUserControl's Controller.
         /// </summary>
@@ -198,7 +199,7 @@ namespace StackExchange.DataExplorer
                 throw new ArgumentException("Unable to find a ControllerBase on ViewPage " + vp.GetType().FullName);
             return c.DB;
         }
-
+        */
 
         /// <summary>
         /// Adds the url to the RouteCollection with the specified defaults.

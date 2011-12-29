@@ -5,37 +5,32 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class PageNumber
     {
+        public string HRef { get; set; }
+        public string CssClass { get; set; }
+        public string DivId { get; set; }
+        public int PageCount { get; set; }
+        public int PageCurrent { get; set; }
+
         private const int _cellcount = 6;
         private const string _prev = "prev ";
         private const string _next = " next";
-        private const string PAGER_DOTS = "&hellip;";
+        const string PAGER_DOTS = "&hellip;";
 
-        public PageNumber(string href, int pageCount, int currentPerPage, int pageCurrent, string cssClass)
+        public PageNumber(string href, int pageCount, int pageCurrent, string cssClass)
         {
             HRef = href;
             CssClass = cssClass;
             PageCount = pageCount;
-            CurrentPerPage = currentPerPage;
             PageCurrent = pageCurrent;
         }
-
-        public PageNumber(string href, int pageCount, int pageCurrent, string cssClass, string divId, bool isAjax)
+        public PageNumber(string href, int pageCount, int pageCurrent, string cssClass, string divId)
         {
             HRef = href;
             CssClass = cssClass;
             DivId = divId;
             PageCount = pageCount;
             PageCurrent = pageCurrent;
-            IsJQuery = isAjax;
         }
-
-        public string HRef { get; set; }
-        public string CssClass { get; set; }
-        public string DivId { get; set; }
-        public int PageCount { get; set; }
-        public int PageCurrent { get; set; }
-        public int CurrentPerPage { get; set; }
-        public bool IsJQuery { get; set; }
 
         public override string ToString()
         {
@@ -73,7 +68,7 @@ namespace StackExchange.DataExplorer.Helpers
                     // we're in the middle, somewhere
                     pages.Add("1");
                     pages.Add(PAGER_DOTS);
-                    const int range = _cellcount - 4;
+                    int range = _cellcount - 4;
                     for (int i = curPage - range; i <= curPage + range; i++)
                         pages.Add(i.ToString());
                     pages.Add(PAGER_DOTS);
@@ -147,8 +142,6 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 sb.Append(@"<a href=""");
                 sb.Append(HRef.Replace("page=-1", "page=" + pageText));
-                if (CurrentPerPage != 50)
-                  sb.Append("&pagesize=" + CurrentPerPage);
                 sb.Append(@""" title=""go to page ");
                 sb.Append(pageText);
                 sb.Append(@"""");

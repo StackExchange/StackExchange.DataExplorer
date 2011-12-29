@@ -14,6 +14,8 @@ using System.Web;
 using StackExchange.DataExplorer.Models.StackEntities;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
+using StackExchange.DataExplorer.Helpers;
+using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer
 {
@@ -110,7 +112,7 @@ namespace StackExchange.DataExplorer
             OperationContext.Current.IncomingMessageProperties["MicrosoftDataServicesRequestUri"] = builder.Uri;
 
 
-            SqlConnection sqlConnection = Current.DB.Sites.First(s => s.Name.ToLower() == siteName).GetConnection(ConnectionPoolSize);
+            SqlConnection sqlConnection = Current.DB.Query<Site>("select * from Sites where lower(Name) == @siteName", new {siteName}).First().GetConnection(ConnectionPoolSize);
             Current.RegisterConnectionForDisposal(sqlConnection);
 
             var workspace = new MetadataWorkspace(

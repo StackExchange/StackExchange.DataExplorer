@@ -24,7 +24,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
 
             User.CreateUser("Fred", "a@a.com", "xyz");
 
-            var u2 = Current.DB.Users.First(u => u.Login == "Fred");
+            var u2 = Current.DB.Query<User>("select * from Users where Login = @Login", new {Login = "Fred"}).First();
             Assert.AreEqual("Fred", u2.Login);
 
             var o = Current.DB.Query<UserOpenId>("select * from UserOpenId where OpenIdClaim = @claim", new {claim = "xyz"}).FirstOrDefault(); 
@@ -34,8 +34,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
         [TestMethod]
         public void TestNoName() {
 
-            Current.DB.Users.DeleteAllOnSubmit(Current.DB.Users.Where(u => u.Login.StartsWith("jon.doe")));
-            Current.DB.SubmitChanges();
+            Current.DB.Execute("delete from Users where Login like 'jon.doe%'");
 
             var u1 = User.CreateUser("", null, "xyz");
             var u2 = User.CreateUser(null, "", "xyz1");
@@ -48,8 +47,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
         [TestMethod]
         public void TestNoSpaces() {
 
-            Current.DB.Users.DeleteAllOnSubmit(Current.DB.Users.Where(u => u.Login.StartsWith("jon.doe")));
-            Current.DB.SubmitChanges();
+            Current.DB.Execute("delete from Users where Login like 'jon.doe%'");
 
             var u1 = User.CreateUser("jon   doe", null, "xyz");
             Assert.AreEqual("jon.doe", u1.Login);

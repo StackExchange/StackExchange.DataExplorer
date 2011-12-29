@@ -1,6 +1,8 @@
 ﻿@model StackExchange.DataExplorer.Helpers.PagedList<StackExchange.DataExplorer.Models.User>
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Models
+@using StackExchange.DataExplorer.Helpers
+
 @{this.SetPageTitle("Users - Stack Exchange Data Explorer");}
 <table id="userList">
     <tbody>
@@ -16,4 +18,4 @@
     </tbody>
 </table>
 
-@Html.Partial("PageNumbers", ViewData["PageNumbers"])
+@UIHelper.PageNumber("/users?page=-1", Model, "pager fr")

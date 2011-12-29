@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -11,6 +10,32 @@ namespace StackExchange.DataExplorer.Models
 {
     public partial class User
     {
+        public int Id { get; set; }
+        public string Login { get; set; }
+        public string Email { get; set; }
+        public DateTime? LastLogin { get; set; }
+        public bool IsAdmin { get; set; }
+        public string IPAddress { get; set; }
+        public bool IsModerator { get; set; }
+        public DateTime? CreationDate { get; set; }
+        public string AboutMe { get; set; }
+        public string Website { get; set; }
+        public string Location { get; set; }
+        public DateTime? DOB { get; set; }
+        public DateTime? LastActivityDate { get; set; }
+        public DateTime? LastSeenDate { get; set; }
+        public string PreferencesRaw { get; set; }
+
+        List<UserOpenId> _userOpenIds;
+        public List<UserOpenId> UserOpenIds
+        {
+            get
+            {
+                _userOpenIds = _userOpenIds ?? Current.DB.Query<UserOpenId>("select * from UserOpenId where UserId = @Id", new { Id }).ToList();
+                return _userOpenIds;
+            }
+        }
+
         private const string emptyLogin = "jon.doe";
 
         /// <summary>
@@ -44,7 +69,7 @@ namespace StackExchange.DataExplorer.Models
             return (GetBusinessRuleViolations(action).Count == 0);
         }
 
-        partial void OnValidate(ChangeAction action)
+        public void OnValidate(ChangeAction action)
         {
             if (!IsValid(action))
                 throw new ApplicationException("User object not in a valid state.");
@@ -59,12 +84,15 @@ namespace StackExchange.DataExplorer.Models
 
             if ((action == ChangeAction.Insert) || (action == ChangeAction.Update))
             {
-                if (Current.DB.Users.Any<User>(u => (u.Login == Login) && (u.Id != Id)))
+                if (Current.DB.Query<int>("select 1 from Users where Login = @Login and Id <> @Id", new { Login, Id }).Any())
+                {
                     violations.Add(new BusinessRuleViolation("Login name must be unique.", "Login"));
+                }
             }
 
             return violations;
         }
+    
 
         public static User CreateUser(string login, string email, string openIdClaim)
         {
@@ -84,7 +112,7 @@ namespace StackExchange.DataExplorer.Models
             int retries = 0;
             bool success = false;
 
-            int maxId = Current.DB.ExecuteQuery<int?>("select max(Id) + 1 from Users").First() ?? 0;
+            int maxId = Current.DB.Query<int?>("select max(Id) + 1 from Users").First() ?? 0;
             maxId += 1;
 
             while (!success)
@@ -105,8 +133,8 @@ namespace StackExchange.DataExplorer.Models
                 }
             }
 
-            u.Id = Current.DB.Insert<User>(new { u.Email, u.Login }).Value;
-            Current.DB.Insert<UserOpenId>(new { OpenIdClaim = openIdClaim, UserId = u.Id });
+            u.Id = Current.DB.Users.Insert(new { u.Email, u.Login }).Value;
+            Current.DB.UserOpenIds.Insert(new { OpenIdClaim = openIdClaim, UserId = u.Id });
 
             return u;
         }
@@ -162,11 +190,10 @@ namespace StackExchange.DataExplorer.Models
                 return false;
             }
 
-            var masterUser = db.Users.Where(u => u.Id == masterId).First();
-            var mergeUser = db.Users.Where(u => u.Id == mergeId).First();
+            var masterUser = db.Users.Get(masterId);
+            var mergeUser = db.Users.Get(mergeId);
 
             log.AppendLine(string.Format("Beginning merge of {0} into {1}", mergeId, masterId));
-
 
             // Query Executions
             var queryExecutions = db.Query<QueryExecution>("select * from QueryExecutions where UserId = @mergeId", new {mergeId}).ToList();
@@ -217,14 +244,14 @@ namespace StackExchange.DataExplorer.Models
             }
             
             // Votes
-            var mergeVotes = db.Votes.Where(v => v.UserId == mergeId).ToList();
-            var masterVotes = db.Votes.Where(v => v.UserId == masterId).ToList();
+            var mergeVotes = db.Query<Vote>("select * from Votes where UserId = @mergeId", new {mergeId}).ToList();
+            var masterVotes = db.Query<Vote>("select * from Votes where UserId = @masterId", new { masterId }).ToList(); 
             int dupe = 0;
             mergeVotes.ForEach(mergeVote =>
             {
-                if (masterVotes.Exists(masterVote => masterVote.SavedQueryId == mergeVote.SavedQueryId))
+                if (masterVotes.Exists(masterVote => masterVote.RootId == mergeVote.RootId))
                 {
-                    db.Votes.DeleteOnSubmit(mergeVote);
+                    db.Votes.Delete(mergeVote.Id);
                     dupe++;
                 }
                 else mergeVote.UserId = masterId;
@@ -250,8 +277,7 @@ namespace StackExchange.DataExplorer.Models
             log.AppendLine("Deleting merged user");
             var okToContinue = submitIfValid(() =>
             {
-                db.Users.DeleteOnSubmit(mergeUser);
-                db.SubmitChanges();
+                db.Users.Delete(mergeUser.Id);
             });
             if (!okToContinue) return false;
 
@@ -260,9 +286,8 @@ namespace StackExchange.DataExplorer.Models
                 log.AppendLine("Replacing jon.doe username on master");
                 okToContinue = submitIfValid(() =>
                 {
-                    masterUser.Login = savedLogin;
-                    firstOpenId.OpenIdClaim = User.NormalizeOpenId(firstOpenId.OpenIdClaim);
-                    db.SubmitChanges();
+                    Current.DB.Users.Update(masterUser.Id, new { Login = savedLogin });
+                    Current.DB.UserOpenIds.Update(firstOpenId.Id, new { OpenIdClaim = User.NormalizeOpenId(firstOpenId.OpenIdClaim)});
                 });
                 if (!okToContinue) return false;
             }
@@ -272,8 +297,8 @@ namespace StackExchange.DataExplorer.Models
 
         public static bool CanMergeUsers(int masterId, int mergeId, out string canMergeMsg)
         {
-            var masterUser = Current.DB.Query<User>("select Id from Users where Id = @Id", new { Id = masterId }).SingleOrDefault();
-            var mergeUser = Current.DB.Query<User>("select Id from Users where Id = @Id", new { Id = mergeId }).SingleOrDefault();
+            var masterUser = Current.DB.Users.Get(masterId);
+            var mergeUser = Current.DB.Users.Get(mergeId); 
             if (masterId == mergeId)
             {
                 canMergeMsg = "User ids are identical";
@@ -294,14 +319,32 @@ namespace StackExchange.DataExplorer.Models
             return true;
         }
 
+        int? _savedQueriesCount;
         public int SavedQueriesCount
         {
-            get { return Current.DB.Query<int>("SELECT COUNT(*) FROM Metadata WHERE OwnerId = @userId", new { userId = Id }).FirstOrDefault(); }
+            get 
+            { 
+                _savedQueriesCount = _savedQueriesCount ?? Current.DB.Query<int>("SELECT COUNT(*) FROM Metadata WHERE OwnerId = @userId", new { userId = Id }).FirstOrDefault();
+                return _savedQueriesCount.Value;
+            }
+            set
+            {
+                _savedQueriesCount = value;
+            }
         }
 
+        int? _queryExecutionsCount; 
         public int QueryExecutionsCount
         {
-            get { return Current.DB.Query<int>("select count(*) from QueryExecutions where UserId = @userId", new { userId = Id }).FirstOrDefault(); }
+            get 
+            { 
+                _queryExecutionsCount = _queryExecutionsCount ?? Current.DB.Query<int>("select count(*) from QueryExecutions where UserId = @userId", new { userId = Id }).FirstOrDefault();
+                return _queryExecutionsCount.Value;
+            }
+            set 
+            {
+                _queryExecutionsCount = value;
+            }
         }
     }
 }

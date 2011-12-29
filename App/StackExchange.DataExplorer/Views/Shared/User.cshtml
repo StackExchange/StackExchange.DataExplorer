@@ -5,17 +5,17 @@
     <div style="float: left; margin-right: 10px;">
         <a class="user-gravatar" href="/users/@Model.Id">@Html.Raw(Model.Gravatar(64))</a>
     </div>
-    <div class="user-details">
-        <a href="/users/@Model.Id">@Model.Login</a>
-        <br/><br/>
-        Created @Model.CreationDate.GetValueOrDefault().ToString("d")
-        <br/><br/>
-        @Model.SavedQueriesCount saved queries, @Model.QueryExecutionsCount executions
+    <div style="clear:both"></div>
+    <div class="user-summary-details">
+        <div class="user-login">
+            <a href="/users/@Model.Id">@Model.Login</a>
+        </div>
+        <div class="user-created">
+            Created @Model.CreationDate.GetValueOrDefault().ToString("d")
+        </div>
+        <div class="user-saved-queries">
+            @Model.SavedQueriesCount saved queries, @Model.QueryExecutionsCount executions
+        </div>
     </div>
-    
-    @*<div class="user-gravatar">
-        <a href="/users/@Model.Id">@Html.Raw(Model.Gravatar(32))</a></div>
-    <div class="user-details">
-        <a href="/users/@Model.Id">@Model.Login</a></div>*@
 </div>
 <br class="clear"/>

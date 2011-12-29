@@ -7,6 +7,8 @@ using StackExchange.DataExplorer.Models;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
+
 
 namespace StackExchange.DataExplorer
 {
@@ -101,25 +103,27 @@ namespace StackExchange.DataExplorer
         /// <summary>
         /// Gets the single data context for this current request.
         /// </summary>
-        public static DBContext DB
+        public static Database DB
         {
             get
             {
-                DBContext result = null;
-
+                Database result = null;
                 if (Context != null)
                 {
-                    result = Context.Items["DB"] as DBContext;
+                    result = Context.Items["DB"] as Database;
                 }
                 else
                 {
                     // unit tests
-                    result = CallContext.GetData("DB") as DBContext;
+                    result = CallContext.GetData("DB") as Database;
                 }
 
                 if (result == null)
                 {
-                    result = DBContext.GetContext();
+                    DbConnection cnn = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString);
+                    cnn = new MvcMiniProfiler.Data.ProfiledDbConnection(cnn, Current.Profiler);
+                    cnn.Open();
+                    result = new Database(cnn, 30);
                     if (Context != null)
                     {
                         Context.Items["DB"] = result;
@@ -128,8 +132,6 @@ namespace StackExchange.DataExplorer
                     {
                         CallContext.SetData("DB", result);
                     }
-
-                    Current.DB.Connection.Open();
                 }
 
                 return result;
@@ -156,14 +158,14 @@ namespace StackExchange.DataExplorer
         /// </summary>
         public static void DisposeDB()
         {
-            DBContext db = null;
+            Database db = null;
             if (Context != null)
             {
-                db = Context.Items["DB"] as DBContext;
+                db = Context.Items["DB"] as Database;
             }
             else
             {
-                db = CallContext.GetData("DB") as DBContext;
+                db = CallContext.GetData("DB") as Database;
             }
             if (db != null)
             {

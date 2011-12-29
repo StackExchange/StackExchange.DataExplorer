@@ -1603,6 +1603,20 @@ font-weight:bold;
   padding-bottom: 10px;
 }
 
+.user-summary-details {
+    width: 220px;
+    
+}
+.user-summary-details div
+{
+    margin-top: 6px;
+}
+
+.user-summary-details .user-created, .user-summary-details .user-saved-queries
+{
+    color: #777;
+}
+
 .cool, .cool .relativetime {
   color:#999 !important;
 }

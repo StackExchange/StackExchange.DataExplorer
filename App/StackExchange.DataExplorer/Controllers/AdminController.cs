@@ -25,14 +25,14 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/whitelist/approve/{id:int}", HttpVerbs.Post)]
         public ActionResult ApproveWhiteListEntry(int id)
         {
-            Current.DB.Update<OpenIdWhiteList>(new { Id = id, Approved = true });
+            Current.DB.OpenIdWhiteList.Update(id, new { Approved = true });
             return Json("ok");
         }
 
         [Route("admin/whitelist/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveWhiteListEntry(int id)
         {
-            Current.DB.Execute("delete OpenIdWhiteList where Id = @id", new { id });
+            Current.DB.OpenIdWhiteList.Delete(id);
             return Json("ok");
         }
 
@@ -41,7 +41,7 @@ namespace StackExchange.DataExplorer.Controllers
         {
             SetHeader("Open Id Whitelist");
 
-            return View(Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList"));
+            return View(Current.DB.OpenIdWhiteList.All()); 
         }
 
         [Route("admin")]
@@ -61,7 +61,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/refresh-stats", HttpVerbs.Post)]
         public ActionResult RefreshStats()
         {
-            foreach (Site site in Current.DB.Sites)
+            foreach (Site site in Current.DB.Sites.All())
             {
                 site.UpdateStats();
             }
@@ -123,12 +123,12 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/normalize-openids")]
         public ActionResult NormalizeOpenIds()
         {
-            foreach (var openId in Current.DB.Query<UserOpenId>("select * from UserOpenId"))
+            foreach (var openId in Current.DB.UserOpenIds.All())
             {
                 var cleanClaim = Models.User.NormalizeOpenId(openId.OpenIdClaim);
                 if (cleanClaim != openId.OpenIdClaim)
                 {
-                    Current.DB.Update<UserOpenId>(new {Id = openId.Id, OpenIdClaim = cleanClaim });
+                    Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = cleanClaim });
                 }
             }
             return TextPlain("Done.");
@@ -138,7 +138,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult FindDuplicateWhitelistOpenIds(string sort)
         {
             var sorter = whitelistSorts[sort ?? "approved"];
-            var whitelistOpenIds = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList").ToList();
+            var whitelistOpenIds = Current.DB.OpenIdWhiteList.All().ToList();
             var dupeOpenIds = (from openid in whitelistOpenIds
                                group openid by Models.User.NormalizeOpenId(openid.OpenId)
                                    into grp
@@ -160,7 +160,7 @@ namespace StackExchange.DataExplorer.Controllers
                 var newOpenId = Models.User.NormalizeOpenId(openid.OpenId);
                 if (openid.OpenId != newOpenId)
                 {
-                    Current.DB.Update<OpenIdWhiteList>(new { Id = openid.Id, OpenId = newOpenId });
+                    Current.DB.OpenIdWhiteList.Update(openid.Id, new { OpenId = newOpenId });
                 }
             }
             return TextPlain("Done.");
@@ -174,8 +174,8 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return TextPlain(canMergeMsg);
             }
-            ViewBag.MasterUser = Current.DB.Query<User>("select * from Users where Id = @Id", new { Id = masterId }).First();
-            ViewBag.MergeUser = Current.DB.Query<User>("select * from Users where Id = @Id", new { Id = mergeId }).First();
+            ViewBag.MasterUser = Current.DB.Users.Get(masterId);
+            ViewBag.MergeUser = Current.DB.Users.Get(mergeId);
             SetHeader("Merge Users");
             return View();
         }
@@ -206,7 +206,7 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/useropenid/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveUserOpenIdEntry(int id)
         {
-            Current.DB.Delete<UserOpenId>(id);
+            Current.DB.UserOpenIds.Delete(id);
             return Json("ok");
         }
 

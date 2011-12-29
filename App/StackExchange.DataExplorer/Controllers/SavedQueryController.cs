@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
-using Dapper.Contrib.Extensions;
+using Dapper;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
@@ -448,23 +448,9 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             ViewData["SearchCriteria"] = searchCriteria;
-            ViewData["TotalQueries"] = total;
-            ViewData["PageNumbers"] = new PageNumber(
-                href + "&page=-1",
-                Convert.ToInt32(Math.Ceiling(total / (decimal)pagesize)),
-                pagesize.Value,
-                page.Value - 1,
-                "pager"
-            );
-            ViewData["PageSizer"] = new PageSizer(
-                href + "&pagesize=-1",
-                page.Value,
-                pagesize.Value,
-                total,
-                "page-sizer fr"
-            );
+            ViewData["Href"] = href;
 
-            return View(queries);
+            return View(new PagedList<QueryExecutionViewData>(queries,page.Value, pagesize.Value, false, total));
         }
     }
 }

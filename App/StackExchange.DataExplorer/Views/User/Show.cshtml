@@ -41,7 +41,7 @@
                         <td>seen</td>
                         <td><span class="@Model.LastSeenDate.Temperature()">@Html.Raw(Model.LastSeenDate.ToRelativeTimeSpan())</span></td>
                     </tr>
-                    @if (isCurrentUser)
+                    @if (isCurrentUser || (Current.User != null && Current.User.IsAdmin))
                     {
                         <tr>
                             <td>openid</td>
@@ -89,6 +89,8 @@
     {
         <h3>@ViewData["EmptyMessage"]</h3>
     }
-    @Html.Partial("PageNumbers", ViewData["PageNumbers"])
+    
+    @UIHelper.PageNumber(ViewData["Href"].ToString() + "&page=-1", (PagedList<QueryExecutionViewData>)ViewData["Queries"], "pager")
+   
     <div class="clear"></div>
 </div>

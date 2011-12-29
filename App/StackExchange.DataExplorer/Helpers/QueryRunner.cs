@@ -130,7 +130,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser, AsyncQueryRunner.AsyncResult result = null)
         {
-            var sites = Current.DB.Sites.ToList();
+            var sites = Current.DB.Sites.All();
             if (parsedQuery.ExcludesMetas)
             { 
                 sites = sites.Where(s => !s.Url.Contains("meta.")).ToList();
@@ -258,7 +258,7 @@ namespace StackExchange.DataExplorer.Helpers
             if (currentCount > 130)
             {
                 // clearly a robot, auto black list 
-                Current.DB.Insert<BlackList>(new { CreationDate = DateTime.UtcNow, IPAddress = remoteIP });
+                Current.DB.BlackList.Insert(new { CreationDate = DateTime.UtcNow, IPAddress = remoteIP });
             }
 
             if (currentCount > 100)
@@ -266,7 +266,7 @@ namespace StackExchange.DataExplorer.Helpers
                 throw new Exception("You can not run any new queries for another hour, you have exceeded your limit!");
             }
 
-            if (Current.DB.ExecuteQuery<int>("select count(*) from BlackList where IPAddress = {0}", remoteIP).First() > 0)
+            if (Current.DB.Query<int>("select count(*) from BlackList where IPAddress = @remoteIP", new { remoteIP }).First() > 0)
             {
                 System.Threading.Thread.Sleep(2000);
                 throw new Exception("You have been blacklisted due to abuse!");
@@ -291,7 +291,6 @@ namespace StackExchange.DataExplorer.Helpers
                                                                          // todo handle errors as well
                                                                          messages.AppendLine(args.Message);
                                                                      });
-
                 try
                 {
                     cnn.InfoMessage += infoHandler;

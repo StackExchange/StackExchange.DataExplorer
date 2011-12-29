@@ -592,7 +592,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
             ViewData["Tables"] = Site.GetTableInfos();
-            ViewData["Sites"] = Current.DB.Sites.ToList();
+            ViewData["Sites"] = Current.DB.Sites.All();
 
             return true;
         }
