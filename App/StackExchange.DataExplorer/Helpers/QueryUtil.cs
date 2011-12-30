@@ -74,39 +74,27 @@ namespace StackExchange.DataExplorer.Helpers
         /// <returns>The revision, or null if the ID was invalid</returns>
         public static Revision GetCompleteRevision(int revisionId)
         {
-            // The metadata join condition is pretty ugly...
-            return Current.DB.Query<Revision, Query, Metadata, User, Revision>(@"
+            return Current.DB.Query<Revision, Query, QuerySet, User, Revision>(@"
                 SELECT
                     *
                 FROM
-                    Revisions revision
+                    Revisions r
                 JOIN
-                    Queries query
+                    Queries q
                 ON
-                    query.Id = revision.QueryId AND revision.Id = @revision
+                    q.Id = r.QueryId AND r.Id = @revision
                 JOIN
-                    Metadata metadata
+                    QuerySets qs
                 ON
-                    (
-                        metadata.RevisionId = revision.RootId AND
-                        metadata.OwnerId = revision.OwnerId
-                    ) OR (
-                        metadata.RevisionId = revision.Id AND
-                        metadata.OwnerId = revision.OwnerId AND
-                        revision.RootId IS NULL
-                    ) OR (
-                        metadata.RevisionId = revision.Id AND
-                        metadata.OwnerId IS NULL AND
-                        revision.OwnerId IS NULL
-                    )
+                    isnull(r.RootId, r.Id) = qs.Id
                 LEFT OUTER JOIN
-                    Users [user]
+                    Users u
                 ON
-                    revision.OwnerId = [user].Id",
-                (revision, query, metadata, user) =>
+                    r.OwnerId = u.Id",
+                (revision, query, querySet, user) =>
                 {
                     revision.Query = query;
-                    revision.Metadata = metadata;
+                    revision.QuerySet = querySet;
                     revision.Owner = user;
 
                     return revision;
@@ -114,55 +102,6 @@ namespace StackExchange.DataExplorer.Helpers
                 new
                 {
                     revision = revisionId
-                }
-            ).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Retrieves the Revision that represents the "featurable" version of a particular
-        /// user's edits on a given query lineage. Basically, this is either the user's most
-        /// recent revision, or the revision they marked as being the one to feature.
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="rootId"></param>
-        /// <returns></returns>
-        public static Revision GetFeaturedCompleteRevision(int userId, int rootId)
-        {
-            return Current.DB.Query<Revision, Query, Metadata, User, Revision>(@"
-                SELECT
-                    *
-                FROM
-                    Revisions revision
-                JOIN
-                    Queries query
-                ON
-                    query.Id = revision.QueryId AND
-                    revision.OwnerId = @owner AND
-                    (revision.RootId = @root OR revision.Id = @root)
-                JOIN
-                    Metadata metadata
-                ON
-                    (metadata.RevisionId = @root OR metadata.RevisionId = revision.RootId) AND
-                    metadata.OwnerId = @owner
-                LEFT OUTER JOIN
-                    Users [user]
-                ON
-                    revision.OwnerId = [user].Id
-                ORDER BY
-                    revision.IsFeature DESC, revision.CreationDate DESC
-                ",
-                (revision, query, metadata, user) =>
-                {
-                    revision.Query = query;
-                    revision.Metadata = metadata;
-                    revision.Owner = user;
-
-                    return revision;
-                },
-                new
-                {
-                    owner = userId,
-                    root = rootId
                 }
             ).FirstOrDefault();
         }

@@ -9,30 +9,28 @@ namespace StackExchange.DataExplorer.Helpers
         private const int VIEW_EXPIRES_SECS = 15*60; // view information expires in 15 minutes
 
         // TODO: we may consider batching this up for performance sake
-        public static void TrackQueryView(string ipAddress, int revisionId, int? ownerId)
+        public static void TrackQueryView(string ipAddress, int revisionId)
         {
-            if (IsNewView(ipAddress, revisionId, ownerId))
+            if (IsNewView(ipAddress, revisionId))
             {
                 Current.DB.Execute(@"
                     UPDATE
-                        Metadata
+                        QuerySets
                     SET
                         Views = Views + 1
                     WHERE
-                        RevisionId = @revision AND
-                        OwnerId " + (ownerId.HasValue ? "= @owner" : "IS NULL"),
+                        InitialRevisionId = @revision",
                     new
                     {
-                        revision = revisionId,
-                        owner = ownerId.HasValue ? ownerId.Value : -1
+                        revision = revisionId
                     }
                 );
             }
         }
 
-        public static bool IsNewView(string ipAddress, int revisionId, int? ownerId)
+        public static bool IsNewView(string ipAddress, int revisionId)
         {
-            string key = "qv - " + ipAddress + " " + (ownerId.HasValue ? ownerId.Value + " " : "") + revisionId;
+            string key = "qv - " + ipAddress + " " + revisionId;
             bool isNewView = true;
 
             int currentBracket = GetTimeBracket();

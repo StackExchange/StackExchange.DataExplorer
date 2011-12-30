@@ -13,5 +13,6 @@ namespace StackExchange.DataExplorer.Models
         public Table<UserOpenId> UserOpenIds { get; private set; }
         public Table<Vote> Votes { get; private set; }
         public Table<BlackList> BlackList { get; private set; }
+        public Table<QuerySet> QuerySets { get; private set; }
     }
 }

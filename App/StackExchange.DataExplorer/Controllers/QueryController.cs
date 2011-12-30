@@ -504,7 +504,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         private void SaveMetadata(Revision revision, string title, string description, bool updateWithoutChange)
         {
-            Metadata metadata = null;
+            QuerySet metadata = null;
 
             if (title.IsNullOrEmpty())
             {
@@ -518,7 +518,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!CurrentUser.IsAnonymous)
             {
-                metadata = Current.DB.Query<Metadata>(@"
+                metadata = Current.DB.Query<QuerySet>(@"
                     SELECT
                         *
                     FROM

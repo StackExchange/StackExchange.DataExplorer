@@ -2,7 +2,7 @@
 
 namespace StackExchange.DataExplorer.Models
 {
-    public class Metadata
+    public class QuerySet
     {
         public int Id { get; set; }
         public int RevisionId { get; set; }

@@ -178,7 +178,7 @@
     <Compile Include="Models\AppSetting.cs" />
     <Compile Include="Models\BlackList.cs" />
     <Compile Include="Models\CachedResult.cs" />
-    <Compile Include="Models\Metadata.cs" />
+    <Compile Include="Models\QuerySet.cs" />
     <Compile Include="Models\MigrationType.cs" />
     <Compile Include="Models\OpenIdWhiteList.cs" />
     <Compile Include="Models\Query.cs" />

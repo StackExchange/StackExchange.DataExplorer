@@ -247,7 +247,7 @@ namespace StackExchange.DataExplorer.Models
             int dupe = 0;
             mergeVotes.ForEach(mergeVote =>
             {
-                if (masterVotes.Exists(masterVote => masterVote.RootId == mergeVote.RootId))
+                if (masterVotes.Exists(masterVote => masterVote.QuerySetId == mergeVote.QuerySetId))
                 {
                     db.Votes.Delete(mergeVote.Id);
                     dupe++;

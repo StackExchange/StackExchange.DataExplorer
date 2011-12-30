@@ -19,7 +19,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (voteType == "favorite")
             {
-                Revision revision = QueryUtil.GetBasicRevision(id);
+                Revision revision = QueryUtil.GetCompleteRevision(id);
 
                 if (revision == null)
                 {
@@ -33,35 +33,26 @@ namespace StackExchange.DataExplorer.Controllers
                         Votes
                     WHERE
                         VoteTypeId = @vote AND
-                        RootId = @root AND
-                        UserId = @user AND
-                        OwnerId " + (revision.OwnerId != null ? " = @owner" : " IS NULL"),
+                        QuerySetId = @querySetId AND
+                        UserId = @user"
+                    ,
                     new
                     {
                         vote = (int)VoteType.Favorite,
-                        root = revision.RootId,
-                        owner = revision.OwnerId,
+                        querySetId = revision.QuerySet.Id,
                         user = CurrentUser.Id
                     }
                 ).FirstOrDefault();
 
                 if (vote == null)
                 {
-                    Current.DB.Execute(@"
-                        INSERT INTO Votes(
-                            OwnerId, RootId, UserId, VoteTypeId, CreationDate
-                        ) VALUES(
-                            @owner, @root, @user, @vote, @creation
-                        )",
-                        new
-                        {
-                            vote = (int)VoteType.Favorite,
-                            root = revision.RootId,
-                            owner = revision.OwnerId,
-                            user = CurrentUser.Id,
-                            creation = DateTime.UtcNow
-                        }
-                    );
+                    Current.DB.Votes.Insert(new 
+                    {
+                        QuerySetId = revision.QuerySet.Id,
+                        UserId = CurrentUser.Id,
+                        VoteTypeId = (int)VoteType.Favorite,
+                        CreationDate = DateTime.UtcNow
+                    });
                 }
                 else
                 {
@@ -70,17 +61,15 @@ namespace StackExchange.DataExplorer.Controllers
 
                 Current.DB.Execute(@"
                     UPDATE
-                        Metadata
+                        QuerySets
                     SET
                         Votes = Votes + @change
                     WHERE
-                        RevisionId = @root AND
-                        OwnerId " + (revision.OwnerId != null ? " = @owner" : " IS NULL"),
+                        Id = @id",
                     new
                     {
                         change = vote == null ? 1 : -1,
-                        root = revision.RootId,
-                        owner = revision.OwnerId
+                        id = revision.QuerySet.Id
                     }
                 );
             }

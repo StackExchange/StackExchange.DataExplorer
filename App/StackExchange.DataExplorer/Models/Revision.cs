@@ -12,7 +12,7 @@ namespace StackExchange.DataExplorer.Models
         public bool IsFeature { get; set; }
         public DateTime CreationDate { get; set; }
         public Query Query { get; set; }
-        public Metadata Metadata { get; set; }
+        public QuerySet QuerySet { get; set; }
         public User Owner { get; set; }
         public Revision Parent { get; set; }
 

@@ -132,7 +132,7 @@ namespace StackExchange.DataExplorer
             return s.HasValue() ? HtmlUtilities.URLFriendly(s) : s;
         }
 
-        public static string Slugify(this Metadata metadata)
+        public static string Slugify(this QuerySet metadata)
         {
             if (metadata == null || metadata.Title.IsNullOrEmpty())
             {
