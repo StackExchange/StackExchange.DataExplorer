@@ -32,7 +32,7 @@
                 parents.Add(current.ParentId.Value);
             }
         <li id="revision-@current.Id" class="revision@(HtmlUtilities.MakeClasses(classes))">
-            <a href="/@Model.SiteName.ToLower()/query/edit/@current.Id@current.Metadata.Slugify()" title="@current.Query.QueryBody">
+            <a href="/@Model.SiteName.ToLower()/query/edit/@current.Id@current.QuerySet.Slugify()" title="@current.Query.QueryBody">
                 <span class="revision-info" title="@current.ExplainOrigin(Current.User)">@current.Id</span>
                 @Html.Raw(current.CreationDate.ToRelativeTimeSpanMini())
             </a>

@@ -21,8 +21,8 @@
     if (revision != null)
     {
         sql = revision.Query.QueryBody;
-        name = revision.Metadata.Title;
-        description = revision.Metadata.Description;
+        name = revision.QuerySet.Title;
+        description = revision.QuerySet.Description;
     }
 
     sql = Html.Encode(sql);

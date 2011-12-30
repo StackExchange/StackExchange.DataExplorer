@@ -160,7 +160,8 @@ namespace StackExchange.DataExplorer
                 if (result == null)
                 {
                     DbConnection cnn = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString);
-                    cnn = new MvcMiniProfiler.Data.ProfiledDbConnection(cnn, new ErrorLoggingProfiler(Current.Profiler));
+                    if (Current.Profiler != null)
+                        cnn = new MvcMiniProfiler.Data.ProfiledDbConnection(cnn, new ErrorLoggingProfiler(Current.Profiler));
                     cnn.Open();
                     result = new Database(cnn, 30);
                     if (Context != null)

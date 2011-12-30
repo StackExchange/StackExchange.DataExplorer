@@ -208,7 +208,7 @@ order by Row asc", new { currentPage, perPage });
                         SELECT
                             /**select**/, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
                         FROM
-                            Queries query
+                            Queries q
                             /**join**/
                             /**leftjoin**/
                             /**where**/
@@ -219,78 +219,61 @@ order by Row asc", new { currentPage, perPage });
                     RowNumber",
                 new { start = start, finish = finish }
             );
-            var counter = builder.AddTemplate("SELECT COUNT(*) FROM Queries query /**join**/ /**leftjoin**/ /**where**/");
+            var counter = builder.AddTemplate("SELECT COUNT(*) FROM Queries q /**join**/ /**leftjoin**/ /**where**/");
 
             if (order_by == "recent")
             {
-                builder.Select("execution.RevisionId AS Id");
-                builder.Select("execution.LastRun");
-                builder.Select("site.Name AS SiteName");
-                builder.Join("QueryExecutions execution ON execution.QueryId = query.Id");
-                builder.Join("Sites site ON site.Id = execution.SiteId");
-                builder.Join("Revisions ON Revisions.Id = execution.RevisionId AND execution.UserId = @user", new { user = id });
-                builder.Join(@"
-                    Metadata metadata ON
-                    (
-                        metadata.RevisionId = Revisions.RootId AND
-                        metadata.OwnerId = Revisions.OwnerId
-                    ) OR (
-                        metadata.RevisionId = Revisions.Id AND
-                        metadata.OwnerId = Revisions.OwnerId AND
-                        Revisions.RootId IS NULL
-                    ) OR (
-                        metadata.RevisionId = Revisions.Id AND
-                        metadata.OwnerId IS NULL AND
-                        Revisions.OwnerId IS NULL
-                    )"
-                );
-                builder.OrderBy("execution.LastRun DESC");
+                builder.Select("re.RevisionId AS Id");
+                builder.Select("re.LastRun");
+                builder.Select("s.Name AS SiteName");
+                builder.Join("Revisions r ON r.QueryId = q.Id");
+                builder.Join("RevisionExecutions re ON re.RevisionId = r.Id");
+                builder.Join("Sites s ON s.Id = re.SiteId");
+                builder.Join(@"QuerySets qs ON isnull(r.RootId, r.Id) = qs.InitialRevisionId");
+                builder.OrderBy("re.LastRun DESC");
 
                 message = user.Id == CurrentUser.Id ? 
                     "You have never ran any queries" : "No queries ran recently";
             }
             else
             {
-                builder.Select("metadata.RevisionId AS Id");
-                builder.Select("metadata.LastActivity AS LastRun");
-                builder.Join("Metadata metadata on metadata.LastQueryId = query.Id");
+                builder.Select("qs.CurrentRevisionId AS Id");
+                builder.Select("qs.LastActivity AS LastRun");
+                builder.Join("Revisions r on r.QueryId = q.Id");
+                builder.Join("QuerySets qs on qs.CurrentRevisionId = r.Id");
 
                 if (order_by == "favorite")
                 {
                     builder.Join(@"
-                        Votes ON
-                        Votes.RootId = metadata.RevisionId AND
-                        (
-                            Votes.OwnerId = metadata.OwnerId OR
-                            (Votes.OwnerId IS NULL AND metadata.OwnerID IS NULL)
-                        ) AND
-                        Votes.UserId = @user AND
-                        Votes.VoteTypeId = @vote",
+                        Votes v ON
+                        v.QuerySetId = qs.Id AND
+                        v.UserId = @user AND
+                        v.VoteTypeId = @vote",
                         new { user = id, vote = (int)VoteType.Favorite }
                     );
-                    builder.OrderBy("metadata.Votes DESC");
+                    builder.OrderBy("qs.Votes DESC");
 
                     useLatest = true;
                     message = user.Id == CurrentUser.Id ?
                         "You have no favorite queries, click the star icon on a query to favorite it" : "No favorites";
                 } else {
-                    builder.Where("metadata.OwnerId = @user", new { user = id });
-                    builder.Where("metadata.Hidden = 0");
-                    builder.OrderBy("metadata.LastActivity DESC");
+                    builder.Where("qs.OwnerId = @user", new { user = id });
+                    builder.Where("qs.Hidden = 0");
+                    builder.OrderBy("qs.LastActivity DESC");
 
                     message = user.Id == CurrentUser.Id ?
                         "You haven't edited any queries" : "No queries";
                 }
             }
 
-            builder.Select("[user].Id as CreatorId");
-            builder.Select("[user].Login as CreatorLogin");
-            builder.Select("metadata.Title AS Name");
-            builder.Select("metadata.[Description] AS [Description]");
-            builder.Select("metadata.Votes AS FavoriteCount");
-            builder.Select("metadata.Views AS Views");
-            builder.Select("query.QueryBody AS [SQL]");
-            builder.LeftJoin("Users [user] ON [user].Id = metadata.OwnerId");
+            builder.Select("u.Id as CreatorId");
+            builder.Select("u.Login as CreatorLogin");
+            builder.Select("qs.Title AS Name");
+            builder.Select("qs.[Description] AS [Description]");
+            builder.Select("qs.Votes AS FavoriteCount");
+            builder.Select("qs.Views AS Views");
+            builder.Select("q.QueryBody AS [SQL]");
+            builder.LeftJoin("Users u ON u.Id = qs.OwnerId");
 
             var queries = Current.DB.Query<QueryExecutionViewData>(
                 pager.RawSql,
