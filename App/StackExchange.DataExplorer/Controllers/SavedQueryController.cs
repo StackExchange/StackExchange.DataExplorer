@@ -219,13 +219,10 @@ namespace StackExchange.DataExplorer.Controllers
         {
             if (Current.User.IsAdmin)
             {
-                /*
-                Current.DB.SavedQueries.FirstOrDefault(q => q.Id == id).IsSkipped = skip;
-                Current.DB.SubmitChanges();
-                 */
+                // do it
             }
 
-            return Content("success");
+            return Content("failed");
         }
 
 

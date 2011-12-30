@@ -100,6 +100,45 @@ namespace StackExchange.DataExplorer
             get { return Controller.CurrentUser; }
         }
 
+
+        class ErrorLoggingProfiler : MvcMiniProfiler.Data.IDbProfiler
+        {
+            MvcMiniProfiler.Data.IDbProfiler wrapped;
+
+            public ErrorLoggingProfiler(MvcMiniProfiler.Data.IDbProfiler wrapped)
+            {
+                this.wrapped = wrapped;
+            }
+
+            public void ExecuteFinish(DbCommand profiledDbCommand, MvcMiniProfiler.Data.ExecuteType executeType, DbDataReader reader)
+            {
+                this.wrapped.ExecuteFinish(profiledDbCommand, executeType, reader);
+            }
+
+            public void ExecuteStart(DbCommand profiledDbCommand, MvcMiniProfiler.Data.ExecuteType executeType)
+            {
+                this.wrapped.ExecuteStart(profiledDbCommand, executeType);
+            }
+
+            public bool IsActive
+            {
+                get { return this.wrapped.IsActive; }
+            }
+
+            public void OnError(DbCommand profiledDbCommand, MvcMiniProfiler.Data.ExecuteType executeType, Exception exception)
+            {
+                var formatter = new MvcMiniProfiler.SqlFormatters.SqlServerFormatter();
+                var timing = new MvcMiniProfiler.SqlTiming(profiledDbCommand, executeType, null);
+                exception.Data["SQL"] = formatter.FormatSql(timing);
+                this.wrapped.OnError(profiledDbCommand, executeType, exception);
+            }
+
+            public void ReaderFinish(DbDataReader reader)
+            {
+                this.wrapped.ReaderFinish(reader);
+            }
+        }
+
         /// <summary>
         /// Gets the single data context for this current request.
         /// </summary>
@@ -121,7 +160,7 @@ namespace StackExchange.DataExplorer
                 if (result == null)
                 {
                     DbConnection cnn = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString);
-                    cnn = new MvcMiniProfiler.Data.ProfiledDbConnection(cnn, Current.Profiler);
+                    cnn = new MvcMiniProfiler.Data.ProfiledDbConnection(cnn, new ErrorLoggingProfiler(Current.Profiler));
                     cnn.Open();
                     result = new Database(cnn, 30);
                     if (Context != null)

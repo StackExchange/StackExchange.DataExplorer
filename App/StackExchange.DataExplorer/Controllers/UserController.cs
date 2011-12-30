@@ -28,8 +28,8 @@ namespace StackExchange.DataExplorer.Controllers
 
             int total = Current.DB.Query<int>("select count(*) from Users").First();
             var rows = Current.DB.Query<User>(@"select *, 
-	(select COUNT(*) from Metadata where OwnerId = Y.Id) SavedQueriesCount,
-	(select COUNT(*) from QueryExecutions  where UserId = Y.Id) QueryExecutionsCount  
+	(select COUNT(*) from QuerySets where OwnerId = Y.Id) SavedQueriesCount,
+	(select COUNT(*) from RevisionExecutions  where UserId = Y.Id) QueryExecutionsCount  
 from 
 (
 	select * from

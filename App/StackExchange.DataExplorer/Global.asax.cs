@@ -82,8 +82,40 @@ namespace StackExchange.DataExplorer
 
         protected void Application_Error(object sender, EventArgs e)
         {
-            // TODO: yes, this might be .. a bad idea, but I'm trying it for now
             Application["LastError"] = Server.GetLastError();
+
+#if DEBUG
+            var lastError = Server.GetLastError();
+            string sql = null;
+
+            try
+            {
+                sql = lastError.Data["SQL"] as string;
+            }
+            catch
+            {
+                // skip it
+            }
+
+            if (sql == null) return;
+
+            var ex = new HttpUnhandledException("An unhandled exception occurred during the execution of the current web request. Please review the stack trace for more information about the error and where it originated in the code.", lastError);
+
+            Server.ClearError();
+
+            var html = ex.GetHtmlErrorMessage();
+            var traceNode = "<b>Stack Trace:</b>";
+            html = html.Replace(traceNode, @"<b>Sql:</b><br><br>
+    <table width='100%' bgcolor='#ffffccc'>
+    <tbody><tr><td><code><pre>" + sql + @"</pre></code></td></tr></tbody>
+    </table><br>" + traceNode);
+
+            HttpContext.Current.Response.Write(html);
+            HttpContext.Current.Response.StatusCode = 500;
+            HttpContext.Current.Response.Status = "Internal Server Error";
+            HttpContext.Current.Response.End();
+#endif
+        
         }
 
 
