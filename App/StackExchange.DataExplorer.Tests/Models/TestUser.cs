@@ -27,7 +27,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
             var u2 = Current.DB.Query<User>("select * from Users where Login = @Login", new {Login = "Fred"}).First();
             Assert.AreEqual("Fred", u2.Login);
 
-            var o = Current.DB.Query<UserOpenId>("select * from UserOpenId where OpenIdClaim = @claim", new {claim = "xyz"}).FirstOrDefault(); 
+            var o = Current.DB.Query<UserOpenId>("select * from UserOpenIds where OpenIdClaim = @claim", new {claim = "xyz"}).FirstOrDefault(); 
             Assert.AreEqual("xyz", o.OpenIdClaim);
         }
 
