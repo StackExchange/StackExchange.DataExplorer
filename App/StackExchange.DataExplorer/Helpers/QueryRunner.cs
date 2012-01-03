@@ -198,15 +198,14 @@ namespace StackExchange.DataExplorer.Helpers
             return results;
         }
 
-        public static void LogQueryExecution(User user, int siteId, int revisionId, int queryId)
+        public static void LogRevisionExecution(User user, int siteId, int revisionId)
         {
             int updated = Current.DB.Query<int>(@"
-                UPDATE QueryExecutions SET
+                UPDATE RevisionExecutions SET
                     ExecutionCount = ExecutionCount + 1,
                     LastRun = @last
                 WHERE
                     RevisionId = @revision AND
-                    QueryId = @query AND
                     SiteId = @site AND
                     UserId " + (user.IsAnonymous ? "IS NULL" : "= @user") + @"
 
@@ -214,7 +213,6 @@ namespace StackExchange.DataExplorer.Helpers
                 new
                 {
                     revision = revisionId,
-                    query = queryId,
                     site = siteId,
                     user = user.Id,
                     last = DateTime.UtcNow
@@ -224,18 +222,17 @@ namespace StackExchange.DataExplorer.Helpers
             if (updated == 0)
             {
                 Current.DB.Execute(@"
-                    INSERT INTO QueryExecutions(
+                    INSERT INTO RevisionExecutions(
                         ExecutionCount, FirstRun, LastRun,
-                        RevisionId, QueryId, SiteId, UserId
+                        RevisionId, SiteId, UserId
                     ) VALUES(
-                        1, @first, @last, @revision, @query, @site, @user
+                        1, @first, @last, @revision, @site, @user
                     )",
                     new
                     {
                         first = DateTime.UtcNow,
                         last = DateTime.UtcNow,
                         revision = revisionId,
-                        query = queryId,
                         site = siteId,
                         user = user.Id
                     }

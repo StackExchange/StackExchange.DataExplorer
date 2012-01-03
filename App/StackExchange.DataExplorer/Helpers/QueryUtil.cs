@@ -86,7 +86,7 @@ namespace StackExchange.DataExplorer.Helpers
                 JOIN
                     QuerySets qs
                 ON
-                    isnull(r.RootId, r.Id) = qs.Id
+                    isnull(r.RootId, r.Id) = qs.InitialRevisionId
                 LEFT OUTER JOIN
                     Users u
                 ON

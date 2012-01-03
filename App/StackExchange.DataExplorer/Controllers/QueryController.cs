@@ -201,7 +201,7 @@ namespace StackExchange.DataExplorer.Controllers
                 results.Slug = title.URLFriendly();
             }
 
-            QueryRunner.LogQueryExecution(CurrentUser, siteId, results.RevisionId, queryId);
+            QueryRunner.LogRevisionExecution(CurrentUser, siteId, results.RevisionId);
 
             // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
             return Content(results.ToJson().Replace("/", "\\/"), "application/json");
@@ -241,7 +241,7 @@ namespace StackExchange.DataExplorer.Controllers
                 // It might be bad that we have to do this here
                 results.RevisionId = revisionId;
 
-                QueryRunner.LogQueryExecution(CurrentUser, siteId, revisionId, query.Id);
+                QueryRunner.LogRevisionExecution(CurrentUser, siteId, revisionId);
 
                 // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
                 response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
@@ -504,7 +504,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         private void SaveMetadata(Revision revision, string title, string description, bool updateWithoutChange)
         {
-            QuerySet metadata = null;
+            QuerySet querySet = null;
 
             if (title.IsNullOrEmpty())
             {
@@ -518,13 +518,13 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!CurrentUser.IsAnonymous)
             {
-                metadata = Current.DB.Query<QuerySet>(@"
+                querySet = Current.DB.Query<QuerySet>(@"
                     SELECT
                         *
                     FROM
-                        Metadata
+                        QuerySets
                     WHERE
-                        RevisionId = @revision AND
+                        InitialRevisionId = @revision AND
                         OwnerId = @owner",
                     new
                     {
@@ -534,46 +534,33 @@ namespace StackExchange.DataExplorer.Controllers
                 ).FirstOrDefault();
             }
 
-            // We always save a metadata for anonymous users since they don't have an
-            // actual revision history that we're associating the metadata with
-            if (CurrentUser.IsAnonymous || metadata == null)
+            // We always save a querys set for anonymous users since they don't have an
+            // actual revision history that we're associating the query set with
+            if (CurrentUser.IsAnonymous || querySet == null)
             {
-                Current.DB.Execute(@"
-                    INSERT INTO Metadata(
-                        RevisionId, OwnerId, Title, Description,
-                        LastQueryId, LastActivity, Votes, Views
-                    ) VALUES(
-                        @revision, @owner, @title, @description,
-                        @query, @activity, 0, 0
-                    )",
+                Current.DB.QuerySets.Insert(
                     new
                     {
-                        revision = CurrentUser.IsAnonymous ? revision.Id : revision.RootId,
-                        owner = CurrentUser.IsAnonymous ? (int?)null : CurrentUser.Id,
-                        title = title,
-                        description = description,
-                        query = revision.QueryId,
-                        activity = DateTime.UtcNow
+                        InitialRevisionId = CurrentUser.IsAnonymous ? revision.Id : revision.RootId,
+                        CurrentRevisionId = revision.Id,
+                        OwnerId = CurrentUser.IsAnonymous ? (int?)null : CurrentUser.Id,
+                        Title = title,
+                        Description = description,
+                        LastActivity = DateTime.UtcNow,
+                        Votes = 0, 
+                        Views = 0
                     }
                 );
             }
-            else if (updateWithoutChange || metadata.Title != title || metadata.Description != description)
+            else if (updateWithoutChange || querySet.Title != title || querySet.Description != description)
             {
-                Current.DB.Execute(@"
-                    UPDATE
-                        Metadata
-                    SET
-                        Title = @title, Description = @description,
-                        LastQueryId = @query, LastActivity = @activity
-                    WHERE
-                        Id = @id",
+                Current.DB.QuerySets.Update(querySet.Id,
                     new
                     {
-                        id = metadata.Id,
-                        title = title,
-                        description = description,
-                        query = revision.QueryId,
-                        activity = DateTime.UtcNow
+                        Title = title,
+                        Description = description,
+                        CurrentRevisionId = revision.Id,
+                        LastActivity = DateTime.UtcNow
                     }
                 );
             }
