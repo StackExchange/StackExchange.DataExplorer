@@ -71,6 +71,11 @@ namespace StackExchange.DataExplorer.Models
                 return database.Query<T>("select * from " + TableName + " where id = @id", new { id }).FirstOrDefault();
             }
 
+            public T First()
+            {
+                return database.Query<T>("select top 1 * from " + TableName).FirstOrDefault();
+            }
+
             public IEnumerable<T> All()
             {
                 return database.Query<T>("select * from " + TableName);
@@ -110,6 +115,23 @@ namespace StackExchange.DataExplorer.Models
             
             // this takes 0.1ms in dev, it could be sped up to close to nothing by baking a method.
             tableConstructor(this);
+        }
+
+        public void BeginTransaction(IsolationLevel isolation = IsolationLevel.ReadCommitted)
+        {
+            transaction = connection.BeginTransaction(isolation);
+        }
+
+        public void CommitTransaction()
+        {
+            transaction.Commit();
+            transaction = null;
+        }
+
+        public void RollbackTransaction()
+        {
+            transaction.Rollback();
+            transaction = null;
         }
 
         public Action<Database> CreateTableConstructor()
@@ -155,7 +177,7 @@ namespace StackExchange.DataExplorer.Models
 
         private bool TableExists(string name)
         {
-            return connection.Query("select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = @name", new { name }).Count() == 1;
+            return connection.Query("select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = @name", new { name }, transaction: transaction).Count() == 1;
         }
 
         public int Execute(string sql, dynamic param = null)
@@ -203,6 +225,11 @@ namespace StackExchange.DataExplorer.Models
         {
             if (connection.State != ConnectionState.Closed)
             {
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
+
                 connection.Close();
                 connection = null;
             }

@@ -11,19 +11,15 @@ namespace StackExchange.DataExplorer.Tests {
     public class BaseTest {
 
         [TestInitialize]
-        public void Setup() {
-
-            if (Current.DB.Connection.State != System.Data.ConnectionState.Open) {
-                Current.DB.Connection.Open();
-            }
-            Current.DB.Transaction = Current.DB.Connection.BeginTransaction();
+        public void Setup() 
+        {
+            Current.DB.BeginTransaction();
         }
 
         [TestCleanup]
-        public void Teardown() {
-            Current.DB.Transaction.Rollback();
-            Current.DB.Transaction.Dispose();
-            Current.DB.Transaction = null;
+        public void Teardown() 
+        {
+            Current.DB.RollbackTransaction();
             Current.DisposeDB();
         }
     }

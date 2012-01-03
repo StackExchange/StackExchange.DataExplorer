@@ -15,7 +15,7 @@ namespace StackExchange.DataExplorer.Tests.Util {
             Current.DB.Execute("delete from AppSettings");
             AppSettings.Refresh();
             Assert.IsFalse(AppSettings.EnableWhiteList);
-            Current.DB.Insert<AppSetting>(new { Setting = "EnableWhiteList", Value = "true" });
+            Current.DB.AppSettings.Insert(new { Setting = "EnableWhiteList", Value = "true" });
             AppSettings.Refresh();
             Assert.IsTrue(AppSettings.EnableWhiteList);
         }
