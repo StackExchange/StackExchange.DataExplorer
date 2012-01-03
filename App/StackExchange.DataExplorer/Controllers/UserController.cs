@@ -226,6 +226,7 @@ order by Row asc", new { currentPage, perPage });
                 builder.Select("re.RevisionId AS Id");
                 builder.Select("re.LastRun");
                 builder.Select("s.Name AS SiteName");
+                builder.Where("re.UserId = @user", new { user = id });
                 builder.Join("Revisions r ON r.QueryId = q.Id");
                 builder.Join("RevisionExecutions re ON re.RevisionId = r.Id");
                 builder.Join("Sites s ON s.Id = re.SiteId");

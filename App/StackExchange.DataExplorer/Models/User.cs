@@ -30,7 +30,7 @@ namespace StackExchange.DataExplorer.Models
         {
             get
             {
-                _userOpenIds = _userOpenIds ?? Current.DB.Query<UserOpenId>("select * from UserOpenId where UserId = @Id", new { Id }).ToList();
+                _userOpenIds = _userOpenIds ?? Current.DB.Query<UserOpenId>("select * from UserOpenIds where UserId = @Id", new { Id }).ToList();
                 return _userOpenIds;
             }
         }
@@ -194,32 +194,65 @@ namespace StackExchange.DataExplorer.Models
 
             log.AppendLine(string.Format("Beginning merge of {0} into {1}", mergeId, masterId));
 
-            // Query Executions
-            var queryExecutions = db.Query<QueryExecution>("select * from QueryExecutions where UserId = @mergeId", new {mergeId}).ToList();
-            log.AppendLine(string.Format("Moving {0} query executions over", queryExecutions.Count));
-            queryExecutions.ForEach(qe => qe.UserId = masterId);
+            // Revision Executions
+            {
+                var updates = db.Execute(@"update r set ExecutionCount = r.ExecutionCount + r2.ExecutionCount
+from RevisionExecutions r
+join RevisionExecutions r2 on r.SiteId = r2.SiteId and r.RevisionId = r2.RevisionId 
+where r.UserId = @masterId and r2.UserId = @mergeId", new { mergeId, masterId });
 
+                var deletes = db.Execute(@"delete r 
+from RevisionExecutions r
+join RevisionExecutions r2 on r.SiteId = r2.SiteId and r.RevisionId = r2.RevisionId 
+where r.UserId = @mergeId  and r2.UserId = @masterId", new { mergeId, masterId });
+
+                var remaps = db.Execute(@"update r set UserId = @masterId
+from RevisionExecutions r
+where UserId = @mergeId", new { mergeId, masterId });
+
+                log.AppendLine(string.Format("Moving revision executions over {0} dupes, {1} remapped, {2} deleted", updates, remaps, deletes));
+            }
 
             // User Open Ids
-            var userOpenIds = db.Query<UserOpenId>("select * from UserOpenId where UserId = @masterId", new { masterId }).ToList();
-            var firstOpenId = userOpenIds.First();
-            userOpenIds = userOpenIds.Skip(1).ToList();
-            log.AppendLine(string.Format("Removing {0} inaccessible openids found for master", userOpenIds.Count));
-
-            foreach (var uoi in userOpenIds)
             {
-                log.AppendLine(string.Format("--Dropping {0} as an open id for the master user", uoi.OpenIdClaim));
-                Current.DB.Execute("delete UserOpenId where Id = @Id", new {uoi.Id});
+                var rempped = db.Execute("update UserOpenIds set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
+                log.AppendLine(string.Format("Remapped {0} user open ids", rempped));
             }
-            
-            userOpenIds = db.Query<UserOpenId>("select * from UserOpenId where UserId = @mergeId", new { mergeId }).ToList(); 
-            
-            log.AppendLine(string.Format("Removing {0} openids for mergee", userOpenIds.Count));
-            
-            foreach (var uoi in userOpenIds)
+
+
+            // update QuerySets
             {
-                log.AppendLine(string.Format("--Dropping {0} as an open id for the mergee", uoi.OpenIdClaim));
-                Current.DB.Execute("delete UserOpenId where Id = @Id", new {uoi.Id});
+                var rempped = db.Execute("update QuerySets set OwnerId = @masterId where OwnerId = @mergeId", new { mergeId, masterId });
+                log.AppendLine(string.Format("Remapped {0} user query sets", rempped));
+            }
+
+            // revisions 
+            {
+                var rempped = db.Execute("update Revisions set OwnerId = @masterId where OwnerId = @mergeId", new { mergeId, masterId });
+                log.AppendLine(string.Format("Remapped {0} revisions", rempped));
+            }
+
+            // votes
+            {
+                var dupes = db.Execute(@"delete v
+from Votes v
+join Votes v2 on v.VoteTypeId = v2.VoteTypeId and v.QuerySetId = v2.QuerySetId 
+where v.UserId = @mergeId and v2.UserId = @masterId", new { mergeId, masterId });
+
+                var rempped = db.Execute("update Votes set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
+
+                log.AppendLine(string.Format("Remapped {0} votes, deleted {1} dupes", rempped, dupes));
+            }
+
+            // SavedQueries (it is deprecated, but do it just in case)
+            try
+            {
+                var count = db.Execute("update SavedQueries set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
+                log.AppendLine(string.Format("Remapped {0} saved queries", count));
+            }
+            catch 
+            {
+                log.AppendLine("Failed to remap saved queries, perhaps it is time to dump this ... ");
             }
 
             // User
@@ -227,67 +260,53 @@ namespace StackExchange.DataExplorer.Models
             string savedLogin = null;
             if (masterUser.Login.StartsWith(emptyLogin) && !mergeUser.Login.StartsWith(emptyLogin)) savedLogin = mergeUser.Login;
             if (masterUser.Email.IsNullOrEmpty() && !mergeUser.Email.IsNullOrEmpty()) masterUser.Email = mergeUser.Email;
-            // if (masterUser.LastLogin.GetValueOrDefault() < mergeUser.LastLogin.GetValueOrDefault()) masterUser.LastLogin = mergeUser.LastLogin;
             if (!masterUser.IsAdmin && mergeUser.IsAdmin) masterUser.IsAdmin = true;
             if (masterUser.CreationDate.GetValueOrDefault() > mergeUser.CreationDate.GetValueOrDefault()) masterUser.CreationDate = mergeUser.CreationDate;
             if (masterUser.AboutMe.IsNullOrEmpty() && mergeUser.AboutMe.HasValue()) masterUser.AboutMe = mergeUser.AboutMe;
             if (masterUser.Website.IsNullOrEmpty() && mergeUser.Website.HasValue()) masterUser.Website = mergeUser.Website;
             if (masterUser.Location.IsNullOrEmpty() && mergeUser.Location.HasValue()) masterUser.Location = mergeUser.Location;
             if (!masterUser.DOB.HasValue && mergeUser.DOB.HasValue) masterUser.DOB = mergeUser.DOB;
-            // if (masterUser.LastActivityDate.GetValueOrDefault() < mergeUser.LastActivityDate.GetValueOrDefault()) masterUser.LastActivityDate = mergeUser.LastActivityDate;
             if (masterUser.LastSeenDate.GetValueOrDefault() < mergeUser.LastSeenDate.GetValueOrDefault())
             {
                 masterUser.LastSeenDate = mergeUser.LastSeenDate;
                 masterUser.IPAddress = mergeUser.IPAddress;
             }
-            
-            // Votes
-            var mergeVotes = db.Query<Vote>("select * from Votes where UserId = @mergeId", new {mergeId}).ToList();
-            var masterVotes = db.Query<Vote>("select * from Votes where UserId = @masterId", new { masterId }).ToList(); 
-            int dupe = 0;
-            mergeVotes.ForEach(mergeVote =>
-            {
-                if (masterVotes.Exists(masterVote => masterVote.QuerySetId == mergeVote.QuerySetId))
-                {
-                    db.Votes.Delete(mergeVote.Id);
-                    dupe++;
-                }
-                else mergeVote.UserId = masterId;
-            });
-            log.AppendLine(string.Format("Removed {0} dupe votes", dupe));
 
-            Func<Action, bool> submitIfValid = doIfOk =>
-            {
-                var violations = masterUser.GetBusinessRuleViolations(ChangeAction.Update);
-                if (violations.Count == 0)
-                {
-                    doIfOk();
-                    return true;
-                }
-                else
-                {
-                    log.AppendLine("**UNABLE TO SUBMIT:");
-                    violations.ToList().ForEach(v => log.AppendLine(string.Format("--{0}: {1}", v.PropertyName, v.ErrorMessage)));
-                    return false;
-                }
-            };
 
-            log.AppendLine("Deleting merged user");
-            var okToContinue = submitIfValid(() =>
+            var violations = masterUser.GetBusinessRuleViolations(ChangeAction.Update);
+            if (violations.Count == 0)
             {
-                db.Users.Delete(mergeUser.Id);
-            });
-            if (!okToContinue) return false;
+                db.Users.Update(masterUser.Id, new 
+                { 
+                    masterUser.Email, 
+                    masterUser.IsAdmin, 
+                    masterUser.CreationDate, 
+                    masterUser.AboutMe, 
+                    masterUser.Website, 
+                    masterUser.Location, 
+                    masterUser.DOB, 
+                    masterUser.LastSeenDate,
+                    masterUser.IPAddress
+                });
+
+                log.AppendLine("Updated user record");
+            }
+            else
+            {
+                log.AppendLine("**UNABLE TO SUBMIT:");
+                violations.ToList().ForEach(v => log.AppendLine(string.Format("--{0}: {1}", v.PropertyName, v.ErrorMessage)));
+                return false;
+            }
+
+
+            db.Users.Delete(mergeUser.Id);
+            log.AppendLine("Deleted merged user");
+
 
             if (savedLogin.HasValue())
             {
-                log.AppendLine("Replacing jon.doe username on master");
-                okToContinue = submitIfValid(() =>
-                {
-                    Current.DB.Users.Update(masterUser.Id, new { Login = savedLogin });
-                    Current.DB.UserOpenIds.Update(firstOpenId.Id, new { OpenIdClaim = User.NormalizeOpenId(firstOpenId.OpenIdClaim)});
-                });
-                if (!okToContinue) return false;
+                Current.DB.Users.Update(masterUser.Id, new { Login = savedLogin });
+                log.AppendLine("Replaced username on master since it was a jon.doe");
             }
             log.AppendLine("That's all folks");
             return true;
@@ -322,7 +341,7 @@ namespace StackExchange.DataExplorer.Models
         {
             get 
             { 
-                _savedQueriesCount = _savedQueriesCount ?? Current.DB.Query<int>("SELECT COUNT(*) FROM Metadata WHERE OwnerId = @userId", new { userId = Id }).FirstOrDefault();
+                _savedQueriesCount = _savedQueriesCount ?? Current.DB.Query<int>("SELECT COUNT(*) FROM QuerySets WHERE OwnerId = @userId", new { userId = Id }).FirstOrDefault();
                 return _savedQueriesCount.Value;
             }
             set
@@ -336,7 +355,7 @@ namespace StackExchange.DataExplorer.Models
         {
             get 
             { 
-                _queryExecutionsCount = _queryExecutionsCount ?? Current.DB.Query<int>("select count(*) from QueryExecutions where UserId = @userId", new { userId = Id }).FirstOrDefault();
+                _queryExecutionsCount = _queryExecutionsCount ?? Current.DB.Query<int>("select count(*) from RevisionExecutions where UserId = @userId", new { userId = Id }).FirstOrDefault();
                 return _queryExecutionsCount.Value;
             }
             set 

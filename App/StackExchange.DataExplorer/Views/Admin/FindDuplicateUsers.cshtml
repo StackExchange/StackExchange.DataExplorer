@@ -31,7 +31,7 @@ Sort:
             @foreach (var dupe in group.Item2.Skip(1))
             {
                 @Html.Partial("User", dupe);
-                <a href="/admin/merge-users?masterId=@master.Id&mergeId=@dupe.Id">(merge with suggested master)</a>
+                <a href="/admin/merge-users?masterid=@master.Id&mergeid=@dupe.Id">(merge with suggested master)</a>
             }
         </div>
         <br />

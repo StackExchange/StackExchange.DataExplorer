@@ -119,7 +119,7 @@ namespace StackExchange.DataExplorer.Controllers
                         }
 
                         User user = null;
-                        var openId = Current.DB.Query<UserOpenId>("select * from UserOpenId where OpenIdClaim = @claimedId", new {claimedId}).FirstOrDefault();
+                        var openId = Current.DB.Query<UserOpenId>("select * from UserOpenIds where OpenIdClaim = @claimedId", new {claimedId}).FirstOrDefault();
 
                         if (!CurrentUser.IsAnonymous)
                         {
@@ -130,7 +130,7 @@ namespace StackExchange.DataExplorer.Controllers
                             SetHeader("Log in below to change your OpenID");
                             return View("Login");
                           }
-                          openId = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenId  where UserId = @Id", new {CurrentUser.Id}).First();
+                          openId = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id}).First();
                           openId.OpenIdClaim = claimedId;
                           Current.DB.UserOpenIds.Update(openId.Id, new { openId.OpenIdClaim });
                           user = CurrentUser;

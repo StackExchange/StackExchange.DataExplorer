@@ -182,7 +182,7 @@
     <Compile Include="Models\MigrationType.cs" />
     <Compile Include="Models\OpenIdWhiteList.cs" />
     <Compile Include="Models\Query.cs" />
-    <Compile Include="Models\QueryExecution.cs" />
+    <Compile Include="Models\RevisionExecution.cs" />
     <Compile Include="Models\Revision.cs" />
     <Compile Include="Models\Site.cs" />
     <Compile Include="Models\StackEntities\StackExchangeData.Designer.cs">

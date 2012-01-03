@@ -5,10 +5,9 @@ using System.Web;
 
 namespace StackExchange.DataExplorer.Models
 {
-    public partial class QueryExecution
+    public partial class RevisionExecution
     {
         public int Id { get; set; }
-        public int QueryId { get; set; }
         public int? UserId { get; set; }
         public int SiteId { get; set; }
         public DateTime FirstRun { get; set; }

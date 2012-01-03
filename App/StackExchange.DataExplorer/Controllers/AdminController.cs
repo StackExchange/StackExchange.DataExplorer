@@ -88,16 +88,35 @@ namespace StackExchange.DataExplorer.Controllers
         };
 
         [Route("admin/find-dupe-users")]
-        public ActionResult FindDuplicateUsers(string sort)
+        public ActionResult FindDuplicateUsers(string sort, bool useEmail = false)
         {
             var sorter = userSorts[sort ?? "oldest"];
-            var openids = Current.DB.Query<UserOpenId>("select * from UserOpenId").ToList();
 
-            var dupeUserIds = (from openid in openids
-                             group openid by Models.User.NormalizeOpenId(openid.OpenIdClaim)
-                                 into grp
-                                 where grp.Count() > 1
-                                 select new Tuple<string, IEnumerable<int>>(grp.Key, grp.Select(id => id.UserId))).ToList();
+
+            List<Tuple<string, IEnumerable<int>>> dupeUserIds = null; 
+                
+          
+
+            if (useEmail)
+            {
+                var allUsers = Current.DB.Query(@"select Email, Id from Users
+where Email is not null and len(rtrim(Email)) > 0 ");
+
+                dupeUserIds = (from email in allUsers
+                               group email by (string)email.Email
+                                   into grp
+                                   where grp.Count() > 1
+                                   select new Tuple<string, IEnumerable<int>>(grp.Key, grp.Select(u => (int)u.Id).OrderBy(id => id).ToList())).ToList();
+            }
+            else
+            {
+                var openids = Current.DB.Query<UserOpenId>("select * from UserOpenIds").ToList();
+                dupeUserIds = (from openid in openids
+                               group openid by Models.User.NormalizeOpenId(openid.OpenIdClaim)
+                                   into grp
+                                   where grp.Count() > 1
+                                   select new Tuple<string, IEnumerable<int>>(grp.Key, grp.Select(id => id.UserId).OrderBy(id => id))).ToList();
+            }
 
             ViewBag.Sort = sort;
             ViewBag.Sorts = userSorts.Keys;
@@ -109,7 +128,7 @@ namespace StackExchange.DataExplorer.Controllers
                 var userMap = Current.DB.Query<User>("select * from Users where Id in @Ids", new { Ids = dupeUserIds.Select(u => u.Item2).SelectMany(u => u) })
                     .ToDictionary(u => u.Id);
 
-                var dupeUsers = dupeUserIds.Select(tuple => Tuple.Create(tuple.Item1, tuple.Item2.Select(id => userMap[id])));
+                var dupeUsers = dupeUserIds.Select(tuple => Tuple.Create(tuple.Item1, tuple.Item2.Select(id => userMap[id]))).ToList();
 
                 return View(dupeUsers);
             }
@@ -192,7 +211,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult FindDuplicateUserOpenIds()
         {
 
-            var sql = "select * from UserOpenId where UserId in (select UserId from UserOpenId having count(*) > 0)";
+            var sql = "select * from UserOpenIds where UserId in (select UserId from UserOpenId having count(*) > 0)";
 
             var dupes = (from uoi in Current.DB.Query<UserOpenId>(sql)
                         group uoi by uoi.UserId
