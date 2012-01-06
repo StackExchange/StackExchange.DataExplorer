@@ -15,5 +15,7 @@ namespace StackExchange.DataExplorer.Models
         public Table<BlackList> BlackList { get; private set; }
         public Table<QuerySet> QuerySets { get; private set; }
         public Table<AppSetting> AppSettings { get; private set; }
+        public Table<Revision> Revisions { get; private set; }
+        public Table<Query> Queries { get; private set; }
     }
 }

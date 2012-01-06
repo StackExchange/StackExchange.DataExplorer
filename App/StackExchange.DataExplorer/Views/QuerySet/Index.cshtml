@@ -99,7 +99,7 @@
                 @if (Current.User.IsAdmin)
                 {
                     <div class="admin" style="display:none;">
-                        <span class="id" style="display:none;">@query.Id</span>
+                        <span class="id" style="display:none;">@query.RevisionId</span>
                         <a class="feature @(query.Featured?"featured":"")" href="#">@(query.Featured?"featured":"feature")</a>
                         <a class="skip @(query.Skipped?"skipped":"")" href="#">@(query.Skipped?"skipped":"skip")</a>
                     </div>                    

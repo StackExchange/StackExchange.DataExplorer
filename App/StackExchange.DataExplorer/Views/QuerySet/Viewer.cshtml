@@ -1,0 +1,36 @@
+﻿@model StackExchange.DataExplorer.ViewModel.QueryExecutionViewData
+@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Models
+@{
+    Layout = "~/Views/Shared/Query.cshtml";
+    this.SetPageTitle(Model.Name + " - Stack Exchange Data Explorer");
+}
+
+@section Metadata
+{
+    @Html.Partial("QueryVoting", Model.QueryVoting)
+    <p>@Model.Description</p>
+}
+
+<pre id="queryBodyText" class="cm-s-default"><code>@Model.SQL</code></pre>
+
+<table class="fw">
+    <tbody><tr>
+    <td class="vt">
+        <ul id="editor-toolbar" class="linkbar">
+            <li id="edit-link"><a href="@Model.URLWithStub("edit")">edit this query</a></li>
+        </ul>
+    </td>
+    <td align="right" class="post-signature">  </td>
+    <td class="post-signature owner">
+        <div class="user-info">
+            <div class="user-action-time">created @Model.CreationDate.ToRelativeTimeMini()</div>
+            <div class="user-gravatar32"><a href="/users/@Model.Creator.Id">@Html.Raw(Model.Creator.Gravatar(32))</a>
+        </div>
+    </td>
+    </tr>
+    </tbody>
+</table>
+
+
+

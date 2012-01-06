@@ -9,8 +9,8 @@ namespace StackExchange.DataExplorer.Controllers
     public class VoteController : StackOverflowController
     {
         [HttpPost]
-        [Route(@"vote/{id:\d+}")]
-        public ActionResult Vote(int id, string voteType)
+        [Route(@"vote/{querySetId:\d+}")]
+        public ActionResult Vote(int querySetId, string voteType)
         {
             if (Current.User.IsAnonymous)
             {
@@ -19,9 +19,9 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (voteType == "favorite")
             {
-                Revision revision = QueryUtil.GetCompleteRevision(id);
+                QuerySet querySet = Current.DB.QuerySets.Get(querySetId);
 
-                if (revision == null)
+                if (querySet == null)
                 {
                     return Json(new { error = true });
                 }
@@ -39,7 +39,7 @@ namespace StackExchange.DataExplorer.Controllers
                     new
                     {
                         vote = (int)VoteType.Favorite,
-                        querySetId = revision.QuerySet.Id,
+                        querySetId = querySetId,
                         user = CurrentUser.Id
                     }
                 ).FirstOrDefault();
@@ -48,7 +48,7 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     Current.DB.Votes.Insert(new 
                     {
-                        QuerySetId = revision.QuerySet.Id,
+                        QuerySetId = querySetId,
                         UserId = CurrentUser.Id,
                         VoteTypeId = (int)VoteType.Favorite,
                         CreationDate = DateTime.UtcNow
@@ -69,7 +69,7 @@ namespace StackExchange.DataExplorer.Controllers
                     new
                     {
                         change = vote == null ? 1 : -1,
-                        id = revision.QuerySet.Id
+                        id = querySetId
                     }
                 );
             }

@@ -40,39 +40,32 @@ namespace StackExchange.DataExplorer.ViewModel
         {
             get
             {
-                return URLWithStub(null);
+                var slug = name == null ? "" : "/" + name.URLFriendly();
+
+                if (RevisionId == null)
+                {
+                    return string.Format("/{0}/query/{1}{2}", SiteName, QuerySetId, slug);
+                }
+                else
+                {
+                    return string.Format("/{0}/revision/{1}/{2}{3}", SiteName, QuerySetId, RevisionId, slug);
+                }
             }
         }
 
         public string URLWithStub(string stub)
         {
-            // {0} - Site Name
-            // {1} - Revision / Root ID
-            // {2} - User ID
-            // {3} - Slug
-            string format = "/{0}/query/" + (stub != null ? stub + "/" : "");
 
-            if (UseLatestLink && CreatorId != null)
-            {
-                format += "{2}/{1}{3}";
-            }
-            else
-            {
-                format += "{1}{3}";
-            }
-
-            return string.Format(format, new object[] {
+            return string.Format("/{0}/query/{1}/{2}", 
                 SiteName,
-                Id,
-                CreatorId ?? 0,
-                name != null && stub == null ? "/" + name.URLFriendly() : ""
-            });
+                stub,
+                RevisionId
+            );
         }
 
         public long RowNumber { get; set; }
         public bool Featured { get; set; }
         public bool Skipped { get; set; }
-        public bool UseLatestLink { get; set; }
         public DateTime LastRun { get; set; }
         public int FavoriteCount { get; set; }
         public int? CreatorId { get; set; }
@@ -81,6 +74,11 @@ namespace StackExchange.DataExplorer.ViewModel
         public string SiteName { get; set; }
         public string Description { get; set; }
         public string SQL { get; set; }
-        public int Id { get; set; }
+        public int? RevisionId { get; set; }
+        public int QuerySetId { get; set; }
+        public DateTime CreationDate { get; set; }
+
+        public User Creator { get; set; }
+        public User Editor { get; set; }
     }
 }

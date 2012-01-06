@@ -197,7 +197,6 @@ order by Row asc", new { currentPage, perPage });
 
             int start = ((page.Value - 1) * pagesize.Value) + 1;
             int finish = page.Value * pagesize.Value;
-            bool useLatest = false;
             string message;
             var builder = new SqlBuilder();
             var pager = builder.AddTemplate(@"
@@ -230,7 +229,7 @@ order by Row asc", new { currentPage, perPage });
                 builder.Join("Revisions r ON r.QueryId = q.Id");
                 builder.Join("RevisionExecutions re ON re.RevisionId = r.Id");
                 builder.Join("Sites s ON s.Id = re.SiteId");
-                builder.Join(@"QuerySets qs ON isnull(r.RootId, r.Id) = qs.InitialRevisionId");
+                builder.Join(@"QuerySets qs ON qs.Id = r.OriginalQuerySetId");
                 builder.OrderBy("re.LastRun DESC");
 
                 message = user.Id == CurrentUser.Id ? 
@@ -253,8 +252,6 @@ order by Row asc", new { currentPage, perPage });
                         new { user = id, vote = (int)VoteType.Favorite }
                     );
                     builder.OrderBy("qs.Votes DESC");
-
-                    useLatest = true;
                     message = user.Id == CurrentUser.Id ?
                         "You have no favorite queries, click the star icon on a query to favorite it" : "No favorites";
                 } else {
@@ -282,7 +279,6 @@ order by Row asc", new { currentPage, perPage });
             ).Select<QueryExecutionViewData, QueryExecutionViewData>(
                 (view) =>
                 {
-                    view.UseLatestLink = useLatest;
                     view.SiteName = (view.SiteName ?? Site.Name).ToLower();
 
                     return view;

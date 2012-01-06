@@ -136,7 +136,7 @@
     <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
-    <Compile Include="Controllers\SavedQueryController.cs" />
+    <Compile Include="Controllers\QuerySetController.cs" />
     <Compile Include="Controllers\StackOverflowController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QueryController.cs" />
@@ -156,6 +156,7 @@
     <Compile Include="Helpers\Crc16.cs" />
     <Compile Include="Helpers\CsvResult.cs" />
     <Compile Include="Helpers\UIHelper.cs" />
+    <Compile Include="Models\QuerySetRevision.cs" />
     <Compile Include="Models\_Database.cs" />
     <Compile Include="Helpers\DataKeys.cs" />
     <Compile Include="Helpers\HtmlUtilities.cs" />
@@ -390,8 +391,7 @@
     <Content Include="Views\Legal\TermsOfService.cshtml" />
     <Content Include="Views\Legal\TrademarkGuidance.cshtml" />
     <Content Include="Views\Query\New.cshtml" />
-    <Content Include="Views\SavedQuery\Index.cshtml" />
-    <Content Include="Views\SavedQuery\Show.cshtml" />
+    <Content Include="Views\QuerySet\Index.cshtml" />
     <Content Include="Views\User\Index.cshtml" />
     <Content Include="Views\User\Edit.cshtml" />
     <Content Include="Views\User\Show.cshtml" />
@@ -413,7 +413,7 @@
     <Content Include="Views\Admin\MergeUsers.cshtml" />
     <Content Include="Views\Shared\Query.cshtml" />
     <Content Include="Views\Query\Editor.cshtml" />
-    <Content Include="Views\SavedQuery\Viewer.cshtml" />
+    <Content Include="Views\QuerySet\Viewer.cshtml" />
     <Content Include="Views\Admin\FindDuplicateUserOpenIds.cshtml" />
     <Content Include="Views\Shared\QueryResults.cshtml" />
     <Content Include="Views\Shared\RevisionHistory.cshtml" />

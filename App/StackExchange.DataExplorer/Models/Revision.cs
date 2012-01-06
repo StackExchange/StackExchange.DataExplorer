@@ -6,31 +6,12 @@ namespace StackExchange.DataExplorer.Models
     {
         public int Id { get; set; }
         public int QueryId { get; set; }
-        public int? ParentId { get; set; }
         public int? OwnerId { get; set; }
         public string OwnerIP { get; set; }
-        public bool IsFeature { get; set; }
         public DateTime CreationDate { get; set; }
+        public int OriginalQuerySetId { get; set; }
         public Query Query { get; set; }
         public QuerySet QuerySet { get; set; }
         public User Owner { get; set; }
-        public Revision Parent { get; set; }
-
-        private int? rootId = null;
-        public int? RootId {
-            get
-            {
-                return rootId == null ? this.Id : this.rootId;
-            }
-
-            set {
-                this.rootId = value;
-            }
-        }
-
-        public bool IsRoot()
-        {
-            return this.rootId == null;
-        }
     }
 }

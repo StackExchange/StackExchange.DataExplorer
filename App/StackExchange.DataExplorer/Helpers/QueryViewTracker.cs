@@ -9,9 +9,9 @@ namespace StackExchange.DataExplorer.Helpers
         private const int VIEW_EXPIRES_SECS = 15*60; // view information expires in 15 minutes
 
         // TODO: we may consider batching this up for performance sake
-        public static void TrackQueryView(string ipAddress, int revisionId)
+        public static void TrackQueryView(string ipAddress, int querySetId)
         {
-            if (IsNewView(ipAddress, revisionId))
+            if (IsNewView(ipAddress, querySetId))
             {
                 Current.DB.Execute(@"
                     UPDATE
@@ -19,10 +19,10 @@ namespace StackExchange.DataExplorer.Helpers
                     SET
                         Views = Views + 1
                     WHERE
-                        InitialRevisionId = @revision",
+                        Id = @querySetId",
                     new
                     {
-                        revision = revisionId
+                        querySetId
                     }
                 );
             }

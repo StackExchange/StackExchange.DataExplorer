@@ -10,9 +10,19 @@ using System.Reflection;
 using System.Text;
 using System.Data.Common;
 using MvcMiniProfiler;
+using System.Diagnostics;
+
+namespace Dapper
+{
+    [DebuggerStepThrough]
+    public static partial class SqlMapper
+    {
+    }
+}
 
 namespace StackExchange.DataExplorer.Models
 {
+    [DebuggerStepThrough]
     public partial class Database : IDisposable
     {
         public class Table<T>
@@ -159,14 +169,21 @@ namespace StackExchange.DataExplorer.Models
                 name = typeof(T).Name;
                 if (!TableExists(name))
                 {
-                    // the most stupid pluralizer ever
-                    if (TableExists(name + "s"))
+                    // the most stupid pluralizer ever, if you want something good see: http://jasonq.com/index.php/pluralizer
+                    if (name.EndsWith("y"))
                     {
-                        name = name + "s";
+                        name = name.Substring(0, name.Length - 1) + "ies";
                     }
                     else
                     {
-                        name = name + "es";
+                        if (TableExists(name + "s"))
+                        {
+                            name = name + "s";
+                        }
+                        else
+                        {
+                            name = name + "es";
+                        }
                     }
                 }
 

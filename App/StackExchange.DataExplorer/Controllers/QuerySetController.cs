@@ -12,7 +12,7 @@ using StackExchange.DataExplorer.ViewModel;
 
 namespace StackExchange.DataExplorer.Controllers
 {
-    public class SavedQueryController : StackOverflowController
+    public class QuerySetController : StackOverflowController
     {
         [Route(@"{sitename}/s/{queryId:\d+}/{slug?}")]
         public ActionResult MapQuery(string sitename, int queryId, string slug)
@@ -29,26 +29,24 @@ namespace StackExchange.DataExplorer.Controllers
                 slug = "/" + slug;
             }
 
-            return new RedirectPermanentResult("/" + sitename + "/query/" + revision.OwnerId + "/" + revision.RootId + slug);
+            return new RedirectPermanentResult("/" + sitename + "/query/" + revision.QuerySet.Id + "/" + slug);
         }
 
-        [Route(@"{sitename}/query/{ownerId:\d+}/{rootId:\d+}/{slug?}")]
-        public ActionResult ShowLatest(string sitename, int ownerId, int rootId, string slug)
+        [Route(@"{sitename}/query/{querySetId:\d+}/{slug?}")]
+        public ActionResult ShowLatest(string sitename, int querySetId, string slug)
         {
             Site = GetSite(sitename);
-
             if (Site == null)
             {
                 return PageNotFound();
             }
 
-            var revision = QueryUtil.GetCompleteRevision(rootId);
-
+            var revision = QueryUtil.GetCompleteLatestRevision(querySetId);
             return ShowCommon(revision, slug, true);
         }
 
-        [Route(@"{sitename}/query/{revisionId:\d+}/{slug?}")]
-        public ActionResult Show(string sitename, int revisionId, string slug)
+        [Route(@"{sitename}/revision/{querySetId:\d+}/{revisionId:\d+}/{slug?}")]
+        public ActionResult Show(string sitename, int querySetId, int revisionId, string slug)
         {
             Site = GetSite(sitename);
 
@@ -57,7 +55,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var revision = QueryUtil.GetCompleteRevision(revisionId);
+            var revision = QueryUtil.GetCompleteRevision(querySetId, revisionId);
 
             return ShowCommon(revision, slug, false);
         }
@@ -70,7 +68,6 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             var title = revision.QuerySet.Title;
-            int rootId = revision.RootId ?? revision.Id;
             int ownerId = revision.OwnerId ?? 0;
 
             title = title.URLFriendly();
@@ -88,7 +85,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageMovedPermanentlyTo(string.Format(url, new object[] {
                     Site.Name.ToLower(),
                     ownerId,
-                    latest ? rootId : revision.Id,
+                    revision.Id,
                     title
                 }) + Request.Url.Query);
             }
@@ -170,39 +167,43 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!IsSearchEngine())
             {
-                QueryViewTracker.TrackQueryView(GetRemoteIP(), rootId);
+                QueryViewTracker.TrackQueryView(GetRemoteIP(), revision.QuerySet.Id);
             }
+
+            var initialRevision = revision.QuerySet.InitialRevision; 
 
             var viewmodel = new QueryExecutionViewData
             {
                 QueryVoting = voting,
-                Id = revision.Id,
+                QuerySetId = revision.QuerySet.Id,
+                RevisionId = revision.Id,
                 Name = revision.QuerySet.Title,
                 Description = revision.QuerySet.Description,
                 FavoriteCount = revision.QuerySet.Votes,
                 Views = revision.QuerySet.Views,
                 LastRun = revision.QuerySet.LastActivity,
-                CreatorId = revision.Owner != null ? revision.Owner.Id : (int?)null,
-                CreatorLogin = revision.Owner != null ? revision.Owner.Login : null,
+                CreatorId = initialRevision.Owner != null ? initialRevision.Owner.Id : (int?)null,
+                CreatorLogin = initialRevision.Owner != null ? initialRevision.Owner.Login : null,
                 SiteName = Site.Name.ToLower(),
                 SQL = revision.Query.QueryBody,
-                UseLatestLink = false
+                Creator = initialRevision.Owner ?? new User { IPAddress = revision.OwnerIP },
+                CreationDate = initialRevision.CreationDate 
             };
 
             return View("Viewer", viewmodel);
         }
 
         [HttpPost]
-        [Route(@"feature_query/{id:\d+}")]
-        public ActionResult Feature(int id, bool feature)
+        [Route(@"feature_query/{querySetId:\d+}")]
+        public ActionResult Feature(int querySetId, bool feature)
         {
             if (Current.User.IsAdmin)
             {
-                Revision revision = QueryUtil.GetCompleteRevision(id);
+                var querySet = Current.DB.QuerySets.Get(querySetId);
 
-                if (revision != null)
+                if (querySet != null)
                 {
-                    Current.DB.Execute("UPDATE Metadata SET Featured = 1 WHERE Id = @id", new { id = revision.QuerySet.Id });
+                    Current.DB.QuerySets.Update(querySetId, new { Featured = true });
                 }
             }
 
@@ -324,7 +325,7 @@ namespace StackExchange.DataExplorer.Controllers
                 );
                 counter = builder.AddTemplate("SELECT COUNT(*) FROM QuerySets qs /**join**/ /**leftjoin**/ /**where**/");
 
-                builder.Select("qs.CurrentRevisionId AS Id");
+                builder.Select("qs.Id as QuerySetId");
                 builder.Select("qs.LastActivity AS LastRun");
                 builder.Join("Revisions r ON r.Id = qs.CurrentRevisionId");
                 builder.Join("Queries q ON q.Id = r.QueryId");
@@ -382,14 +383,13 @@ namespace StackExchange.DataExplorer.Controllers
                 );
                 counter = builder.AddTemplate("SELECT COUNT(*) FROM Revisions");
 
-                builder.Select("r.Id AS Id");
+                builder.Select("r.Id AS RevisionId");
+                builder.Select("qs.Id as QuerySetId");
                 builder.Select("r.CreationDate AS LastRun");
-                builder.Join(@"QuerySets qs ON isnull(RootId, r.Id) = InitialRevisionId");
+                builder.Join(@"QuerySets qs ON OriginalQuerySetId = qs.Id");
                 builder.Join("Queries q on q.Id = r.QueryId");
                 builder.LeftJoin("Users u ON r.OwnerId = u.Id");
                 builder.OrderBy("CreationDate DESC");
-
-                useLatest = false;
             }
 
             builder.Select("u.Id as CreatorId");
@@ -408,12 +408,10 @@ namespace StackExchange.DataExplorer.Controllers
             IEnumerable<QueryExecutionViewData> queries = Current.DB.Query<QueryExecutionViewData>(
                 pager.RawSql,
                 pager.Parameters
-            ).Select<QueryExecutionViewData, QueryExecutionViewData>(
+            ).Select(
                 (view) =>
                 {
-                    view.UseLatestLink = useLatest;
                     view.SiteName = Site.Name.ToLower();
-
                     return view;
                 }
             );

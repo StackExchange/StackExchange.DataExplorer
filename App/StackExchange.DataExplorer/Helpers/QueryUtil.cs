@@ -10,6 +10,13 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class QueryUtil
     {
+
+        public static Revision GetCompleteLatestRevision(int querySetId)
+        {
+            int revisionId = Current.DB.Query<int>("select CurrentRevisionId from QuerySets where Id = @querySetId", new { querySetId }).FirstOrDefault();
+            return GetCompleteRevision(querySetId,revisionId);
+        }
+
         /// <summary>
         /// Retrieves the basic revision information
         /// </summary>
@@ -72,7 +79,7 @@ namespace StackExchange.DataExplorer.Helpers
         /// </summary>
         /// <param name="revisionId">The ID of the revision</param>
         /// <returns>The revision, or null if the ID was invalid</returns>
-        public static Revision GetCompleteRevision(int revisionId)
+        public static Revision GetCompleteRevision(int querySetId, int revisionId)
         {
             return Current.DB.Query<Revision, Query, QuerySet, User, Revision>(@"
                 SELECT
@@ -82,11 +89,11 @@ namespace StackExchange.DataExplorer.Helpers
                 JOIN
                     Queries q
                 ON
-                    q.Id = r.QueryId AND r.Id = @revision
+                    q.Id = r.QueryId AND r.Id = @revisionId
                 JOIN
                     QuerySets qs
                 ON
-                    isnull(r.RootId, r.Id) = qs.InitialRevisionId
+                    qs.Id = @querySetId
                 LEFT OUTER JOIN
                     Users u
                 ON
@@ -101,7 +108,8 @@ namespace StackExchange.DataExplorer.Helpers
                 },
                 new
                 {
-                    revision = revisionId
+                    revisionId,
+                    querySetId
                 }
             ).FirstOrDefault();
         }
@@ -128,46 +136,32 @@ namespace StackExchange.DataExplorer.Helpers
             ).FirstOrDefault();
         }
 
-        public static IEnumerable<Revision> GetRevisionHistory(int rootId, int userId)
+        public static IEnumerable<Revision> GetRevisionHistory(int querySetId)
         {
-            return Current.DB.Query<Revision, Query, Revision, User, Revision>(@"
+            return Current.DB.Query<Revision, Query, Revision>(@"
                 SELECT
-                    revision.*, query.*, parent.*, [user].*
+                    r.*, q.*
                 FROM
-                    Revisions revision
-                LEFT JOIN
-                    Revisions parent
-                ON
-                    revision.ParentId = parent.Id
-                LEFT JOIN
-                    Users [user]
-                ON
-                    parent.OwnerId = [user].Id
+                    QuerySetRevision qr 
+                JOIN 
+                    Revisions r
                 JOIN
-                    Queries query
+                    Queries q
                 ON
-                    revision.QueryId = query.Id
+                    r.QueryId = q.Id
                 WHERE
-                    (revision.RootId = @root OR revision.Id = @root) AND
-                    revision.OwnerId = @owner
+                    qr.QuerySetId = @querySetId
                 ORDER BY
-                    revision.CreationDate DESC",
-                (revision, query, parent, user) =>
+                    qr.Id desc",
+                (revision, query) =>
                 {
-                    if (parent != null)
-                    {
-                        parent.Owner = user;
-                    }
-
                     revision.Query = query;
-                    revision.Parent = parent;
-
                     return revision;
                 },
                 new
                 {
-                    root = rootId,
-                    owner = userId
+                    querySetId,
+
                 }
             );
         }

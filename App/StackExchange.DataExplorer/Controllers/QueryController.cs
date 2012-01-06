@@ -134,49 +134,32 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 if (query == null)
                 {
-                    queryId = (int)Current.DB.Query<decimal>(@"
-                            INSERT INTO Queries(
-                                QueryHash, QueryBody
-                            ) VALUES(
-                                @hash, @body
-                            )
-
-                            SELECT SCOPE_IDENTITY()",
+                    queryId = (int)Current.DB.Queries.Insert(
                         new
                         {
-                            hash = parsedQuery.Hash,
-                            body = parsedQuery.Sql
+                            QueryHash = parsedQuery.Hash,
+                            QueryBody = parsedQuery.Sql
                         }
-                    ).First();
+                    );
                 }
                 else
                 {
                     queryId = query.Id;
                 }
 
-                revisionId = (int)Current.DB.Query<decimal>(@"
-                        INSERT INTO Revisions(
-                            QueryId, RootId, ParentId, OwnerId, OwnerIP, CreationDate
-                        ) VALUES(
-                            @query, @root, @parent, @owner, @ip, @creation
-                        )
-
-                        SELECT SCOPE_IDENTITY()",
+                revisionId = (int)Current.DB.Revisions.Insert(
                     new
                     {
-                        query = queryId,
-                        root = parent != null ? (int?)parent.RootId : null,
-                        parent = parent == null ? (int?)null : parent.Id,
-                        owner = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
-                        ip = GetRemoteIP(),
-                        creation = saveTime = DateTime.UtcNow
+                        QueryId = queryId,
+                        OwnerId = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
+                        OwnerIP = GetRemoteIP(),
+                        CreationDate = saveTime = DateTime.UtcNow
                     }
-                ).First();
+                );
 
                 var revision = new Revision
                 {
                     Id = revisionId,
-                    RootId = parent != null ? (int?)parent.RootId : null,
                     QueryId = queryId
                 };
 
@@ -374,8 +357,8 @@ namespace StackExchange.DataExplorer.Controllers
             return new RedirectPermanentResult("/" + sitename + "/query/" + revision.Id + slug);
         }
 
-        [Route(@"{sitename}/query/edit/{revisionId:\d+}/{slug?}")]
-        public ActionResult Edit(string sitename, int revisionId)
+        [Route(@"{sitename}/query/edit/{querySetId:\d+}/{slug?}")]
+        public ActionResult Edit(string sitename, int querySetId)
         {
             bool foundSite = SetCommonQueryViewData(sitename);
 
@@ -384,9 +367,9 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            SetHeaderInfo(revisionId);
+            SetHeader("Editing Query");
 
-            Revision revision = QueryUtil.GetCompleteRevision(revisionId);
+            Revision revision = QueryUtil.GetCompleteLatestRevision(querySetId);
 
             if (revision == null)
             {
@@ -398,7 +381,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!CurrentUser.IsAnonymous)
             {
-                ViewData["history"] = QueryUtil.GetRevisionHistory(revision.RootId.Value, CurrentUser.Id);
+                ViewData["history"] = QueryUtil.GetRevisionHistory(revision.QuerySet.Id);
             }
 
             return View("Editor", Site);
@@ -528,7 +511,6 @@ namespace StackExchange.DataExplorer.Controllers
                         OwnerId = @owner",
                     new
                     {
-                        revision = revision.RootId,
                         owner = CurrentUser.Id
                     }
                 ).FirstOrDefault();
@@ -541,7 +523,7 @@ namespace StackExchange.DataExplorer.Controllers
                 Current.DB.QuerySets.Insert(
                     new
                     {
-                        InitialRevisionId = CurrentUser.IsAnonymous ? revision.Id : revision.RootId,
+                        InitialRevisionId = revision.Id,
                         CurrentRevisionId = revision.Id,
                         OwnerId = CurrentUser.IsAnonymous ? (int?)null : CurrentUser.Id,
                         Title = title,
@@ -552,7 +534,7 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 );
             }
-            else if (updateWithoutChange || querySet.Title != title || querySet.Description != description)
+            else if (querySet.Title != title || querySet.Description != description)
             {
                 Current.DB.QuerySets.Update(querySet.Id,
                     new
@@ -568,7 +550,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         private bool SetCommonQueryViewData(string sitename)
         {
-            SetHeaderInfo();
+            SetHeader("Viewing Query");
             var s = GetSite(sitename);
             if (s==null)
             {
@@ -582,24 +564,6 @@ namespace StackExchange.DataExplorer.Controllers
             ViewData["Sites"] = Current.DB.Sites.All();
 
             return true;
-        }
-
-        private void SetHeaderInfo()
-        {
-            SetHeaderInfo(null);
-        }
-
-        private void SetHeaderInfo(int? edit)
-        {
-            if (edit != null)
-            {
-                SetHeader("Editing Query");
-                ViewData["SavedQueryId"] = edit.Value;
-            }
-            else
-            {
-                SetHeader("Compose Query");
-            }
         }
     }
 }
