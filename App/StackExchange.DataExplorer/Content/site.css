@@ -802,7 +802,15 @@ ul.linkbar li {
 
 #metadata .info {
   float: left;
-  width: 60%;
+  width: 700px;
+}
+
+#metadata .info .description {
+  float: left;
+  display: block;
+  width: 500px;
+  clear: none;
+  line-height: 16px;
 }
 
 #metadata {

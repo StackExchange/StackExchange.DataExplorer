@@ -118,7 +118,7 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             ).FirstOrDefault();
 
-            var voting = new QueryVoting
+            var voting = new QuerySetVoting
             {
                 TotalVotes = totalVotes,
                 RevisionId = revision.Id,
@@ -172,22 +172,10 @@ namespace StackExchange.DataExplorer.Controllers
 
             var initialRevision = revision.QuerySet.InitialRevision; 
 
-            var viewmodel = new QueryExecutionViewData
+            var viewmodel = new QueryViewerData
             {
-                QueryVoting = voting,
-                QuerySetId = revision.QuerySet.Id,
-                RevisionId = revision.Id,
-                Name = revision.QuerySet.Title,
-                Description = revision.QuerySet.Description,
-                FavoriteCount = revision.QuerySet.Votes,
-                Views = revision.QuerySet.Views,
-                LastRun = revision.QuerySet.LastActivity,
-                CreatorId = initialRevision.Owner != null ? initialRevision.Owner.Id : (int?)null,
-                CreatorLogin = initialRevision.Owner != null ? initialRevision.Owner.Login : null,
-                SiteName = Site.Name.ToLower(),
-                SQL = revision.Query.QueryBody,
-                Creator = initialRevision.Owner ?? new User { IPAddress = revision.OwnerIP },
-                CreationDate = initialRevision.CreationDate 
+                QuerySetVoting = voting,
+                Revision = revision
             };
 
             return View("Viewer", viewmodel);

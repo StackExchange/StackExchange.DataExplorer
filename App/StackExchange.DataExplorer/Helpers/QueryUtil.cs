@@ -116,18 +116,24 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static Revision GetMigratedRevision(int id, MigrationType type)
         {
-            return Current.DB.Query<Revision>(@"
+            return Current.DB.Query<Revision,QuerySet,Revision>(@"
                 SELECT
-                    Revisions.*
+                    r.*, qs.*
                 FROM
-                    Revisions
+                    Revisions r
                 JOIN
-                    QueryMap
+                    QueryMap qm
                 ON
-                    Revisions.Id = QueryMap.RevisionId
+                    r.Id = qm.RevisionId
+                JOIN 
+                    QuerySets qs on qs.Id = r.OriginalQuerySetId 
                 WHERE
-                    QueryMap.OriginalId = @original AND
-                    MigrationType = @type",
+                    qm.OriginalId = @original AND
+                    MigrationType = @type",(r,q) => 
+                {
+                    r.QuerySet = q;
+                    return r;
+                },
                 new
                 {
                     original = id,

@@ -433,14 +433,19 @@ namespace StackExchange.DataExplorer
             return ToRelativeTimeSpanMini(dt.Value);
         }
 
-        public static string ToRelativeTimeSpanMicro(this DateTime dt)
+        public static IHtmlString AsHtml(this string html)
         {
-            return string.Format(@"<span title=""{0:u}"" class=""relativetime"">{1}</span>", dt, ToRelativeTimeMicro(dt));
+            return MvcHtmlString.Create(html);
         }
 
-        public static string ToRelativeTimeSpanMicro(this DateTime? dt)
+        public static IHtmlString ToRelativeTimeSpanMicro(this DateTime dt)
         {
-            if (dt == null) return "";
+            return string.Format(@"<span title=""{0:u}"" class=""relativetime"">{1}</span>", dt, ToRelativeTimeMicro(dt)).AsHtml();
+        }
+
+        public static IHtmlString ToRelativeTimeSpanMicro(this DateTime? dt)
+        {
+            if (dt == null) return "".AsHtml();
             return ToRelativeTimeSpanMicro(dt.Value);
         }
 

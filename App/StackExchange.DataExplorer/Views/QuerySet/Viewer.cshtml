@@ -1,31 +1,31 @@
-﻿@model StackExchange.DataExplorer.ViewModel.QueryExecutionViewData
+﻿@model StackExchange.DataExplorer.ViewModel.QueryViewerData
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Models
 @{
     Layout = "~/Views/Shared/Query.cshtml";
-    this.SetPageTitle(Model.Name + " - Stack Exchange Data Explorer");
+    this.SetPageTitle(Model.Revision.QuerySet.Title + " - Stack Exchange Data Explorer");
 }
 
 @section Metadata
 {
-    @Html.Partial("QueryVoting", Model.QueryVoting)
-    <p>@Model.Description</p>
+    @Html.Partial("QueryVoting", Model.QuerySetVoting)
+    <p class='description'>@Model.Revision.QuerySet.Description</p>
 }
 
-<pre id="queryBodyText" class="cm-s-default"><code>@Model.SQL</code></pre>
+<pre id="queryBodyText" class="cm-s-default"><code>@Model.Revision.Query.QueryBody</code></pre>
 
 <table class="fw">
     <tbody><tr>
     <td class="vt">
         <ul id="editor-toolbar" class="linkbar">
-            <li id="edit-link"><a href="@Model.URLWithStub("edit")">edit this query</a></li>
+            <li id="edit-link"><a href="/query/edit/@Model.Revision.QuerySet.Id">edit this query</a></li>
         </ul>
     </td>
     <td align="right" class="post-signature">  </td>
     <td class="post-signature owner">
         <div class="user-info">
-            <div class="user-action-time">created @Model.CreationDate.ToRelativeTimeMini()</div>
-            <div class="user-gravatar32"><a href="/users/@Model.Creator.Id">@Html.Raw(Model.Creator.Gravatar(32))</a>
+            <div class="user-action-time">created @Model.Revision.QuerySet.InitialRevision.CreationDate.ToRelativeTimeSpanMicro()</div>
+            <div class="user-gravatar32"><a href="/users/@Model.Revision.QuerySet.InitialRevision.Owner.Id">@Html.Raw(Model.Revision.QuerySet.InitialRevision.Owner.Gravatar(32))</a>
         </div>
     </td>
     </tr>

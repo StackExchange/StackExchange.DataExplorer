@@ -1,6 +1,6 @@
 ﻿namespace StackExchange.DataExplorer.ViewModel
 {
-    public class QueryVoting
+    public class QuerySetVoting
     {
         public int RevisionId { get; set; }
         public int TotalVotes { get; set; }

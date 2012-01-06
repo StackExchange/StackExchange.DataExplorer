@@ -4,16 +4,16 @@ using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.ViewModel
 {
-    public struct QueryExecutionViewData
+    public class QueryExecutionViewData
     {
         private string name;
-        private QueryVoting voting;
+        private QuerySetVoting voting;
 
-        public QueryVoting QueryVoting
+        public QuerySetVoting QueryVoting
         {
             get
             {
-                return voting ?? new QueryVoting
+                return voting ?? new QuerySetVoting
                 {
                     HasVoted = false,
                     TotalVotes = FavoriteCount,
@@ -53,15 +53,6 @@ namespace StackExchange.DataExplorer.ViewModel
             }
         }
 
-        public string URLWithStub(string stub)
-        {
-
-            return string.Format("/{0}/query/{1}/{2}", 
-                SiteName,
-                stub,
-                RevisionId
-            );
-        }
 
         public long RowNumber { get; set; }
         public bool Featured { get; set; }
@@ -77,8 +68,5 @@ namespace StackExchange.DataExplorer.ViewModel
         public int? RevisionId { get; set; }
         public int QuerySetId { get; set; }
         public DateTime CreationDate { get; set; }
-
-        public User Creator { get; set; }
-        public User Editor { get; set; }
     }
 }
