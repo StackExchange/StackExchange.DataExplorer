@@ -21,7 +21,7 @@ namespace StackExchange.DataExplorer.Models
         {
             get 
             {
-                return Current.DB.Revisions.Get(this.InitialRevisionId);
+                return GetRevision(InitialRevisionId);
             }
         }
 
@@ -29,8 +29,18 @@ namespace StackExchange.DataExplorer.Models
         {
             get
             {
-                return Current.DB.Revisions.Get(this.CurrentRevisionId);
+                return GetRevision(CurrentRevisionId);
             }
         }
+
+
+        private Revision GetRevision(int revisionId)
+        {
+            var rev = Current.DB.Revisions.Get(revisionId);
+            rev.Owner = Current.DB.Users.Get(rev.OwnerId ?? -1) ?? new User { IPAddress = rev.OwnerIP, IsAnonymous = true };
+            return rev;
+        }
+
+       
     }
 }

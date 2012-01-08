@@ -4,6 +4,10 @@
 @{
     Layout = "~/Views/Shared/Query.cshtml";
     this.SetPageTitle(Model.Revision.QuerySet.Title + " - Stack Exchange Data Explorer");
+
+    var querySet = Model.Revision.QuerySet;
+    var initialRevision = querySet.InitialRevision;
+    var currentRevision = querySet.CurrentRevision;
 }
 
 @section Metadata
@@ -12,21 +16,51 @@
     <p class='description'>@Model.Revision.QuerySet.Description</p>
 }
 
+@helper UserSignature(User user, DateTime date, bool isEdit, bool isOwner)
+{
+<div class="user-info@(isOwner?" owner":"")">
+    <div class="user-action-time">@(isEdit?"edited":"created") @date.ToRelativeTimeSpanMicro()</div>
+    @if (!(isEdit && !isOwner))
+    { 
+        <div class="user-gravatar32"><a href="/users/@user.Id">@Html.Raw(user.Gravatar(32))</a>
+            @if (user.IsAnonymous == null)
+            { 
+                <span>anonymous</span>
+            }
+            else
+            { 
+                <a href="/users/@user.Id">@user.Login</a>
+            }
+        </div>
+    }
+</div>
+}
+
 <pre id="queryBodyText" class="cm-s-default"><code>@Model.Revision.Query.QueryBody</code></pre>
 
 <table class="fw">
     <tbody><tr>
     <td class="vt">
-        <ul id="editor-toolbar" class="linkbar">
-            <li id="edit-link"><a href="/query/edit/@Model.Revision.QuerySet.Id">edit this query</a></li>
-        </ul>
-    </td>
-    <td align="right" class="post-signature">  </td>
-    <td class="post-signature owner">
-        <div class="user-info">
-            <div class="user-action-time">created @Model.Revision.QuerySet.InitialRevision.CreationDate.ToRelativeTimeSpanMicro()</div>
-            <div class="user-gravatar32"><a href="/users/@Model.Revision.QuerySet.InitialRevision.Owner.Id">@Html.Raw(Model.Revision.QuerySet.InitialRevision.Owner.Gravatar(32))</a>
+        <div class="toolbar">
+            @if (querySet.OwnerId == Current.User.Id)
+            { 
+                <a href="/@Current.Controller.Site.Name.ToLower()/query/edit/@querySet.Id">edit query</a>
+            }
+            else
+            { 
+                <a href="/@Current.Controller.Site.Name.ToLower()/query/fork/@querySet.Id">fork query</a>
+            }
         </div>
+       
+    </td>
+    <td align="right" class="post-signature">  
+        @if (querySet.InitialRevisionId != querySet.CurrentRevisionId)
+        {
+            UserSignature(currentRevision.Owner, currentRevision.CreationDate, isEdit: true, isOwner: (initialRevision.OwnerId == currentRevision.OwnerId));
+        }
+    </td>
+    <td class="post-signature">
+         @UserSignature(initialRevision.Owner, initialRevision.CreationDate, isEdit: false, isOwner: true)
     </td>
     </tr>
     </tbody>

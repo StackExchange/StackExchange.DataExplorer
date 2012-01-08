@@ -821,6 +821,32 @@ ul.linkbar li {
   width: 100%;
 }
 
+.user-info, .post-signature
+{
+    width: 180px;    
+}
+
+.user-info.owner
+{
+    background-color: #E0EAF1;
+    padding: 6px;
+}
+
+.user-info .relativetime
+{
+    color: Black;    
+}
+
+.user-info .user-action-time
+{
+    margin-bottom: 6px;    
+}
+
+.fw {
+    width: 100%;
+}
+
+
 #site-selector {
   list-style-type: none;
   margin-left: 0px;

@@ -4,7 +4,7 @@
 @using StackExchange.DataExplorer.ViewModel;
 
 <div id="history" class="right-group">
-    <span class="heading">Your Revisions</span>
+    <span class="heading">Revisions</span>
     <ul>
     @if (Model.History != null && Model.History.FirstOrDefault() != null)
     {
@@ -12,31 +12,14 @@
         int? selected = Model.Current != null ? Model.Current.Id : (int?)null;
         var parents = new HashSet<int>();
 
-        for (int i = 0; i < history.Length; ++i)
+        foreach (var revision in history)
         {
-            var previous = i > 0 ? history[i - 1] : null;
-            var current = history[i];
-            var next = i < history.Length - 1 ? history[i + 1] : null;
-            var forked = next != null && current.ParentId != next.Id;
-            var classes = new Dictionary<string, bool>
-            {
-                { "external", forked && current.Parent.OwnerId != Current.User.Id },
-                { "forked", forked },
-                { "last", i == history.Length - 1 },
-                { "parent", parents.Contains(current.Id) },
-                { "selected", selected == current.Id }
-            };
-
-            if (current.ParentId.HasValue)
-            {
-                parents.Add(current.ParentId.Value);
-            }
-        <li id="revision-@current.Id" class="revision@(HtmlUtilities.MakeClasses(classes))">
-            <a href="/@Model.SiteName.ToLower()/query/edit/@current.Id@current.QuerySet.Slugify()" title="@current.Query.QueryBody">
-                <span class="revision-info" title="@current.ExplainOrigin(Current.User)">@current.Id</span>
-                @Html.Raw(current.CreationDate.ToRelativeTimeSpanMini())
-            </a>
-        </li>
+            <li id="revision-@revision.Id" class="revision">
+                <a href="/@Model.SiteName.ToLower()/query/edit/@revision.Id@revision.QuerySet.Slugify()" title="@revision.Query.QueryBody">
+                    <span class="revision-info" title="">@revision.Id</span>
+                    @Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())
+                </a>
+            </li>
         }
     }
     else

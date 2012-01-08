@@ -145,20 +145,13 @@ namespace StackExchange.DataExplorer.Helpers
         public static IEnumerable<Revision> GetRevisionHistory(int querySetId)
         {
             return Current.DB.Query<Revision, Query, Revision>(@"
-                SELECT
-                    r.*, q.*
-                FROM
-                    QuerySetRevision qr 
-                JOIN 
-                    Revisions r
-                JOIN
-                    Queries q
-                ON
-                    r.QueryId = q.Id
-                WHERE
-                    qr.QuerySetId = @querySetId
-                ORDER BY
-                    qr.Id desc",
+                select r.*, q.*
+from QuerySetRevisions qr 
+join Revisions r on qr.RevisionId = r.Id
+join Queries q on r.QueryId = q.Id
+where
+	qr.QuerySetId = @querySetId
+order by qr.Id desc",
                 (revision, query) =>
                 {
                     revision.Query = query;

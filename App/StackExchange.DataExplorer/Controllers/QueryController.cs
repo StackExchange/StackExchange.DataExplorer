@@ -357,6 +357,7 @@ namespace StackExchange.DataExplorer.Controllers
             return new RedirectPermanentResult("/" + sitename + "/query/" + revision.Id + slug);
         }
 
+        [Route(@"{sitename}/query/fork/{querySetId:\d+}/{slug?}")]
         [Route(@"{sitename}/query/edit/{querySetId:\d+}/{slug?}")]
         public ActionResult Edit(string sitename, int querySetId)
         {
