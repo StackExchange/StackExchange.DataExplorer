@@ -135,7 +135,7 @@ namespace StackExchange.DataExplorer.Controllers
             // We only create revisions if something actually changed.
             // We'll log it as an execution anyway if applicable, so the user will
             // still get a link in their profile, just not their own revision.
-            if (context.QuerySet == null || query == null || context.QuerySet.CurrentRevision.QueryId != query.Id)
+            if (context.QuerySet == null || query == null || context.QuerySet.CurrentRevision == null || context.QuerySet.CurrentRevision.QueryId != query.Id)
             {
                 if (query == null)
                 {
