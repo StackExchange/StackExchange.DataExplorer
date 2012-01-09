@@ -305,9 +305,9 @@
     <Content Include="Scripts\openid-jquery.js" />
     <Content Include="robots.txt" />
     <Compile Include="ViewModel\QueryExecutionViewData.cs" />
+    <Compile Include="ViewModel\QuerySetViewModel.cs" />
     <Compile Include="ViewModel\QueryViewerData.cs" />
     <Compile Include="ViewModel\QuerySetVoting.cs" />
-    <Compile Include="ViewModel\RevisionHistory.cs" />
     <Compile Include="ViewModel\SubHeader.cs" />
     <Compile Include="ViewModel\SubHeaderViewData.cs" />
   </ItemGroup>

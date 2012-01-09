@@ -11,27 +11,49 @@ namespace StackExchange.DataExplorer.Helpers
     public class QueryUtil
     {
 
-        public static Revision GetCompleteLatestRevision(int querySetId)
+        public static QuerySet GetFullQuerySet(int querySetId)
         {
-            int revisionId = Current.DB.Query<int>("select CurrentRevisionId from QuerySets where Id = @querySetId", new { querySetId }).FirstOrDefault();
-            return GetCompleteRevision(querySetId,revisionId);
+            var querySet = Current.DB.QuerySets.Get(querySetId);
+            if (querySet == null) return null;
+
+            querySet.Revisions = Current.DB.Query<Revision>(@"select r.* from QuerySetRevisions qr 
+join Revisions r on r.Id = qr.RevisionId 
+where qr.QuerySetId = @querySetId
+order by qr.Id asc", new {querySetId}).ToList();
+
+            var queries = Current.DB.Query<Query>(@"select * from Queries where Id in @Ids", new { Ids = querySet.Revisions.Select(r => r.QueryId).Distinct() }).ToDictionary(q => q.Id);
+            var usersToLoad = querySet.Revisions.Select(r => r.OwnerId).Concat(new[] {querySet.OwnerId}).Where(id => id != null).ToArray();
+
+            // shallow load users, pulling about me seems overkill
+            var users = Current.DB.Query<User>("select Id, Login, Email, IPAddress from Users where Id in @Ids", new { Ids = usersToLoad }).ToDictionary(u => u.Id);
+
+            Func<int?, string, User> getUser = (id, ip) => 
+            {
+                User user = null;
+                if (id.HasValue)
+                {
+                    users.TryGetValue(id.Value, out user);
+                }
+                user = user ?? new User { IPAddress = ip, IsAnonymous = true };
+                return user;
+            };
+
+            querySet.Owner = getUser(querySet.OwnerId, querySet.OwnerIp);
+            querySet.CurrentRevision = querySet.Revisions.Last();
+            querySet.InitialRevision = querySet.Revisions.First();
+
+            foreach (var revision in querySet.Revisions)
+            {
+                revision.QuerySet = querySet;
+                revision.Owner = getUser(revision.OwnerId, revision.OwnerIP);
+                Query query = null;
+                queries.TryGetValue(revision.QueryId, out query);
+                revision.Query = query;
+            }
+
+            return querySet;
         }
 
-        /// <summary>
-        /// Retrieves the basic revision information
-        /// </summary>
-        /// <param name="revisionId">The ID of the revision</param>
-        /// <returns>A revision, or null if the ID was invalid</returns>
-        public static Revision GetBasicRevision(int revisionId)
-        {
-            return Current.DB.Query<Revision>(
-                "SELECT * FROM Revisions WHERE Id = @revision",
-                new
-                {
-                    revision = revisionId
-                }
-            ).FirstOrDefault();
-        }
 
         /// <summary>
         /// Retrieves the cached results for the given query
@@ -74,46 +96,6 @@ namespace StackExchange.DataExplorer.Helpers
             return cache;
         }
 
-        /// <summary>
-        /// Retrieves a Revision with its corresponding Query and Metadata information
-        /// </summary>
-        /// <param name="revisionId">The ID of the revision</param>
-        /// <returns>The revision, or null if the ID was invalid</returns>
-        public static Revision GetCompleteRevision(int querySetId, int revisionId)
-        {
-            return Current.DB.Query<Revision, Query, QuerySet, User, Revision>(@"
-                SELECT
-                    *
-                FROM
-                    Revisions r
-                JOIN
-                    Queries q
-                ON
-                    q.Id = r.QueryId AND r.Id = @revisionId
-                JOIN
-                    QuerySets qs
-                ON
-                    qs.Id = @querySetId
-                LEFT OUTER JOIN
-                    Users u
-                ON
-                    r.OwnerId = u.Id",
-                (revision, query, querySet, user) =>
-                {
-                    revision.Query = query;
-                    revision.QuerySet = querySet;
-                    revision.Owner = user;
-
-                    return revision;
-                },
-                new
-                {
-                    revisionId,
-                    querySetId
-                }
-            ).FirstOrDefault();
-        }
-
         public static Revision GetMigratedRevision(int id, MigrationType type)
         {
             return Current.DB.Query<Revision,QuerySet,Revision>(@"
@@ -140,29 +122,6 @@ namespace StackExchange.DataExplorer.Helpers
                     type = (int)type
                 }
             ).FirstOrDefault();
-        }
-
-        public static IEnumerable<Revision> GetRevisionHistory(int querySetId)
-        {
-            return Current.DB.Query<Revision, Query, Revision>(@"
-                select r.*, q.*
-from QuerySetRevisions qr 
-join Revisions r on qr.RevisionId = r.Id
-join Queries q on r.QueryId = q.Id
-where
-	qr.QuerySetId = @querySetId
-order by qr.Id desc",
-                (revision, query) =>
-                {
-                    revision.Query = query;
-                    return revision;
-                },
-                new
-                {
-                    querySetId,
-
-                }
-            );
         }
 
         /// <summary>

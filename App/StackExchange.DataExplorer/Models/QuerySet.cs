@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using StackExchange.DataExplorer.Helpers;
 
 namespace StackExchange.DataExplorer.Models
@@ -18,30 +18,14 @@ namespace StackExchange.DataExplorer.Models
         public int Views { get; set; }
         public string OwnerIp { get; set; }
 
-        public Revision InitialRevision 
-        {
-            get 
-            {
-                return GetRevision(InitialRevisionId);
-            }
-        }
+        // these are loaded via QueryUtil.LoadFullQuerySet
 
-        public Revision CurrentRevision
-        {
-            get
-            {
-                return GetRevision(CurrentRevisionId);
-            }
-        }
+        public Revision InitialRevision { get; set; }
+        public Revision CurrentRevision { get; set; }
 
+        public List<Revision> Revisions { get; set; }
 
-        private Revision GetRevision(int revisionId)
-        {
-            var rev = Current.DB.Revisions.Get(revisionId);
-            rev.Owner = Current.DB.Users.Get(rev.OwnerId ?? -1) ?? new User { IPAddress = rev.OwnerIP, IsAnonymous = true };
-            return rev;
-        }
+        public User Owner { get; set; }
 
-       
     }
 }

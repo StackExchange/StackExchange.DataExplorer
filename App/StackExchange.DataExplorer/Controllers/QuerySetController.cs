@@ -32,7 +32,7 @@ namespace StackExchange.DataExplorer.Controllers
             return new RedirectPermanentResult("/" + sitename + "/query/" + revision.QuerySet.Id + "/" + slug);
         }
 
-        [Route(@"{sitename}/query/{querySetId:\d+}/{slug?}")]
+        [Route(@"{sitename}/query/{querySetId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowLatest(string sitename, int querySetId, string slug)
         {
             Site = GetSite(sitename);
@@ -41,7 +41,7 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var revision = QueryUtil.GetCompleteLatestRevision(querySetId);
+            var revision = QueryUtil.GetFullQuerySet(querySetId).CurrentRevision;
             return ShowCommon(revision, slug, true);
         }
 
@@ -55,7 +55,16 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var revision = QueryUtil.GetCompleteRevision(querySetId, revisionId);
+            var querySet = QueryUtil.GetFullQuerySet(querySetId);
+            if (querySet == null)
+            {
+                return PageNotFound();
+            }
+            var revision = querySet.Revisions.FirstOrDefault(r => r.Id == revisionId);
+            if (revision == null)
+            {
+                return PageNotFound();
+            }
 
             return ShowCommon(revision, slug, false);
         }

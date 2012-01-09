@@ -427,19 +427,23 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
             SetHeader("Editing Query");
 
-            Revision revision = QueryUtil.GetCompleteLatestRevision(querySetId);
+            QuerySet querySet = QueryUtil.GetFullQuerySet(querySetId);
 
-            if (revision == null)
+            if (querySet == null)
             {
                 return PageNotFound();
             }
 
             ViewData["query_action"] = "save/" + Site.Id +  "/" + querySetId;
-            ViewData["revision"] = revision;
-            ViewData["history"] = QueryUtil.GetRevisionHistory(revision.QuerySet.Id);
-            
 
-            return View("Editor", Site);
+
+            return View("Editor", new ViewModel.QuerySetViewModel 
+            { 
+                Site = Site, 
+                Revisions = querySet.Revisions,
+                CurrentRevision = querySet.CurrentRevision,
+                QuerySet = querySet
+            });
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿@model StackExchange.DataExplorer.ViewModel.RevisionHistory
+﻿@model QuerySetViewModel
 @using StackExchange.DataExplorer;
 @using StackExchange.DataExplorer.Helpers;
 @using StackExchange.DataExplorer.ViewModel;
@@ -6,15 +6,15 @@
 <div id="history" class="right-group">
     <span class="heading">Revisions</span>
     <ul>
-    @if (Model.History != null && Model.History.FirstOrDefault() != null)
+    @if (Model.Revisions != null && Model.Revisions.FirstOrDefault() != null)
     {
-        var history = Model.History.ToArray();
-        int? selected = Model.Current != null ? Model.Current.Id : (int?)null;
+        var history = Model.Revisions.ToArray();
+        int? selectedRevisionId = Model.CurrentRevision != null ? Model.CurrentRevision.Id : (int?)null;
 
         foreach (var revision in history)
         {
-            <li id="revision-@revision.Id" class="revision selected">
-                <a href="/@Model.SiteName.ToLower()/query/edit/@revision.Id" title="@revision.Query.QueryBody">
+            <li id="revision-@revision.Id" class="revision@(revision.Id == selectedRevisionId ? " selected" : "")">
+                <a href="/@Current.Controller.Site.Name.ToLower()/revision/@Model.QuerySet.Id/@revision.Id@Model.QuerySet.Slugify()" title="@revision.Query.QueryBody">
                     <span class="revision-info" title="">@revision.Id</span>
                     @Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())
                 </a>

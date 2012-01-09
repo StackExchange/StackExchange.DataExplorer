@@ -1,4 +1,4 @@
-﻿@model StackExchange.DataExplorer.Models.Site
+﻿@model QuerySetViewModel
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
 @using StackExchange.DataExplorer.Models
@@ -7,14 +7,7 @@
     Layout = "~/Views/Shared/Query.cshtml";
     this.SetPageTitle("Query " + Current.Controller.Site.LongName + " - Stack Exchange Data Explorer");
 
-    var revision = ViewData["revision"] as Revision;
-    var history = ViewData["history"] as IEnumerable<Revision>;
-    var revisionHistory = new RevisionHistory
-    {
-        Current = revision,
-        History = history,
-        SiteName = Current.Controller.Site.Name
-    };
+    var revision = Model.CurrentRevision;
     
     string sql = null, name = null, description = null;
     
@@ -60,7 +53,7 @@
         }
         </ul>
     </div>
-    @Html.Partial("RevisionHistory", revisionHistory)
+    @Html.Partial("RevisionHistory", Model)
 </div>
 <ul id="editor-toolbar" class="linkbar compact">
     <li id="permalink" class="result-option"><a class="templated" href="/:site/query/:id:slug:params">permalink</a></li>
