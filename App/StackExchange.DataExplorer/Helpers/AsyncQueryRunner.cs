@@ -10,6 +10,15 @@ using System.Threading;
 
 namespace StackExchange.DataExplorer.Helpers
 {
+    // information about the query not important for execution 
+    public class QueryContextData
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public bool IsText { get; set; }
+        public QuerySet QuerySet { get; set; }
+    }
+
     public class AsyncQueryRunner
     {
         static AsyncQueryRunner()
@@ -45,18 +54,16 @@ namespace StackExchange.DataExplorer.Helpers
             public Exception Exception { get; set; }
             public Guid JobId { get; set; }
             public AsyncState State { get; set; }
-            public string Title { get; set; }
-            public string Description { get; set; }
-            public Revision Parent { get; set; }
-            public bool TextResults { get; set; }
             public ParsedQuery ParsedQuery { get; set; }
             public Site Site { get; set; }
+
+            public QueryContextData QueryContextData { get; set; }
 
             public SqlCommand Command { get; set; }
             public bool Cancelled { get; set; }
         }
 
-        public static AsyncResult Execute(ParsedQuery query, User user, Site site, string title, string description, Revision parent, bool textResults)
+        public static AsyncResult Execute(ParsedQuery query, User user, Site site, QueryContextData context)
         {
             string userTag = user.IsAnonymous ? user.IPAddress : user.Id.ToString();
 
@@ -82,13 +89,10 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 JobId = Guid.NewGuid(),
                 State = AsyncState.Pending,
-                Title = title,
-                Description = description, 
-                Parent = parent, 
-                TextResults = textResults,
                 ParsedQuery = query,
                 Site = site, 
-                LastPoll = DateTime.UtcNow
+                LastPoll = DateTime.UtcNow,
+                QueryContextData = context
             };
 
             Task task = new Task(() =>

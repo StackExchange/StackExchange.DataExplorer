@@ -10,12 +10,11 @@
     {
         var history = Model.History.ToArray();
         int? selected = Model.Current != null ? Model.Current.Id : (int?)null;
-        var parents = new HashSet<int>();
 
         foreach (var revision in history)
         {
-            <li id="revision-@revision.Id" class="revision">
-                <a href="/@Model.SiteName.ToLower()/query/edit/@revision.Id@revision.QuerySet.Slugify()" title="@revision.Query.QueryBody">
+            <li id="revision-@revision.Id" class="revision selected">
+                <a href="/@Model.SiteName.ToLower()/query/edit/@revision.Id" title="@revision.Query.QueryBody">
                     <span class="revision-info" title="">@revision.Id</span>
                     @Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())
                 </a>

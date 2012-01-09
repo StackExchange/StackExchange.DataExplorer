@@ -12,14 +12,4 @@ namespace StackExchange.DataExplorer.ViewModel
         public Revision Current { get; set; }
         public string SiteName { get; set; }
     }
-
-    public static class RevisionHistoryExtensions
-    {
-        public static string ExplainOrigin(this Revision revision, User user)
-        {
-            string relationship = "initial version";
-
-            return "revision " + revision.Id + ", " + relationship;
-        }
-    }
 }

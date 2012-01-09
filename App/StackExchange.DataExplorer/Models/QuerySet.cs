@@ -16,6 +16,7 @@ namespace StackExchange.DataExplorer.Models
         public DateTime LastActivity { get; set; }
         public int Votes { get; set; }
         public int Views { get; set; }
+        public string OwnerIp { get; set; }
 
         public Revision InitialRevision 
         {

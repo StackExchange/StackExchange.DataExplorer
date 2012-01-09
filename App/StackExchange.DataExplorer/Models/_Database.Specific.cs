@@ -17,5 +17,6 @@ namespace StackExchange.DataExplorer.Models
         public Table<AppSetting> AppSettings { get; private set; }
         public Table<Revision> Revisions { get; private set; }
         public Table<Query> Queries { get; private set; }
+        public Table<QuerySetRevision> QuerySetRevisions { get; private set; }
     }
 }

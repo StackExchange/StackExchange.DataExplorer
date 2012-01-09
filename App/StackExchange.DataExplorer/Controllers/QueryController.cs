@@ -33,7 +33,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             try
             {
-                return CompleteResponse(result.QueryResults, result.ParsedQuery, result.TextResults, result.Parent, result.Title, result.Description, result.Site.Id);
+                return CompleteResponse(result.QueryResults, result.ParsedQuery, result.QueryContextData, result.Site.Id);
             }
             catch (Exception ex)
             { 
@@ -43,8 +43,8 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpPost]
-        [Route(@"query/save/{siteId:\d+}/{parentId?:\d+}")]
-        public ActionResult Create(string sql, string title, string description, int siteId, int? parentId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
+        [Route(@"query/save/{siteId:\d+}/{querySetId?:\d+}")]
+        public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -54,15 +54,15 @@ namespace StackExchange.DataExplorer.Controllers
             ActionResult response = null;
             try
             {
-                Revision parent = null;
+                QuerySet querySet = null;
 
-                if (parentId.HasValue)
+                if (querySetId.HasValue)
                 {
-                    parent = QueryUtil.GetBasicRevision(parentId.Value);
+                    querySet = Current.DB.QuerySets.Get(querySetId.Value);
 
-                    if (parent == null)
+                    if (querySet == null)
                     {
-                        throw new ApplicationException("Invalid revision ID");
+                        throw new ApplicationException("Invalid query set ID");
                     }
                 }
 
@@ -78,7 +78,15 @@ namespace StackExchange.DataExplorer.Controllers
                 Site site = GetSite(siteId);
                 ValidateQuery(parsedQuery, site);
 
-                var asyncResults = AsyncQueryRunner.Execute(parsedQuery, CurrentUser, site, title, description, parent, textResults == true);
+                var contextData = new QueryContextData 
+                { 
+                    Title = title,
+                    Description = description,
+                    IsText = textResults == true,
+                    QuerySet = querySet
+                };
+
+                var asyncResults = AsyncQueryRunner.Execute(parsedQuery, CurrentUser, site, contextData);
 
                 if (asyncResults.State == AsyncQueryRunner.AsyncState.Failure)
                 {
@@ -94,7 +102,7 @@ namespace StackExchange.DataExplorer.Controllers
                     return Json(new {running = true, job_id = asyncResults.JobId});
                 }
 
-                response = CompleteResponse(results, parsedQuery, textResults == true, parent, title, description, siteId);
+                response = CompleteResponse(results, parsedQuery, contextData, siteId);
             }
             catch (Exception ex)
             {
@@ -107,14 +115,11 @@ namespace StackExchange.DataExplorer.Controllers
         private ActionResult CompleteResponse(
             QueryResults results, 
             ParsedQuery parsedQuery, 
-            bool textResults, 
-            Revision parent, 
-            string title, 
-            string description,
+            QueryContextData context,
             int siteId
             )
         {
-            results = TranslateResults(parsedQuery, textResults, results);
+            results = TranslateResults(parsedQuery, context.IsText, results);
 
             var query = Current.DB.Query<Query>(
                 "SELECT * FROM Queries WHERE QueryHash = @hash",
@@ -130,7 +135,7 @@ namespace StackExchange.DataExplorer.Controllers
             // We only create revisions if something actually changed.
             // We'll log it as an execution anyway if applicable, so the user will
             // still get a link in their profile, just not their own revision.
-            if (parent == null || query == null || query.Id != parent.QueryId)
+            if (context.QuerySet == null || query == null || context.QuerySet.CurrentRevision.QueryId != query.Id)
             {
                 if (query == null)
                 {
@@ -157,13 +162,68 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                 );
 
-                var revision = new Revision
+                int querySetId;
+                // brand new queryset 
+                if (context.QuerySet == null)
+                { 
+                    // insert it 
+                    querySetId = (int)Current.DB.QuerySets.Insert(new 
+                    {
+                        InitialRevisionId = revisionId,
+                        CurrentRevisionId = revisionId, 
+                        context.Title,
+                        context.Description,
+                        LastActivity = DateTime.UtcNow,
+                        Votes = 0,
+                        Views = 0,
+                        Featured = false,
+                        Hidden = false,
+                        CreationDate = DateTime.UtcNow, 
+                        OwnerIp = CurrentUser.IPAddress,
+                        OwnerId = CurrentUser.IsAnonymous?(int?)null:CurrentUser.Id
+                    });
+                }
+                else if (
+                    (CurrentUser.IsAnonymous && context.QuerySet.OwnerIp == CurrentUser.IPAddress) || context.QuerySet.OwnerId != CurrentUser.Id)
                 {
-                    Id = revisionId,
-                    QueryId = queryId
-                };
+                    // fork it 
+                    querySetId = (int)Current.DB.QuerySets.Insert(new
+                    {
+                        InitialRevisionId = context.QuerySet.InitialRevisionId,
+                        CurrentRevisionId = revisionId,
+                        context.Title,
+                        context.Description,
+                        LastActivity = DateTime.UtcNow,
+                        Votes = 0,
+                        Views = 0,
+                        Featured = false,
+                        Hidden = false,
+                        CreationDate = DateTime.UtcNow,
+                        OwnerIp = CurrentUser.IPAddress,
+                        OwnerId = CurrentUser.IsAnonymous ? (int?)null : CurrentUser.Id,
+                        ForkedQuerySetId = context.QuerySet.Id
+                    });
 
-                SaveMetadata(revision, title, description, true);
+                    Current.DB.Execute(@"insert QuerySetRevisions(QuerySetId, RevisionId) 
+select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new 
+                    { 
+                        newId = querySetId, 
+                        oldId = context.QuerySet.Id
+                    });
+                }
+                else
+                { 
+                    // update it 
+                    querySetId = context.QuerySet.Id;
+
+                    context.Title = context.Title ?? context.QuerySet.Title;
+                    context.Description = context.Description ?? context.QuerySet.Description;
+
+                    Current.DB.QuerySets.Update(context.QuerySet.Id, new { context.Title, context.Description, CurrentRevisionId = revisionId, LastActivity = DateTime.UtcNow});
+                    
+                }
+                
+                Current.DB.QuerySetRevisions.Insert(new { QuerySetId = querySetId, RevisionId = revisionId });
 
                 results.RevisionId = revisionId;
                 results.Created = saveTime;
@@ -171,17 +231,12 @@ namespace StackExchange.DataExplorer.Controllers
             else
             {
                 queryId = query.Id;
-                results.RevisionId = parent.Id;
+                results.RevisionId = context.QuerySet.CurrentRevisionId;
             }
 
-            if (parent != null)
+            if (context.Title != null)
             {
-                results.ParentId = parent.Id;
-            }
-
-            if (title != null)
-            {
-                results.Slug = title.URLFriendly();
+                results.Slug = context.Title.URLFriendly();
             }
 
             QueryRunner.LogRevisionExecution(CurrentUser, siteId, results.RevisionId);
@@ -237,9 +292,10 @@ namespace StackExchange.DataExplorer.Controllers
             return response;
         }
 
+        /*
         [HttpPost]
-        [Route(@"query/update/{revisionId:\d+}")]
-        public ActionResult UpdateMetadata(int revisionId, string title, string description)
+        [Route(@"query/update/{querySetId:\d+}")]
+        public ActionResult UpdateMetadata(int querySetId, string title, string description)
         {
             ActionResult response = null;
 
@@ -261,6 +317,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             return response;
         }
+         */
 
         [Route(@"{sitename}/csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowSingleSiteCsv(string sitename, int revisionId)
@@ -377,13 +434,10 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            ViewData["query_action"] = "save/" + Site.Id +  "/" + revision.Id;
+            ViewData["query_action"] = "save/" + Site.Id +  "/" + querySetId;
             ViewData["revision"] = revision;
-
-            if (!CurrentUser.IsAnonymous)
-            {
-                ViewData["history"] = QueryUtil.GetRevisionHistory(revision.QuerySet.Id);
-            }
+            ViewData["history"] = QueryUtil.GetRevisionHistory(revision.QuerySet.Id);
+            
 
             return View("Editor", Site);
         }
@@ -503,7 +557,7 @@ namespace StackExchange.DataExplorer.Controllers
             if (!CurrentUser.IsAnonymous)
             {
                 querySet = Current.DB.Query<QuerySet>(@"
-                    SELECT
+                    select * from QuerySets
                         *
                     FROM
                         QuerySets

@@ -50,7 +50,7 @@ namespace StackExchange.DataExplorer
 
         public static void Refresh()
         {
-            var data = Current.DB.Query<AppSetting>("select * from AppSettings").ToDictionary(v => v.Setting, v => v.Value);
+            var data = Current.DB.AppSettings.All().ToDictionary(v => v.Setting, v => v.Value);
 
             foreach (var property in typeof(AppSettings).GetProperties(BindingFlags.Static | BindingFlags.Public))
             {
