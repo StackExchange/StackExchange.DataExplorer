@@ -589,14 +589,14 @@ DataExplorer.ready(function () {
             'multi': response.multiSite ? 'm' : '',
             'metas': response.excludeMetas ? 'n' : '',
             'site': response.siteName,
-            'id': response.revisionId,
+            'id': response.querySetId,
             'slug': slug,
             'params': params
         });
 
         if (response.created) {
             var title = response.created.replace(/\.\d+Z/, 'Z'),
-                href = "/" + response.siteName + "/query/edit/" + response.revisionId,
+                href = "/" + response.siteName + "/revision/" + response.querySetId + "/" + response.revisionId + "/" + response.slug,
                 classes = "selected";
 
             if (response.parentId) {
@@ -609,8 +609,8 @@ DataExplorer.ready(function () {
                 '<li id="revision-' + response.revisionId + '" class="' + classes + '">' +
                     '<a href="' + href + '">' +
                         '<span class="revision-info">' + response.revisionId + '</span>' +
-                        '<span class="relativetime" title="' + title + '"></span>' + 
                     '</a>' +
+                    '<span class="relativetime" title="' + title + '"></span>' +
                 '</li>'
             );
             history.find('li:last').addClass('last');

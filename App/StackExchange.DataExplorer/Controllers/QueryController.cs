@@ -227,17 +227,20 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
                 results.RevisionId = revisionId;
                 results.Created = saveTime;
+                results.QuerySetId = querySetId;
             }
             else
             {
                 queryId = query.Id;
                 results.RevisionId = context.QuerySet.CurrentRevisionId;
+                results.QuerySetId = context.QuerySet.Id;
             }
 
             if (context.Title != null)
             {
                 results.Slug = context.Title.URLFriendly();
             }
+
 
             QueryRunner.LogRevisionExecution(CurrentUser, siteId, results.RevisionId);
 

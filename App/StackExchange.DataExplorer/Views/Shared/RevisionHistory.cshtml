@@ -11,13 +11,25 @@
         var history = Model.Revisions.ToArray();
         int? selectedRevisionId = Model.CurrentRevision != null ? Model.CurrentRevision.Id : (int?)null;
 
-        foreach (var revision in history)
+        foreach (var revision in history.Reverse())
         {
             <li id="revision-@revision.Id" class="revision@(revision.Id == selectedRevisionId ? " selected" : "")">
-                <a href="/@Current.Controller.Site.Name.ToLower()/revision/@Model.QuerySet.Id/@revision.Id@Model.QuerySet.Slugify()" title="@revision.Query.QueryBody">
+                <a class='revision' href="/@Current.Controller.Site.Name.ToLower()/revision/@Model.QuerySet.Id/@revision.Id@Model.QuerySet.Slugify()" title="@revision.Query.QueryBody">
                     <span class="revision-info" title="">@revision.Id</span>
-                    @Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())
                 </a>
+
+                @if (revision.Owner.IsAnonymous)
+                {
+                    <span class='user'>anonymous</span> 
+                }
+                else
+                { 
+                    <a class='user' href="/users/@revision.Owner.Id">@revision.Owner.Login</a>
+                }
+
+                @Html.Raw(revision.CreationDate.ToRelativeTimeSpanMini())
+
+                <div style="clear:both"></div>
             </li>
         }
     }

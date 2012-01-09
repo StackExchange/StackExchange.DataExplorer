@@ -659,7 +659,6 @@ ul.site-list .desc {
 }
 
 #history li {
-  background: #FFFFFF url('/content/images/sprites.png') no-repeat scroll 3px -154px;
   border-bottom: 1px dotted #CCCCCC;
   padding: 5px 8px 5px 8px;
 }
@@ -673,45 +672,28 @@ ul.site-list .desc {
   background-color: #FCFCE1; 
 }
 
-#history li:first-child, #history .forked + li {
-  background-position: 3px -180px;
-}
-
-#history li.forked {
-  background-position: 3px -207px;
-}
-
-#history li.forked.parent {
-  background-position: 3px -237px;
-}
-
-#history li.forked + li.parent {
-  background-position: 3px -298px;
-}
-
-#history li.forked + li.forked.parent {
-  background-position: 3px -267px;
-}
-
-#history li.last {
-  background-position: 3px -112px; 
-}
-
-#history li.last:first-child {
-  background-position: 3px -129px;
-}
-
 #history li .relativetime {
   float: right;
+  display: block;
 }
 
 #history li a {
   display: block;
   font-weight: bold;
+  float: left;
+}
+
+#history li a.revision {
+    width: 80px;
+}
+
+#history li a.user {
+    color: #999;   
+    margin-bottom: 5px; 
 }
 
 #history li a span.revision-info {
-  padding-left: 13px;
+  padding-left: 2px;
 }
 
 #history li a:hover {

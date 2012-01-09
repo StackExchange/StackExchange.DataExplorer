@@ -18,9 +18,9 @@
 
 @helper UserSignature(User user, DateTime date, bool isEdit, bool isOwner)
 {
-<div class="user-info@(isOwner?" owner":"")">
+<div class="user-info@(isOwner && !isEdit?" owner":"")">
     <div class="user-action-time">@(isEdit?"edited":"created") @date.ToRelativeTimeSpanMicro()</div>
-    @if (!(isEdit && !isOwner))
+    @if ((isOwner && !isEdit) || !isOwner)
     { 
         <div class="user-gravatar32"><a href="/users/@user.Id">@Html.Raw(user.Gravatar(32))</a>
             @if (user.IsAnonymous == null)
@@ -42,21 +42,28 @@
     <tbody><tr>
     <td class="vt">
         <div class="toolbar">
-            @if (querySet.OwnerId == Current.User.Id)
-            { 
-                <a href="/@Current.Controller.Site.Name.ToLower()/query/edit/@querySet.Id">edit query</a>
+            @if (querySet.CurrentRevisionId != Model.Revision.Id)
+            {
+                  <a href="/@Current.Controller.Site.Name.ToLower()/query/@querySet.Id@querySet.Slugify()">view current version</a>
             }
             else
-            { 
+            {
+                if (querySet.OwnerId == Current.User.Id)
+                { 
+                <a href="/@Current.Controller.Site.Name.ToLower()/query/edit/@querySet.Id">edit query</a>
+                }
+                else
+                { 
                 <a href="/@Current.Controller.Site.Name.ToLower()/query/fork/@querySet.Id">fork query</a>
+                }
             }
         </div>
        
     </td>
-    <td align="right" class="post-signature">  
+    <td class="post-signature">  
         @if (querySet.InitialRevisionId != querySet.CurrentRevisionId)
-        {
-            UserSignature(currentRevision.Owner, currentRevision.CreationDate, isEdit: true, isOwner: (initialRevision.OwnerId == currentRevision.OwnerId));
+        { 
+            @UserSignature(currentRevision.Owner, currentRevision.CreationDate, isEdit: true, isOwner: (initialRevision.OwnerId == currentRevision.OwnerId));
         }
     </td>
     <td class="post-signature">

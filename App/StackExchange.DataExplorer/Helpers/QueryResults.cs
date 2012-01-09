@@ -95,6 +95,7 @@ namespace StackExchange.DataExplorer.Helpers
         public int? ParentId { get; set; }
         public int RevisionId { get; set; }
         public bool FromCache { get; set; }
+        public int QuerySetId { get; set; }
 
         [JsonConverter(typeof(IsoDateTimeConverter))]
         public DateTime? Created { get; set; }
@@ -147,6 +148,7 @@ namespace StackExchange.DataExplorer.Helpers
             results.ParentId = ParentId;
             results.RevisionId = RevisionId;
             results.Created = Created;
+            results.QuerySetId = QuerySetId;
 
             results.Messages = FormatTextResults(Messages, ResultSets);
 
@@ -173,6 +175,7 @@ namespace StackExchange.DataExplorer.Helpers
             returnValue.ParentId = ParentId;
             returnValue.RevisionId = RevisionId;
             returnValue.Created = Created;
+            returnValue.QuerySetId = QuerySetId;
 
             returnValue.ExecutionPlan = TransformPlan(this.ExecutionPlan);
 
