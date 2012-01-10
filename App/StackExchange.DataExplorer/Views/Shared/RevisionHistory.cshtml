@@ -6,7 +6,7 @@
 <div id="history" class="right-group">
     <span class="heading">Revisions</span>
     <ul>
-    @if (Model.Revisions != null && Model.Revisions.FirstOrDefault() != null)
+    @if (Model != null && Model.Revisions != null && Model.Revisions.FirstOrDefault() != null)
     {
         var history = Model.Revisions.ToArray();
         int? selectedRevisionId = Model.CurrentRevision != null ? Model.CurrentRevision.Id : (int?)null;

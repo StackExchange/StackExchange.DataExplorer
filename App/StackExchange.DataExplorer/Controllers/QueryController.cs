@@ -158,7 +158,8 @@ namespace StackExchange.DataExplorer.Controllers
                         QueryId = queryId,
                         OwnerId = CurrentUser.IsAnonymous ? null : (int?)CurrentUser.Id,
                         OwnerIP = GetRemoteIP(),
-                        CreationDate = saveTime = DateTime.UtcNow
+                        CreationDate = saveTime = DateTime.UtcNow,
+                        OriginalQuerySetId = context.QuerySet != null ? context.QuerySet.Id : (int?)null
                     }
                 );
 
@@ -182,6 +183,8 @@ namespace StackExchange.DataExplorer.Controllers
                         OwnerIp = CurrentUser.IPAddress,
                         OwnerId = CurrentUser.IsAnonymous?(int?)null:CurrentUser.Id
                     });
+
+                    Current.DB.Revisions.Update(revisionId, new { OriginalQuerySetId = querySetId });
                 }
                 else if (
                     (CurrentUser.IsAnonymous && context.QuerySet.OwnerIp == CurrentUser.IPAddress) || context.QuerySet.OwnerId != CurrentUser.Id)
@@ -487,7 +490,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
             ViewData["query_action"] = "save/" + Site.Id;
 
-            return View("Editor", Site);
+            return View("Editor", null);
         }
 
         private QueryResults ExecuteWithResults(ParsedQuery query, int siteId, bool textResults)

@@ -557,7 +557,7 @@ DataExplorer.ready(function () {
             action = action.substring(0, action.lastIndexOf('/'));
         }
 
-        form[0].action = action + '/' + response.revisionId;
+        form[0].action = action + '/' + response.querySetId;
 
         if (response.resultSets.length) {
             results = response.resultSets[0];
@@ -611,9 +611,15 @@ DataExplorer.ready(function () {
                         '<span class="revision-info">' + response.revisionId + '</span>' +
                     '</a>' +
                     '<span class="relativetime" title="' + title + '"></span>' +
+                    '<div style="clear:both"></div>' +
                 '</li>'
             );
             history.find('li:last').addClass('last');
+
+            if (window.history && window.history.pushState && document.URL.indexOf("query/edit") == -1)
+            {
+                window.history.pushState(null,"","edit/" + response.querySetId);
+            }
         }
 
         history.find('.relativetime').each(function () {

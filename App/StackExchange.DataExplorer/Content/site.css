@@ -660,7 +660,7 @@ ul.site-list .desc {
 
 #history li {
   border-bottom: 1px dotted #CCCCCC;
-  padding: 5px 8px 5px 8px;
+  padding: 0 8px 5px;
 }
 
 #history li.empty {
@@ -689,7 +689,6 @@ ul.site-list .desc {
 
 #history li a.user {
     color: #999;   
-    margin-bottom: 5px; 
 }
 
 #history li a span.revision-info {
@@ -1607,7 +1606,9 @@ font-weight:bold;
 #queryBodyText {
   line-height: 15px;
   margin-bottom: 30px;
-  padding: 8px 8px 8px 8px;
+  padding: 10px;
+  background-color: #FAFAFA; 
+  border: solid 1px #DDD;
 }
 
 #edit-link {

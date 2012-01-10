@@ -7,7 +7,7 @@
     Layout = "~/Views/Shared/Query.cshtml";
     this.SetPageTitle("Query " + Current.Controller.Site.LongName + " - Stack Exchange Data Explorer");
 
-    var revision = Model.CurrentRevision;
+    var revision = Model != null ?  Model.CurrentRevision : null;
     
     string sql = null, name = null, description = null;
     
