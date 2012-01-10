@@ -815,7 +815,8 @@ DataExplorer.ready(function () {
         };
 
         function defaultFormatter(row, cell, value, column, context) {
-            col = (value || value === 0) ? encodeColumn(value) : "";
+            col = (value || value === 0) ? value : "";
+            // I went with this as opposed to a regex cause it is theoretically faster, if regex is faster will be happy to change
             if (col.substr && (col.substr(0, "http://".length) == "http://" || col.substr(0, "https://".length) == "https://")) {
                 var url = col;
                 var description = col;
@@ -824,7 +825,10 @@ DataExplorer.ready(function () {
                     url = split[0];
                     description = split[1];
                 }
-                col = "<a href='" + url +"'>" + description + "</a>";
+                col = "<a href='" + encodeColumn(url) +"'>" + encodeColumn(description) + "</a>";
+            }
+            else {
+              col = encodeColumn(col);
             }
             return col;
         }
