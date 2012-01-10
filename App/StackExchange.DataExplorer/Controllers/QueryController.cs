@@ -253,8 +253,8 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
 
         [HttpPost]
-        [Route(@"query/run/{siteId:\d+}/{revisionId:\d+}")]
-        public ActionResult Execute(int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
+        [Route(@"query/run/{siteId:\d+}/{querySetId:\d+}/{revisionId:\d+}")]
+        public ActionResult Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -284,6 +284,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
                 // It might be bad that we have to do this here
                 results.RevisionId = revisionId;
+                results.QuerySetId = querySetId;
 
                 QueryRunner.LogRevisionExecution(CurrentUser, siteId, revisionId);
 

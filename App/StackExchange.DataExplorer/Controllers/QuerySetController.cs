@@ -160,7 +160,7 @@ namespace StackExchange.DataExplorer.Controllers
             );
 
             ViewData["QueryVoting"] = voting;
-            ViewData["query_action"] = "run/" + Site.Id + "/" + revision.Id;
+            ViewData["query_action"] = "run/" + Site.Id + "/" + revision.QuerySet.Id + "/" + revision.Id;
 
             if (cachedResults != null)
             {
