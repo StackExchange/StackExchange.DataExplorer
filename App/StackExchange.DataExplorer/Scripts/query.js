@@ -825,7 +825,7 @@ DataExplorer.ready(function () {
                     url = split[0];
                     description = split[1];
                 }
-                col = "<a href='" + encodeColumn(url) +"'>" + encodeColumn(description) + "</a>";
+                col = "<a href='" + encodeURI(url).replace(/&(?!\w+([;\s]|$))/g, '&amp') +"'>" + encodeColumn(description) + "</a>";
             }
             else {
               col = encodeColumn(col);
