@@ -24,6 +24,20 @@
 @section Metadata
 {
     <h2><input type="text" id="title" name="title" value="@name" size="40" placeholder="Enter a title for your query" /></h2>
+    <p id="query-description-text">@(Model.QuerySet != null ? Model.QuerySet.Description : "")</p>
+    <a id="edit-query-description" href="#">edit description</a>
+    <textarea style="display:none" name="description" id="query-description" placeholder='enter a description'>@(Model.QuerySet != null ? Model.QuerySet.Description : "")</textarea>
+    
+    <script type="text/javascript">
+        $(function () {
+            $("#edit-query-description").click(function () {
+                $("#edit-query-description").hide();
+                $("#query-description-text").hide();
+                $("#query-description").show();
+                return false;
+            });
+        });
+    </script>
 }
 
 <div id="editor">

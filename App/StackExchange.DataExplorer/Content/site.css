@@ -393,6 +393,12 @@ div#title
     margin-top: -20px;
 }
 
+#query-description
+{
+    width: 100%;
+    height: 80px;    
+}
+
 #logindisplay
 {
     font-size:1.1em;
@@ -1551,11 +1557,9 @@ font-weight:bold;
   margin-bottom: 40px;
 }
 
-#query-description {
-  float: left;
-  width: 700px;  
-  color: #333;
-  line-height: 16px;
+#edit-query-description
+{
+    color: #777;    
 }
 
 .error-notification {
