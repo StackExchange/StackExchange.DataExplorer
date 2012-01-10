@@ -507,8 +507,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
         private static QueryResults TranslateResults(ParsedQuery query, bool textResults, QueryResults results)
         {
             textResults = textResults || (results.ResultSets.Count != 1);
-            if (!textResults) results.Messages = QueryResults.FormatTextResults("", results.ResultSets);
-
+        
             if (textResults)
             {
                 results = results.ToTextResults();
@@ -626,7 +625,6 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
             ViewData["Tables"] = Site.GetTableInfos();
-            ViewData["Sites"] = Current.DB.Sites.All();
 
             return true;
         }

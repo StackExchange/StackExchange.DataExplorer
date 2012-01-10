@@ -130,7 +130,7 @@ namespace StackExchange.DataExplorer.Controllers
             var voting = new QuerySetVoting
             {
                 TotalVotes = totalVotes,
-                RevisionId = revision.Id,
+                QuerySetId = revision.QuerySet.Id,
                 ReadOnly = CurrentUser.IsAnonymous
             };
 
@@ -167,6 +167,7 @@ namespace StackExchange.DataExplorer.Controllers
                 ViewData["cached_results"] = new QueryResults
                 {
                     RevisionId = revision.Id,
+                    QuerySetId = revision.QuerySet.Id,
                     SiteId = Site.Id,
                     SiteName = Site.Name,
                     Slug = revision.QuerySet.Title.URLFriendly(),
@@ -328,6 +329,8 @@ namespace StackExchange.DataExplorer.Controllers
                 builder.Join("Queries q ON q.Id = r.QueryId");
                 builder.LeftJoin("Users u ON qs.OwnerId = u.Id");
                 builder.Where("qs.Hidden = 0");
+                builder.Where("qs.Title is not null");
+                builder.Where("qs.Title <> ''");
 
                 if (order_by == "featured" || order_by == "recent")
                 {

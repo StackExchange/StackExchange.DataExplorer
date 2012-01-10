@@ -10,7 +10,7 @@
     </div>
     <script type="text/javascript">
         DataExplorer.ready(function () {
-            DataExplorer.Voting.init('#query-voting', @(Model.RevisionId), @(Model.HasVoted.ToString().ToLower()), @(Model.ReadOnly.ToString().ToLower()));
+            DataExplorer.Voting.init('#query-voting', @(Model.QuerySetId), @(Model.HasVoted.ToString().ToLower()), @(Model.ReadOnly.ToString().ToLower()));
         });
     </script>
 </div>

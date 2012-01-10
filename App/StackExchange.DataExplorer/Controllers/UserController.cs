@@ -252,7 +252,7 @@ order by Row asc", new { currentPage, perPage });
                         v.VoteTypeId = @vote",
                         new { user = id, vote = (int)VoteType.Favorite }
                     );
-                    builder.OrderBy("qs.Votes DESC");
+                    builder.OrderBy("v.Id DESC");
                     message = user.Id == CurrentUser.Id ?
                         "You have no favorite queries, click the star icon on a query to favorite it" : "No favorites";
                 } else {
