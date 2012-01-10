@@ -200,6 +200,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static void LogRevisionExecution(User user, int siteId, int revisionId)
         {
+
             int updated = Current.DB.Query<int>(@"
                 UPDATE RevisionExecutions SET
                     ExecutionCount = ExecutionCount + 1,
@@ -234,7 +235,7 @@ namespace StackExchange.DataExplorer.Helpers
                         last = DateTime.UtcNow,
                         revision = revisionId,
                         site = siteId,
-                        user = user.Id
+                        user = (user.IsAnonymous ? (int?)null : user.Id)
                     }
                 );
             }
