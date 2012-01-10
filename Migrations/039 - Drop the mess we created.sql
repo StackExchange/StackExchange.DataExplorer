@@ -54,7 +54,7 @@ go
 -- initial revision is now unique ... index it 
 if dbo.fnIndexExists('QuerySets', 'QuerySets_InitialRevisionId_Unique') = 0
 begin 
-	create unique index QuerySets_InitialRevisionId_Unique on QuerySets(InitialRevisionId)
+	create index QuerySets_InitialRevisionId_Unique on QuerySets(InitialRevisionId)
 end 
 
 go 
@@ -62,7 +62,7 @@ go
 -- same for the current rev, QuerySets have unique revisions
 if dbo.fnIndexExists('QuerySets', 'QuerySets_CurrentRevisionId_Unique') = 0
 begin 
-	create unique index QuerySets_CurrentRevisionId_Unique on QuerySets(CurrentRevisionId)
+	create index QuerySets_CurrentRevisionId_Unique on QuerySets(CurrentRevisionId)
 end 
 
 go 
