@@ -74,18 +74,16 @@ namespace StackExchange.DataExplorer.Models
         public static IEnumerable<Site> GetSites()
         {
             // Could/should probably just cache this somewhere
-            return Current.DB.Query<Site>(@"
-                SELECT
-                    sites.*
-                FROM
-                    Sites sites
-                JOIN
-                    Sites mains
-                ON
-                    REPLACE(sites.Url, 'http://meta.', 'http://') = mains.Url
-                ORDER BY
-                    mains.TotalQuestions DESC,
-                    CHARINDEX('http://meta.', sites.Url)"
+            return Current.DB.Query<Site>(@"SELECT s.*
+FROM
+    Sites s
+LEFT JOIN
+    Sites m
+ON
+    REPLACE(s.Url, 'http://meta.', 'http://') = m.Url
+ORDER BY
+    isnull(m.Name,s.Name) asc,
+    CHARINDEX('http://meta.', s.Url)"
             );
         }
 
