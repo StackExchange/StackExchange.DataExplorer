@@ -817,7 +817,14 @@ DataExplorer.ready(function () {
         function defaultFormatter(row, cell, value, column, context) {
             col = (value || value === 0) ? encodeColumn(value) : "";
             if (col.substr && (col.substr(0, "http://".length) == "http://" || col.substr(0, "https://".length) == "https://")) {
-                col = "<a href='" + col +"'>" + col + "</a>";
+                var url = col;
+                var description = col;
+                var split = col.split("|");
+                if (split.length == 2) {
+                    url = split[0];
+                    description = split[1];
+                }
+                col = "<a href='" + url +"'>" + description + "</a>";
             }
             return col;
         }
