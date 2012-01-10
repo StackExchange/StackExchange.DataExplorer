@@ -793,7 +793,7 @@ DataExplorer.ready(function () {
     }
 
     function ColumnFormatter(base) {
-        var base = base, autolink = /^https?:\/\/.*/;
+        var base = base;
 
         this.getFormatter = function (column) {
             if (column.field === 'tags' || column.field == 'tagName') {
@@ -815,24 +815,18 @@ DataExplorer.ready(function () {
         };
 
         function defaultFormatter(row, cell, value, column, context) {
-            if (value == null) {
-                value = "";
-            }
-
-            if (typeof value === "string" && autolink.test(value)) {
-                var url = value, description = value, split = value.split("|");
-                
+            col = (value || value === 0) ? encodeColumn(value) : "";
+            if (col.substr && (col.substr(0, "http://".length) == "http://" || col.substr(0, "https://".length) == "https://")) {
+                var url = col;
+                var description = col;
+                var split = col.split("|");
                 if (split.length == 2) {
                     url = split[0];
                     description = split[1];
                 }
-
-                value = '<a href="' + url + '">' + encodeColumn(description) + '</a>';
-            } else {
-                value = encodeColumn(value);
+                col = "<a href='" + url +"'>" + description + "</a>";
             }
-
-            return value;
+            return col;
         }
         
         function dateFormatter(row, cell, value, column, context) {
