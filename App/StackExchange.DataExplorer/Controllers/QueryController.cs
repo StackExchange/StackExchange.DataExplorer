@@ -418,7 +418,10 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                 slug = "/" + slug;
             }
 
-            return new RedirectPermanentResult("/" + sitename + "/query/" + revision.Id + slug);
+            // find the first queryset with the revision 
+            var querySetId = Current.DB.Query<int>(@"select top 1 QuerySetId from QuerySetRevisions where RevisionId = @Id order by Id asc", new {revision.Id});
+
+            return new RedirectPermanentResult("/" + sitename + "/query/" + querySetId + slug);
         }
 
         [Route(@"{sitename}/query/fork/{querySetId:\d+}/{slug?}")]

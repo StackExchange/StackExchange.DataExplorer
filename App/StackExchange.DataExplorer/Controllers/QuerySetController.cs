@@ -84,19 +84,19 @@ namespace StackExchange.DataExplorer.Controllers
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
             if (title.HasValue() && (string.IsNullOrEmpty(slug) || slug != title))
             {
-                string url = "/{0}/query/{2}/{3}";
+                string url = "/{0}/query/{1}/{3}";
 
-                if (latest)
+                if (!latest)
                 {
                     url = "/{0}/query/{1}/{2}/{3}";
                 }
 
-                return PageMovedPermanentlyTo(string.Format(url, new object[] {
+                return PageMovedPermanentlyTo(string.Format(url,
                     Site.Name.ToLower(),
-                    ownerId,
+                    revision.QuerySet.Id,
                     revision.Id,
                     title
-                }) + Request.Url.Query);
+                ) + Request.Url.Query);
             }
 
             title = revision.QuerySet.Title;
