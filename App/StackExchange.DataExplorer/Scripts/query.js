@@ -704,8 +704,7 @@ DataExplorer.ready(function () {
 
     // Note that we destroy resultset in this function!
     function prepareTable(target, resultset, response) {
-        var 
-            grid, 
+        var grid, 
             columns = resultset.columns, 
             rows = resultset.rows,
             row, 
@@ -793,7 +792,17 @@ DataExplorer.ready(function () {
     }
 
     function ColumnFormatter(base) {
-        var base = base, autolinker = /^https?:\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.; ]*[-A-Z0-9+&@#\/%=~_\[\] ]((\|.+)?|$)/i;
+        var base = base,
+            autolinker = /^https?:\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.; ]*[-A-Z0-9+&@#\/%=~_\[\] ]((\|.+)?|$)/i,
+            dummy = document.createElement('a'),
+            wrapper = dummy,
+            _outerHTML = 'outerHTML';
+
+        if (!dummy.outerHTML) {
+            wrapper = document.createElement('span');
+            _outerHTML = 'innerHTML';
+            wrapper.appendChild(dummy);
+        }
 
         this.getFormatter = function (column) {
             if (column.field === 'tags' || column.field == 'tagName') {
@@ -819,7 +828,6 @@ DataExplorer.ready(function () {
                 value = "";
             }
             
-            // I went with this as opposed to a regex cause it is theoretically faster, if regex is faster will be happy to change
             if (typeof value === 'string' && autolinker.test(value)) {
                 var url = value,
                     description = value,
@@ -830,7 +838,13 @@ DataExplorer.ready(function () {
                     description = split[1];
                 }
 
-                value = "<a href='" + url.replace(/&(?!\w+([;\s]|$))/g, '&amp;').replace(' ', '%20') +"'>" + encodeColumn(description) + "</a>";
+                dummy.setAttribute('href', url);
+                // If we want literal entities to be rendered, this won't work
+                // But I'm not sure why we would, so this seems reasonable.
+                dummy[_textContent] = description;
+
+                // Firefox doesn't have outerHTML, so we have some hackery...
+                value = wrapper[_outerHTML];
             } else {
                 value = encodeColumn(value);
             }
