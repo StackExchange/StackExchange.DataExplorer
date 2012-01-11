@@ -793,7 +793,7 @@ DataExplorer.ready(function () {
     }
 
     function ColumnFormatter(base) {
-        var base = base;
+        var base = base, autolinker = /^https?:\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.; ]*[-A-Z0-9+&@#\/%=~_\[\] ]((\|.+)?|$)/i;
 
         this.getFormatter = function (column) {
             if (column.field === 'tags' || column.field == 'tagName') {
@@ -815,22 +815,27 @@ DataExplorer.ready(function () {
         };
 
         function defaultFormatter(row, cell, value, column, context) {
-            col = (value || value === 0) ? value : "";
+            if (value == null) {
+                value = "";
+            }
+            
             // I went with this as opposed to a regex cause it is theoretically faster, if regex is faster will be happy to change
-            if (col.substr && (col.substr(0, "http://".length) == "http://" || col.substr(0, "https://".length) == "https://")) {
-                var url = col;
-                var description = col;
-                var split = col.split("|");
+            if (typeof value === 'string' && autolinker.test(value)) {
+                var url = value,
+                    description = value,
+                    split = value.split("|");
+
                 if (split.length == 2) {
                     url = split[0];
                     description = split[1];
                 }
-                col = "<a href='" + encodeURI(decodeURI(url)).replace(/&(?!\w+([;\s]|$))/g, '&amp;') +"'>" + encodeColumn(description) + "</a>";
+
+                value = "<a href='" + url.replace(/&(?!\w+([;\s]|$))/g, '&amp;').replace(' ', '%20') +"'>" + encodeColumn(description) + "</a>";
+            } else {
+                value = encodeColumn(value);
             }
-            else {
-              col = encodeColumn(col);
-            }
-            return col;
+
+            return value;
         }
         
         function dateFormatter(row, cell, value, column, context) {
