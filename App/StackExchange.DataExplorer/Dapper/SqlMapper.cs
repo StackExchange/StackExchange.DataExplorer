@@ -2100,6 +2100,14 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
             }
         }
 
+        public IEnumerable<string> ParameterNames 
+        {
+            get
+            {
+                return parameters.Select(p => p.Key);
+            }
+        }
+
         /// <summary>
         /// Get the value of a parameter
         /// </summary>

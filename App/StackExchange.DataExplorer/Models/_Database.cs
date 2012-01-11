@@ -11,35 +11,29 @@ using System.Text;
 using System.Data.Common;
 using MvcMiniProfiler;
 using System.Diagnostics;
-
-namespace Dapper
-{
-    [DebuggerStepThrough]
-    public static partial class SqlMapper
-    {
-    }
-}
+using System.Reflection.Emit;
 
 namespace StackExchange.DataExplorer.Models
 {
-    [DebuggerStepThrough]
     public partial class Database : IDisposable
     {
         public class Table<T>
         {
             Database database;
             string tableName;
+            string likelyTableName;
 
-            public Table(Database database)
+            public Table(Database database, string likelyTableName)
             {
                 this.database = database;
+                this.likelyTableName = likelyTableName;
             }
 
             public string TableName 
             { 
                 get 
                 {
-                    tableName = tableName ?? database.DetermineTableName<T>();
+                    tableName = tableName ?? database.DetermineTableName<T>(likelyTableName);
                     return tableName;
                 } 
             }
@@ -94,6 +88,11 @@ namespace StackExchange.DataExplorer.Models
             static ConcurrentDictionary<Type, List<string>> paramNameCache = new ConcurrentDictionary<Type, List<string>>();
             private static List<string> GetParamNames(object o)
             {
+                if (o is DynamicParameters)
+                {
+                    return (o as DynamicParameters).ParameterNames.ToList();
+                }
+
                 List<string> paramNames;
                 if (!paramNameCache.TryGetValue(o.GetType(), out paramNames))
                 {
@@ -123,7 +122,6 @@ namespace StackExchange.DataExplorer.Models
                 tableConstructor = CreateTableConstructor(); 
             }
             
-            // this takes 0.1ms in dev, it could be sped up to close to nothing by baking a method.
             tableConstructor(this);
         }
 
@@ -146,45 +144,50 @@ namespace StackExchange.DataExplorer.Models
 
         public Action<Database> CreateTableConstructor()
         {
+            var dm = new DynamicMethod("ConstructInstances", null, new Type[] { typeof(Database) }, true);
+            var il = dm.GetILGenerator();
+
             var setters = GetType().GetProperties()
                 .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(Table<>))
-                .Select(p => Tuple.Create(p.GetSetMethod(true), p.PropertyType.GetConstructor(new Type[] { typeof(Database) })));
+                .Select(p => Tuple.Create(
+                        p.GetSetMethod(true), 
+                        p.PropertyType.GetConstructor(new Type[] { typeof(Database), typeof(string) }),
+                        p.Name
+                 ));
 
-            return (db) => 
+            foreach (var setter in setters)
             {
-                foreach (var setter in setters)
-                {
-                    setter.Item1.Invoke(db, new object[] { setter.Item2.Invoke(new object[] {db}) });
-                }
-            };
+                il.Emit(OpCodes.Ldarg_0);
+                // [db]
+
+                il.Emit(OpCodes.Dup);
+                // [db, db]
+
+                il.Emit(OpCodes.Ldstr, setter.Item3);
+                // [db, db, likelyname]
+
+                il.Emit(OpCodes.Newobj, setter.Item2);
+                // [db, table]
+
+                il.Emit(OpCodes.Callvirt, setter.Item1);
+                // []
+            }
+
+            il.Emit(OpCodes.Ret);
+            return (Action<Database>)dm.CreateDelegate(typeof(Action<Database>));
         }
 
         static ConcurrentDictionary<Type, string> tableNameMap = new ConcurrentDictionary<Type, string>();
-        private string DetermineTableName<T>()
+        private string DetermineTableName<T>(string likelyTableName)
         {
             string name;
 
             if (!tableNameMap.TryGetValue(typeof(T), out name))
             {
-                name = typeof(T).Name;
+                name = likelyTableName;
                 if (!TableExists(name))
                 {
-                    // the most stupid pluralizer ever, if you want something good see: http://jasonq.com/index.php/pluralizer
-                    if (name.EndsWith("y"))
-                    {
-                        name = name.Substring(0, name.Length - 1) + "ies";
-                    }
-                    else
-                    {
-                        if (TableExists(name + "s"))
-                        {
-                            name = name + "s";
-                        }
-                        else
-                        {
-                            name = name + "es";
-                        }
-                    }
+                    name = typeof(T).Name;
                 }
 
                 tableNameMap[typeof(T)] = name;

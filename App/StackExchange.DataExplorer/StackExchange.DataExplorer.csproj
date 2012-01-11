@@ -143,6 +143,7 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VoteController.cs" />
     <Compile Include="Current.cs" />
+    <Compile Include="Dapper\Snapshotter.cs" />
     <Compile Include="Dapper\SqlBuilder.cs" />
     <Compile Include="Dapper\SqlMapper.cs" />
     <Compile Include="DefaultAttribute.cs" />
