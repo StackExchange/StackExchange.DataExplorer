@@ -13,17 +13,17 @@ using MvcMiniProfiler;
 using System.Diagnostics;
 using System.Reflection.Emit;
 
-namespace StackExchange.DataExplorer.Models
+namespace Dapper
 {
-    public partial class Database : IDisposable
+    public abstract class Database<TDatabase> : IDisposable where TDatabase : Database<TDatabase>, new()
     {
         public class Table<T>
         {
-            Database database;
+            Database<TDatabase> database;
             string tableName;
             string likelyTableName;
 
-            public Table(Database database, string likelyTableName)
+            public Table(Database<TDatabase> database, string likelyTableName)
             {
                 this.database = database;
                 this.likelyTableName = likelyTableName;
@@ -111,9 +111,17 @@ namespace StackExchange.DataExplorer.Models
         int commandTimeout;
         DbTransaction transaction;
 
-        private static Action<Database> tableConstructor; 
 
-        public Database(DbConnection connection, int commandTimeout)
+        public static TDatabase Create(DbConnection connection, int commandTimeout)
+        {
+            TDatabase db = new TDatabase();
+            db.InitDatabase(connection, commandTimeout);
+            return db;
+        }
+
+        private static Action<Database<TDatabase>> tableConstructor; 
+
+        private void InitDatabase(DbConnection connection, int commandTimeout)
         {
             this.connection = connection;
             this.commandTimeout = commandTimeout;
@@ -142,17 +150,18 @@ namespace StackExchange.DataExplorer.Models
             transaction = null;
         }
 
-        public Action<Database> CreateTableConstructor()
+        public Action<Database<TDatabase>> CreateTableConstructor()
         {
-            var dm = new DynamicMethod("ConstructInstances", null, new Type[] { typeof(Database) }, true);
+            var dm = new DynamicMethod("ConstructInstances", null, new Type[] { typeof(Database<TDatabase>) }, true);
             var il = dm.GetILGenerator();
 
             var setters = GetType().GetProperties()
                 .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(Table<>))
                 .Select(p => Tuple.Create(
-                        p.GetSetMethod(true), 
-                        p.PropertyType.GetConstructor(new Type[] { typeof(Database), typeof(string) }),
-                        p.Name
+                        p.GetSetMethod(true),
+                        p.PropertyType.GetConstructor(new Type[] { typeof(Database<TDatabase>), typeof(string) }),
+                        p.Name,
+                        p.DeclaringType
                  ));
 
             foreach (var setter in setters)
@@ -160,21 +169,31 @@ namespace StackExchange.DataExplorer.Models
                 il.Emit(OpCodes.Ldarg_0);
                 // [db]
 
-                il.Emit(OpCodes.Dup);
-                // [db, db]
-
                 il.Emit(OpCodes.Ldstr, setter.Item3);
-                // [db, db, likelyname]
+                // [db, likelyname]
 
                 il.Emit(OpCodes.Newobj, setter.Item2);
-                // [db, table]
+                // [table]
+
+                var table = il.DeclareLocal(setter.Item2.DeclaringType);
+                il.Emit(OpCodes.Stloc, table);
+                // []
+
+                il.Emit(OpCodes.Ldarg_0);
+                // [db]
+
+                il.Emit(OpCodes.Castclass, setter.Item4);
+                // [db cast to container]
+
+                il.Emit(OpCodes.Ldloc, table);
+                // [db cast to container, table]
 
                 il.Emit(OpCodes.Callvirt, setter.Item1);
                 // []
             }
-
+ 
             il.Emit(OpCodes.Ret);
-            return (Action<Database>)dm.CreateDelegate(typeof(Action<Database>));
+            return (Action<Database<TDatabase>>)dm.CreateDelegate(typeof(Action<Database<TDatabase>>));
         }
 
         static ConcurrentDictionary<Type, string> tableNameMap = new ConcurrentDictionary<Type, string>();

@@ -188,7 +188,7 @@ namespace StackExchange.DataExplorer.Controllers
         /// <summary>
         /// Gets the shared DataContext to be used by a Request's controllers.
         /// </summary>
-        public Database DB
+        public DataExplorerDatabase DB
         {
             get { return Current.DB; }
         }

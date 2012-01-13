@@ -142,19 +142,19 @@ namespace StackExchange.DataExplorer
         /// <summary>
         /// Gets the single data context for this current request.
         /// </summary>
-        public static Database DB
+        public static DataExplorerDatabase DB
         {
             get
             {
-                Database result = null;
+                DataExplorerDatabase result = null;
                 if (Context != null)
                 {
-                    result = Context.Items["DB"] as Database;
+                    result = Context.Items["DB"] as DataExplorerDatabase;
                 }
                 else
                 {
                     // unit tests
-                    result = CallContext.GetData("DB") as Database;
+                    result = CallContext.GetData("DB") as DataExplorerDatabase;
                 }
 
                 if (result == null)
@@ -163,7 +163,7 @@ namespace StackExchange.DataExplorer
                     if (Current.Profiler != null)
                         cnn = new MvcMiniProfiler.Data.ProfiledDbConnection(cnn, new ErrorLoggingProfiler(Current.Profiler));
                     cnn.Open();
-                    result = new Database(cnn, 30);
+                    result = DataExplorerDatabase.Create(cnn, 30);
                     if (Context != null)
                     {
                         Context.Items["DB"] = result;
@@ -198,14 +198,14 @@ namespace StackExchange.DataExplorer
         /// </summary>
         public static void DisposeDB()
         {
-            Database db = null;
+            DataExplorerDatabase db = null;
             if (Context != null)
             {
-                db = Context.Items["DB"] as Database;
+                db = Context.Items["DB"] as DataExplorerDatabase;
             }
             else
             {
-                db = CallContext.GetData("DB") as Database;
+                db = CallContext.GetData("DB") as DataExplorerDatabase;
             }
             if (db != null)
             {

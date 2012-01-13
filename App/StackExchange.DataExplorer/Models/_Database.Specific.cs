@@ -5,7 +5,7 @@ using System.Web;
 
 namespace StackExchange.DataExplorer.Models
 {
-    public partial class Database
+    public class DataExplorerDatabase : Dapper.Database<DataExplorerDatabase>
     {
         public Table<Site> Sites { get; private set; }
         public Table<User> Users { get; private set; }
