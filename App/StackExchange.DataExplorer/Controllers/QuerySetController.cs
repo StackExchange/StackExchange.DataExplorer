@@ -41,7 +41,15 @@ namespace StackExchange.DataExplorer.Controllers
                 return PageNotFound();
             }
 
-            var revision = QueryUtil.GetFullQuerySet(querySetId).CurrentRevision;
+            var querySet = QueryUtil.GetFullQuerySet(querySetId);
+
+            if (querySet == null)
+            {
+                return PageNotFound();
+            }
+            
+            var revision = querySet.CurrentRevision;
+
             return ShowCommon(revision, slug, true);
         }
 
