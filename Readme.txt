@@ -28,8 +28,10 @@ The File layout
 
 Configuring the databases:
 
+- Ensure a blank database called DataExplorer exists and integrated security is enabled (can change by editing migrate.local.bat in the migration directory)
 - Run migrate.local.bat in the migration directory, then import some data about the sites from the SeedData/sites.sql script. It assumes the DB is called "DataExplorer", if you name it differently or have a named instance, you will have to edit the batch file. 
 - Import data into the Stack Overflow database (and any other databases you wish to query) alternatively if a DB exists you can simple run queries that do not depend on data like "SELECT 1"  tools like soddi can help you, see: http://stackapps.com/questions/2511/fast-multi-platform-data-dump-import-sql-server-2000-2005-2008-sqlite-mysq
+- Ensure a Site record exists for each site you wish to query. (a row in Sites) 
 
 
 - Contributing Patches
