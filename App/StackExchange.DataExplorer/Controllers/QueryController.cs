@@ -262,15 +262,25 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             ActionResult response = null;
-
             try
             {
-                var query = QueryUtil.GetQueryForRevision(revisionId);
+                QuerySet querySet = null;
 
-                if (query == null)
+                
+                querySet = Current.DB.QuerySets.Get(querySetId);
+
+                if (querySet == null)
                 {
+                    throw new ApplicationException("Invalid query set ID");
+                }
+
+                Revision revision = Current.DB.Revisions.Get(revisionId);
+                if (revision == null)
+                { 
                     throw new ApplicationException("Invalid revision ID");
                 }
+
+                Query query = Current.DB.Queries.Get(revision.QueryId);
 
                 var parsedQuery = new ParsedQuery(
                     query.QueryBody,
@@ -280,16 +290,33 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                     excludeMetas == true
                 );
 
-                var results = ExecuteWithResults(parsedQuery, siteId, textResults == true);
+                QueryResults results = null;
+                Site site = GetSite(siteId);
+                ValidateQuery(parsedQuery, site);
 
-                // It might be bad that we have to do this here
-                results.RevisionId = revisionId;
-                results.QuerySetId = querySetId;
+                var contextData = new QueryContextData
+                {
+                    IsText = textResults == true,
+                    QuerySet = querySet
+                };
 
-                QueryRunner.LogRevisionExecution(CurrentUser, siteId, revisionId);
+                var asyncResults = AsyncQueryRunner.Execute(parsedQuery, CurrentUser, site, contextData);
 
-                // Consider handling this XSS condition (?) in the ToJson() method instead, if possible
-                response = Content(results.ToJson().Replace("/", "\\/"), "application/json");
+                if (asyncResults.State == AsyncQueryRunner.AsyncState.Failure)
+                {
+                    throw asyncResults.Exception;
+                }
+
+                if (asyncResults.State == AsyncQueryRunner.AsyncState.Success)
+                {
+                    results = asyncResults.QueryResults;
+                }
+                else
+                {
+                    return Json(new { running = true, job_id = asyncResults.JobId });
+                }
+
+                response = CompleteResponse(results, parsedQuery, contextData, siteId);
             }
             catch (Exception ex)
             {
@@ -299,32 +326,6 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             return response;
         }
 
-        /*
-        [HttpPost]
-        [Route(@"query/update/{querySetId:\d+}")]
-        public ActionResult UpdateMetadata(int querySetId, string title, string description)
-        {
-            ActionResult response = null;
-
-            try
-            {
-                Revision revision = QueryUtil.GetBasicRevision(revisionId);
-
-                if (revision == null)
-                {
-                    throw new ApplicationException("Invalid revision ID");
-                }
-
-                SaveMetadata(revision, title, description, false);
-            }
-            catch (ApplicationException ex)
-            {
-                response = TransformExecutionException(ex);
-            }
-
-            return response;
-        }
-         */
 
         [Route(@"{sitename}/csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowSingleSiteCsv(string sitename, int revisionId)
