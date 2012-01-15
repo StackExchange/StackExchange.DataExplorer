@@ -17,6 +17,7 @@ namespace StackExchange.DataExplorer.Helpers
         public string Description { get; set; }
         public bool IsText { get; set; }
         public QuerySet QuerySet { get; set; }
+        public Revision Revision { get; set; }
     }
 
     public class AsyncQueryRunner

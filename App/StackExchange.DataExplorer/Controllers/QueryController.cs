@@ -129,14 +129,15 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             ).FirstOrDefault();
 
-            int revisionId = 0, queryId;
+            int revisionId = 0;
             DateTime saveTime;
 
             // We only create revisions if something actually changed.
             // We'll log it as an execution anyway if applicable, so the user will
             // still get a link in their profile, just not their own revision.
-            if (context.QuerySet == null || query == null || context.QuerySet.CurrentRevision == null || context.QuerySet.CurrentRevision.QueryId != query.Id)
+            if (context.Revision == null && (context.QuerySet == null || query == null || context.QuerySet.CurrentRevision == null || context.QuerySet.CurrentRevision.QueryId != query.Id))
             {
+                int queryId; 
                 if (query == null)
                 {
                     queryId = (int)Current.DB.Queries.Insert(
@@ -234,16 +235,15 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
             else
             {
-                queryId = query.Id;
-                results.RevisionId = context.QuerySet.CurrentRevisionId;
+                results.RevisionId = context.Revision != null ? context.Revision.Id : context.QuerySet.CurrentRevisionId;
                 results.QuerySetId = context.QuerySet.Id;
+                results.Created = null;
             }
 
             if (context.Title != null)
             {
                 results.Slug = context.Title.URLFriendly();
             }
-
 
             QueryRunner.LogRevisionExecution(CurrentUser, siteId, results.RevisionId);
 
@@ -297,7 +297,8 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                 var contextData = new QueryContextData
                 {
                     IsText = textResults == true,
-                    QuerySet = querySet
+                    QuerySet = querySet,
+                    Revision = revision
                 };
 
                 var asyncResults = AsyncQueryRunner.Execute(parsedQuery, CurrentUser, site, contextData);
