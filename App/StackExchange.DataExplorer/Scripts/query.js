@@ -616,9 +616,11 @@ DataExplorer.ready(function () {
             );
             history.find('li:last').addClass('last');
 
+            console.log(response);
+
             if (window.history && window.history.pushState && document.URL.indexOf("query/edit") == -1)
             {
-                window.history.pushState(null,"","edit/" + response.querySetId);
+                window.history.pushState(null,"", "/" + response.siteName + "/query/edit/" + response.querySetId);
             }
         }
 
