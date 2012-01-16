@@ -1059,7 +1059,7 @@ function bindToolTip(graph, suffix) {
 function renderGraph(resultSet) {
 
     var options = {
-        legend: { position: "ne" },
+        legend: { position: "nw" },
         grid: { hoverable: true },
         selection: { mode: "x" },
         series: { lines: { show: true }, points: { show: true} }
