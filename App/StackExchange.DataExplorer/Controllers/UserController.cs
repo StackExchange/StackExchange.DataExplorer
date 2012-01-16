@@ -238,7 +238,6 @@ order by Row asc", new { currentPage, perPage });
             }
             else
             {
-                builder.Select("qs.Id as QuerySetId");
                 builder.Select("qs.CurrentRevisionId AS Id");
                 builder.Select("qs.LastActivity AS LastRun");
                 builder.Join("Revisions r on r.QueryId = q.Id");
@@ -266,6 +265,7 @@ order by Row asc", new { currentPage, perPage });
                 }
             }
 
+            builder.Select("qs.Id as QuerySetId");
             builder.Select("u.Id as CreatorId");
             builder.Select("u.Login as CreatorLogin");
             builder.Select("qs.Title AS Name");
