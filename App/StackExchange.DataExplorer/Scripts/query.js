@@ -984,6 +984,12 @@ function isGraph(resultSet) {
 
     for (var i = 0; i < resultSet.columns.length; i++) {
         var type = resultSet.columns[i]["type"];
+
+        // allow for strings in the second column provided there are only 3 cols 
+        if (type == 'Text' && i==1 && resultSet.columns.length == 3) {
+            continue;
+        }
+
         if (i != 0 && type == 'Date') {
             graph = false;
             break;
@@ -1065,18 +1071,29 @@ function renderGraph(resultSet) {
 
     var series = [];
 
-    for (var col = 1; col < resultSet.columns.length; col++) {
-        series.push({label: resultSet.columns[col].name, data: []});
+    // if the second column is text we need to unpivot 
+    if (resultSet.columns[1]["type"] == 'Text')
+    {
+        var columns = {}; 
+        for (var row = 0; row < resultSet.rows.length; row++) {
+            var columnName = resultSet.rows[row][1];
+            if (columns[columnName] === undefined)
+            {
+                columns[columnName] = (series.push({label: columnName, data: [] }) - 1);
+            }
+            series[columns[columnName]].data.push([resultSet.rows[row][0],  resultSet.rows[row][2]]);
+        }
     }
-
-
-    for (var col = 1; col < resultSet.columns.length; col++) {
-        series.push([]);
-    }
-
-    for (var row = 0; row < resultSet.rows.length; row++) {
+    else 
+    {
         for (var col = 1; col < resultSet.columns.length; col++) {
-            series[col - 1].data.push([resultSet.rows[row][0], resultSet.rows[row][col]]);
+            series.push({label: resultSet.columns[col].name, data: []});
+        }
+
+        for (var row = 0; row < resultSet.rows.length; row++) {
+            for (var col = 1; col < resultSet.columns.length; col++) {
+                series[col - 1].data.push([resultSet.rows[row][0], resultSet.rows[row][col]]);
+            }
         }
     }
 
