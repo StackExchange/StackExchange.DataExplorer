@@ -394,7 +394,8 @@ namespace StackExchange.DataExplorer.Controllers
                 builder.Select("r.Id AS RevisionId");
                 builder.Select("qs.Id as QuerySetId");
                 builder.Select("r.CreationDate AS LastRun");
-                builder.Join(@"QuerySets qs ON OriginalQuerySetId = qs.Id");
+                builder.Join("QuerySetRevisions qr on qr.RevisionId = r.Id ");
+                builder.Join("QuerySets qs on qs.Id = qr.QuerySetId");
                 builder.Join("Queries q on q.Id = r.QueryId");
                 builder.LeftJoin("Users u ON r.OwnerId = u.Id");
                 builder.OrderBy("CreationDate DESC");
