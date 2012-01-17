@@ -352,6 +352,8 @@ DataExplorer.ready(function () {
 
         var cleanup = function () {
             $('#loading').hide();
+            error.stop();
+            $('.report-option').stop();
 
             form.find('input, button').prop('disabled', false);
         }
