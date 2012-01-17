@@ -555,11 +555,7 @@ DataExplorer.ready(function () {
             params = '?' + params;
         }
 
-        if (/[^\d]\/\d+\/\d+$/.test(action)) {
-            action = action.substring(0, action.lastIndexOf('/'));
-        }
-
-        if (!/(\/\d+){3}$/.test(action)) {
+        if (/[^\d]\/\d+$/.test(action)) {
             form[0].action = action + '/' + response.querySetId;
         }
 
