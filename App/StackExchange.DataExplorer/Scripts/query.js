@@ -694,6 +694,8 @@ DataExplorer.ready(function () {
 
     function showError(response) {
         if (response && !response.error) {
+            error.hide();
+
             return false;
         }
 
