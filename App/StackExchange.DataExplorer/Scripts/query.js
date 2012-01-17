@@ -555,11 +555,13 @@ DataExplorer.ready(function () {
             params = '?' + params;
         }
 
-        if (/.*?\/\d+\/\d+$/.test(action)) {
+        if (/[^\d]\/\d+\/\d+$/.test(action)) {
             action = action.substring(0, action.lastIndexOf('/'));
         }
 
-        form[0].action = action + '/' + response.querySetId;
+        if (!/(\/\d+){3}$/.test(action)) {
+            form[0].action = action + '/' + response.querySetId;
+        }
 
         if (response.resultSets.length) {
             results = response.resultSets[0];
@@ -617,8 +619,6 @@ DataExplorer.ready(function () {
                 '</li>'
             );
             history.find('li:last').addClass('last');
-
-            console.log(response);
 
             if (window.history && window.history.pushState && document.URL.indexOf("query/edit") == -1)
             {
