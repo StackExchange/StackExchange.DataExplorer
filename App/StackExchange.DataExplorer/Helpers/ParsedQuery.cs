@@ -364,10 +364,12 @@ namespace StackExchange.DataExplorer.Helpers
 
                     if (line.Length > 0 || stringified)
                     {
+                        string firstWord = null;
+
                         if (!stringified)
                         {
                             int space = line.IndexOf(' ');
-                            string firstWord = line;
+                            firstWord = line;
 
                             if (space != -1)
                             {
@@ -391,7 +393,7 @@ namespace StackExchange.DataExplorer.Helpers
 
                         buffer.Append(ScanSegment(line));
 
-                        if (stringified)
+                        if (stringified || firstWord == "GO")
                         {
                             buffer.Append('\n');
                         }
