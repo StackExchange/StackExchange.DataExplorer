@@ -352,6 +352,8 @@ DataExplorer.ready(function () {
 
         var cleanup = function () {
             $('#loading').hide();
+            error.stop();
+            $('.report-option').stop();
 
             form.find('input, button').prop('disabled', false);
         }
@@ -553,11 +555,9 @@ DataExplorer.ready(function () {
             params = '?' + params;
         }
 
-        if (/.*?\/\d+\/\d+$/.test(action)) {
-            action = action.substring(0, action.lastIndexOf('/'));
+        if (/[^\d]\/\d+$/.test(action)) {
+            form[0].action = action + '/' + response.querySetId;
         }
-
-        form[0].action = action + '/' + response.querySetId;
 
         if (response.resultSets.length) {
             results = response.resultSets[0];
@@ -615,8 +615,6 @@ DataExplorer.ready(function () {
                 '</li>'
             );
             history.find('li:last').addClass('last');
-
-            console.log(response);
 
             if (window.history && window.history.pushState && document.URL.indexOf("query/edit") == -1)
             {
@@ -692,6 +690,8 @@ DataExplorer.ready(function () {
 
     function showError(response) {
         if (response && !response.error) {
+            error.hide();
+
             return false;
         }
 
