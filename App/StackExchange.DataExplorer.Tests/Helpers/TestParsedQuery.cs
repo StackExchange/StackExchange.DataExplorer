@@ -340,5 +340,31 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
             Assert.AreEqual("Expected default value trees for Reputation to be a int!", query.Errors[0]);
             Assert.IsFalse(query.IsExecutionReady);
         }
+
+        [TestMethod]
+        public void TestCreateProcWithGoReduction()
+        {
+            string sql = new StringBuilder()
+                .AppendLine("CREATE TABLE #Test (id int IDENTITY(1,1) NOT NULL, v VARCHAR(MAX) NOT NULL);")
+                .AppendLine("go")
+                .AppendLine("CREATE INDEX #IX_T on #Test(id)")
+                .AppendLine("go")
+                .AppendLine("--BEGIN")
+                .AppendLine("--  RETURN GETDATE()")
+                .AppendLine("--END")
+                .AppendLine("CREATE PROCEDURE #T_P2 @v VARCHAR(MAX) AS")
+                .AppendLine("  PRINT @v")
+                .AppendLine("RETURN")
+                .AppendLine("GO")
+                .AppendLine("#T_P2 'test'")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.IsTrue(query.ExecutionSqlBatches.Any());
+            Assert.AreEqual("CREATE TABLE #Test (id int IDENTITY(1,1) NOT NULL, v VARCHAR(MAX) NOT NULL);\n" +
+                "go\nCREATE INDEX #IX_T on #Test(id)\ngo\nCREATE PROCEDURE #T_P2 @v VARCHAR(MAX) AS\nPRINT @v " +
+                "RETURN\nGO\n#T_P2 'test'", query.ExecutionSql);
+        }
     }
 }
