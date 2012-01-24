@@ -766,9 +766,9 @@ DataExplorer.ready(function () {
 
             columns[i] = {
                 'cssClass': columns[i].type === 'Number' ? 'number' : 'text',
-                'id': "col" + c,
+                'id': "col" + i,
                 'name': columns[i].name,
-                'field': "col" + c,
+                'field': "col" + i,
                 'type': columns[i].type.asVariable(),
                 'width': Math.min((widths[i] || 50) + 16, maxWidth) 
             };
