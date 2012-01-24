@@ -726,7 +726,10 @@ DataExplorer.ready(function () {
             row = {};
 
             for (var c = 0; c < columns.length; ++c) {
-                row["col" + c] = rows[i][c];
+                if (!variables[c]) {
+                    variables[c] = "col" + c;
+                }
+                row[variables[c]] = rows[i][c];
 
                 // Skip dates because we always know what length they'll be,
                 // ignoring the case of the completely blank column
@@ -766,9 +769,9 @@ DataExplorer.ready(function () {
 
             columns[i] = {
                 'cssClass': columns[i].type === 'Number' ? 'number' : 'text',
-                'id': "col" + c,
+                'id': variables[i],
                 'name': columns[i].name,
-                'field': "col" + c,
+                'field': variables[i],
                 'type': columns[i].type.asVariable(),
                 'width': Math.min((widths[i] || 50) + 16, maxWidth) 
             };
