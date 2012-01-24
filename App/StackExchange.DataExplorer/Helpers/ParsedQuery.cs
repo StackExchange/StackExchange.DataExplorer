@@ -47,22 +47,10 @@ namespace StackExchange.DataExplorer.Helpers
             "SET", "DECLARE", "SELECT", "WITH", "INSERT", "GO", "PRINT"
         };
 
-        public ParsedQuery(string sql, NameValueCollection requestParams, bool crossSite, bool excludeMetas)
-            : this(sql, requestParams, false, crossSite, excludeMetas)
-        {
-
-        }
-
-        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan, bool crossSite, bool excludeMetas)
-            : this(sql, requestParams)
+        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan = false, TargetSites targetSites = Helpers.TargetSites.Current)
         {
             IncludeExecutionPlan = executionPlan;
-            IsCrossSite = crossSite;
-            ExcludesMetas = excludeMetas;
-        }
-
-        public ParsedQuery(string sql, NameValueCollection requestParams)
-        {
+            TargetSites = targetSites;
             Parameters = new Dictionary<string, QueryParameter>();
             Parse(sql, requestParams);
         }
@@ -83,7 +71,7 @@ namespace StackExchange.DataExplorer.Helpers
         public bool IncludeExecutionPlan {
             get
             {
-                return !IsCrossSite && includeExecutionPlan;
+                return TargetSites == Helpers.TargetSites.Current && includeExecutionPlan;
             }
 
             private set
@@ -95,23 +83,8 @@ namespace StackExchange.DataExplorer.Helpers
         /// <summary>
         /// Whether or not this query should be executed across all sites
         /// </summary>
-        public bool IsCrossSite { get; private set; }
+        public TargetSites TargetSites { get; private set; }
 
-        private bool excludesMetas = false;
-
-        /// <summary>
-        /// Whether or not this query should exclude meta sites, if it should be executed across all sites
-        /// </summary>
-        public bool ExcludesMetas {
-            get {
-                return IsCrossSite && excludesMetas;
-            }
-
-            private set
-            {
-                excludesMetas = value;
-            }
-        }
 
         public string ErrorMessage { get; private set; }
 

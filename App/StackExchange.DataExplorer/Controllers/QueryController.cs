@@ -44,7 +44,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         [HttpPost]
         [Route(@"query/save/{siteId:\d+}/{querySetId?:\d+}")]
-        public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
+        public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, TargetSites? targetSites)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -70,8 +70,7 @@ namespace StackExchange.DataExplorer.Controllers
                     sql,
                     Request.Params,
                     withExecutionPlan == true,
-                    crossSite == true,
-                    excludeMetas == true
+                    targetSites ?? TargetSites.Current
                 );
 
                 QueryResults results = null;
@@ -254,7 +253,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
         [HttpPost]
         [Route(@"query/run/{siteId:\d+}/{querySetId:\d+}/{revisionId:\d+}")]
-        public ActionResult Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
+        public ActionResult Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, TargetSites? targetSites)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -286,8 +285,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                     query.QueryBody,
                     Request.Params,
                     withExecutionPlan == true,
-                    crossSite == true,
-                    excludeMetas == true
+                    targetSites ?? TargetSites.Current
                 );
 
                 QueryResults results = null;
@@ -367,27 +365,27 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             return new CsvResult(resultSets);
         }
 
-        [Route(@"{sitename}/mcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowMultiSiteCsv(string sitename, int revisionId)
+
+        [Route(@"{sitename}/all-meta-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteMeteCsv(string sitename, int revisionId)
         {
-            Query query = QueryUtil.GetQueryForRevision(revisionId);
-
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            var results = QueryRunner.GetResults(
-                new ParsedQuery(query.QueryBody, Request.Params, crossSite: true, excludeMetas: false),
-                null,
-                CurrentUser
-            );
-
-            return new CsvResult(results.ResultSets);
+            return GetCsv(sitename, revisionId, TargetSites.AllMetaSites);
         }
 
-        [Route(@"{sitename}/nmcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+
+        [Route(@"{sitename}/all-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteCsv(string sitename, int revisionId)
+        {
+            return GetCsv(sitename, revisionId, TargetSites.AllSites);
+        }
+
+        [Route(@"{sitename}/all-non-meta-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowMultiSiteWithoutMetaCsv(string sitename, int revisionId)
+        {
+            return GetCsv(sitename, revisionId, TargetSites.AllNonMetaSites);
+        }
+
+        private ActionResult GetCsv(string sitename, int revisionId, TargetSites targetSites)
         {
             Query query = QueryUtil.GetQueryForRevision(revisionId);
 
@@ -397,7 +395,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             var results = QueryRunner.GetResults(
-                new ParsedQuery(query.QueryBody, Request.Params, crossSite: true, excludeMetas: true),
+                new ParsedQuery(query.QueryBody, Request.Params, executionPlan: false, targetSites: targetSites),
                 null,
                 CurrentUser
             );

@@ -585,9 +585,13 @@ DataExplorer.ready(function () {
             'cached': response.fromCache ? ' (cached)' : ''
         });
 
+        var target = "";
+        if (response.targetSites == 1) { target = "all-"; } // all sites
+        else if (response.targetSites == 2) { target = "all-meta-"; } // all meta sites
+        else if (response.targetSites == 3) { target = "all-non-meta-"; } // all non meta sites
+
         DataExplorer.template('a.templated', 'href', {
-            'multi': response.multiSite ? 'm' : '',
-            'metas': response.excludeMetas ? 'n' : '',
+            'targetSites': target,
             'site': response.siteName,
             'id': response.querySetId,
             'slug': slug,
@@ -781,7 +785,7 @@ DataExplorer.ready(function () {
         document.body.removeChild(sizerParent);
 
         options = $.extend({}, gridOptions, {
-            'formatterFactory': new ColumnFormatter(response.url),
+            'formatterFactory': new ColumnFormatter(response),
             'rowHeight': hasTags ? 35 : 25, 
             'enableTextSelectionOnCells' : true
         });
@@ -790,8 +794,8 @@ DataExplorer.ready(function () {
         grid.onColumnsResized = resizeResults;
     }
 
-    function ColumnFormatter(base) {
-        var base = base,
+    function ColumnFormatter(response) {
+        var base = response.url,
             autolinker = /^https?:\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.; ]*[-A-Z0-9+&@#\/%=~_\[\] ]((\|.+)?|$)/i,
             dummy = document.createElement('a'),
             wrapper = dummy,
@@ -803,19 +807,34 @@ DataExplorer.ready(function () {
             wrapper.appendChild(dummy);
         }
 
+        var siteColumnName = null;
+        if(response.resultSets && response.resultSets[0])
+        {
+            var cols = response.resultSets[0].columns; 
+            for (var i = 0; i < cols.length; i++) {
+                if (cols[i]["type"] == "site")
+                {
+                    siteColumnName = "col" + i;
+                }
+            }
+        }
+
         this.getFormatter = function (column) {
-            if (column.field === 'tags' || column.field == 'tagName') {
-                return tagFormatter;
+            
+            if (column.name.toLowerCase() === 'tags' || column.name.toLowerCase() === 'tagName') {
+                return tagFormatter(siteColumnName);
             } else if (column.type) {
                 switch (column.type) {
                     case 'user':
-                        return linkFormatter('/users/');
+                        return linkFormatter('/users/',siteColumnName);
                     case 'post':
-                        return linkFormatter('/questions/');
+                        return linkFormatter('/questions/',siteColumnName);
                     case 'suggestedEdits':
-                        return linkFormatter('/suggested-edits/');
+                        return linkFormatter('/suggested-edits/',siteColumnName);
                     case 'date':
                         return dateFormatter;
+                    case 'site':
+                        return siteFormatter;
                 }
             }
 
@@ -859,38 +878,73 @@ DataExplorer.ready(function () {
             return (new Date(value)).toString("yyyy-MM-dd HH:mm:ss");
         }
 
-        function tagFormatter(row, cell, value, column, context) {
-            if (!value || value.search(/^(?:<[^<]+>)+$/) === -1) {
+        function tagFormatter(siteColumnName) { 
+            var siteColumnName = siteColumnName;
+
+            return function(row, cell, value, column, context) {
+                if (!value || value.search(/^(?:<[^<]+>)+$/) === -1) {
+                    return defaultFormatter(row, cell, value, column, context);
+                }
+
+                var tags = value.substring(1, value.length - 1).split('><'),
+                    template = '<a class="post-tag :class" href=":base/tags/:tag">:tag</a>',
+                    value = '', tag;
+
+                var url = base;
+                if (siteColumnName != null)
+                {
+                    url = context[siteColumnName].url;
+                }
+
+                for (var i = 0; i < tags.length; ++i) {
+                    tag = tags[i];
+
+                    value = value + template.format({
+                        'base': url,
+                        'class': '',
+                        'tag': tag
+                    });
+                }
+
+                return value;
+            }
+        }
+
+        function siteFormatter(row, cell, value, column, context) {
+            var template = '<a href=":url">:text</a>';
+
+            if (!value || typeof value !== 'object') {
                 return defaultFormatter(row, cell, value, column, context);
             }
 
-            var tags = value.substring(1, value.length - 1).split('><'),
-                template = '<a class="post-tag :class" href=":base/tags/:tag">:tag</a>',
-                value = '', tag;
-
-            for (var i = 0; i < tags.length; ++i) {
-                tag = tags[i];
-
-                value = value + template.format({
-                    'base': base,
-                    'class': '',
-                    'tag': tag
-                });
-            }
-
-            return value;
+            return template.format({
+                'url': value.url,
+                'text': encodeColumn(value.name)
+            });
         }
 
-        function linkFormatter(path) {
-            var url = base + path, template = '<a href=":url">:text</a>';
+
+        function linkFormatter(path, siteColumnName) {
+            var url = base + path, 
+                template = '<a href=":url">:text</a>',
+                siteColumnName = siteColumnName,
+                path = path;
 
             return function (row, cell, value, column, context) {
+
                 if (!value || typeof value !== 'object') {
                     return defaultFormatter(row, cell, value, column, context);
                 }
 
+                var currentUrl = url;
+
+                if (siteColumnName != null)
+                {
+                    currentUrl = context[siteColumnName].url + path;
+                }
+
                 return template.format({
-                    'url': url + value.id,
+                    'url': currentUrl + value.id,
                     'text': encodeColumn(value.title)
                 });
             };

@@ -23,7 +23,8 @@ namespace StackExchange.DataExplorer.Helpers
         Date,
         Text,
         Url, 
-        SuggestedEdit
+        SuggestedEdit,
+        Site
     }
 
     public class ResultColumnInfo
@@ -80,8 +81,7 @@ namespace StackExchange.DataExplorer.Helpers
         /// </summary>
         public string ExecutionPlan { get; set; }
 
-        public bool MultiSite { get; set; }
-        public bool ExcludeMetas { get; set; }
+        public TargetSites TargetSites { get; set; }
         public string Messages { get; set; }
         public string Url { get; set; }
         public int SiteId { get; set; }
@@ -142,8 +142,7 @@ namespace StackExchange.DataExplorer.Helpers
             results.Truncated = Truncated;
             results.Url = Url;
             results.Slug = Slug;
-            results.MultiSite = MultiSite;
-            results.ExcludeMetas = ExcludeMetas;
+            results.TargetSites = TargetSites;
             results.ExecutionPlan = this.ExecutionPlan;
             results.ParentId = ParentId;
             results.RevisionId = RevisionId;
@@ -168,8 +167,7 @@ namespace StackExchange.DataExplorer.Helpers
             returnValue.Truncated = this.Truncated;
             returnValue.Url = this.Url;
             returnValue.Slug = this.Slug;
-            returnValue.MultiSite = this.MultiSite;
-            returnValue.ExcludeMetas = this.ExcludeMetas;
+            returnValue.TargetSites = this.TargetSites;
             returnValue.ResultSets = this.ResultSets;
             returnValue.Messages = this.Messages;
             returnValue.ParentId = ParentId;

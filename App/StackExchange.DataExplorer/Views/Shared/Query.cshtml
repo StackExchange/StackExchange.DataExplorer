@@ -43,8 +43,14 @@
                 <label title="Include the execution plan for this query in the results"><input type="checkbox" name="withExecutionPlan" value="true" />Include execution plan</label>
             @if (AppSettings.AllowRunOnAllDbsOption)
             {
-                <label title="Execute this query on all sites at once"><input type="checkbox" name="crossSite" value="true" />Mutli-site</label>
-                <label title="Exclude meta sites from the sites this query is executed against"><input type="checkbox" name="excludeMetas" value="true" />Exclude metas</label>
+                <label title="Targe sites">Run on: 
+                <select name="targetSites">
+                    <option selected value="Current">This Site</option>
+                    <option value="AllSites">All Sites</option>
+                    <option value="AllMetaSites">All Meta Sites</option>
+                    <option value="AllNonMetaSites">All Non-Meta Sites</option>
+                    </select>
+                </label>
             }
             </span>
         </div>
@@ -81,8 +87,8 @@
                     <a id="graphTab" class="optional" href="#graph">Graph</a>
                     <a id="executionPlanTab" class="optional" href="#executionPlan">Execution Plan</a>
                 </div>
-                <a id="resultSetsButton" class="download-button templated" title="Download results as CSV" href="/:site/:metas:multi;csv/:id:params">Download CSV</a>
-                <a id="executionPlanButton" class="download-button templated" title="Download execution plan as XML" href="/:site/:metas:multi;plan/:id:params">Download XML</a>
+                <a id="resultSetsButton" class="download-button templated" title="Download results as CSV" href="/:site/:targetSites;csv/:id:params">Download CSV</a>
+                <a id="executionPlanButton" class="download-button templated" title="Download execution plan as XML" href="/:site/:targetSites;plan/:id:params">Download XML</a>
             </div>
         </div>
         <div id="resultSets" class="panel"></div>
