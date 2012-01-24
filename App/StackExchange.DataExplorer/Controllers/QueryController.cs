@@ -44,7 +44,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         [HttpPost]
         [Route(@"query/save/{siteId:\d+}/{querySetId?:\d+}")]
-        public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
+        public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, TargetSites? targetSites)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -70,8 +70,7 @@ namespace StackExchange.DataExplorer.Controllers
                     sql,
                     Request.Params,
                     withExecutionPlan == true,
-                    crossSite == true,
-                    excludeMetas == true
+                    targetSites ?? TargetSites.Current
                 );
 
                 QueryResults results = null;
@@ -254,7 +253,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
         [HttpPost]
         [Route(@"query/run/{siteId:\d+}/{querySetId:\d+}/{revisionId:\d+}")]
-        public ActionResult Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? crossSite, bool? excludeMetas)
+        public ActionResult Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, TargetSites? targetSites)
         {
             if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(GetRemoteIP()))
             {
@@ -286,8 +285,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                     query.QueryBody,
                     Request.Params,
                     withExecutionPlan == true,
-                    crossSite == true,
-                    excludeMetas == true
+                    targetSites ?? TargetSites.Current
                 );
 
                 QueryResults results = null;
@@ -378,7 +376,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             var results = QueryRunner.GetResults(
-                new ParsedQuery(query.QueryBody, Request.Params, crossSite: true, excludeMetas: false),
+                new ParsedQuery(query.QueryBody, Request.Params, executionPlan: false, targetSites: TargetSites.AllSites),
                 null,
                 CurrentUser
             );
@@ -397,7 +395,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             var results = QueryRunner.GetResults(
-                new ParsedQuery(query.QueryBody, Request.Params, crossSite: true, excludeMetas: true),
+                new ParsedQuery(query.QueryBody, Request.Params, executionPlan: false, targetSites: TargetSites.AllNonMetaSites),
                 null,
                 CurrentUser
             );

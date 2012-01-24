@@ -43,8 +43,14 @@
                 <label title="Include the execution plan for this query in the results"><input type="checkbox" name="withExecutionPlan" value="true" />Include execution plan</label>
             @if (AppSettings.AllowRunOnAllDbsOption)
             {
-                <label title="Execute this query on all sites at once"><input type="checkbox" name="crossSite" value="true" />Multi-site</label>
-                <label title="Exclude meta sites from the sites this query is executed against"><input type="checkbox" name="excludeMetas" value="true" />Exclude metas</label>
+                <label title="Targe sites">Run on: 
+                <select name="targetSites">
+                    <option selected value="Current">This Site</option>
+                    <option value="AllSites">All Sites</option>
+                    <option value="AllMetaSites">All Meta Sites</option>
+                    <option value="AllNonMetaSites">All Non-Meta Sites</option>
+                    </select>
+                </label>
             }
             </span>
         </div>

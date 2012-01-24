@@ -131,11 +131,14 @@ namespace StackExchange.DataExplorer.Helpers
         private static QueryResults GetMultiSiteResults(ParsedQuery parsedQuery, User currentUser, AsyncQueryRunner.AsyncResult result = null)
         {
             var sites = Current.DB.Sites.All();
-            if (parsedQuery.ExcludesMetas)
+            if (parsedQuery.TargetSites == TargetSites.AllNonMetaSites)
             { 
                 sites = sites.Where(s => !s.Url.Contains("meta.")).ToList();
             }
-
+            else if (parsedQuery.TargetSites == TargetSites.AllMetaSites)
+            {
+                sites = sites.Where(s => s.Url.Contains("meta.")).ToList();
+            }
 
             var firstSite = sites.First();
             var results = QueryRunner.GetSingleSiteResults(parsedQuery, firstSite, currentUser, result);
@@ -193,7 +196,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             results.Messages = buffer.ToString();
             results.MultiSite = true;
-            results.ExcludeMetas = parsedQuery.ExcludesMetas;
+            results.ExcludeMetas = parsedQuery.TargetSites == TargetSites.AllNonMetaSites;
 
             return results;
         }
@@ -439,7 +442,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static QueryResults GetResults(ParsedQuery query, Site site, User user, AsyncQueryRunner.AsyncResult result = null)
         {
-            if (query.IsCrossSite)
+            if (query.TargetSites != TargetSites.Current)
             {
                 return GetMultiSiteResults(query, user, result);
             }
