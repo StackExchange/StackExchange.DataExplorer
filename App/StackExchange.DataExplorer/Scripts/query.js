@@ -754,11 +754,13 @@ DataExplorer.ready(function () {
         }
 
         for (var i = 0; i < columns.length; ++i) {
+            var name = columns[i].name.toLowerCase();
+
             if (columns[i].type === 'Date') {
                 widths[i] = 160;
             }
 
-            if (columns[i].name.toLowerCase() === 'post link') {
+            if (name === 'post link') {
                 widths[i] = maxWidth;
             } else {
                 sizer[_textContent] = columns[i].name;
@@ -777,7 +779,7 @@ DataExplorer.ready(function () {
                 'width': Math.min((widths[i] || 50) + 16, maxWidth) 
             };
 
-            if (columns[i].field === 'tags' || columns[i].field === 'tagName') {
+            if (name === 'tags' || name === 'tagname') {
                 hasTags = true;
             }
         }
