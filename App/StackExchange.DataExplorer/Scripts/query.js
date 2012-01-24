@@ -896,7 +896,7 @@ DataExplorer.ready(function () {
                 var url = base;
                 if (siteColumnName != null)
                 {
-                    url = context[siteColumnName].url + path;
+                    url = context[siteColumnName].url;
                 }
 
                 for (var i = 0; i < tags.length; ++i) {
