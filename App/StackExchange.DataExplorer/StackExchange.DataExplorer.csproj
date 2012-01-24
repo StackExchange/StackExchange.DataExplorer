@@ -156,6 +156,7 @@
     <Compile Include="Helpers\ChangeAction.cs" />
     <Compile Include="Helpers\Crc16.cs" />
     <Compile Include="Helpers\CsvResult.cs" />
+    <Compile Include="Helpers\SiteInfo.cs" />
     <Compile Include="Helpers\TargetSites.cs" />
     <Compile Include="Helpers\UIHelper.cs" />
     <Compile Include="Models\QuerySetRevision.cs" />

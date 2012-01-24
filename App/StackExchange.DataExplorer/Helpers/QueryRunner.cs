@@ -171,10 +171,10 @@ namespace StackExchange.DataExplorer.Helpers
             else
             {
 
-                results.ResultSets[0].Columns.Add(new ResultColumnInfo { Name = "Site Name", Type = ResultColumnType.SiteName });
+                results.ResultSets[0].Columns.Add(new ResultColumnInfo { Name = "Site Name", Type = ResultColumnType.Site });
                 foreach (var row in results.ResultSets[0].Rows)
                 {
-                    row.Add(sites.First().Name);
+                    row.Add(sites.First().SiteInfo);
                 }
                 
                 foreach (var s in sites.Skip(1))
@@ -190,7 +190,7 @@ namespace StackExchange.DataExplorer.Helpers
 
                         foreach (var row in tmp.ResultSets[0].Rows)
                         {
-                            row.Add(s.Name);
+                            row.Add(s.SiteInfo);
                             results.ResultSets[0].Rows.Add(row);
                         }
 
@@ -572,19 +572,19 @@ namespace StackExchange.DataExplorer.Helpers
                         DecorateColumn(column);
 
                         // tricky ... multi site has special handling.
-                        if (resultSet.Columns.Any(c => c.Type == ResultColumnType.SiteName))
+                        if (resultSet.Columns.Any(c => c.Type == ResultColumnType.Site))
                         {
                             int siteNameIndex = 0;
                             foreach (var item in resultSet.Columns)
 	                        {
-		                        if (item.Type == ResultColumnType.SiteName) break;
+		                        if (item.Type == ResultColumnType.Site) break;
                                 siteNameIndex++;
 	                        }
 
                             var sites = Current.DB.Sites.All();
                             foreach (var group in resultSet.Rows.GroupBy(r => r[siteNameIndex]))
                             {
-                                using (var newConnection = sites.First(s => s.Name == (string)group.First()[siteNameIndex]).GetConnection())
+                                using (var newConnection = sites.First(s => s.Id == ((SiteInfo)group.First()[siteNameIndex]).Id).GetConnection())
                                 {
                                     newConnection.Open();
                                     ProcessColumn(newConnection, index, group.ToList(), column);

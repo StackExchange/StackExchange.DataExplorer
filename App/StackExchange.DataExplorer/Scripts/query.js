@@ -788,7 +788,7 @@ DataExplorer.ready(function () {
         document.body.removeChild(sizerParent);
 
         options = $.extend({}, gridOptions, {
-            'formatterFactory': new ColumnFormatter(response.url),
+            'formatterFactory': new ColumnFormatter(response),
             'rowHeight': hasTags ? 35 : 25, 
             'enableTextSelectionOnCells' : true
         });
@@ -797,8 +797,8 @@ DataExplorer.ready(function () {
         grid.onColumnsResized = resizeResults;
     }
 
-    function ColumnFormatter(base) {
-        var base = base,
+    function ColumnFormatter(response) {
+        var base = response.url,
             autolinker = /^https?:\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.; ]*[-A-Z0-9+&@#\/%=~_\[\] ]((\|.+)?|$)/i,
             dummy = document.createElement('a'),
             wrapper = dummy,
@@ -810,19 +810,33 @@ DataExplorer.ready(function () {
             wrapper.appendChild(dummy);
         }
 
+        var siteColumnName = null;
+        if(response.resultSets && response.resultSets[0])
+        {
+            var cols = response.resultSets[0].columns; 
+            for (var i = 0; i < cols.length; i++) {
+                if (cols[i]["type"] == "site")
+                {
+                    siteColumnName = "col" + i;
+                }
+            }
+        }
+
         this.getFormatter = function (column) {
             if (column.field === 'tags' || column.field == 'tagName') {
                 return tagFormatter;
             } else if (column.type) {
                 switch (column.type) {
                     case 'user':
-                        return linkFormatter('/users/');
+                        return linkFormatter('/users/',siteColumnName);
                     case 'post':
-                        return linkFormatter('/questions/');
+                        return linkFormatter('/questions/',siteColumnName);
                     case 'suggestedEdits':
-                        return linkFormatter('/suggested-edits/');
+                        return linkFormatter('/suggested-edits/',siteColumnName);
                     case 'date':
                         return dateFormatter;
+                    case 'site':
+                        return siteFormatter;
                 }
             }
 
@@ -888,16 +902,41 @@ DataExplorer.ready(function () {
             return value;
         }
 
-        function linkFormatter(path) {
-            var url = base + path, template = '<a href=":url">:text</a>';
+        function siteFormatter(row, cell, value, column, context) {
+            var template = '<a href=":url">:text</a>';
+
+            if (!value || typeof value !== 'object') {
+                return defaultFormatter(row, cell, value, column, context);
+            }
+
+            return template.format({
+                'url': value.url,
+                'text': encodeColumn(value.name)
+            });
+        }
+
+
+        function linkFormatter(path, siteColumnName) {
+            var url = base + path, 
+                template = '<a href=":url">:text</a>',
+                siteColumnName = siteColumnName,
+                path = path;
 
             return function (row, cell, value, column, context) {
+
                 if (!value || typeof value !== 'object') {
                     return defaultFormatter(row, cell, value, column, context);
                 }
 
+                var currentUrl = url;
+
+                if (siteColumnName != null)
+                {
+                    currentUrl = context[siteColumnName].url + path;
+                }
+
                 return template.format({
-                    'url': url + value.id,
+                    'url': currentUrl + value.id,
                     'text': encodeColumn(value.title)
                 });
             };
