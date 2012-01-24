@@ -142,7 +142,6 @@ namespace StackExchange.DataExplorer.Helpers
 
             var firstSite = sites.First();
             var results = QueryRunner.GetSingleSiteResults(parsedQuery, firstSite, currentUser, result);
-            StringBuilder buffer = new StringBuilder();
 
             if (results.ResultSets.First().Columns.Where(c => c.Name == "Pivot").Any())
             {
@@ -171,8 +170,13 @@ namespace StackExchange.DataExplorer.Helpers
             }
             else
             {
-                results = results.ToTextResults();
-                AddBody(buffer, results, firstSite);
+
+                results.ResultSets[0].Columns.Add(new ResultColumnInfo { Name = "Site Name", Type = ResultColumnType.SiteName });
+                foreach (var row in results.ResultSets[0].Rows)
+                {
+                    row.Add(sites.First().Name);
+                }
+                
                 foreach (var s in sites.Skip(1))
                 {
                     if (result != null && result.Cancelled)
@@ -182,9 +186,16 @@ namespace StackExchange.DataExplorer.Helpers
 
                     try
                     {
-                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser, result).ToTextResults();
+                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser, result);
+
+                        foreach (var row in tmp.ResultSets[0].Rows)
+                        {
+                            row.Add(s.Name);
+                            results.ResultSets[0].Rows.Add(row);
+                        }
+
                         results.ExecutionTime += tmp.ExecutionTime;
-                        AddBody(buffer, tmp, s);
+                        results.Messages += "\n" + tmp.Messages;
                     }
                     catch (Exception)
                     { 
@@ -194,9 +205,7 @@ namespace StackExchange.DataExplorer.Helpers
                 }
             }
 
-            results.Messages = buffer.ToString();
-            results.MultiSite = true;
-            results.ExcludeMetas = parsedQuery.TargetSites == TargetSites.AllNonMetaSites;
+            results.TargetSites = parsedQuery.TargetSites;
 
             return results;
         }
@@ -561,17 +570,46 @@ namespace StackExchange.DataExplorer.Helpers
                     if (magic_columns.ContainsKey(column.Name))
                     {
                         DecorateColumn(column);
-                        IEnumerable<object> values = resultSet.Rows.Select(row => row[index]);
-                        List<object> processedValues = magic_columns[column.Name](cnn, values);
-                        int rowNumber = 0;
-                        foreach (var row in resultSet.Rows)
+
+                        // tricky ... multi site has special handling.
+                        if (resultSet.Columns.Any(c => c.Type == ResultColumnType.SiteName))
                         {
-                            row[index] = processedValues[rowNumber];
-                            rowNumber++;
+                            int siteNameIndex = 0;
+                            foreach (var item in resultSet.Columns)
+	                        {
+		                        if (item.Type == ResultColumnType.SiteName) break;
+                                siteNameIndex++;
+	                        }
+
+                            var sites = Current.DB.Sites.All();
+                            foreach (var group in resultSet.Rows.GroupBy(r => r[siteNameIndex]))
+                            {
+                                using (var newConnection = sites.First(s => s.Name == (string)group.First()[siteNameIndex]).GetConnection())
+                                {
+                                    newConnection.Open();
+                                    ProcessColumn(newConnection, index, group.ToList(), column);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ProcessColumn(cnn, index, resultSet.Rows, column);
                         }
                     }
                     index++;
                 }
+            }
+        }
+
+        private static void ProcessColumn(SqlConnection cnn, int index, List<List<object>> rows, ResultColumnInfo column)
+        {
+            IEnumerable<object> values = rows.Select(row => row[index]);
+            List<object> processedValues = magic_columns[column.Name](cnn, values);
+            int rowNumber = 0;
+            foreach (var row in rows)
+            {
+                row[index] = processedValues[rowNumber];
+                rowNumber++;
             }
         }
 

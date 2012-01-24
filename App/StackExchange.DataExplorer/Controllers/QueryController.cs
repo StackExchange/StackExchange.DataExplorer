@@ -365,27 +365,27 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             return new CsvResult(resultSets);
         }
 
-        [Route(@"{sitename}/mcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowMultiSiteCsv(string sitename, int revisionId)
+
+        [Route(@"{sitename}/all-meta-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteMeteCsv(string sitename, int revisionId)
         {
-            Query query = QueryUtil.GetQueryForRevision(revisionId);
-
-            if (query == null)
-            {
-                return PageNotFound();
-            }
-
-            var results = QueryRunner.GetResults(
-                new ParsedQuery(query.QueryBody, Request.Params, executionPlan: false, targetSites: TargetSites.AllSites),
-                null,
-                CurrentUser
-            );
-
-            return new CsvResult(results.ResultSets);
+            return GetCsv(sitename, revisionId, TargetSites.AllMetaSites);
         }
 
-        [Route(@"{sitename}/nmcsv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+
+        [Route(@"{sitename}/all-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteCsv(string sitename, int revisionId)
+        {
+            return GetCsv(sitename, revisionId, TargetSites.AllSites);
+        }
+
+        [Route(@"{sitename}/all-non-meta-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowMultiSiteWithoutMetaCsv(string sitename, int revisionId)
+        {
+            return GetCsv(sitename, revisionId, TargetSites.AllNonMetaSites);
+        }
+
+        private ActionResult GetCsv(string sitename, int revisionId, TargetSites targetSites)
         {
             Query query = QueryUtil.GetQueryForRevision(revisionId);
 
@@ -395,7 +395,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             var results = QueryRunner.GetResults(
-                new ParsedQuery(query.QueryBody, Request.Params, executionPlan: false, targetSites: TargetSites.AllNonMetaSites),
+                new ParsedQuery(query.QueryBody, Request.Params, executionPlan: false, targetSites: targetSites),
                 null,
                 CurrentUser
             );

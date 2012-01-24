@@ -585,9 +585,13 @@ DataExplorer.ready(function () {
             'cached': response.fromCache ? ' (cached)' : ''
         });
 
+        var target = "";
+        if (response.targetSites == 1) { target = "all-"; } // all sites
+        else if (response.targetSites == 2) { target = "all-meta-"; } // all meta sites
+        else if (response.targetSites == 3) { target = "all-non-meta-"; } // all non meta sites
+
         DataExplorer.template('a.templated', 'href', {
-            'multi': response.multiSite ? 'm' : '',
-            'metas': response.excludeMetas ? 'n' : '',
+            'targetSites': target,
             'site': response.siteName,
             'id': response.querySetId,
             'slug': slug,
