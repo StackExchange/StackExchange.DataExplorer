@@ -823,8 +823,9 @@ DataExplorer.ready(function () {
         }
 
         this.getFormatter = function (column) {
-            if (column.field === 'tags' || column.field == 'tagName') {
-                return tagFormatter;
+            
+            if (column.name.toLowerCase() === 'tags' || column.name.toLowerCase() === 'tagName') {
+                return tagFormatter(siteColumnName);
             } else if (column.type) {
                 switch (column.type) {
                     case 'user':
@@ -880,26 +881,36 @@ DataExplorer.ready(function () {
             return (new Date(value)).toString("yyyy-MM-dd HH:mm:ss");
         }
 
-        function tagFormatter(row, cell, value, column, context) {
-            if (!value || value.search(/^(?:<[^<]+>)+$/) === -1) {
-                return defaultFormatter(row, cell, value, column, context);
+        function tagFormatter(siteColumnName) { 
+            var siteColumnName = siteColumnName;
+
+            return function(row, cell, value, column, context) {
+                if (!value || value.search(/^(?:<[^<]+>)+$/) === -1) {
+                    return defaultFormatter(row, cell, value, column, context);
+                }
+
+                var tags = value.substring(1, value.length - 1).split('><'),
+                    template = '<a class="post-tag :class" href=":base/tags/:tag">:tag</a>',
+                    value = '', tag;
+
+                var url = base;
+                if (siteColumnName != null)
+                {
+                    url = context[siteColumnName].url + path;
+                }
+
+                for (var i = 0; i < tags.length; ++i) {
+                    tag = tags[i];
+
+                    value = value + template.format({
+                        'base': url,
+                        'class': '',
+                        'tag': tag
+                    });
+                }
+
+                return value;
             }
-
-            var tags = value.substring(1, value.length - 1).split('><'),
-                template = '<a class="post-tag :class" href=":base/tags/:tag">:tag</a>',
-                value = '', tag;
-
-            for (var i = 0; i < tags.length; ++i) {
-                tag = tags[i];
-
-                value = value + template.format({
-                    'base': base,
-                    'class': '',
-                    'tag': tag
-                });
-            }
-
-            return value;
         }
 
         function siteFormatter(row, cell, value, column, context) {
