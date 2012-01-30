@@ -591,9 +591,9 @@ DataExplorer.ready(function () {
         else if (response.targetSites == 3) { target = "all-non-meta-"; } // all non meta sites
 
         DataExplorer.template('a.templated', 'href', {
-            'targetSites': target,
+            'targetsites': target,
             'site': response.siteName,
-            'id': response.querySetId,
+            'revisionid': response.revisionId,
             'slug': slug,
             'params': params
         });
