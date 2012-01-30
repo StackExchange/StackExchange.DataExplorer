@@ -52,6 +52,13 @@ namespace StackExchange.DataExplorer.Helpers
                 return Util.FromJavaScriptTime((long)value).ToString("yyyy-MM-dd HH:mm:ss");
             }
 
+            var siteInfo = value as SiteInfo; 
+            if (siteInfo != null)
+            {
+
+                return siteInfo.Name;
+            }
+
             return value.ToString().Replace("\"", "\"\"");
         }
 
