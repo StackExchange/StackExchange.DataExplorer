@@ -290,7 +290,15 @@ namespace StackExchange.DataExplorer.Helpers
                         }
                         else
                         {
-                            currentVal = "null";
+                            var sInfo = col as SiteInfo;
+                            if (sInfo != null)
+                            { 
+                                currentVal = sInfo.Name;
+                            }
+                            else 
+                            {
+                                currentVal = "null";
+                            }
                         }
                     }
                     buffer.Append(currentVal.PadRight(maxLengths[i] + 1, ' '));
