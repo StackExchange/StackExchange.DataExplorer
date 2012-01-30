@@ -2,8 +2,8 @@ using System;
 using System.Web;
 using System.Web.Mvc;
 using System.Linq;
-using MvcMiniProfiler;
-using MvcMiniProfiler.MVCHelpers;
+using StackExchange.Profiling;
+using StackExchange.Profiling.MVCHelpers;
 using Microsoft.Web.Infrastructure;
 using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using StackExchange.DataExplorer.Controllers;
@@ -30,7 +30,7 @@ namespace StackExchange.DataExplorer.App_Start
         public static void PreStart()
         {
             WebRequestProfilerProvider.Settings.UserProvider = new ProxySafeUserProvider();
-            MiniProfiler.Settings.SqlFormatter = new MvcMiniProfiler.SqlFormatters.SqlServerFormatter();
+            MiniProfiler.Settings.SqlFormatter = new StackExchange.Profiling.SqlFormatters.SqlServerFormatter();
 
             //Make sure the MiniProfiler handles BeginRequest and EndRequest
             DynamicModuleUtility.RegisterModule(typeof(MiniProfilerStartupModule));

@@ -9,7 +9,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
 using System.Data.Common;
-using MvcMiniProfiler;
+using StackExchange.Profiling;
 using System.Diagnostics;
 using System.Reflection.Emit;
 

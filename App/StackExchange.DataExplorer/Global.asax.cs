@@ -8,7 +8,7 @@ using System.Web.Security;
 using SimpleErrorHandler;
 using StackExchange.DataExplorer.Helpers;
 using System.Linq;
-using MvcMiniProfiler.MVCHelpers;
+using StackExchange.Profiling.MVCHelpers;
 
 namespace StackExchange.DataExplorer
 {
@@ -172,7 +172,7 @@ namespace StackExchange.DataExplorer
             }
 
            // profiling for everyone.
-           //MvcMiniProfiler.MiniProfiler.Stop(discardResults: true);
+           //StackExchange.Profiling.MiniProfiler.Stop(discardResults: true);
         }
     }
 }

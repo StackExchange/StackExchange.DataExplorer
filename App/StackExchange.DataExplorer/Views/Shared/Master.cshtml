@@ -14,7 +14,7 @@
 
     @Html.Raw(AssetPackager.ScriptSrc("jquery"))
     @Html.Raw(AssetPackager.ScriptSrc("master"))
-    @MvcMiniProfiler.MiniProfiler.RenderIncludes()
+    @StackExchange.Profiling.MiniProfiler.RenderIncludes()
 
     <script type="text/javascript">
         DataExplorer.init({

@@ -101,21 +101,21 @@ namespace StackExchange.DataExplorer
         }
 
 
-        class ErrorLoggingProfiler : MvcMiniProfiler.Data.IDbProfiler
+        class ErrorLoggingProfiler : StackExchange.Profiling.Data.IDbProfiler
         {
-            MvcMiniProfiler.Data.IDbProfiler wrapped;
+            StackExchange.Profiling.Data.IDbProfiler wrapped;
 
-            public ErrorLoggingProfiler(MvcMiniProfiler.Data.IDbProfiler wrapped)
+            public ErrorLoggingProfiler(StackExchange.Profiling.Data.IDbProfiler wrapped)
             {
                 this.wrapped = wrapped;
             }
 
-            public void ExecuteFinish(DbCommand profiledDbCommand, MvcMiniProfiler.Data.ExecuteType executeType, DbDataReader reader)
+            public void ExecuteFinish(DbCommand profiledDbCommand, StackExchange.Profiling.Data.ExecuteType executeType, DbDataReader reader)
             {
                 this.wrapped.ExecuteFinish(profiledDbCommand, executeType, reader);
             }
 
-            public void ExecuteStart(DbCommand profiledDbCommand, MvcMiniProfiler.Data.ExecuteType executeType)
+            public void ExecuteStart(DbCommand profiledDbCommand, StackExchange.Profiling.Data.ExecuteType executeType)
             {
                 this.wrapped.ExecuteStart(profiledDbCommand, executeType);
             }
@@ -125,10 +125,10 @@ namespace StackExchange.DataExplorer
                 get { return this.wrapped.IsActive; }
             }
 
-            public void OnError(DbCommand profiledDbCommand, MvcMiniProfiler.Data.ExecuteType executeType, Exception exception)
+            public void OnError(DbCommand profiledDbCommand, StackExchange.Profiling.Data.ExecuteType executeType, Exception exception)
             {
-                var formatter = new MvcMiniProfiler.SqlFormatters.SqlServerFormatter();
-                var timing = new MvcMiniProfiler.SqlTiming(profiledDbCommand, executeType, null);
+                var formatter = new StackExchange.Profiling.SqlFormatters.SqlServerFormatter();
+                var timing = new StackExchange.Profiling.SqlTiming(profiledDbCommand, executeType, null);
                 exception.Data["SQL"] = formatter.FormatSql(timing);
                 this.wrapped.OnError(profiledDbCommand, executeType, exception);
             }
@@ -161,7 +161,7 @@ namespace StackExchange.DataExplorer
                 {
                     DbConnection cnn = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString);
                     if (Current.Profiler != null)
-                        cnn = new MvcMiniProfiler.Data.ProfiledDbConnection(cnn, new ErrorLoggingProfiler(Current.Profiler));
+                        cnn = new StackExchange.Profiling.Data.ProfiledDbConnection(cnn, new ErrorLoggingProfiler(Current.Profiler));
                     cnn.Open();
                     result = DataExplorerDatabase.Create(cnn, 30);
                     if (Context != null)
@@ -361,11 +361,11 @@ namespace StackExchange.DataExplorer
             }
         }
 
-        public static MvcMiniProfiler.MiniProfiler Profiler 
+        public static StackExchange.Profiling.MiniProfiler Profiler 
         { 
             get 
             {
-                return MvcMiniProfiler.MiniProfiler.Current;
+                return StackExchange.Profiling.MiniProfiler.Current;
             } 
         }
     }
