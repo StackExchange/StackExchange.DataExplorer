@@ -595,7 +595,8 @@ DataExplorer.ready(function () {
             'site': response.siteName,
             'revisionid': response.revisionId,
             'slug': slug,
-            'params': params
+            'params': params,
+            'id' : response.querySetId
         });
 
         if (response.created) {
