@@ -20,12 +20,12 @@ namespace StackExchange.DataExplorer.Helpers
         );
 
         private static readonly Regex ValidIntRegex = new Regex(
-            @"\A[0-9]+\Z",
+            @"\A-?[0-9]+\Z",
             RegexOptions.Compiled | RegexOptions.Multiline
         );
 
         private static readonly Regex ValidFloatRegex = new Regex(
-            @"\A[0-9]+(\.[0-9]+)?\Z",
+            @"\A-?[0-9]+(\.[0-9]+)?\Z",
             RegexOptions.Compiled | RegexOptions.Multiline
         );
 
