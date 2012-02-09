@@ -57,7 +57,7 @@ order by Row asc", new { currentPage, perPage });
         {
             User user = Current.DB.Users.Get(id);
 
-            if (updatedUser.DOB < DateTime.Now.AddYears(-100) || updatedUser.DOB > DateTime.Now.AddYears(-6))
+            if (updatedUser.DOB < DateTime.UtcNow.AddYears(-100) || updatedUser.DOB > DateTime.UtcNow.AddYears(-6))
             {
                 updatedUser.DOB = null;
             }

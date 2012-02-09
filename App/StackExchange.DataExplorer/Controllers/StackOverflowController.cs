@@ -15,6 +15,7 @@ using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
 using Dapper;
+using System.Web;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -287,19 +288,34 @@ namespace StackExchange.DataExplorer.Controllers
         /// </summary>
         protected void InitCurrentUser()
         {
-            _currentUser = new User();
-            _currentUser.IsAnonymous = true;
+            _currentUser = GetCurrentUser(Request, User.Identity.Name);
+        }
 
-            if (Request.IsAuthenticated)
+        public static User GetCurrentUser(HttpRequest request, string identity)
+        {
+            return GetCurrentUser(request.IsAuthenticated, request.UserHostAddress, identity);
+        }
+
+        public static User GetCurrentUser(HttpRequestBase request, string identity)
+        {
+            return GetCurrentUser(request.IsAuthenticated, request.UserHostAddress, identity);
+        }
+
+        private static User GetCurrentUser(bool isAuthenticated, string userHostAddress, string identity)
+        {
+            var user = new User();
+            user.IsAnonymous = true;
+
+            if (isAuthenticated)
             {
                 int id;
-                if (Int32.TryParse(User.Identity.Name, out id))
+                if (Int32.TryParse(identity, out id))
                 {
                     User lookup = Current.DB.Users.Get(id);
                     if (lookup != null)
                     {
-                        _currentUser = lookup;
-                        _currentUser.IsAnonymous = false;
+                        user = lookup;
+                        user.IsAnonymous = false;
                     }
                 }
                 else
@@ -308,7 +324,8 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             }
 
-            _currentUser.IPAddress = Request.UserHostAddress;
+            user.IPAddress = userHostAddress;
+            return user;
         }
 
 

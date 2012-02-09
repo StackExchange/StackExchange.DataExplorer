@@ -97,7 +97,14 @@ namespace StackExchange.DataExplorer
         /// </summary>
         public static User User
         {
-            get { return Controller.CurrentUser; }
+            get 
+            {
+                if (Controller == null)
+                {
+                    return StackOverflowController.GetCurrentUser(HttpContext.Current.Request, HttpContext.Current.User.Identity.Name);
+                }
+                return Controller.CurrentUser; 
+            }
         }
 
 
