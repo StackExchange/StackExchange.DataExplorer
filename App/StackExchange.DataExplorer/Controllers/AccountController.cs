@@ -212,6 +212,7 @@ namespace StackExchange.DataExplorer.Controllers
             if (identifier.StartsWith(@"https://me.yahoo.com")) return true;
             if (identifier.Contains(@"//www.google.com/profiles/")) return true;
             if (identifier.StartsWith(@"http://stackauth.com/")) return true;
+            if (identifier.StartsWith(@"http://openid.stackexchange.com/")) return true;
             return false;
         }
     }

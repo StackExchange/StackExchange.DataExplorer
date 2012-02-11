@@ -5,7 +5,7 @@
     </div>
     <form id="openid_form" action="/user/authenticate?returnurl=@Request.Params["returnurl"]" method="post">
         <div id="openid_choice">
-            <p>Click your <a href="http://openid.net/what/">OpenID</a> account provider</p>
+            <p>Click your <a href="http://openid.net/what/">OpenID</a> account provider:</p>
             <div id="openid_btns"></div>
         </div>
         <div id="openid_input_area"></div>
@@ -18,7 +18,7 @@
                 </p>
             </noscript>
         </div>
-        <p>Or, manually enter your OpenID</p>
+        <p>Or, manually enter your OpenID:</p>
         <table id="openid-url-input">
             <tr>
                 <td class="vt large">
@@ -36,7 +36,6 @@
         </table>
     </form>
 </div>
-<link rel="stylesheet" href="http://sstatic.net/openid.css?v=3" />
 <script src="/Scripts/openid-jquery.js?v=3" type="text/javascript"></script>
 <script type="text/javascript">
     $(function () {

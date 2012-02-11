@@ -6,6 +6,12 @@ This code is licenced under the New BSD License.
 */
 
 var providers_large = {
+    stackexchange: {
+        name: 'StackExchange',
+        url: 'https://openid.stackexchange.com/',
+        x: -1,
+        y: -518
+    },
     google: {
         name: 'Google',
         url: 'https://www.google.com/accounts/o8/id',

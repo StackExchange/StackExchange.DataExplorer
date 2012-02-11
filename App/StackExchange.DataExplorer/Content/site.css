@@ -1055,10 +1055,16 @@ div.grippie {
 }
 
 .openid-identifier {
-  background:url("http://sstatic.net/sf/Img/openid-large.png") no-repeat scroll left center transparent;
+  background:url("http://sstatic.net/img/openid-large.png") no-repeat scroll left center transparent;
   height:22px;
   line-height:22px;
   padding-left:32px;
+}
+
+#openid_form > p {
+  clear: both;
+  padding-top: 15px;
+  margin-bottom: 8px;
 }
 
 #openid_btns, #openid_btns br {
