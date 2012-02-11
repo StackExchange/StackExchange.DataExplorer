@@ -37,6 +37,11 @@ namespace StackExchange.DataExplorer.App_Start
 
             //Setup profiler for Controllers via a Global ActionFilter
             GlobalFilters.Filters.Add(new ProfilingActionFilter());
+
+            MiniProfiler.Settings.Results_List_Authorize = request => 
+            {
+                return Current.User.IsAdmin;
+            };
         }
 
         public static void PostStart()
