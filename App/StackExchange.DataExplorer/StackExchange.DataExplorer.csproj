@@ -154,6 +154,7 @@
     <Compile Include="Helpers\AsyncQueryRunner.cs" />
     <Compile Include="Helpers\BusinessRuleViolation.cs" />
     <Compile Include="Helpers\ChangeAction.cs" />
+    <Compile Include="Helpers\HelperTableCache.cs" />
     <Compile Include="Helpers\Crc16.cs" />
     <Compile Include="Helpers\CsvResult.cs" />
     <Compile Include="Helpers\SiteInfo.cs" />

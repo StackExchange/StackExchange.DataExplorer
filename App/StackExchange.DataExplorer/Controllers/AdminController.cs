@@ -53,8 +53,8 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("admin/clear-cache")]
         public ActionResult ClearCache()
         {
-            Current.DB.Execute("truncate table CachedResults");
-            Current.DB.Execute("truncate table CachedPlans");
+            PurgeCache();
+
             return Redirect("/admin");
         }
 
@@ -66,12 +66,17 @@ namespace StackExchange.DataExplorer.Controllers
                 site.UpdateStats();
             }
 
-            Current.DB.Execute("truncate table CachedResults");
-            Current.DB.Execute("truncate table CachedPlans");
+            PurgeCache();
 
             return Content("sucess");
         }
 
+        private void PurgeCache()
+        {
+            Current.DB.Execute("truncate table CachedResults");
+            Current.DB.Execute("truncate table CachedPlans");
+            HelperTableCache.Refresh();
+        }
 
         private Dictionary<string, user2user> userSorts = new Dictionary<string, user2user>()
         {

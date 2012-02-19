@@ -220,6 +220,65 @@ $.fn.tabs = function () {
     });
 };
 
+if (!Object.keys) {
+    Object.keys = (function () {
+        var hasOwnProperty = Object.prototype.hasOwnProperty,
+        hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
+        dontEnums = [
+          'toString',
+          'toLocaleString',
+          'valueOf',
+          'hasOwnProperty',
+          'isPrototypeOf',
+          'propertyIsEnumerable',
+          'constructor'
+        ],
+        dontEnumsLength = dontEnums.length
+
+        return function (obj) {
+            if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object')
+
+            var result = []
+
+            for (var prop in obj) {
+                if (hasOwnProperty.call(obj, prop)) result.push(prop)
+            }
+
+            if (hasDontEnumBug) {
+                for (var i = 0; i < dontEnumsLength; i++) {
+                    if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i])
+                }
+            }
+            return result
+        }
+    })();
+};
+
+document.create = function create(element, attributes) {
+    element = document.createElement(element);
+
+    if (attributes) {
+        if (attributes.text != null) {
+            element[_textContent] = attributes.text;
+            delete attributes.text;
+        }
+
+        var i, keys = Object.keys(attributes);
+
+        for (i = 0; i < keys.length; ++i) {
+            var key = keys[i];
+
+            if (key.toLowerCase() === 'classname') {
+                key = 'class';
+            }
+
+            element.setAttribute(key, attributes[keys[i]]);
+        }
+    }
+
+    return element;
+};
+
 if (!String.prototype.trim) {
     String.prototype.trim = function () {
         return this.replace(/^\s+|\s+$/g, '');

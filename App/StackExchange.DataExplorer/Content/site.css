@@ -591,11 +591,58 @@ ul.site-list .desc {
   padding: 6px 8px 5px 8px;
 }
 
+#schema {
+  position: relative;
+}
+
+#schema .hidden {
+  display: none;
+}
+
+#schema .table-data-panel {
+  background-color: rgba(255, 255, 255, 0.95);
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+#schema .table-data-panel .schema-table {
+  background-color: #F7F7F7;
+  border-bottom: 1px dotted #CCC;
+  color: #606060;
+}
+
+#schema .table-data-panel table {
+  margin-top: 5px;
+  width: 100%;
+}
+
+#schema .table-data-panel th {
+  background-color: #FDFDFD;
+  border-bottom: 1px solid #DFDFDF;
+  color: #404040;
+  font-weight: bold;
+  padding: 0px 5px 4px 5px;
+}
+
+#schema .table-data-panel td {
+  border-bottom: 1px solid #FAFAFA;
+  border-left: 1px solid #FAFAFA;
+}
+
+#schema .table-data-panel td:first-child {
+  border-left-width: 0px;
+}
+
+#schema .table-data-panel .number {
+  text-align: right;
+}
+
 .heading .buttons {
   float: right;
 }
 
-.heading .buttons .button {
+.heading .buttons .button, #schema ul .button, #schema .table-data-panel .button {
   background: transparent url('/content/images/sprites.png') no-repeat scroll 0px 0px;
   cursor: pointer;
   float: left;
@@ -603,6 +650,19 @@ ul.site-list .desc {
   overflow: hidden;
   text-indent: -999em;
   width: 12px;
+}
+
+#schema .table-data-panel .table-data-close {
+  background-position: 0px -392px;
+}
+
+#schema .schema-table .button {
+  float: right;
+}
+
+#schema ul .table-data {
+  background-position: 0px -374px;
+  height: 14px;
 }
 
 .heading .buttons .collapse {
