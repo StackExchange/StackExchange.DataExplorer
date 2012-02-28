@@ -96,7 +96,7 @@ namespace StackExchange.DataExplorer.Controllers
             base.Initialize(requestContext);
 
             if (AppSettings.EnableWhiteList && !(this is AccountController) && CurrentUser.IsAnonymous) {
-                requestContext.HttpContext.Response.Redirect("/account/login");
+                requestContext.HttpContext.Response.Redirect("/account/login?returnurl=" + Request.RawUrl);
             }
 
 

@@ -66,9 +66,12 @@ namespace StackExchange.DataExplorer.Models
             return new SqlConnection(ConnectionString + string.Format("Max Pool Size={0};",maxPoolSize));
         }
 
-        public SqlConnection GetConnection()
+        public SqlConnection GetOpenConnection()
         {
-            return new SqlConnection(ConnectionString);
+            var cnn = new SqlConnection(ConnectionString);
+            cnn.Open();
+            if (AppSettings.FetchDataInReadUncommitted) { cnn.Execute("set transaction isolation level read uncommitted"); }
+            return cnn;
         }
 
         public static IEnumerable<Site> GetSites()
@@ -89,10 +92,9 @@ ORDER BY
 
         public void UpdateStats()
         {
-            using (SqlConnection cnn = GetConnection())
+            using (SqlConnection cnn = GetOpenConnection())
             using( var cmd = new SqlCommand())
             {
-                cnn.Open();
                
                 cmd.Connection = cnn;
                 cmd.CommandTimeout = 300;
@@ -149,10 +151,9 @@ ORDER BY
             if (!user.IsAnonymous && user.Email != null)
             {
 
-                using (SqlConnection cnn = GetConnection())
+                using (SqlConnection cnn = GetOpenConnection())
                 {
                     string hash = Util.GravatarHash(user.Email);
-                    cnn.Open();
                     try
                     {
                         return cnn.Query<int?>("select top 1 Id from Users where EmailHash = @hash order by Reputation desc", new {hash}).FirstOrDefault();
@@ -177,9 +178,8 @@ ORDER BY
             var tables = new List<TableInfo>();
 
 
-            using (SqlConnection cnn = GetConnection())
+            using (SqlConnection cnn = GetOpenConnection())
             {
-                cnn.Open();
                 string sql =
                     @"
 select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS

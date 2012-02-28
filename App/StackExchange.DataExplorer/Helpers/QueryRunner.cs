@@ -284,10 +284,8 @@ namespace StackExchange.DataExplorer.Helpers
 
             var results = new QueryResults();
 
-            using (SqlConnection cnn = site.GetConnection())
+            using (SqlConnection cnn = site.GetOpenConnection())
             {
-                cnn.Open();
-
                 // well we do not want to risk blocking, if somebody needs to change this we will need to add a setting
                 cnn.Execute("set transaction isolation level read uncommitted");
 
@@ -584,9 +582,8 @@ namespace StackExchange.DataExplorer.Helpers
                             var sites = Current.DB.Sites.All();
                             foreach (var group in resultSet.Rows.GroupBy(r => r[siteNameIndex]))
                             {
-                                using (var newConnection = sites.First(s => s.Id == ((SiteInfo)group.First()[siteNameIndex]).Id).GetConnection())
+                                using (var newConnection = sites.First(s => s.Id == ((SiteInfo)group.First()[siteNameIndex]).Id).GetOpenConnection())
                                 {
-                                    newConnection.Open();
                                     ProcessColumn(newConnection, index, group.ToList(), column);
                                 }
                             }
