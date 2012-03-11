@@ -362,6 +362,7 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                     else
                     {
+                        order_by = "votes";
                         builder.Where("qs.Votes > @threshold", new { threshold = threshold });
                         builder.OrderBy("qs.Votes DESC");
                         builder.OrderBy("qs.Views DESC");
