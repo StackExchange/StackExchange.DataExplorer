@@ -256,6 +256,7 @@ order by Row asc", new { currentPage, perPage });
                     message = user.Id == CurrentUser.Id ?
                         "You have no favorite queries, click the star icon on a query to favorite it" : "No favorites";
                 } else {
+                    order_by = "edited";
                     builder.Where("qs.OwnerId = @user", new { user = id });
                     builder.Where("qs.Hidden = 0");
                     builder.OrderBy("qs.LastActivity DESC");
