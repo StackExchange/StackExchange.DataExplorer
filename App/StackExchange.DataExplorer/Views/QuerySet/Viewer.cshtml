@@ -73,5 +73,14 @@
     </tbody>
 </table>
 
+<script type="text/javascript">
+    DataExplorer.ready(function () {
+        DataExplorer.template('#site-selector a.templated', 'href', {
+            'slug': '@querySet.Slugify()',
+            'params': window.location.search,
+            'id': @querySet.Id
+        });
 
-
+        $('#site-selector').show();
+    });
+</script>
