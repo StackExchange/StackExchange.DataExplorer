@@ -347,13 +347,11 @@ DataExplorer.ready(function () {
     $('.miniTabs').tabs();
 
     form.submit(function () {
-        $('.report-option').fadeOut();
-        error.fadeOut();
+        $('.report-option').hide();
+        error.hide();
 
         var cleanup = function () {
             $('#loading').hide();
-            error.stop();
-            $('.report-option').stop();
 
             form.find('input, button').prop('disabled', false);
         }
