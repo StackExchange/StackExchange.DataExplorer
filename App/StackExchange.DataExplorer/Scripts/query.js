@@ -830,7 +830,7 @@ DataExplorer.ready(function () {
                         return linkFormatter('/users/',siteColumnName);
                     case 'post':
                         return linkFormatter('/questions/',siteColumnName);
-                    case 'suggestedEdits':
+                    case 'suggestededit':
                         return linkFormatter('/suggested-edits/',siteColumnName);
                     case 'date':
                         return dateFormatter;
