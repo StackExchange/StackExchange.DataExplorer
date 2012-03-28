@@ -827,11 +827,13 @@ DataExplorer.ready(function () {
             } else if (column.type) {
                 switch (column.type) {
                     case 'user':
-                        return linkFormatter('/users/',siteColumnName);
+                        return linkFormatter('/users/', siteColumnName);
                     case 'post':
-                        return linkFormatter('/questions/',siteColumnName);
+                        return linkFormatter('/questions/', siteColumnName);
                     case 'suggestededit':
-                        return linkFormatter('/suggested-edits/',siteColumnName);
+                        return linkFormatter('/suggested-edits/', siteColumnName);
+                    case 'comment':
+                        return linkFormatter('/posts/comments/', siteColumnName);
                     case 'date':
                         return dateFormatter;
                     case 'site':
