@@ -890,7 +890,7 @@ DataExplorer.ready(function () {
                 return defaultFormatter(row, cell, value, column, context);
             }
             
-            return (new Date(value)).toString("yyyy-MM-dd HH:mm:ss");
+            return (new Date(value)).toUTC();
         }
 
         function tagFormatter(siteColumnName) { 

@@ -359,6 +359,21 @@ Date.parseTimestamp = (function () {
     return implementation;
 })();
 
+Date.prototype.toUTC = (function () {
+    function zero(val) {
+        return val < 9 ? '0' + val : val;
+    }
+
+    return function () {
+        return this.getUTCFullYear() +
+            '-' + zero(this.getUTCMonth() + 1) +
+            '-' + zero(this.getUTCDate()) +
+            ' ' + zero(this.getUTCHours()) +
+            ':' + zero(this.getUTCMinutes()) +
+            ':' + zero(this.getUTCSeconds());
+    }
+})();
+
 Date.prototype.toRelativeTimeMini = (function () {
     months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
