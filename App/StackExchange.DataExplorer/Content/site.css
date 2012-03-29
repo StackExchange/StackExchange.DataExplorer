@@ -1164,7 +1164,12 @@ overflow:hidden;
 white-space:nowrap;
 width:230px;
 }
-
+table td.overflowing {
+  padding: 0px;
+}
+table td.overflowing .no-overflow {
+  padding: 5px 5px 10px 5px;
+}
 .querylist {
   list-style-type: none;  
   margin: 0;

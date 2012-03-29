@@ -45,14 +45,14 @@
                     {
                         <tr>
                             <td>openid</td>
-                            <td><div class="no-overflow">@Model.UserOpenIds[0].OpenIdClaim</div></td>
+                            <td class="overflowing"><div class="no-overflow">@Model.UserOpenIds[0].OpenIdClaim</div></td>
                         </tr>
                     }
                     @if (Model.Website != null && Model.Website.Length > 4)
                     {
                         <tr>
                             <td>website</td>
-                            <td><div class="no-overflow"><a href="http://@Model.Website" rel="me" class="url">@Model.Website</a></div></td>
+                            <td class="overflowing"><div class="no-overflow"><a href="http://@Model.Website" rel="me" class="url">@Model.Website</a></div></td>
                         </tr>
                     }
                     <tr>
