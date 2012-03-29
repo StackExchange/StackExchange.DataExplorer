@@ -797,7 +797,7 @@ DataExplorer.ready(function () {
 
     function ColumnFormatter(response) {
         var base = response.url,
-            autolinker = /^https?:\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.; ]*[-A-Z0-9+&@#\/%=~_\[\] ]((\|.+)?|$)/i,
+            autolinker = /^(https?|site):\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.;]*[-A-Z0-9+&@#\/%=~_\[\]](?:\|.+?)?$/i,
             dummy = document.createElement('a'),
             wrapper = dummy,
             _outerHTML = 'outerHTML';
@@ -848,8 +848,10 @@ DataExplorer.ready(function () {
             if (value == null) {
                 value = "";
             }
+
+            var matches;
             
-            if (typeof value === 'string' && autolinker.test(value)) {
+            if (typeof value === 'string' && (matches = autolinker.exec(value))) {
                 var url = value,
                     description = value,
                     split = value.split("|");
@@ -857,6 +859,16 @@ DataExplorer.ready(function () {
                 if (split.length == 2) {
                     url = split[0];
                     description = split[1];
+                }
+
+                if (matches[1] === 'site') {
+                    url = url.substring('site:/'.length);
+
+                    if (siteColumnName) {
+                        url = context[siteColumnName].url + url;
+                    } else {
+                        url = base + url;
+                    }
                 }
 
                 dummy.setAttribute('href', url);
@@ -934,7 +946,6 @@ DataExplorer.ready(function () {
                 path = path;
 
             return function (row, cell, value, column, context) {
-
                 if (!value || typeof value !== 'object') {
                     return defaultFormatter(row, cell, value, column, context);
                 }
