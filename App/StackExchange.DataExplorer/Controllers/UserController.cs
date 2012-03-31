@@ -143,11 +143,13 @@ order by Row asc", new { currentPage, perPage });
         [Route(@"users/{id:INT}/{name?}")]
         public ActionResult Show(int id, string name, string order_by, int? page)
         {
-            User user = Current.DB.Users.Get(id);
+            User user = !Current.User.IsAnonymous && Current.User.Id == id ? Current.User : Current.DB.Users.Get(id);
+
             if (user == null)
             {
                 return PageNotFound();
             }
+            
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
             if (user.UrlTitle.HasValue() && (string.IsNullOrEmpty(name) || name != user.UrlTitle))
             {
