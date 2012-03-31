@@ -18,13 +18,29 @@ namespace StackExchange.DataExplorer.Controllers
         };
 
         [Route("users")]
-        public ActionResult Index(int? page)
+        public ActionResult Index(string order_by, int? page)
         {
+            SetHeader("Users", order_by, 
+                new SubHeaderViewData
+                {
+                    Description = "all",
+                    Title = "All registered users",
+                    Href = "/users?order_by=all",
+                    Default = true
+                },
+                new SubHeaderViewData
+                {
+                    Description = "active",
+                    Title = "Users who have been active in the last month",
+                    Href = "/users?order_by=active"
+                }
+            );
+            SelectMenuItem("Users");
+
             int perPage = 35;
             int currentPage = Math.Max(page ?? 1, 1);
 
-            SetHeader("Users");
-            SelectMenuItem("Users");
+            
 
             int total = Current.DB.Query<int>("select count(*) from Users").First();
             var rows = Current.DB.Query<User>(@"select *, 
@@ -159,39 +175,33 @@ order by Row asc", new { currentPage, perPage });
             SetHeader(user.Login);
             SelectMenuItem("Users");
 
-            order_by = order_by ?? "edited";
-
-            ViewData["UserQueryHeaders"] = new SubHeader
+            var profileTabs = new SubHeader
             {
+                Selected = order_by,
                 Items = new List<SubHeaderViewData>
                 {
                     new SubHeaderViewData
                     {
                         Description = "edited",
                         Title = "Recently edited queries",
-                        Href =
-                            "/users/" + user.Id + "?order_by=edited",
-                        Selected = (order_by == "edited")
+                        Href = "/users/" + user.Id + "?order_by=edited",
+                        Default = true,
                     },
                     new SubHeaderViewData
                     {
                         Description = "favorite",
                         Title = "Favorite queries",
-                        Href =
-                            "/users/" + user.Id +
-                            "?order_by=favorite",
-                        Selected = (order_by == "favorite")
+                        Href = "/users/" + user.Id + "?order_by=favorite"
                     },
                     new SubHeaderViewData
                     {
                         Description = "recent",
                         Title = "Recently executed queries",
-                        Href =
-                            "/users/" + user.Id + "?order_by=recent",
-                        Selected = (order_by == "recent")
+                        Href = "/users/" + user.Id + "?order_by=recent"
                     }
                 }
             };
+            ViewData["UserQueryHeaders"] = profileTabs;
 
             page = Math.Max(page ?? 1, 1);
             int? pagesize = 15; // In case we decide to make this a query param
@@ -256,7 +266,6 @@ order by Row asc", new { currentPage, perPage });
                     message = user.Id == CurrentUser.Id ?
                         "You have no favorite queries, click the star icon on a query to favorite it" : "No favorites";
                 } else {
-                    order_by = "edited";
                     builder.Where("qs.OwnerId = @user", new { user = id });
                     builder.Where("qs.Hidden = 0");
                     builder.OrderBy("qs.LastActivity DESC");
@@ -289,7 +298,7 @@ order by Row asc", new { currentPage, perPage });
             );
             int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
 
-            ViewData["Href"] = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + order_by;
+            ViewData["Href"] = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + profileTabs.Selected;
             ViewData["Queries"] = new PagedList<QueryExecutionViewData>(queries, page.Value, pagesize.Value, false, total);
 
             if (!queries.Any())

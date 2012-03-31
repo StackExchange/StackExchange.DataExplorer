@@ -63,6 +63,8 @@ namespace StackExchange.DataExplorer.Controllers
             }
         }
 
+        public SubHeader Header { get; private set; }
+
         public Site GetSite(string sitename)
         {
             return Current.DB.Query<Models.Site>("select * from Sites where lower(Name) = @sitename", new { sitename }).FirstOrDefault(); 
@@ -178,12 +180,17 @@ namespace StackExchange.DataExplorer.Controllers
 
         public void SetHeader(string title)
         {
-            SetHeader(title, null);
+            SetHeader(title, (SubHeaderViewData[])null);
         }
 
         public void SetHeader(string title, params SubHeaderViewData[] tabs)
         {
-            ViewData["Header"] = new SubHeader(title) {Items = tabs};
+            SetHeader(title, null, tabs);
+        }
+
+        public void SetHeader(string title, string selected, params SubHeaderViewData[] tabs)
+        {
+            ViewData["Header"] = Header = new SubHeader(title) { Selected = selected, Items = tabs };
         }
 
         /// <summary>
