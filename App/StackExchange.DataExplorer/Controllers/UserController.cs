@@ -38,6 +38,7 @@ namespace StackExchange.DataExplorer.Controllers
             SelectMenuItem("Users");
 
             var users = GetUserList(Header.Selected, page, search);
+            ViewData["SearchUser"] = search;
 
             return View(users);
         }
