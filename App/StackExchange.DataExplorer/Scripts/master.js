@@ -87,17 +87,20 @@ DataExplorer.DeferredRequest = function DeferredRequest(settings) {
     }
 
     var options = $.extend({
-        'delay': 950,
-        'type': 'post'
-    }, settings),
+            'delay': 950,
+            'type': 'post',
+            force: true
+        }, settings),
         pending = null,
         dispatched = false,
         canceled = false,
         deferred = null;
 
-    $(document).bind('unload', function () {
-        request(true);
-    });
+    if (options.force) {
+        $(document).bind('unload', function () {
+            request(true);
+        });
+    }
 
     this.request = function rerequest(data) {
         if (pending) {

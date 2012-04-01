@@ -15,6 +15,7 @@
             filter = new DataExplorer.DeferredRequest({
                 delay: 500,
                 type: 'get',
+                force: false,
                 url: '@ViewData["SearchHref"]',
                 callback: function (data) {
                     users.html(data);
