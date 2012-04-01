@@ -420,6 +420,7 @@
     <Content Include="Views\Admin\FindDuplicateUserOpenIds.cshtml" />
     <Content Include="Views\Shared\QueryResults.cshtml" />
     <Content Include="Views\Shared\RevisionHistory.cshtml" />
+    <Content Include="Views\Shared\UserList.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

@@ -1428,8 +1428,8 @@ pre {
 
 }
 
-table#userList {
-  width:100%;
+#user-filter {
+  margin-bottom: 8px;
 }
 
 table#userList .user .user-gravatar {

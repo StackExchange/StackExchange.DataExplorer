@@ -18,7 +18,7 @@ namespace StackExchange.DataExplorer.Controllers
         };
 
         [Route("users")]
-        public ActionResult Index(string order_by, int? page)
+        public ActionResult Index(string order_by, int? page, string search)
         {
             SetHeader("Users", order_by, 
                 new SubHeaderViewData
@@ -37,6 +37,21 @@ namespace StackExchange.DataExplorer.Controllers
             );
             SelectMenuItem("Users");
 
+            var users = GetUserList(Header.Selected, page, search);
+
+            return View(users);
+        }
+
+        [Route("users/search")]
+        public ActionResult Search(string order_by, string search)
+        {
+            var users = GetUserList(order_by == "active" ? "active" : "all", null, search);
+
+            return PartialView("~/Views/Shared/UserList.cshtml", users);
+        }
+
+        private PagedList<User> GetUserList(string selected, int? page, string search)
+        {
             int perPage = 36;
             int currentPage = Math.Max(page ?? 1, 1);
             var builder = new SqlBuilder();
@@ -61,7 +76,7 @@ namespace StackExchange.DataExplorer.Controllers
             );
             var counter = builder.AddTemplate("SELECT COUNT(*) FROM Users /**join**/ /**where**/");
 
-            if (Header.Selected == "all")
+            if (selected == "all")
             {
                 builder.OrderBy("Login ASC");
             }
@@ -79,13 +94,24 @@ namespace StackExchange.DataExplorer.Controllers
                 builder.Where("LastRun >= @since", new { since = DateTime.UtcNow.AddDays(-activePeriod).Date });
             }
 
-            var total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
+            var url = "/users?order_by=" + selected;
+            ViewData["SearchHref"] = "/users/search?order_by=" + selected;
+
+            if (search.HasValue() && search.Length > 2)
+            {
+                url += "&search=" + HtmlUtilities.UrlEncode(search);
+                ViewData["UserSearch"] = search;
+
+                builder.Where("Login LIKE @search", new { search = '%' + search + '%' });
+            }
+
+            ViewData["Href"] = url;
+
             var rows = Current.DB.Query<User>(pager.RawSql, pager.Parameters);
+            var total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
             var users = new PagedList<User>(rows, currentPage, perPage, false, total);
 
-            ViewData["Href"] = "/users?order_by=" + Header.Selected;
-
-            return View(users);
+            return users;
         }
 
 

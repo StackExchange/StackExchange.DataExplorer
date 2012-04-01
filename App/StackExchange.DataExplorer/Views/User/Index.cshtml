@@ -1,21 +1,38 @@
 ﻿@model StackExchange.DataExplorer.Helpers.PagedList<StackExchange.DataExplorer.Models.User>
 @using StackExchange.DataExplorer
-@using StackExchange.DataExplorer.Models
-@using StackExchange.DataExplorer.Helpers
 
-@{this.SetPageTitle("Users - Stack Exchange Data Explorer");}
-<table id="userList">
-    <tbody>
-        @foreach (var row in Model.ToRows(9))
-        {
-            <tr>
-                @foreach (User user in row)
-                {
-                    <td>@Html.Partial("User", user)</td>
+@{ this.SetPageTitle("Users - Stack Exchange Data Explorer"); }
+
+<div id="user-filter">
+    <label>Type to find users:</label> <input type="text" name="search" autocomplete="off" />
+</div>
+<div id="user-search">
+    @Html.Partial("UserList", Model)
+</div>
+<script type="text/javascript">
+    (function () {
+        var users = $('#user-search'),
+            filter = new DataExplorer.DeferredRequest({
+                delay: 500,
+                type: 'get',
+                url: '@ViewData["SearchHref"]',
+                callback: function (data) {
+                    users.html(data);
                 }
-            </tr>
-        }
-    </tbody>
-</table>
+            }),
+            lastValue = null,
+            search = $('#user-filter > input[name="search"]').on('keydown paste', function () {
+                filter.request(function () {
+                    var value = search.val();
 
-@UIHelper.PageNumber(ViewData["Href"].ToString() + "&page=-1", Model, "pager fr")
+                    if ((value.length && value.length < 3) || (value == lastValue)) {
+                        filter.cancel();
+                    } else {
+                        lastValue = value;
+                    }
+
+                    return { search: value };
+                });
+            });
+    })();
+</script>

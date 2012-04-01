@@ -90,9 +90,10 @@ DataExplorer.DeferredRequest = function DeferredRequest(settings) {
         'delay': 950,
         'type': 'post'
     }, settings),
-            pending = null,
-            dispatched = false,
-            deferred = null;
+        pending = null,
+        dispatched = false,
+        canceled = false,
+        deferred = null;
 
     $(document).bind('unload', function () {
         request(true);
@@ -102,6 +103,8 @@ DataExplorer.DeferredRequest = function DeferredRequest(settings) {
         if (pending) {
             clearTimeout(pending);
         }
+
+        canceled = false;
 
         if (!dispatched) {
             options.data = data;
@@ -113,17 +116,28 @@ DataExplorer.DeferredRequest = function DeferredRequest(settings) {
         }
     }
 
+    this.cancel = function cancel() {
+        clearTimeout(pending);
+        canceled = true;
+    }
+
     function request(synchronous) {
         dispatched = true;
         synchronous = !!synchronous;
 
-        $.ajax({
-            'async': synchronous,
-            'data': options.data,
-            'type': options.type,
-            'url': options.url,
-            'success': response
-        });
+        var data = typeof options.data === 'function' ? options.data() : options.data;
+
+        if (!canceled) {
+            $.ajax({
+                'async': synchronous,
+                'data': data,
+                'type': options.type,
+                'url': options.url,
+                'success': response
+            });
+        } else {
+            dispatched = false;
+        }
     }
 
     function response(response) {
