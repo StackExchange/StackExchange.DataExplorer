@@ -31,38 +31,61 @@ namespace StackExchange.DataExplorer.Controllers
                 new SubHeaderViewData
                 {
                     Description = "active",
-                    Title = "Users who have been active in the last month",
+                    Title = "Users who have been active in the last 30 days",
                     Href = "/users?order_by=active"
                 }
             );
             SelectMenuItem("Users");
 
-            int perPage = 35;
+            int perPage = 36;
             int currentPage = Math.Max(page ?? 1, 1);
+            var builder = new SqlBuilder();
+            var pager = builder.AddTemplate(@"
+                SELECT
+                    *,
+                    (SELECT COUNT(*) FROM QuerySets WHERE OwnerId = Y.Id) SavedQueriesCount,
+                    (SELECT COUNT(*) FROM RevisionExecutions WHERE UserId = Y.Id) QueryExecutionsCount
+                FROM
+                (
+                    SELECT * FROM
+                    (
+                        SELECT
+                            ROW_NUMBER() OVER (/**orderby**/) AS Row, Users.Id, Users.Login, Users.Email,
+                            Users.IPAddress, Users.IsAdmin, Users.CreationDate /**select**/
+                        FROM Users /**join**/ /**where**/
+                    ) AS X
+                    WHERE Row > @start AND Row <= @finish
+                ) AS Y
+                ORDER BY Row ASC",
+                new { start = (currentPage - 1) * perPage, finish = currentPage * perPage }
+            );
+            var counter = builder.AddTemplate("SELECT COUNT(*) FROM Users /**join**/ /**where**/");
 
-            
+            if (Header.Selected == "all")
+            {
+                builder.OrderBy("Login ASC");
+            }
+            else
+            {
+                var activePeriod = 30; // Last 30 days
 
-            int total = Current.DB.Query<int>("select count(*) from Users").First();
-            var rows = Current.DB.Query<User>(@"select *, 
-	(select COUNT(*) from QuerySets where OwnerId = Y.Id) SavedQueriesCount,
-	(select COUNT(*) from RevisionExecutions  where UserId = Y.Id) QueryExecutionsCount  
-from 
-(
-	select * from
-	(	select 
-		ROW_NUMBER() over (order by Login asc) as Row, 
-		*
-		from Users 
-	) 
-	as X 
-	where Row > (@currentPage-1) * @perPage and Row <= @currentPage * @perPage
-) Y
-order by Row asc", new { currentPage, perPage });
+                // We should probably just be...actually recording the user's LastActivityDate,
+                // instead of performing this join all the time
+                builder.Select(", LastRun AS LastActivityDate");
+                builder.Join(@"(
+                    SELECT UserId, MAX(LastRun) AS LastRun FROM RevisionExecutions GROUP BY UserId
+                ) AS LastExecutions ON LastExecutions.UserId = Users.Id");
+                builder.OrderBy("LastRun DESC");
+                builder.Where("LastRun >= @since", new { since = DateTime.UtcNow.AddDays(-activePeriod).Date });
+            }
 
+            var total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
+            var rows = Current.DB.Query<User>(pager.RawSql, pager.Parameters);
+            var users = new PagedList<User>(rows, currentPage, perPage, false, total);
 
-            PagedList<User> data = new PagedList<Models.User>(rows, currentPage, perPage, false, total);
+            ViewData["Href"] = "/users?order_by=" + Header.Selected;
 
-            return View(data);
+            return View(users);
         }
 
 

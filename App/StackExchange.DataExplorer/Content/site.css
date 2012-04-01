@@ -1428,13 +1428,14 @@ pre {
 
 }
 
-table#userList td {
-  width: 185px;   
-  height: 45px;
+table#userList {
+  width:100%;
 }
 
 table#userList .user .user-gravatar {
     float: left;
+    width: 48px;
+    height: 48px;
 }
 
 table#userList .user .user-details {
@@ -1443,6 +1444,30 @@ table#userList .user .user-details {
     margin-top: 10px;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.user-details td {
+  padding-bottom: 10px;
+}
+
+#userList .user  {
+  width: 230px;
+  height: 64px;
+}
+
+.user-summary-details {
+  float: left;
+  width: 175px;
+}
+.user-summary-details div
+{
+    margin-bottom: 6px;
+    margin-left: 8px;
+}
+
+.user-summary-details .user-created, .user-summary-details .user-saved-queries
+{
+    color: #777;
 }
 
 .fr  {
@@ -1629,24 +1654,6 @@ font-weight:bold;
 #edit-link {
   float: right;
   margin-right: 0px;
-}
-
-.user-details td {
-  padding-bottom: 10px;
-}
-
-.user-summary-details {
-    width: 220px;
-    
-}
-.user-summary-details div
-{
-    margin-top: 6px;
-}
-
-.user-summary-details .user-created, .user-summary-details .user-saved-queries
-{
-    color: #777;
 }
 
 .cool, .cool .relativetime {
