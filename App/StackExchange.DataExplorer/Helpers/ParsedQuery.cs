@@ -321,7 +321,7 @@ namespace StackExchange.DataExplorer.Helpers
                         line = line.Substring(0, startSingleComment);
                     }
 
-                    for (int i = 0; i < substitutions.Count; ++i)
+                    for (int i = substitutions.Count - 1; i > -1; --i)
                     {
                         line = line.Replace("~S" + i, substitutions[i]);
                     }
