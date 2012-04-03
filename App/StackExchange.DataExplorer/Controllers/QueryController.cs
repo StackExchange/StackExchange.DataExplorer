@@ -79,12 +79,12 @@ namespace StackExchange.DataExplorer.Controllers
 
                 if (title.HasValue() && title.Length > 100)
                 {
-                    throw new ApplicationException("Title must be less than 100 characters");
+                    throw new ApplicationException("Title must be no more than 100 characters");
                 }
 
                 if (description.HasValue() && description.Length > 1000)
                 {
-                    throw new ApplicationException("Description must be less than 1000 characters");
+                    throw new ApplicationException("Description must be no more than 1000 characters");
                 }
 
                 var contextData = new QueryContextData 
