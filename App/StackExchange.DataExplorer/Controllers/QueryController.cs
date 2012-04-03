@@ -77,6 +77,16 @@ namespace StackExchange.DataExplorer.Controllers
                 Site site = GetSite(siteId);
                 ValidateQuery(parsedQuery, site);
 
+                if (title.HasValue() && title.Length > 100)
+                {
+                    throw new ApplicationException("Title must be less than 100 characters");
+                }
+
+                if (description.HasValue() && description.Length > 1000)
+                {
+                    throw new ApplicationException("Description must be less than 1000 characters");
+                }
+
                 var contextData = new QueryContextData 
                 { 
                     Title = title,
