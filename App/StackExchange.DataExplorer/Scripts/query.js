@@ -576,7 +576,7 @@ DataExplorer.ready(function () {
 
         document.getElementById('messages').children[0][_textContent] = response.messages;
 
-        if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
+        if (!slug && !/\/[^\/]+\/query\/new/.test(window.location.pathname) && /.*?\/[^\/]+$/.test(window.location.pathname)) {
             slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
 
             if (/\d+/.test(slug)) {
