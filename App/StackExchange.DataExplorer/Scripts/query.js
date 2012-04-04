@@ -547,10 +547,19 @@ DataExplorer.ready(function () {
             results, height = 0, maxHeight = 500,
             slug = response.slug,
             params = $('#query-params input[type="text"]').serialize(),
-            textOnly = false;
+            textOnly = false,
+            userid;
 
         if (params) {
-            params = '?' + params;
+            params = params.replace(/(^|&)UserId=(\d+)(&|$)/i, function (match, g1, g2, g3) {
+                userid = g2;
+
+                return g1 ? g3 : "";
+            });
+
+            if (params) {
+                params = '?' + params;
+            }
         }
 
         if (/[^\d]\/\d+$/.test(action)) {
@@ -596,6 +605,16 @@ DataExplorer.ready(function () {
             'params': params,
             'id' : response.querySetId
         });
+
+        if (userid) {
+            userid = (params ? '&' : '?') + 'UserId=' + userid;
+
+            var related = $('a.templated.related-site');
+
+            if (related.length) {
+                related[0].setAttribute('href', related[0].getAttribute('href') + userid);
+            }
+        }
 
         if (response.created) {
             var title = response.created.replace(/\.\d+Z/, 'Z'),
