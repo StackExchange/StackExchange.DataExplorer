@@ -23,7 +23,7 @@
 
 @section Metadata
 {
-    <h2><input type="text" id="title" name="title" value="@name" size="40" placeholder="Enter a title for your query" /></h2>
+    <h2><input type="text" id="title" name="title" value="@name" size="40" placeholder="Enter a title for your query" maxlength="100" /></h2>
     <p id="query-description-text">@(Model != null && Model.QuerySet != null ? Model.QuerySet.Description : "")</p>
     <a id="edit-query-description" href="#">edit description</a>
     <textarea style="display:none" name="description" id="query-description" placeholder='enter a description'>@(Model != null && Model.QuerySet != null ? Model.QuerySet.Description : "")</textarea>

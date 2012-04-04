@@ -347,13 +347,11 @@ DataExplorer.ready(function () {
     $('.miniTabs').tabs();
 
     form.submit(function () {
-        $('.report-option').fadeOut();
-        error.fadeOut();
+        $('.report-option').hide();
+        error.hide();
 
         var cleanup = function () {
             $('#loading').hide();
-            error.stop();
-            $('.report-option').stop();
 
             form.find('input, button').prop('disabled', false);
         }
@@ -549,10 +547,19 @@ DataExplorer.ready(function () {
             results, height = 0, maxHeight = 500,
             slug = response.slug,
             params = $('#query-params input[type="text"]').serialize(),
-            textOnly = false;
+            textOnly = false,
+            userid;
 
         if (params) {
-            params = '?' + params;
+            params = params.replace(/(^|&)UserId=(\d+)(&|$)/i, function (match, g1, g2, g3) {
+                userid = g2;
+
+                return g1 ? g3 : "";
+            });
+
+            if (params) {
+                params = '?' + params;
+            }
         }
 
         if (/[^\d]\/\d+$/.test(action)) {
@@ -569,7 +576,7 @@ DataExplorer.ready(function () {
 
         document.getElementById('messages').children[0][_textContent] = response.messages;
 
-        if (!slug && /.*?\/[^\/]+$/.test(window.location.pathname)) {
+        if (!slug && !/\/[^\/]+\/query\/new/.test(window.location.pathname) && /.*?\/[^\/]+$/.test(window.location.pathname)) {
             slug = window.location.pathname.substring(window.location.pathname.lastIndexOf('/'));
 
             if (/\d+/.test(slug)) {
@@ -598,6 +605,16 @@ DataExplorer.ready(function () {
             'params': params,
             'id' : response.querySetId
         });
+
+        if (userid) {
+            userid = (params ? '&' : '?') + 'UserId=' + userid;
+
+            var related = $('a.templated.related-site');
+
+            if (related.length) {
+                related[0].setAttribute('href', related[0].getAttribute('href') + userid);
+            }
+        }
 
         if (response.created) {
             var title = response.created.replace(/\.\d+Z/, 'Z'),
@@ -799,7 +816,7 @@ DataExplorer.ready(function () {
 
     function ColumnFormatter(response) {
         var base = response.url,
-            autolinker = /^https?:\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.; ]*[-A-Z0-9+&@#\/%=~_\[\] ]((\|.+)?|$)/i,
+            autolinker = /^(https?|site):\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.;]*[-A-Z0-9+&@#\/%=~_\[\]](?:\|.+?)?$/i,
             dummy = document.createElement('a'),
             wrapper = dummy,
             _outerHTML = 'outerHTML';
@@ -829,11 +846,13 @@ DataExplorer.ready(function () {
             } else if (column.type) {
                 switch (column.type) {
                     case 'user':
-                        return linkFormatter('/users/',siteColumnName);
+                        return linkFormatter('/users/', siteColumnName);
                     case 'post':
-                        return linkFormatter('/questions/',siteColumnName);
-                    case 'suggestedEdits':
-                        return linkFormatter('/suggested-edits/',siteColumnName);
+                        return linkFormatter('/questions/', siteColumnName);
+                    case 'suggestededit':
+                        return linkFormatter('/suggested-edits/', siteColumnName);
+                    case 'comment':
+                        return linkFormatter('/posts/comments/', siteColumnName);
                     case 'date':
                         return dateFormatter;
                     case 'site':
@@ -848,8 +867,10 @@ DataExplorer.ready(function () {
             if (value == null) {
                 value = "";
             }
+
+            var matches;
             
-            if (typeof value === 'string' && autolinker.test(value)) {
+            if (typeof value === 'string' && (matches = autolinker.exec(value))) {
                 var url = value,
                     description = value,
                     split = value.split("|");
@@ -857,6 +878,16 @@ DataExplorer.ready(function () {
                 if (split.length == 2) {
                     url = split[0];
                     description = split[1];
+                }
+
+                if (matches[1] === 'site') {
+                    url = url.substring('site:/'.length);
+
+                    if (siteColumnName) {
+                        url = context[siteColumnName].url + url;
+                    } else {
+                        url = base + url;
+                    }
                 }
 
                 dummy.setAttribute('href', url);
@@ -878,7 +909,7 @@ DataExplorer.ready(function () {
                 return defaultFormatter(row, cell, value, column, context);
             }
             
-            return (new Date(value)).toString("yyyy-MM-dd HH:mm:ss");
+            return (new Date(value)).toUTC();
         }
 
         function tagFormatter(siteColumnName) { 
@@ -934,7 +965,6 @@ DataExplorer.ready(function () {
                 path = path;
 
             return function (row, cell, value, column, context) {
-
                 if (!value || typeof value !== 'object') {
                     return defaultFormatter(row, cell, value, column, context);
                 }

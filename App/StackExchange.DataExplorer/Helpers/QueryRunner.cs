@@ -620,6 +620,9 @@ namespace StackExchange.DataExplorer.Helpers
                 case "User Link":
                     column.Type = ResultColumnType.User;
                     break;
+                case "Comment Link":
+                    column.Type = ResultColumnType.Comment;
+                    break;
                 case "Suggested Edit Link":
                     column.Type = ResultColumnType.SuggestedEdit;
                     break;
@@ -630,11 +633,18 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> GetMagicColumns()
         {
-            var rval = new Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>();
-            rval["Post Link"] = GetPostLinks;
-            rval["User Link"] = GetUserLinks;
-            rval["Suggested Edit Link"] = GetSuggestedEditLinks;
-            return rval;
+            return new Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>
+            {
+                { "Post Link", GetPostLinks },
+                { "User Link", GetUserLinks },
+                { "Comment Link", GetCommentLinks },
+                { "Suggested Edit Link", GetSuggestedEditLinks }
+            };
+        }
+
+        public static List<object> GetCommentLinks(SqlConnection cnn, IEnumerable<object> items)
+        {
+            return LookupIds(cnn, items, @"SELECT Id, Text FROM Comments WHERE Id IN ");
         }
 
         public static List<object> GetSuggestedEditLinks(SqlConnection cnn, IEnumerable<object> items)

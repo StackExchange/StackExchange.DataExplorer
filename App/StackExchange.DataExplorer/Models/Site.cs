@@ -74,6 +74,22 @@ namespace StackExchange.DataExplorer.Models
             return cnn;
         }
 
+        public bool SharesUsers(Site site)
+        {
+            var shares = false;
+
+            if (this.Url.StartsWith("http://meta.") && this.Url != "http://meta.stackoverflow.com")
+            {
+                shares = this.Url.Substring("http://meta.".Length) == site.Url.Substring("http://".Length);
+            }
+            else if (site.Url.StartsWith("http://meta.") && site.Url != "http://meta.stackoverflow.com")
+            {
+                shares = site.Url.Substring("http://meta.".Length) == this.Url.Substring("http://".Length);
+            }
+
+            return shares;
+        }
+
         public static IEnumerable<Site> GetSites()
         {
             // Could/should probably just cache this somewhere

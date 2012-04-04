@@ -60,13 +60,13 @@
     }
         <ul id="site-selector" class="result-option">
         @foreach (Site site in Site.GetSites())
-        {
+        {            
             if (site.Id == Current.Controller.Site.Id)
             {
                 continue;
             }
             <li>
-                <a class="site templated" href="/@site.Name.ToLower()/query/:id:slug:params" title="View results on @site.LongName">
+                <a class="site templated @(Current.Controller.Site.SharesUsers(site) ? "related-site" : "")" href="/@site.Name.ToLower()/query/:id:slug:params" title="View results on @site.LongName">
                     <img src="@site.IconProxyUrl" alt="@site.LongName" width="16" height="16" />
                 </a>
             </li>

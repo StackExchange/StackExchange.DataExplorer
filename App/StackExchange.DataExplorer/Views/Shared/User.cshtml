@@ -1,20 +1,26 @@
 ﻿@model StackExchange.DataExplorer.Models.User
+@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
 
+@{ var slug = @Model.Login.Slugify(); }
 <div class="user">
-    <div style="float: left; margin-right: 10px;">
-        <a class="user-gravatar" href="/users/@Model.Id">@Html.Raw(Model.Gravatar(64))</a>
+    <div class="user-gravatar">
+        <a class="user-gravatar" href="/users/@Model.Id@slug">@Html.Raw(Model.Gravatar(48))</a>
     </div>
-    <div style="clear:both"></div>
     <div class="user-summary-details">
         <div class="user-login">
-            <a href="/users/@Model.Id">@Model.Login</a>
-        </div>
-        <div class="user-created">
-            Created @Model.CreationDate.GetValueOrDefault().ToString("d")
+            <a href="/users/@Model.Id@slug">@Model.Login</a>
         </div>
         <div class="user-saved-queries">
-            @Model.SavedQueriesCount saved queries, @Model.QueryExecutionsCount executions
+            <strong>@Model.SavedQueriesCount</strong> saved queries<br />
+            <strong>@Model.QueryExecutionsCount</strong> executions
+        </div>
+        <div class="user-created">
+            @if (Model.LastActivityDate == null) {
+                @: Created <span class="relativetime" title="@Model.CreationDate.GetValueOrDefault().ToString("u")">@Model.CreationDate.GetValueOrDefault().ToString("d MMM yyyy")</span>
+            } else {
+                @: Last activity @Html.Raw(Model.LastActivityDate.ToRelativeTimeSpan())
+            }
         </div>
     </div>
 </div>
