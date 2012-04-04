@@ -326,7 +326,7 @@ window.location.param = (function () {
                 search = groups[i].split('=');
 
                 if (search.length === 2 && search[0].length) {
-                    cache[search[0].toLowerCase()] = search[1];
+                    cache[search[0].toLowerCase()] = window.decodeURIComponent(search[1].replace(/\+/g, ' '));
                 }
             }
         }
