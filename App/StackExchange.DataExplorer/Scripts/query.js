@@ -1166,10 +1166,11 @@ function renderGraph(resultSet) {
     {
         var columns = {}; 
         for (var row = 0; row < resultSet.rows.length; row++) {
-            var columnName = resultSet.rows[row][1];
+            var columnLabel = resultSet.rows[row][1],
+                columnName = "col_" + columnLabel;
             if (columns[columnName] === undefined)
             {
-                columns[columnName] = (series.push({label: columnName, data: [] }) - 1);
+                columns[columnName] = (series.push({label: columnLabel, data: [] }) - 1);
             }
             series[columns[columnName]].data.push([resultSet.rows[row][0],  resultSet.rows[row][2]]);
         }
