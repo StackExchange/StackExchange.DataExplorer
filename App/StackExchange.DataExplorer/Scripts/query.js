@@ -23,7 +23,12 @@
         if (target.nodeName === 'TEXTAREA') {
             editor = CodeMirror.fromTextArea(target, $.extend({}, options, {
                 'lineNumbers': true,
-                'onChange': onChange
+                'onChange': onChange,
+                'extraKeys': {
+                    'Ctrl-Enter': function () {
+                        field.closest('form').submit();
+                    }
+                }
             }));
         } else {
             query = target[_textContent];
@@ -61,10 +66,11 @@
         // where it's coming from.
         if (value.charCodeAt(value.length - 1) === 8203) {
             value = value.substring(0, value.length - 1);
-
-            // Explicitly update the field when this happens
-            field.val(value);
         }
+
+        // Explicitly update the field, since CodeMirror might not have gotten a
+        // chance to yet
+        field.val(value);
 
         return value;
     }
