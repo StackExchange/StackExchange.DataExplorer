@@ -378,7 +378,7 @@ Date.parseTimestamp = (function () {
 
 Date.prototype.toUTC = (function () {
     function zero(val) {
-        return val < 9 ? '0' + val : val;
+        return val < 10 ? '0' + val : val;
     }
 
     return function () {
