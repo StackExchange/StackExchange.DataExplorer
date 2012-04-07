@@ -238,16 +238,20 @@ DataExplorer.TableHelpers = (function () {
         className: 'schema-table'
     }));
     dataTemplate.appendChild((function () {
-        var table = document.createElement('table'),
+        var wrapper = document.create('div', {
+                className: 'table-data-wrapper'
+            }),
+            table = document.createElement('table'),
             tableHead = document.createElement('thead'),
             tableBody = document.createElement('tbody');
 
+        wrapper.appendChild(table);
         table.appendChild(tableHead);
         table.appendChild(tableBody);
         tableHead.appendChild(document.createElement('tr'));
         tableBody.appendChild(document.createElement('tr'));
 
-        return table;
+        return wrapper;
     })());
     
     function init(tableData) {
@@ -308,8 +312,16 @@ DataExplorer.TableHelpers = (function () {
         });
     }
 
+    // This is terrible, because it requires the outside code to
+    // account for the header height...will fix later
+    function resize(height) {
+        // Could store references directly to the wrapper, too...
+        $('#schema .table-data-wrapper').css({ height: height + 'px' });
+    }
+
     return {
-        'init': init
+        'init': init,
+        'resize': resize
     };
 })();
 
@@ -351,6 +363,7 @@ DataExplorer.ready(function () {
                 offset = schema.outerHeight() - list.height();
 
             list.height(remaining - offset);
+            DataExplorer.TableHelpers.resize((available - offset) + 9);
 
             if (wrapper) {
                 offset = wrapper.closest('.CodeMirror').outerHeight() - wrapper.height();

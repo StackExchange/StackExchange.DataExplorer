@@ -613,8 +613,11 @@ ul.site-list .desc {
 }
 
 #schema .table-data-panel table {
-  margin-top: 5px;
   width: 100%;
+}
+
+#schema .table-data-wrapper {
+  overflow-y: auto;
 }
 
 #schema .table-data-panel th {
@@ -622,7 +625,7 @@ ul.site-list .desc {
   border-bottom: 1px solid #DFDFDF;
   color: #404040;
   font-weight: bold;
-  padding: 0px 5px 4px 5px;
+  padding: 5px 5px 4px 5px;
 }
 
 #schema .table-data-panel td {
