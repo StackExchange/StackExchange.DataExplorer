@@ -12,13 +12,6 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class HelperTableCache
     {
-        static HelperTableCache()
-        {
-            // Should pull this from AppSettings
-            Preferences = new HelperTableCachePreferences();
-            Refresh();
-        }
-
         private static Dictionary<string, Dictionary<string, ResultSet>> cache = 
             new Dictionary<string, Dictionary<string, ResultSet>>();
         private static HelperTableCachePreferences preferences = new HelperTableCachePreferences();
@@ -35,6 +28,16 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static Dictionary<string, ResultSet> GetCache(Site site)
         {
+            if (Preferences == null)
+            {
+                Refresh();
+
+                if (Preferences == null)
+                {
+                    return null;
+                }
+            }
+
             if (!Preferences.PerSite)
             {
                 return cache.First().Value;
@@ -63,6 +66,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static void Refresh()
         {
+            Preferences = AppSettings.HelperTableOptions;
             IEnumerable<Site> sites;
 
             cache.Clear();

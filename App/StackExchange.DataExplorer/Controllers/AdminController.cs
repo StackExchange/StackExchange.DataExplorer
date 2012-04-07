@@ -50,6 +50,14 @@ namespace StackExchange.DataExplorer.Controllers
             return View();
         }
 
+        [Route("admin/clear-table-cache")]
+        public ActionResult ClearTableCache()
+        {
+            HelperTableCache.Refresh();
+
+            return Redirect("/admin");
+        }
+
         [Route("admin/clear-cache")]
         public ActionResult ClearCache()
         {
