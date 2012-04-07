@@ -14,7 +14,7 @@ namespace StackExchange.DataExplorer.Helpers
     {
         private static Dictionary<string, Dictionary<string, ResultSet>> cache = 
             new Dictionary<string, Dictionary<string, ResultSet>>();
-        private static HelperTableCachePreferences preferences = new HelperTableCachePreferences();
+        private static HelperTableCachePreferences preferences = null;
         private static Regex tableMatcher;
 
         public static HelperTableCachePreferences Preferences
@@ -22,7 +22,11 @@ namespace StackExchange.DataExplorer.Helpers
             get { return preferences;  }
             set {
                 preferences = value;
-                tableMatcher = new Regex(preferences.IncludePattern);
+
+                if (value != null)
+                {
+                    tableMatcher = new Regex(preferences.IncludePattern);
+                }
             }
         }
 
