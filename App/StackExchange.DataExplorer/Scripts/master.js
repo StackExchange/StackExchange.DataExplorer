@@ -87,21 +87,27 @@ DataExplorer.DeferredRequest = function DeferredRequest(settings) {
     }
 
     var options = $.extend({
-        'delay': 950,
-        'type': 'post'
-    }, settings),
-            pending = null,
-            dispatched = false,
-            deferred = null;
+            'delay': 950,
+            'type': 'post',
+            force: true
+        }, settings),
+        pending = null,
+        dispatched = false,
+        canceled = false,
+        deferred = null;
 
-    $(document).bind('unload', function () {
-        request(true);
-    });
+    if (options.force) {
+        $(document).bind('unload', function () {
+            request(true);
+        });
+    }
 
     this.request = function rerequest(data) {
         if (pending) {
             clearTimeout(pending);
         }
+
+        canceled = false;
 
         if (!dispatched) {
             options.data = data;
@@ -113,17 +119,28 @@ DataExplorer.DeferredRequest = function DeferredRequest(settings) {
         }
     }
 
+    this.cancel = function cancel() {
+        clearTimeout(pending);
+        canceled = true;
+    }
+
     function request(synchronous) {
         dispatched = true;
         synchronous = !!synchronous;
 
-        $.ajax({
-            'async': synchronous,
-            'data': options.data,
-            'type': options.type,
-            'url': options.url,
-            'success': response
-        });
+        var data = typeof options.data === 'function' ? options.data() : options.data;
+
+        if (!canceled) {
+            $.ajax({
+                'async': synchronous,
+                'data': data,
+                'type': options.type,
+                'url': options.url,
+                'success': response
+            });
+        } else {
+            dispatched = false;
+        }
     }
 
     function response(response) {
@@ -368,7 +385,7 @@ window.location.param = (function () {
                 search = groups[i].split('=');
 
                 if (search.length === 2 && search[0].length) {
-                    cache[search[0].toLowerCase()] = search[1];
+                    cache[search[0].toLowerCase()] = window.decodeURIComponent(search[1].replace(/\+/g, ' '));
                 }
             }
         }
@@ -416,6 +433,21 @@ Date.parseTimestamp = (function () {
     }
 
     return implementation;
+})();
+
+Date.prototype.toUTC = (function () {
+    function zero(val) {
+        return val < 10 ? '0' + val : val;
+    }
+
+    return function () {
+        return this.getUTCFullYear() +
+            '-' + zero(this.getUTCMonth() + 1) +
+            '-' + zero(this.getUTCDate()) +
+            ' ' + zero(this.getUTCHours()) +
+            ':' + zero(this.getUTCMinutes()) +
+            ':' + zero(this.getUTCSeconds());
+    }
 })();
 
 Date.prototype.toRelativeTimeMini = (function () {

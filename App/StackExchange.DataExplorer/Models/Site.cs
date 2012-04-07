@@ -66,9 +66,28 @@ namespace StackExchange.DataExplorer.Models
             return new SqlConnection(ConnectionString + string.Format("Max Pool Size={0};",maxPoolSize));
         }
 
-        public SqlConnection GetConnection()
+        public SqlConnection GetOpenConnection()
         {
-            return new SqlConnection(ConnectionString);
+            var cnn = new SqlConnection(ConnectionString);
+            cnn.Open();
+            if (AppSettings.FetchDataInReadUncommitted) { cnn.Execute("set transaction isolation level read uncommitted"); }
+            return cnn;
+        }
+
+        public bool SharesUsers(Site site)
+        {
+            var shares = false;
+
+            if (this.Url.StartsWith("http://meta.") && this.Url != "http://meta.stackoverflow.com")
+            {
+                shares = this.Url.Substring("http://meta.".Length) == site.Url.Substring("http://".Length);
+            }
+            else if (site.Url.StartsWith("http://meta.") && site.Url != "http://meta.stackoverflow.com")
+            {
+                shares = site.Url.Substring("http://meta.".Length) == this.Url.Substring("http://".Length);
+            }
+
+            return shares;
         }
 
         public static IEnumerable<Site> GetSites()
@@ -89,10 +108,9 @@ ORDER BY
 
         public void UpdateStats()
         {
-            using (SqlConnection cnn = GetConnection())
+            using (SqlConnection cnn = GetOpenConnection())
             using( var cmd = new SqlCommand())
             {
-                cnn.Open();
                
                 cmd.Connection = cnn;
                 cmd.CommandTimeout = 300;
@@ -149,10 +167,9 @@ ORDER BY
             if (!user.IsAnonymous && user.Email != null)
             {
 
-                using (SqlConnection cnn = GetConnection())
+                using (SqlConnection cnn = GetOpenConnection())
                 {
                     string hash = Util.GravatarHash(user.Email);
-                    cnn.Open();
                     try
                     {
                         return cnn.Query<int?>("select top 1 Id from Users where EmailHash = @hash order by Reputation desc", new {hash}).FirstOrDefault();
@@ -177,9 +194,8 @@ ORDER BY
             var tables = new List<TableInfo>();
 
 
-            using (SqlConnection cnn = GetConnection())
+            using (SqlConnection cnn = GetOpenConnection())
             {
-                cnn.Open();
                 string sql =
                     @"
 select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
@@ -262,5 +278,12 @@ order by TABLE_NAME, ORDINAL_POSITION
         #endregion
 
         public SiteInfo SiteInfo { get { return new SiteInfo { Id = Id, Name = Name, Url = Url }; } }
+
+        public object IconProxyUrl { 
+            get 
+            {
+                return "/icon/" + this.Id;
+            } 
+        }
     }
 }

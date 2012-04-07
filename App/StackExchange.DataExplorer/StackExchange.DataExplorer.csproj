@@ -135,6 +135,7 @@
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\IconController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\QuerySetController.cs" />
     <Compile Include="Controllers\StackOverflowController.cs" />
@@ -421,6 +422,7 @@
     <Content Include="Views\Admin\FindDuplicateUserOpenIds.cshtml" />
     <Content Include="Views\Shared\QueryResults.cshtml" />
     <Content Include="Views\Shared\RevisionHistory.cshtml" />
+    <Content Include="Views\Shared\UserList.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

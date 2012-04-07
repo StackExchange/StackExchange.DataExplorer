@@ -250,10 +250,8 @@ namespace StackExchange.DataExplorer.Helpers
 
             var results = new QueryResults();
 
-            using (SqlConnection cnn = site.GetConnection())
+            using (SqlConnection cnn = site.GetOpenConnection())
             {
-                cnn.Open();
-
                 // well we do not want to risk blocking, if somebody needs to change this we will need to add a setting
                 cnn.Execute("set transaction isolation level read uncommitted");
 
@@ -550,9 +548,8 @@ namespace StackExchange.DataExplorer.Helpers
                             var sites = Current.DB.Sites.All();
                             foreach (var group in resultSet.Rows.GroupBy(r => r[siteNameIndex]))
                             {
-                                using (var newConnection = sites.First(s => s.Id == ((SiteInfo)group.First()[siteNameIndex]).Id).GetConnection())
+                                using (var newConnection = sites.First(s => s.Id == ((SiteInfo)group.First()[siteNameIndex]).Id).GetOpenConnection())
                                 {
-                                    newConnection.Open();
                                     ProcessColumn(newConnection, index, group.ToList(), column);
                                 }
                             }
@@ -589,6 +586,9 @@ namespace StackExchange.DataExplorer.Helpers
                 case "User Link":
                     column.Type = ResultColumnType.User;
                     break;
+                case "Comment Link":
+                    column.Type = ResultColumnType.Comment;
+                    break;
                 case "Suggested Edit Link":
                     column.Type = ResultColumnType.SuggestedEdit;
                     break;
@@ -599,11 +599,18 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> GetMagicColumns()
         {
-            var rval = new Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>();
-            rval["Post Link"] = GetPostLinks;
-            rval["User Link"] = GetUserLinks;
-            rval["Suggested Edit Link"] = GetSuggestedEditLinks;
-            return rval;
+            return new Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>
+            {
+                { "Post Link", GetPostLinks },
+                { "User Link", GetUserLinks },
+                { "Comment Link", GetCommentLinks },
+                { "Suggested Edit Link", GetSuggestedEditLinks }
+            };
+        }
+
+        public static List<object> GetCommentLinks(SqlConnection cnn, IEnumerable<object> items)
+        {
+            return LookupIds(cnn, items, @"SELECT Id, Text FROM Comments WHERE Id IN ");
         }
 
         public static List<object> GetSuggestedEditLinks(SqlConnection cnn, IEnumerable<object> items)

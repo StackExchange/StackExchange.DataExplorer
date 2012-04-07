@@ -132,6 +132,22 @@ namespace StackExchange.DataExplorer
             return s.HasValue() ? HtmlUtilities.URLFriendly(s) : s;
         }
 
+        /// <summary>
+        /// Produces a URL-friendly version of this String, "like-this-one", and prepends it with
+        /// a forward slash if the URL-friendly version is non-blank
+        /// </summary>
+        public static string Slugify(this string s)
+        {
+            if (!s.HasValue())
+            {
+                return s;
+            }
+
+            string slug = HtmlUtilities.URLFriendly(s);
+
+            return slug.HasValue() ? "/" + slug : "";
+        }
+
         public static string Slugify(this QuerySet metadata)
         {
             if (metadata == null || metadata.Title.IsNullOrEmpty())

@@ -366,5 +366,23 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
                 "go\nCREATE INDEX #IX_T on #Test(id)\ngo\nCREATE PROCEDURE #T_P2 @v VARCHAR(MAX) AS\nPRINT @v " +
                 "RETURN\nGO\n#T_P2 'test'", query.ExecutionSql);
         }
+
+        [TestMethod]
+        public void TestFailingQuery()
+        {
+            string sql = new StringBuilder()
+                .AppendLine("Select 'Select ''' + ''' As [DatabaseName], Case WHEN TagName IS NULL Then" +
+                    " ''' + 'Null' + ''' WHEN TagName = '''' Then ''Empty'' ELSE ''Unexpected'' End As " +
+                    "[Type], Count(*) As [Count] from ' ")
+                .AppendLine(" + '[' + ']' + '..Tags Where IsNull(TagName,'''')='''' Group By TagName UNION'")
+                .ToString();
+
+            var query = new ParsedQuery(sql, null);
+
+            Assert.AreEqual("Select 'Select ''' + ''' As [DatabaseName], Case WHEN TagName IS NULL Then '''" +
+                " + 'Null' + ''' WHEN TagName = '''' Then ''Empty'' ELSE ''Unexpected'' End As [Type]," +
+                " Count(*) As [Count] from ' + '[' + ']' + '..Tags Where IsNull(TagName,'''')='''' Group" +
+                " By TagName UNION'", query.ExecutionSql);
+        }
     }
 }

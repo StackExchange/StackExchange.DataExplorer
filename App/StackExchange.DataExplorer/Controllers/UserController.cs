@@ -18,35 +18,101 @@ namespace StackExchange.DataExplorer.Controllers
         };
 
         [Route("users")]
-        public ActionResult Index(int? page)
+        public ActionResult Index(string order_by, int? page, string search)
         {
-            int perPage = 35;
-            int currentPage = Math.Max(page ?? 1, 1);
-
-            SetHeader("Users");
+            SetHeader("Users", order_by, 
+                new SubHeaderViewData
+                {
+                    Description = "all",
+                    Title = "All registered users",
+                    Href = "/users?order_by=all",
+                    Default = true
+                },
+                new SubHeaderViewData
+                {
+                    Description = "active",
+                    Title = "Users who have been active in the last 30 days",
+                    Href = "/users?order_by=active"
+                }
+            );
             SelectMenuItem("Users");
 
-            int total = Current.DB.Query<int>("select count(*) from Users").First();
-            var rows = Current.DB.Query<User>(@"select *, 
-	(select COUNT(*) from QuerySets where OwnerId = Y.Id) SavedQueriesCount,
-	(select COUNT(*) from RevisionExecutions  where UserId = Y.Id) QueryExecutionsCount  
-from 
-(
-	select * from
-	(	select 
-		ROW_NUMBER() over (order by Login asc) as Row, 
-		*
-		from Users 
-	) 
-	as X 
-	where Row > (@currentPage-1) * @perPage and Row <= @currentPage * @perPage
-) Y
-order by Row asc", new { currentPage, perPage });
+            var users = GetUserList(Header.Selected, page, search);
+            ViewData["SearchUser"] = search;
 
+            return View(users);
+        }
 
-            PagedList<User> data = new PagedList<Models.User>(rows, currentPage, perPage, false, total);
+        [Route("users/search")]
+        public ActionResult Search(string order_by, string search)
+        {
+            var users = GetUserList(order_by == "active" ? "active" : "all", null, search);
 
-            return View(data);
+            return PartialView("~/Views/Shared/UserList.cshtml", users);
+        }
+
+        private PagedList<User> GetUserList(string selected, int? page, string search)
+        {
+            int perPage = 36;
+            int currentPage = Math.Max(page ?? 1, 1);
+            var builder = new SqlBuilder();
+            var pager = builder.AddTemplate(@"
+                SELECT
+                    *,
+                    (SELECT COUNT(*) FROM QuerySets WHERE OwnerId = Y.Id) SavedQueriesCount,
+                    (SELECT COUNT(*) FROM RevisionExecutions WHERE UserId = Y.Id) QueryExecutionsCount
+                FROM
+                (
+                    SELECT * FROM
+                    (
+                        SELECT
+                            ROW_NUMBER() OVER (/**orderby**/) AS Row, Users.Id, Users.Login, Users.Email,
+                            Users.IPAddress, Users.IsAdmin, Users.CreationDate /**select**/
+                        FROM Users /**join**/ /**where**/
+                    ) AS X
+                    WHERE Row > @start AND Row <= @finish
+                ) AS Y
+                ORDER BY Row ASC",
+                new { start = (currentPage - 1) * perPage, finish = currentPage * perPage }
+            );
+            var counter = builder.AddTemplate("SELECT COUNT(*) FROM Users /**join**/ /**where**/");
+
+            if (selected == "all")
+            {
+                builder.OrderBy("Login ASC");
+            }
+            else
+            {
+                var activePeriod = 30; // Last 30 days
+
+                // We should probably just be...actually recording the user's LastActivityDate,
+                // instead of performing this join all the time
+                builder.Select(", LastRun AS LastActivityDate");
+                builder.Join(@"(
+                    SELECT UserId, MAX(LastRun) AS LastRun FROM RevisionExecutions GROUP BY UserId
+                ) AS LastExecutions ON LastExecutions.UserId = Users.Id");
+                builder.OrderBy("LastRun DESC");
+                builder.Where("LastRun >= @since", new { since = DateTime.UtcNow.AddDays(-activePeriod).Date });
+            }
+
+            var url = "/users?order_by=" + selected;
+            ViewData["SearchHref"] = "/users/search?order_by=" + selected;
+
+            if (search.HasValue() && search.Length > 2)
+            {
+                url += "&search=" + HtmlUtilities.UrlEncode(search);
+                ViewData["UserSearch"] = search;
+
+                builder.Where("Login LIKE @search", new { search = '%' + search + '%' });
+            }
+
+            ViewData["Href"] = url;
+
+            var rows = Current.DB.Query<User>(pager.RawSql, pager.Parameters);
+            var total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
+            var users = new PagedList<User>(rows, currentPage, perPage, false, total);
+
+            return users;
         }
 
 
@@ -143,11 +209,13 @@ order by Row asc", new { currentPage, perPage });
         [Route(@"users/{id:INT}/{name?}")]
         public ActionResult Show(int id, string name, string order_by, int? page)
         {
-            User user = Current.DB.Users.Get(id);
+            User user = !Current.User.IsAnonymous && Current.User.Id == id ? Current.User : Current.DB.Users.Get(id);
+
             if (user == null)
             {
                 return PageNotFound();
             }
+            
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
             if (user.UrlTitle.HasValue() && (string.IsNullOrEmpty(name) || name != user.UrlTitle))
             {
@@ -159,39 +227,33 @@ order by Row asc", new { currentPage, perPage });
             SetHeader(user.Login);
             SelectMenuItem("Users");
 
-            order_by = order_by ?? "edited";
-
-            ViewData["UserQueryHeaders"] = new SubHeader
+            var profileTabs = new SubHeader
             {
+                Selected = order_by,
                 Items = new List<SubHeaderViewData>
                 {
                     new SubHeaderViewData
                     {
                         Description = "edited",
                         Title = "Recently edited queries",
-                        Href =
-                            "/users/" + user.Id + "?order_by=edited",
-                        Selected = (order_by == "edited")
+                        Href = "/users/" + user.Id + "?order_by=edited",
+                        Default = true,
                     },
                     new SubHeaderViewData
                     {
                         Description = "favorite",
                         Title = "Favorite queries",
-                        Href =
-                            "/users/" + user.Id +
-                            "?order_by=favorite",
-                        Selected = (order_by == "favorite")
+                        Href = "/users/" + user.Id + "?order_by=favorite"
                     },
                     new SubHeaderViewData
                     {
                         Description = "recent",
                         Title = "Recently executed queries",
-                        Href =
-                            "/users/" + user.Id + "?order_by=recent",
-                        Selected = (order_by == "recent")
+                        Href = "/users/" + user.Id + "?order_by=recent"
                     }
                 }
             };
+            ViewData["UserQueryHeaders"] = profileTabs;
 
             page = Math.Max(page ?? 1, 1);
             int? pagesize = 15; // In case we decide to make this a query param
@@ -288,7 +350,7 @@ order by Row asc", new { currentPage, perPage });
             );
             int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
 
-            ViewData["Href"] = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + order_by;
+            ViewData["Href"] = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + profileTabs.Selected;
             ViewData["Queries"] = new PagedList<QueryExecutionViewData>(queries, page.Value, pagesize.Value, false, total);
 
             if (!queries.Any())

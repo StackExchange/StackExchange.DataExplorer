@@ -79,7 +79,7 @@ namespace StackExchange.DataExplorer.Helpers
         public IEnumerable<IEnumerable<T>> ToRows(int totalRows)
         {
             return this.Select((item, index) => new {Item = item, Index = index})
-                .GroupBy(o => o.Index%totalRows)
+                .GroupBy(o => o.Index / (PageSize / totalRows))
                 .Select(g => g.Select(o => o.Item));
         }
 

@@ -24,7 +24,8 @@ namespace StackExchange.DataExplorer.Helpers
         Text,
         Url, 
         SuggestedEdit,
-        Site
+        Site,
+        Comment
     }
 
     public class ResultColumnInfo
