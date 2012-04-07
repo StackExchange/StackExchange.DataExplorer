@@ -50,6 +50,14 @@ namespace StackExchange.DataExplorer.Controllers
             return View();
         }
 
+        [Route("admin/refresh-settings")]
+        public ActionResult RefreshSettings()
+        {
+            AppSettings.Refresh();
+
+            return Redirect("/admin");
+        }
+
         [Route("admin/clear-table-cache")]
         public ActionResult ClearTableCache()
         {
