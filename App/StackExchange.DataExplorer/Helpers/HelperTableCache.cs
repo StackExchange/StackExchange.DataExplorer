@@ -30,6 +30,26 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
+        public static List<string> GetCachedTables()
+        {
+            var tables = new List<string>();
+
+            foreach (var siteCache in cache.Values)
+            {
+                foreach (var tableName in siteCache.Keys)
+                {
+                    if (!tables.Contains(tableName))
+                    {
+                        tables.Add(tableName);
+                    }
+                }
+            }
+
+            tables.Sort();
+
+            return tables;
+        }
+
         public static Dictionary<string, ResultSet> GetCache(Site site)
         {
             if (Preferences == null)
@@ -161,6 +181,11 @@ namespace StackExchange.DataExplorer.Helpers
         {
             PerSite = false;
             IncludePattern = ".*Types$";
+        }
+
+        public override string ToString()
+        {
+            return "[PerSite = " + PerSite + ", IncludePattern = " + IncludePattern + "]";
         }
 
         public bool PerSite { get; set; }

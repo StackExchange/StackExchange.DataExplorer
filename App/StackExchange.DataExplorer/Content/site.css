@@ -426,6 +426,39 @@ div#title
     text-decoration: none;
 }
 
+.tabular-list, .sublist
+{
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.tabular-list
+{
+  margin-left: 12px;
+}
+
+.tabular-list dt
+{
+  background-color: #F7F7F7;
+  clear: both;
+  float: left;
+  font-style: italic;
+  padding: 2px 3px;
+  margin: 1px 0px;
+  width: 15em;
+}
+
+.tabular-list dd
+{
+  padding: 3px 0px 3px 16em;
+  font-weight: bold;
+}
+
+.tabular-list dd em
+{
+  font-weight: normal;
+}
+
 /* Styles for validation helpers
 -----------------------------------------------------------*/
 .field-validation-error
