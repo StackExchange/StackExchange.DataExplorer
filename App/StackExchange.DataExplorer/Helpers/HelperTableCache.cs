@@ -97,8 +97,7 @@ namespace StackExchange.DataExplorer.Helpers
                 foreach (var table in tables) {
                     if (tableMatcher.IsMatch(table.Name))
                     {
-                        using (SqlConnection connection = site.GetConnection()) {
-                            connection.Open();
+                        using (SqlConnection connection = site.GetOpenConnection()) {
                             cache[site.TinyName][table.Name] = GetTableResults(connection, table);
                         }
                     }
