@@ -37,12 +37,6 @@ namespace StackExchange.DataExplorer
         [Default(false)]
         public static bool AllowRunOnAllDbsOption { get; private set; }
 
-        [Default(false)]
-        public static bool EnableEditorSuggestions { get; private set; }
-
-        [Default(false)]
-        public static bool EnableAdvancedSqlErrors { get; private set; }
-
         [Default("")]
         public static string RecaptchaPublicKey { get; private set; }
 

@@ -1,5 +1,5 @@
 ﻿DataExplorer.QueryEditor = (function () {
-    var editor, field, activeError, params = {}, query,
+    var editor, field, params = {}, query,
         options = {
             'mode': 'text/x-t-sql'
         };
@@ -23,7 +23,6 @@
         if (target.nodeName === 'TEXTAREA') {
             editor = CodeMirror.fromTextArea(target, $.extend({}, options, {
                 'lineNumbers': true,
-                'onChange': onChange,
                 'extraKeys': {
                     'Ctrl-Enter': function () {
                         field.closest('form').submit();
@@ -73,30 +72,6 @@
         field.val(value);
 
         return value;
-    }
-
-    function registerHandler(event, callback) {
-        if (events[event] && typeof callback === 'function') {
-            events[event].push(callback);
-        }
-    }
-
-    function onChange() {
-        if (!DataExplorer.options.enableAdvancedSqlErrors)
-            return;
-
-        if (activeError !== null) {
-            editor.setLineClass(activeError, null);
-            activeError = null;
-        }
-    }
-
-    function onError(line) {
-        if (!DataExplorer.options.enableAdvancedSqlErrors || !editor) {
-            return;
-        }
-        activeError = +line;
-        editor.setLineClass(activeError, 'error-line');
     }
 
     function parseParameters(sql) {
@@ -217,8 +192,6 @@
     return {
         'create': create,
         'value': getValue,
-        'change': registerHandler,
-        'error': onError,
         'exists': exists,
         'parse': parseParameters
     };
@@ -829,10 +802,6 @@ DataExplorer.ready(function () {
             error.hide();
 
             return false;
-        }
-
-        if (response.line) {
-            DataExplorer.QueryEditor.error(response.line);
         }
 
         error.text(response.error).show();
