@@ -442,6 +442,11 @@ namespace StackExchange.DataExplorer.Helpers
                     parameter.Value = value;
                     result = result.Replace("##" + name + "##", value);
                 }
+
+                if (commented > 0)
+                {
+                    Errors.Add("Missing end comment mark */");
+                }
             }
             catch (StackOverflowException)
             {
