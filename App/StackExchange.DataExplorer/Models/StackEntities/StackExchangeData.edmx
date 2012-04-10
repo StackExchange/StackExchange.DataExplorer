@@ -225,7 +225,7 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" />
           <Property Name="PostId" Type="Int32" />
-          <Property Name="VoteTypeId" Type="Int32" />
+          <Property Name="VoteTypeId" Type="Byte" />
           <Property Name="CreationDate" Type="DateTime" />
           <Property Name="BountyAmount" Type="Int32" />
           <Property Name="UserId" Type="Int32" />
@@ -235,7 +235,7 @@
           <Key>
             <PropertyRef Name="Id" />
           </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="Id" Type="Byte" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="40" Unicode="false" FixedLength="false" />
           <NavigationProperty Name="Votes" Relationship="MetaModel.VoteVoteType" FromRole="VoteType" ToRole="Vote" />
         </EntityType>
