@@ -299,12 +299,21 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             );
 
+            if (!Current.User.IsAnonymous && !pagesize.HasValue)
+            {
+                pagesize = Current.User.DefaultQueryPageSize;
+            }
+
             pagesize = Math.Max(Math.Min(pagesize ?? 50, 100), 10);
             page = Math.Max(page ?? 1, 1);
 
+            if (!Current.User.IsAnonymous)
+            {
+                Current.User.DefaultQueryPageSize = pagesize;
+            }
+
             int start = ((page.Value - 1) * pagesize.Value) + 1;
             int finish = page.Value * pagesize.Value;
-            bool useLatest = true;
             var builder = new SqlBuilder();
             SqlBuilder.Template pager = null, counter = null;
 

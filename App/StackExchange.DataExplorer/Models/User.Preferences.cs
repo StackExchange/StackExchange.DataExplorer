@@ -46,6 +46,24 @@ namespace StackExchange.DataExplorer.Models
             }
         }
 
+        public int? DefaultQueryPageSize
+        {
+            get
+            {
+                var value = Preferences.Get<int>(Preference.DefaultQueryPageSize, -1);
+
+                return value == -1 ? (int?)null : value;
+            }
+            set
+            {
+                if (value != DefaultQueryPageSize)
+                {
+                    Preferences.Set(Preference.DefaultQueryPageSize, value ?? -1);
+                    SavePreferences();
+                }
+            }
+        }
+
         /// <summary>
         /// Contains key/value data for this User - will be null until InitPreferences is called.
         /// </summary>
@@ -119,7 +137,8 @@ namespace StackExchange.DataExplorer.Helpers
     public enum Preference
     {
         HideSchema = 1,
-        DefaultQuerySort = 2
+        DefaultQuerySort = 2,
+        DefaultQueryPageSize = 3
     }
 
     public static class PreferenceKey

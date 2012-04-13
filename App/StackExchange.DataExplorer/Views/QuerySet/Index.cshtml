@@ -129,7 +129,7 @@
         </p>
     }
     @UIHelper.PageSizer(ViewData["Href"].ToString() + "&pagesize=-1", Model.PageIndex, Model.PageSize, Model.PageCount, "page-sizer fr")
-    @UIHelper.PageNumber(ViewData["Href"].ToString() + "&page=-1", Model, "pager")
+    @UIHelper.PageNumber(ViewData["Href"].ToString() + "&page=-1&pagesize=" + Model.PageSize, Model, "pager")
 </div>
 
 <script type="text/javascript">
