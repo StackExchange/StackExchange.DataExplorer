@@ -11,7 +11,6 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class QueryController : StackOverflowController
     {
-
         [Route(@"query/job/{guid}")]
         public ActionResult PollJob(Guid guid)
         {
@@ -455,7 +454,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             ViewData["query_action"] = "save/" + Site.Id +  "/" + querySetId;
-
+            ViewData["HelperTables"] = HelperTableCache.GetCacheAsJson(Site);
 
             return View("Editor", new ViewModel.QuerySetViewModel 
             { 
@@ -503,6 +502,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             ViewData["query_action"] = "save/" + Site.Id;
+            ViewData["HelperTables"] = HelperTableCache.GetCacheAsJson(Site);
 
             return View("Editor", null);
         }

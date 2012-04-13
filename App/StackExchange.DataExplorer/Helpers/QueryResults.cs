@@ -30,6 +30,38 @@ namespace StackExchange.DataExplorer.Helpers
 
     public class ResultColumnInfo
     {
+        public static readonly Dictionary<Type, ResultColumnType> ColumnTypeMap = new Dictionary<Type, ResultColumnType>
+        {
+            {
+                typeof (int),
+                ResultColumnType.Number
+            },
+            {
+                typeof (long),
+                ResultColumnType.Number
+            },
+            {
+                typeof (float),
+                ResultColumnType.Number
+            },
+            {
+                typeof (double),
+                ResultColumnType.Number
+            },
+            {
+                typeof (decimal),
+                ResultColumnType.Number
+            },
+            {
+                typeof (string),
+                ResultColumnType.Text
+            },
+            {
+                typeof (DateTime),
+                ResultColumnType.Date
+            }
+        };
+
         public ResultColumnInfo()
         {
             Type = ResultColumnType.Default;

@@ -1796,7 +1796,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         /// </summary>
         [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=true)]
         [DataMemberAttribute()]
-        public Nullable<global::System.Int32> VoteTypeId
+        public Nullable<global::System.Byte> VoteTypeId
         {
             get
             {
@@ -1811,8 +1811,8 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 OnVoteTypeIdChanged();
             }
         }
-        private Nullable<global::System.Int32> _VoteTypeId;
-        partial void OnVoteTypeIdChanging(Nullable<global::System.Int32> value);
+        private Nullable<global::System.Byte> _VoteTypeId;
+        partial void OnVoteTypeIdChanging(Nullable<global::System.Byte> value);
         partial void OnVoteTypeIdChanged();
     
         /// <summary>
@@ -1946,7 +1946,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         /// Create a new VoteType object.
         /// </summary>
         /// <param name="id">Initial value of the Id property.</param>
-        public static VoteType CreateVoteType(global::System.Int32 id)
+        public static VoteType CreateVoteType(global::System.Byte id)
         {
             VoteType voteType = new VoteType();
             voteType.Id = id;
@@ -1961,7 +1961,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         /// </summary>
         [EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
         [DataMemberAttribute()]
-        public global::System.Int32 Id
+        public global::System.Byte Id
         {
             get
             {
@@ -1979,8 +1979,8 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 }
             }
         }
-        private global::System.Int32 _Id;
-        partial void OnIdChanging(global::System.Int32 value);
+        private global::System.Byte _Id;
+        partial void OnIdChanging(global::System.Byte value);
         partial void OnIdChanged();
     
         /// <summary>

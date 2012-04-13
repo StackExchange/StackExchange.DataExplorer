@@ -4,6 +4,7 @@ using System.Reflection;
 using Dapper;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
+using Newtonsoft.Json;
 
 namespace StackExchange.DataExplorer
 {
@@ -36,12 +37,6 @@ namespace StackExchange.DataExplorer
         [Default(false)]
         public static bool AllowRunOnAllDbsOption { get; private set; }
 
-        [Default(false)]
-        public static bool EnableEditorSuggestions { get; private set; }
-
-        [Default(false)]
-        public static bool EnableAdvancedSqlErrors { get; private set; }
-
         [Default("")]
         public static string RecaptchaPublicKey { get; private set; }
 
@@ -51,6 +46,9 @@ namespace StackExchange.DataExplorer
         [Default(-1)]
         public static int AutoExpireCacheMinutes { get; private set; }
 
+        [Default(null)]
+        public static HelperTableCachePreferences HelperTableOptions { get; private set; }
+
         public static void Refresh()
         {
             var data = Current.DB.AppSettings.All().ToDictionary(v => v.Setting, v => v.Value);
@@ -58,6 +56,7 @@ namespace StackExchange.DataExplorer
             foreach (var property in typeof(AppSettings).GetProperties(BindingFlags.Static | BindingFlags.Public))
             {
                 string overrideData;
+
                 if (data.TryGetValue(property.Name, out overrideData))
                 {
                     if (property.PropertyType == typeof(bool))
@@ -66,8 +65,7 @@ namespace StackExchange.DataExplorer
                         Boolean.TryParse(overrideData, out parsed);
                         property.SetValue(null, parsed, null);
                     }
-
-                    if (property.PropertyType == typeof(int))
+                    else if (property.PropertyType == typeof(int))
                     {
                         int parsed = -1;
                         if (int.TryParse(overrideData, out parsed))
@@ -75,12 +73,22 @@ namespace StackExchange.DataExplorer
                             property.SetValue(null, parsed, null);
                         }
                     }
-
-                    if (property.PropertyType == typeof(string))
+                    else if (property.PropertyType == typeof(string))
                     {
                         property.SetValue(null, overrideData, null);
                     }
-
+                    else if (overrideData[0] == '{' && overrideData[overrideData.Length - 1] == '}')
+                    {
+                        try
+                        {
+                            property.SetValue(null, JsonConvert.DeserializeObject(overrideData, property.PropertyType), null);
+                        }
+                        catch (JsonSerializationException)
+                        {
+                            // Just in case
+                            property.SetValue(null, null, null);
+                        }
+                    }
                 }
                 else
                 {

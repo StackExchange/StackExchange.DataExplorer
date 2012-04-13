@@ -15,42 +15,8 @@ namespace StackExchange.DataExplorer.Helpers
     {
         private const int MAX_RESULTS = 50000;
 
-        private static readonly Dictionary<Type, ResultColumnType> ColumnTypeMap = new Dictionary<Type, ResultColumnType>
-                                                                                       {
-                                                                                           {
-                                                                                               typeof (int),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (long),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (float),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (double),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (decimal),
-                                                                                               ResultColumnType.Number
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (string),
-                                                                                               ResultColumnType.Text
-                                                                                               },
-                                                                                           {
-                                                                                               typeof (DateTime),
-                                                                                               ResultColumnType.Date
-                                                                                               }
-                                                                                       };
-
         private static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> magic_columns
             = GetMagicColumns();
-
-
 
         static void AddBody(StringBuilder buffer, QueryResults results, Site site)
         {
@@ -396,7 +362,7 @@ namespace StackExchange.DataExplorer.Helpers
                             var columnInfo = new ResultColumnInfo();
                             columnInfo.Name = reader.GetName(i);
                             ResultColumnType colType;
-                            if (ColumnTypeMap.TryGetValue(reader.GetFieldType(i), out colType))
+                            if (ResultColumnInfo.ColumnTypeMap.TryGetValue(reader.GetFieldType(i), out colType))
                             {
                                 columnInfo.Type = colType;
                             }

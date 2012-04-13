@@ -66,6 +66,11 @@
             </li>
         }
         </ul>
+        <script type="text/javascript">
+            DataExplorer.ready(function () {
+                DataExplorer.TableHelpers.init(@Html.Raw(ViewData["HelperTables"] as string));
+            });
+        </script>
     </div>
     @Html.Partial("RevisionHistory", Model)
 </div>
