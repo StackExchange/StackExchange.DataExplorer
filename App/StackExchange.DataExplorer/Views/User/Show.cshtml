@@ -52,7 +52,7 @@
                     {
                         <tr>
                             <td>website</td>
-                            <td class="overflowing"><div class="no-overflow"><a href="http://@Model.Website" rel="me" class="url">@Model.Website</a></div></td>
+                            <td class="overflowing"><div class="no-overflow"><a href="@HtmlUtilities.SafeProtocol(Model.Website)" rel="me" class="url">@Model.Website</a></div></td>
                         </tr>
                     }
                     <tr>

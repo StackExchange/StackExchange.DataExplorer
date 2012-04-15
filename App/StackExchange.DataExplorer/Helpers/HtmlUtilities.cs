@@ -38,6 +38,8 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static readonly Regex _urlprotocol = new Regex(@"^(https?|ftp)://(www\.)?|(/$)", RegexOptions.Compiled);
 
+        private static readonly Regex _urlprotocolSafe = new Regex(@"^https?://", RegexOptions.Compiled);
+
         private static readonly Regex _markdownMiniBold =
             new Regex(@"(?<=^|[\s,(])(?:\*\*|__)(?=\S)(.+?)(?<=\S)(?:\*\*|__)(?=[\s,?!.)]|$)", RegexOptions.Compiled);
 
@@ -551,6 +553,21 @@ namespace StackExchange.DataExplorer.Helpers
             html = Sanitize(html);
             html = BalanceTags(html);
             return html;
+        }
+
+        /// <summary>
+        /// ensures <code>url</code> has a valid protocol for being used in a link somewhere
+        /// </summary>
+        /// <param name="url">the url to check</param>
+        /// <returns>the processed url</returns>
+        public static string SafeProtocol(string url)
+        {
+            if (!_urlprotocolSafe.IsMatch(url))
+            {
+                url = "http://" + url;
+            }
+
+            return url;
         }
 
         /// <summary>
