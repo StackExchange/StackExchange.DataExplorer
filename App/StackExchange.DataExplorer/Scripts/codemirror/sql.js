@@ -159,7 +159,7 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
         "commit rollback replace view database separator if " +
         "exists null truncate status show lock unique having " +
         "drop procedure begin end delimiter call else leave " +
-        "declare temporary then case when with";
+        "declare temporary then case when with is";
 
 
     var cFunctions =
