@@ -172,6 +172,9 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (cachedResults != null)
             {
+                // Don't show cached execution plan, since the user didn't ask for it...
+                cachedResults.ExecutionPlan = null;
+
                 ViewData["cached_results"] = new QueryResults
                 {
                     RevisionId = revision.Id,
