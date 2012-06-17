@@ -569,12 +569,16 @@ namespace StackExchange.DataExplorer
             return (number == 1) ? word : word + "s";
         }
 
-        public static string PrettyShort(this Int32? num)
-        {
-            if (num == null)
-            {
+        public static string PrettyShort(this int? num) {
+            if (num == null) {
                 return "";
             }
+
+            return num.Value.PrettyShort();
+        }
+
+        public static string PrettyShort(this int num)
+        {
             string rval;
 
             if (num < 1000)
@@ -585,13 +589,13 @@ namespace StackExchange.DataExplorer
             {
                 double divisor = num < 1000000 ? 1000.0 : 1000000.0;
 
-                if (((int) Math.Round(num.Value/divisor)).ToString().Length > 1)
+                if (((int) Math.Round(num/divisor)).ToString().Length > 1)
                 {
-                    rval = (Math.Round(num.Value/divisor)).ToString();
+                    rval = (Math.Round(num/divisor)).ToString();
                 }
                 else
                 {
-                    rval = (Math.Round(num.Value/(divisor/10.0))/10.0).ToString();
+                    rval = (Math.Round(num/(divisor/10.0))/10.0).ToString();
                 }
             }
 

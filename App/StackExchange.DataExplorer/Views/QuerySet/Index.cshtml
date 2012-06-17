@@ -93,7 +93,7 @@
                     }
                 </div>
                 <div class="views">
-                    <span class="totalViews">@query.Views</span>
+                    <span class="totalViews">@Html.Raw(query.Views.PrettyShort())</span>
                     <span class="viewDesc">@("view".Pluralize(query.Views))</span>
                 </div>
                 @if (Current.User.IsAdmin)
