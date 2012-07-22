@@ -123,17 +123,26 @@ namespace StackExchange.DataExplorer.Controllers
 
                         if (!CurrentUser.IsAnonymous)
                         {
-                          if (openId != null && openId.UserId != CurrentUser.Id) //Does another user have this OpenID
-                          {
-                            //TODO: Need to perform a user merge
-                            ViewData["Message"] = "Another user with this OpenID already exists, merging is not possible at this time.";
-                            SetHeader("Log in below to change your OpenID");
-                            return View("Login");
-                          }
-                          openId = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id}).First();
-                          Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = claimedId });
-                          user = CurrentUser;
-                          returnUrl = "/users/" + user.Id;
+                            if (openId != null && openId.UserId != CurrentUser.Id) //Does another user have this OpenID
+                            {
+                                //TODO: Need to perform a user merge
+                                ViewData["Message"] = "Another user with this OpenID already exists, merging is not possible at this time.";
+                                SetHeader("Log in below to change your OpenID");
+                                return View("Login");
+                            }
+
+                            var currentOpenIds = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id});
+
+                            // If a user is merged and then tries to add one of the OpenIDs used for the two original users,
+                            // this update will fail...so don't attempt it if we detect that's the case. Really we should
+                            // work on allowing multiple OpenID logins, but for now I'll settle for not throwing an exception...
+                            if (!currentOpenIds.Any(s => s.OpenIdClaim == claimedId))
+                            {
+                                Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = claimedId });
+                            }
+                          
+                            user = CurrentUser;
+                            returnUrl = "/users/" + user.Id;
                         }
                         else if (openId == null)
                         {
