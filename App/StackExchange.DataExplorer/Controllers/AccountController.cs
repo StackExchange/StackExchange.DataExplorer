@@ -123,7 +123,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                         if (!CurrentUser.IsAnonymous)
                         {
-                          if (openId.UserId != CurrentUser.Id) //Does another user have this OpenID
+                          if (openId != null && openId.UserId != CurrentUser.Id) //Does another user have this OpenID
                           {
                             //TODO: Need to perform a user merge
                             ViewData["Message"] = "Another user with this OpenID already exists, merging is not possible at this time.";
@@ -131,8 +131,7 @@ namespace StackExchange.DataExplorer.Controllers
                             return View("Login");
                           }
                           openId = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id}).First();
-                          openId.OpenIdClaim = claimedId;
-                          Current.DB.UserOpenIds.Update(openId.Id, new { openId.OpenIdClaim });
+                          Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = claimedId });
                           user = CurrentUser;
                           returnUrl = "/user/" + user.Id;
                         }
