@@ -41,7 +41,8 @@ namespace StackExchange.DataExplorer.Helpers
         {
             Pending,
             Success,
-            Failure
+            Failure,
+            Cancelled
         }
 
         public class AsyncResult
@@ -62,6 +63,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             public SqlCommand Command { get; set; }
             public bool Cancelled { get; set; }
+            public bool HasOutput { get; set; }
         }
 
         public static AsyncResult Execute(ParsedQuery query, User user, Site site, QueryContextData context)
@@ -101,10 +103,14 @@ namespace StackExchange.DataExplorer.Helpers
                 try
                 {
                     result.QueryResults = QueryRunner.GetResults(query, site, user, result);
-                    result.State = AsyncState.Success;
+
+                    if (result.State == AsyncState.Pending)
+                    {
+                        result.State = AsyncState.Success;
+                    }
                 }
                 catch (Exception e)
-                {
+                {                    
                     result.Exception = e;
                     result.State = AsyncState.Failure;
                 }
@@ -177,6 +183,23 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 result.LastPoll = DateTime.UtcNow;
             }
+            return result;
+        }
+
+        public static AsyncResult CancelJob(Guid guid)
+        {
+            AsyncResult result;
+            jobs.TryGetValue(guid, out result);
+
+            if (result != null) {
+                if (result.Command != null)
+                {
+                    result.Command.Cancel();
+                    result.Cancelled = true;
+                    result.State = AsyncState.Cancelled;
+                }
+            }
+
             return result;
         }
     }

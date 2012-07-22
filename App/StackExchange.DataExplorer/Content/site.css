@@ -831,7 +831,7 @@ ul.site-list .desc {
   color: #606060;
   display: inline-block;
   font-weight: bold;
-  margin-left: 15px;
+  margin-left: 9px;
 }
 
 #query-options {
@@ -852,10 +852,10 @@ ul.site-list .desc {
   margin: 0px 5px 0px 0px;
 }
 
-#submit-query {
+#submit-query, #cancel-query {
   cursor: pointer;
   font-weight: bold;
-  margin: 0px;
+  margin: 0px 6px 0px 0px;
   padding: 3px 5px 3px 5px;
 }
 
@@ -948,6 +948,12 @@ ul.linkbar li {
   display: none;
   margin-top: 5px;
   padding: 10px 14px 10px 14px;
+}
+
+#error-message.notice {
+  background-color: #E9F5E9;
+  border: 1px solid #16B500;
+  color: #209403;
 }
 
 #query {

@@ -440,33 +440,76 @@ DataExplorer.ready(function () {
         var cleanup = function () {
             $('#loading').hide();
 
-            form.find('input, button').prop('disabled', false);
-        }
+            form.find('input, button').prop('disabled', function () {
+                return this.id == 'cancel-query';
+            });
+        };
 
         var fail = function() {
             showError({ 'error': "Something unexpected went wrong while running "
                             + "your query. Don't worry, blame is already being assigned." });
+        };
+
+        var cancel = function () {
+            showError({ 'error': 'Query execution has been cancelled' }, 'notice');
         }
 
+        var pending = { request: null, timeout: null, setupCancel: true };
         var success = function(response) {
             if (response.running === true)
             {
-                setTimeout(function(){
-                       $.ajax({
+                var poll = function () {
+                    pending.timeout = setTimeout(function(){
+                        pending.request = $.ajax({
                             'type': 'GET',
                             'url': '/query/job/' + response.job_id,
                             'success': success,
                             'error': [cleanup, fail],
-                            'cache': false,
+                            'cache': false
                         });  
-                }, 1500);
+                    }, 1500);
+                };
+
+                if (!pending.timeout && pending.setupCancel) {
+                    var job = response.job_id;
+                    pending.setupCancel = false;
+
+                    $('#cancel-query').one('click', function () {
+                        this.disabled = true;
+
+                        clearTimeout(pending.timeout);
+
+                        if (pending.request) {
+                            pending.request.abort();
+                        }
+
+                        $.ajax({
+                            type: 'POST',
+                            url:  '/query/job/' + job + '/cancel',
+                            success: function (response) {
+                                if (response.cancelled) {
+                                    cleanup();
+                                    cancel();
+                                } else {
+                                    // There were some results, so we're going to try and get whatever
+                                    // was being returned when the user decided to cancel
+                                    poll();
+                                }
+                            },
+                            error: [cleanup, fail],
+                            cache: false
+                        });
+                    }).prop('disabled', false);
+                }
+
+                poll();
             }
             else 
             {
                 cleanup();
                 parseQueryResponse(response);
             }
-        }
+        };
 
         if (verifyParameters()) {
             var data = form.serialize();
@@ -797,14 +840,14 @@ DataExplorer.ready(function () {
         }
     }
 
-    function showError(response) {
+    function showError(response, className) {
         if (response && !response.error) {
             error.hide();
 
             return false;
         }
 
-        error.text(response.error).show();
+        error.text(response.error).show()[0].className = className || '';
 
         return true;
     }

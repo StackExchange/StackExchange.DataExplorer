@@ -42,6 +42,20 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpPost]
+        [Route(@"query/job/{guid}/cancel")]
+        public ActionResult CancelJob(Guid guid)
+        {
+            var result = AsyncQueryRunner.CancelJob(guid);
+
+            if (result == null)
+            {
+                return Json(new { error = "can't cancel unknown job!" });
+            }
+
+            return Json(new { cancelled = !result.HasOutput, job_id = result.JobId });
+        }
+
+        [HttpPost]
         [Route(@"query/save/{siteId:\d+}/{querySetId?:\d+}")]
         public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, TargetSites? targetSites)
         {
@@ -101,7 +115,7 @@ namespace StackExchange.DataExplorer.Controllers
                     throw asyncResults.Exception; 
                 }
 
-                if (asyncResults.State == AsyncQueryRunner.AsyncState.Success)
+                if (asyncResults.State == AsyncQueryRunner.AsyncState.Success || asyncResults.State == AsyncQueryRunner.AsyncState.Cancelled)
                 {
                     results = asyncResults.QueryResults;
                 }
