@@ -133,7 +133,7 @@ namespace StackExchange.DataExplorer.Controllers
                           openId = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id}).First();
                           Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = claimedId });
                           user = CurrentUser;
-                          returnUrl = "/user/" + user.Id;
+                          returnUrl = "/users/" + user.Id;
                         }
                         else if (openId == null)
                         {
