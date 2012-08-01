@@ -140,6 +140,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             AddMenuItem(new SubHeaderViewData
                             {
+                                Id = "compose-button",
                                 Title = "Compose Query",
                                 Description = "Compose Query",
                                 Href = "/" + Site.Name.ToLower() + "/query/new",
