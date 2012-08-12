@@ -14,6 +14,7 @@
                 <h2>Registered User</h2>
                 <form action="/users/edit/@Model.Id" method="post">
                     @Html.ValidationSummary(true)
+                    @Html.AntiForgeryToken()
                     <table style="width:600px;">
                         <tbody>
                             <tr>

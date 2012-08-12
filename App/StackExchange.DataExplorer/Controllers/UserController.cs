@@ -117,6 +117,7 @@ namespace StackExchange.DataExplorer.Controllers
 
 
         [ValidateInput(false)]
+        [ValidateAntiForgeryToken]
         [HttpPost]
         [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id, User updatedUser)
