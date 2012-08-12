@@ -131,7 +131,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 return View("Login");
                             }
 
-                            var currentOpenIds = Current.DB.Query<UserOpenId>("select top 1 * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id});
+                            var currentOpenIds = Current.DB.Query<UserOpenId>("select * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id});
 
                             // If a user is merged and then tries to add one of the OpenIDs used for the two original users,
                             // this update will fail...so don't attempt it if we detect that's the case. Really we should
