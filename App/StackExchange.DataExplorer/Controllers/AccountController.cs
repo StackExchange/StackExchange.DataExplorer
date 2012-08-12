@@ -201,6 +201,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                         var authenticationCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
                         authenticationCookie.Expires = ticket.Expiration;
+                        authenticationCookie.HttpOnly = true;
                         Response.Cookies.Add(authenticationCookie);
 
 
