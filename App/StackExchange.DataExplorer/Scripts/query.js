@@ -727,7 +727,7 @@ DataExplorer.ready(function () {
         else if (response.targetSites == 2) { target = "all-meta-"; } // all meta sites
         else if (response.targetSites == 3) { target = "all-non-meta-"; } // all non meta sites
 
-        DataExplorer.template('a.templated', 'href', {
+        DataExplorer.template('a.templated.site', 'href', {
             'targetsites': target,
             'site': response.siteName,
             'revisionid': response.revisionId,
@@ -736,15 +736,14 @@ DataExplorer.ready(function () {
             'id' : response.querySetId
         });
 
-        if (userid) {
-            userid = (params ? '&' : '?') + 'UserId=' + userid;
-
-            var related = $('a.templated.related-site');
-
-            if (related.length) {
-                related[0].setAttribute('href', related[0].getAttribute('href') + userid);
-            }
-        }
+        DataExplorer.template('a.templated:not(.site), a.template.related-site', 'href', {
+            'targetsites': target,
+            'site': response.siteName,
+            'revisionid': response.revisionId,
+            'slug': slug,
+            'params': (params ? params + '&' : '?') + (userid ? 'UserId=' + userid : ''),
+            'id' : response.querySetId
+        });
 
         if (response.created) {
             var title = response.created.replace(/\.\d+Z/, 'Z'),

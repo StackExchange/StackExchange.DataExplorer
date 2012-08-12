@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<StackExchange.DataExplorer.ViewModel.SubHeaderViewData>
+@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.ViewModel
 
 <div id="hmenus">
@@ -8,6 +9,10 @@
             {
                 <li>
                     <a 
+                    @if (item.Id.HasValue())
+                    {
+                        <text>id="@item.Id"</text>    
+                    }
                     @if (item.Selected)
                     {
                         <text>class="youarehere"</text>
@@ -23,6 +28,10 @@
             {
                 <li style="margin-right:0px;">
                     <a
+                    @if (item.Id.HasValue())
+                    {
+                        <text>id="@item.Id"</text>    
+                    }
                     @if (item.Selected)
                     {
                         <text>class="youarehere"</text>

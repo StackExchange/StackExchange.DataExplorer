@@ -15,7 +15,21 @@ namespace StackExchange.DataExplorer.Models
 
         private UserPreferenceDictionary _preferences = null;
 
-        public bool HideSchema { 
+        public bool AllowRelaxedIdentifierMatch
+        {
+            get
+            {
+                return Preferences.Get<bool>(Preference.AllowRelaxedIdentifierMatch, AppSettings.RelaxedIdentifierDefault);
+            }
+            set
+            {
+                Preferences.Set(Preference.AllowRelaxedIdentifierMatch, value);
+                SavePreferences();
+            }
+        }
+
+        public bool HideSchema
+        { 
             get 
             {
                 return Preferences.Get<bool>(Preference.HideSchema, false);
@@ -138,7 +152,8 @@ namespace StackExchange.DataExplorer.Helpers
     {
         HideSchema = 1,
         DefaultQuerySort = 2,
-        DefaultQueryPageSize = 3
+        DefaultQueryPageSize = 3,
+        AllowRelaxedIdentifierMatch = 4
     }
 
     public static class PreferenceKey

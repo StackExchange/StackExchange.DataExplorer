@@ -70,7 +70,8 @@ namespace StackExchange.DataExplorer
                     {
                         "master", new AssetCollection
                         {
-                            "/Scripts/master.js"
+                            "/Scripts/master.js",
+                            "/Scripts/jquery.autocomplete.js"
                         }
                     },
                     {

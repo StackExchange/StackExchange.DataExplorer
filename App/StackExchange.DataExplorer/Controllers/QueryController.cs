@@ -366,8 +366,15 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                 return PageNotFound();
             }
 
+            var parsedQuery = new ParsedQuery(query.QueryBody, Request.Params);
+
+            if (!parsedQuery.IsExecutionReady)
+            {
+                return PageBadRequest();
+            }
+
             CachedResult cachedResults = QueryUtil.GetCachedResults(
-                new ParsedQuery(query.QueryBody, Request.Params),
+                parsedQuery,
                 Site.Id
             );
             List<ResultSet> resultSets;
@@ -379,7 +386,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             else
             {
                 resultSets = QueryRunner.GetResults(
-                    new ParsedQuery(query.QueryBody, Request.Params),
+                    parsedQuery,
                     site,
                     CurrentUser
                 ).ResultSets;
@@ -492,8 +499,15 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                 return PageNotFound();
             }
 
+            var parsedQuery = new ParsedQuery(query.QueryBody, Request.Params);
+
+            if (!parsedQuery.IsExecutionReady)
+            {
+                return PageBadRequest();
+            }
+
             CachedResult cache = QueryUtil.GetCachedResults(
-                new ParsedQuery(query.QueryBody, Request.Params),
+                parsedQuery,
                 Site.Id
             );
 

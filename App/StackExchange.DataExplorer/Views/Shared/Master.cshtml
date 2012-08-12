@@ -56,6 +56,12 @@
                     </a>
                 </div>
                 @Html.Partial("Menu", ViewData["Menu"])
+                <script type="text/javascript">
+                    DataExplorer.initComposeButton({
+                        IconUrl: '/icon/@Current.Controller.Site.Id',
+                        LongName: '@Current.Controller.Site.LongName'
+                    });
+                </script>
             </div>
             <div class="clear">
             </div>
