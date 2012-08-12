@@ -28,6 +28,9 @@ namespace StackExchange.DataExplorer
         [Default(true)]
         public static bool GuessUserId { get; private set; }
 
+        [Default(true)]
+        public static bool RelaxedIdentifierDefault { get; private set; }
+
         [Default(false)]
         public static bool EnableWhiteList { get; private set; }
 

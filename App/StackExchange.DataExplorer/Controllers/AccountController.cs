@@ -42,19 +42,22 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 // Stage 2: user submitting Identifier
                 Identifier id;
+
                 if (Identifier.TryParse(Request.Form["openid_identifier"], out id))
                 {
                     try
                     {
-                        IAuthenticationRequest request = openid.CreateRequest(Request.Form["openid_identifier"]);
+                        IAuthenticationRequest request = openid.CreateRequest(id);
 
-                        request.AddExtension(new ClaimsRequest
-                                                 {
-                                                     Email = DemandLevel.Require,
-                                                     Nickname = DemandLevel.Request,
-                                                     FullName = DemandLevel.Request,
-                                                     BirthDate = DemandLevel.Request
-                                                 });
+                        request.AddExtension(
+                            new ClaimsRequest
+                            {
+                                Email = DemandLevel.Require,
+                                Nickname = DemandLevel.Request,
+                                FullName = DemandLevel.Request,
+                                BirthDate = DemandLevel.Request
+                            }
+                        );
 
                         return request.RedirectingResponse.AsActionResult();
                     }
@@ -76,21 +79,17 @@ namespace StackExchange.DataExplorer.Controllers
                 switch (response.Status)
                 {
                     case AuthenticationStatus.Authenticated:
-
-                        var claimedId = Models.User.NormalizeOpenId(response.ClaimedIdentifier.ToString().ToLower());
+                        var originalClaim = Models.User.NormalizeOpenId(response.ClaimedIdentifier.ToString(), false);
+                        var normalizedClaim = Models.User.NormalizeOpenId(response.ClaimedIdentifier.ToString());
                         var sreg = response.GetExtension<ClaimsResponse>();
+                        var isSecure = originalClaim.StartsWith("https://");
 
                         if (AppSettings.EnableWhiteList)
                         {
-                            string lookupClaim = claimedId;
+                            // Ideally we'd be as strict as possible here and use originalClaim, but we might break existing deployments then
+                            string lookupClaim = normalizedClaim;
 
-                            // google
-                            if (claimedId.StartsWith(@"http://google.com/accounts/o8/id") && !claimedId.Contains("@") && sreg.Email != null && sreg.Email.Length > 2)
-                            {
-                                lookupClaim = "email:" + sreg.Email;
-                            }
-
-                            if (IsVerifiedEmailProvider(claimedId) && sreg.Email != null && sreg.Email.Length > 2)
+                            if (IsVerifiedEmailProvider(lookupClaim) && sreg.Email != null && sreg.Email.Length > 2)
                             {
                                 lookupClaim = "email:" + sreg.Email;
                             }
@@ -119,7 +118,7 @@ namespace StackExchange.DataExplorer.Controllers
                         }
 
                         User user = null;
-                        var openId = Current.DB.Query<UserOpenId>("select * from UserOpenIds where OpenIdClaim = @claimedId", new {claimedId}).FirstOrDefault();
+                        var openId = Current.DB.Query<UserOpenId>("SELECT * FROM UserOpenIds WHERE OpenIdClaim = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
 
                         if (!CurrentUser.IsAnonymous)
                         {
@@ -136,9 +135,9 @@ namespace StackExchange.DataExplorer.Controllers
                             // If a user is merged and then tries to add one of the OpenIDs used for the two original users,
                             // this update will fail...so don't attempt it if we detect that's the case. Really we should
                             // work on allowing multiple OpenID logins, but for now I'll settle for not throwing an exception...
-                            if (!currentOpenIds.Any(s => s.OpenIdClaim == claimedId))
+                            if (!currentOpenIds.Any(s => s.OpenIdClaim == normalizedClaim))
                             {
-                                Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = claimedId });
+                                Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = normalizedClaim });
                             }
                           
                             user = CurrentUser;
@@ -147,12 +146,16 @@ namespace StackExchange.DataExplorer.Controllers
                         else if (openId == null)
                         {
 
-                            if (sreg != null && IsVerifiedEmailProvider(claimedId))
+                            if (sreg != null && IsVerifiedEmailProvider(normalizedClaim))
                             {
+                                // Eh...We can trust the verified email provider, but we can't really trust Users.Email.
+                                // I can't think of a particularly malicious way this could be exploited, but it's likely
+                                // worth reviewing at some point.
                                 user = Current.DB.Query<User>("select * from Users where Email = @Email", new { sreg.Email }).FirstOrDefault();
+
                                 if (user != null)
                                 {
-                                    Current.DB.UserOpenIds.Insert(new { UserId = user.Id, OpenIdClaim = claimedId });
+                                    Current.DB.UserOpenIds.Insert(new { UserId = user.Id, OpenIdClaim = normalizedClaim, isSecure });
                                 }
                             }
 
@@ -166,12 +169,22 @@ namespace StackExchange.DataExplorer.Controllers
                                     email = sreg.Email;
                                     login = sreg.Nickname;
                                 }
-                                user = Models.User.CreateUser(login, email, claimedId);
+                                user = Models.User.CreateUser(login, email, normalizedClaim);
                             }
                         }
                         else
                         {
                             user = Current.DB.Users.Get(openId.UserId);
+
+                            if (!user.AllowRelaxedIdentifierMatch && !isSecure && openId.IsSecure)
+                            {
+                                ViewData["Message"] = "User preferences prohibit insecure (non-https) variants of the provided OpenID identifier";
+                                return View("Login");
+                            }
+                            else if (isSecure && !openId.IsSecure)
+                            {
+                                Current.DB.UserOpenIds.Update(openId.Id, new { IsSecure = true });
+                            }
                         }
 
                         string Groups = user.IsAdmin ? "Admin" : "";

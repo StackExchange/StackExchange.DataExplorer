@@ -145,11 +145,11 @@ namespace StackExchange.DataExplorer.Models
             return login;
         }
 
-        public static string NormalizeOpenId(string openId)
+        public static string NormalizeOpenId(string openId, bool normalizeScheme = true)
         {
             openId = (openId ?? "").Trim().ToLowerInvariant();
 
-            if (openId.StartsWith("https://"))
+            if (normalizeScheme && openId.StartsWith("https://"))
                 openId = "http://" + openId.Substring(8);
 
             if (openId.EndsWith("/"))
