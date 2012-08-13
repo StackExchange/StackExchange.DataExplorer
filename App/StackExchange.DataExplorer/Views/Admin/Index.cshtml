@@ -13,7 +13,7 @@
 <h3>User Management</h3>
 <ul>
     <li><a href="/admin/whitelist">OpenID whitelist</a></li>
-    <li><a href="/admin/find-dupe-users">Find dupe users</a> (<a class="post-action" href="/admin/find-dupe-users?useemail=true">by email</a>)</li>
+    <li><a href="/admin/find-dupe-users">Find dupe users</a> (<a href="/admin/find-dupe-users?useemail=true">by email</a>)</li>
 </ul>
 <h3>Application Settings</h3>
 <ul>
@@ -65,6 +65,7 @@
         </dl>
     </li>
 </ul>
+@Html.AntiForgeryToken()
 <script type="text/javascript">
 (function () {
     $('a.post-action').each(function () {
@@ -76,7 +77,7 @@
             link.parentNode.insertBefore(textNode, link);
             link.parentNode.removeChild(link);
 
-            $.post(this.href, function () {
+            $.post(this.href, DataExplorer.token({}), function () {
                 if (reload) {
                     window.location.reload(true);
                 } else {

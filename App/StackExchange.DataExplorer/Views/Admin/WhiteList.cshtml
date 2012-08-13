@@ -19,12 +19,13 @@
         </tr>
     }
 </table>
+@Html.AntiForgeryToken()
 <script type="text/javascript">
-    $(document).ready(function () {
+    (function () {
         $("a.approve").click(function () {
             var href = $(this);
             href.hide();
-            $.post(this.href, null, function () {
+            $.post(this.href, DataExplorer.token({}), function () {
                 href.parent().parent().find('.approved').text('True');
             });
             return false;
@@ -33,10 +34,10 @@
         $("a.remove").click(function () {
             var href = $(this);
             href.hide();
-            $.post(this.href, null, function () {
+            $.post(this.href, DataExplorer.token({}), function () {
                 href.parent().parent().hide();
             });
             return false;
         });
-    });
+    })();
 </script>

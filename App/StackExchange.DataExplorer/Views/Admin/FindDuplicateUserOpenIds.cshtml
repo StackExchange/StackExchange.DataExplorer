@@ -27,16 +27,16 @@
     }
     </tbody>
 </table>
-
+@Html.AntiForgeryToken()
 <script type="text/javascript">
-    $(function () {
+    (function () {
         $("a.remove").click(function () {
             var href = $(this);
             href.hide();
-            $.post(this.href, null, function () {
+            $.post(this.href, DataExplorer.token({}), function () {
                 href.parent().parent().hide();
             });
             return false;
         });
-    })
+    })();
 </script>

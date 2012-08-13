@@ -20,6 +20,7 @@
 <h3>Are you sure?  This cannot be undone.</h3>
 <br/>
 <form method="post" action="/admin/merge-users-submit">
+    @Html.AntiForgeryToken()
     <input type="hidden" name="masterId" value="@masterUser.Id" />
     <input type="hidden" name="mergeId" value="@mergeUser.Id" />
     <input type="submit" id="submit" value="Merge these users" />

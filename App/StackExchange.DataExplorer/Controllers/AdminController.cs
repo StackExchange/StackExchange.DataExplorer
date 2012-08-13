@@ -22,6 +22,7 @@ namespace StackExchange.DataExplorer.Controllers
             base.OnActionExecuting(c);
         }
 
+        [ValidateAntiForgeryToken]
         [Route("admin/whitelist/approve/{id:int}", HttpVerbs.Post)]
         public ActionResult ApproveWhiteListEntry(int id)
         {
@@ -29,6 +30,7 @@ namespace StackExchange.DataExplorer.Controllers
             return Json("ok");
         }
 
+        [ValidateAntiForgeryToken]
         [Route("admin/whitelist/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveWhiteListEntry(int id)
         {
@@ -54,6 +56,7 @@ namespace StackExchange.DataExplorer.Controllers
             return View();
         }
 
+        [ValidateAntiForgeryToken]
         [Route("admin/refresh-settings", HttpVerbs.Post)]
         public ActionResult RefreshSettings()
         {
@@ -62,6 +65,7 @@ namespace StackExchange.DataExplorer.Controllers
             return Json("ok");
         }
 
+        [ValidateAntiForgeryToken]
         [Route("admin/clear-table-cache", HttpVerbs.Post)]
         public ActionResult ClearTableCache()
         {
@@ -70,6 +74,7 @@ namespace StackExchange.DataExplorer.Controllers
             return Json("ok");
         }
 
+        [ValidateAntiForgeryToken]
         [Route("admin/clear-cache", HttpVerbs.Post)]
         public ActionResult ClearCache()
         {
@@ -79,6 +84,7 @@ namespace StackExchange.DataExplorer.Controllers
             return Json("ok");
         }
 
+        [ValidateAntiForgeryToken]
         [Route("admin/refresh-stats", HttpVerbs.Post)]
         public ActionResult RefreshStats()
         {
@@ -220,6 +226,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             return View();
         }
 
+        [ValidateAntiForgeryToken]
         [Route("admin/merge-users-submit", HttpVerbs.Post)]
         public ActionResult MergeSubmit(int masterId, int mergeId)
         {
@@ -242,7 +249,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             return View(dupes);
         }
 
-
+        [ValidateAntiForgeryToken]
         [Route("admin/useropenid/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveUserOpenIdEntry(int id)
         {

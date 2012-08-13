@@ -73,11 +73,25 @@
         });
     }
 
+    function token(object) {
+        var name = '__RequestVerificationToken',
+            token = $('input[name="' + name + '"]').val();
+
+        if (!object) {
+            return token;
+        }
+
+        object[name] = token;
+
+        return object;
+    }
+
     return {
         'init': init,
         'ready': ready,
         'options': options,
-        'template': template
+        'template': template,
+        'token': token
     };
 })(), _textContent = 'textContent' in document.createElement('span') ? 'textContent' : 'innerText';
 
