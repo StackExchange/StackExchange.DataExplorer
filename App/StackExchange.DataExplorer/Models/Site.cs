@@ -10,8 +10,7 @@ using System.Linq;
 
 namespace StackExchange.DataExplorer.Models
 {
-    
-    public partial class Site
+    public class Site
     {
         public int Id { get; set; }
         public string TinyName { get; set; }
@@ -30,6 +29,28 @@ namespace StackExchange.DataExplorer.Models
         public int? TotalTags { get; set; }
         public DateTime? LastPost { get; set; }
         public string ImageBackgroundColor { get; set; }
+        public string ConnectionStringOverride { get; set; }
+        // above props are columns on dbo.Sites
+
+        public string ConnectionString
+        {
+            get { return UseConnectionStringOverride ? ConnectionStringOverride : ConnectionStringWebConfig; }
+        }
+
+        private string ConnectionStringWebConfig
+        {
+            get
+            {
+                return ConfigurationManager.ConnectionStrings["ReaderConnection"]
+                    .ConnectionString
+                    .Replace("!!DB!!", DatabaseName);
+            }
+        }
+
+        private bool UseConnectionStringOverride
+        {
+            get { return ConnectionStringOverride.HasValue(); }
+        }
 
         public string ImageCss
         {
@@ -39,20 +60,7 @@ namespace StackExchange.DataExplorer.Models
                 {
                     return "background-color: #" + ImageBackgroundColor; 
                 }
-                else
-                {
-                    return "";
-                }
-            }
-        }
-
-        public string ConnectionString
-        {
-            get
-            {
-                return ConfigurationManager.ConnectionStrings["ReaderConnection"]
-                    .ConnectionString
-                    .Replace("!!DB!!", DatabaseName);
+                return "";
             }
         }
 
@@ -63,7 +71,9 @@ namespace StackExchange.DataExplorer.Models
 
         public SqlConnection GetConnection(int maxPoolSize)
         {
-            return new SqlConnection(ConnectionString + string.Format("Max Pool Size={0};",maxPoolSize));
+            // TODO: do we even need this method any longer? are we still supporting about odata?
+            var cs = ConnectionString + (UseConnectionStringOverride ? "" : string.Format("Max Pool Size={0};",maxPoolSize));
+            return new SqlConnection(cs);
         }
 
         public SqlConnection GetOpenConnection()
