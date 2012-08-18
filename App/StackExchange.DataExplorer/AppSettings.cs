@@ -40,6 +40,9 @@ namespace StackExchange.DataExplorer
         [Default(false)]
         public static bool AllowRunOnAllDbsOption { get; private set; }
 
+        [Default(true)]
+        public static bool EnableCancelQuery { get; private set; }
+
         [Default("")]
         public static string RecaptchaPublicKey { get; private set; }
 

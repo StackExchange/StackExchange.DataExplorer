@@ -45,6 +45,11 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"query/job/{guid}/cancel")]
         public ActionResult CancelJob(Guid guid)
         {
+            if (!AppSettings.EnableCancelQuery)
+            {
+                throw new ApplicationException("Cancelling queries is not enabled");
+            }
+
             var result = AsyncQueryRunner.CancelJob(guid);
 
             if (result == null)

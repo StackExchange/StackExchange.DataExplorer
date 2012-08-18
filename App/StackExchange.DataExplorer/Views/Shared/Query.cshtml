@@ -39,7 +39,10 @@
         </div>
         <div id="query-options">
             <button id="submit-query" type="submit">Run Query</button>
+            @if (AppSettings.EnableCancelQuery)
+            {
             <button id="cancel-query" type="button" disabled>Cancel</button>
+            }
             <span class="options">
                 Options:
                 <label title="Return results in text format"><input type="checkbox" name="textResults" value="true" />Text-only results</label>
