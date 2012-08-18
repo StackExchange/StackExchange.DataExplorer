@@ -822,6 +822,7 @@ ul.site-list .desc {
 
 #history ul {
   height: 185px;
+  list-style-type: none;
   margin: 0px;
   overflow: auto;
   padding: 0px;
@@ -829,12 +830,13 @@ ul.site-list .desc {
 
 #history li {
   border-bottom: 1px dotted #CCCCCC;
-  padding: 0 8px 5px;
+  padding: 5px 8px 5px;
 }
 
 #history li.empty {
-  background-image: none;
-  color: #606060;
+  background: #FDFDFD;
+  color: #707070;
+  font-style: italic;
 }
 
 #history li.selected {
