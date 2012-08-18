@@ -495,6 +495,10 @@ Date.prototype.toRelativeTimeMini = (function () {
     };
 })();
 
+function htmlEncode(text) {
+    return document.createElement("div").appendChild(document.createTextNode(text)).parentNode.innerHTML;
+}
+
 DataExplorer.initComposeButton = function (site) {
     // Add the site selection button to the right of Compose Query
     var button = document.getElementById('compose-button'),
@@ -581,10 +585,6 @@ DataExplorer.initComposeButton = function (site) {
         }
     }
 
-    function htmlEncode(text) {
-        return document.createElement("div").appendChild(document.createTextNode(text)).parentNode.innerHTML;
-    }
-
     function prepareAutocomplete(sites) {
         input = document.create('input', {
             placeholder: 'search by name or url'
@@ -607,7 +607,7 @@ DataExplorer.initComposeButton = function (site) {
             autoFill: false,
             width: '100%',
             formatItem: function (item) {
-                return '<img src="' + item.IconUrl + '"/> ' + htmlEncode(item.LongName);
+                return '<img src="' + item.IconUrl + '" class="site-icon" /> ' + htmlEncode(item.LongName);
             },
             formatMatch: function (item) {
                 return htmlEncode(item.LongName + " " + item.Url);

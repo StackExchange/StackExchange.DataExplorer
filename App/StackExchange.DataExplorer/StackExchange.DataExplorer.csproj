@@ -216,6 +216,7 @@
     <Content Include="Content\codemirror\custom.css" />
     <Content Include="Content\codemirror\theme.css" />
     <Content Include="Content\Img\openid\openid-logos.png" />
+    <Content Include="Content\jquery.autocomplete.css" />
     <Content Include="Content\qp\images\arithmetic_expression.gif" />
     <Content Include="Content\qp\images\assert.gif" />
     <Content Include="Content\qp\images\assign.gif" />
@@ -338,6 +339,7 @@
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\qp.js" />
     <Content Include="Scripts\query.js" />
+    <Content Include="Scripts\query.siteswitcher.js" />
     <Content Include="Scripts\slick.core.js" />
     <Content Include="Scripts\slick.grid.js" />
     <Content Include="Content\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />

@@ -249,7 +249,7 @@ ul li.site-selector-arrow {
 }
 
 .site-selector-popup {
-  background-color: #D9E6F3;
+  background-color: #F6F6F6;
   border: 1px solid #0C57A0;
   border-top-color: #0B4680;
   display: none;
@@ -269,16 +269,20 @@ ul li.site-selector-arrow {
   margin: 0.5em 4px;
 }
 
+.site-selector-popup .ac_results {
+  border: 0px;
+  padding: 0px;
+}
+
 .site-selector-popup .ac_results li {
   background-color: transparent;
-  border-top: 1px solid #78A2CA;
   float: none;  
-  margin: 0px;
-  padding: 3px 5px 2px 5px;
+  margin: 2px 2px 2px 2px;
+  padding: 2px 5px;
 }
 
 .site-selector-popup .ac_results li.ac_over {
-  background-color: #FFFFFF;
+  background-color: #D9E6F3;
 }
 
 #main
@@ -999,9 +1003,33 @@ ul.linkbar li {
   padding-left: 0px;
 }
 
+#site-selector ul {
+  display: inline;
+  margin-left: 8px;
+}
+
 #site-selector li {
-  float: left;
-  margin-right: 6px;
+  display: inline;
+  margin-right: 8px;
+}
+
+#site-selector a.site:hover {
+  text-decoration: none;
+}
+
+.site-icon {
+  width: 16px;
+  height: 16px;
+}
+
+#site-selector .site-selector-related {
+  padding-right: 6px;
+  border-right: 1px solid #AAA;
+}
+
+#switch-sites {
+  padding-left: 22px;
+  background: url('http://cdn.sstatic.net/beta/img/favicon.ico') no-repeat scroll 3px center;
 }
 
 #error-message {

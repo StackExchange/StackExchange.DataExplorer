@@ -36,7 +36,8 @@ namespace StackExchange.DataExplorer
                     {
                         "sitecss", new AssetCollection
                         {
-                            "/Content/site.css"
+                            "/Content/site.css",
+                            "/Content/jquery.autocomplete.css"
                         }
                     },
                     {
@@ -87,6 +88,7 @@ namespace StackExchange.DataExplorer
                             "/Scripts/codemirror/runmode.js",
                             "/Scripts/query.js",
                             "/Scripts/qp.js",
+                            "/Scripts/query.siteswitcher.js"
                         }
                     },
                     {

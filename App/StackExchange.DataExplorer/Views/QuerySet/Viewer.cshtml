@@ -75,11 +75,14 @@
 
 <script type="text/javascript">
     DataExplorer.ready(function () {
-        DataExplorer.template('#site-selector a.templated', 'href', {
+        var formatOptions = {
             'slug': '@querySet.Slugify()',
             'params': window.location.search,
             'id': @querySet.Id
-        });
+        };
+
+        DataExplorer.template('#site-selector a.templated', 'href', formatOptions);
+        DataExplorer.SiteSwitcher.update(formatOptions);
 
         $('#site-selector').show();
     });
