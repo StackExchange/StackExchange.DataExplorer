@@ -829,12 +829,12 @@ ul.site-list .desc {
 }
 
 #history li {
+  background: #FDFDFD;
   border-bottom: 1px dotted #CCCCCC;
   padding: 5px 8px 5px;
 }
 
 #history li.empty {
-  background: #FDFDFD;
   color: #707070;
   font-style: italic;
 }
@@ -1017,6 +1017,11 @@ ul.linkbar li {
 
 #site-selector a.site:hover {
   text-decoration: none;
+}
+
+#site-selector button {
+  cursor: pointer;
+  padding: 2px 5px 2px 5px;
 }
 
 .site-icon {
