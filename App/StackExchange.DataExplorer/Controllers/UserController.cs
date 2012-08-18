@@ -148,7 +148,12 @@ namespace StackExchange.DataExplorer.Controllers
                     // the network has.
                     user.EnforceSecureOpenId = updatedUser.EnforceSecureOpenId;
 
-                    Current.DB.Users.Update(user.Id, snapshot.Diff());
+                    var diff = snapshot.Diff();
+
+                    if (diff.ParameterNames.Any())
+                    {
+                        Current.DB.Users.Update(user.Id, snapshot.Diff());
+                    }
 
                     return Redirect("/users/" + user.Id);
                 }
