@@ -30,7 +30,37 @@ namespace StackExchange.DataExplorer.Models
         public DateTime? LastPost { get; set; }
         public string ImageBackgroundColor { get; set; }
         public string ConnectionStringOverride { get; set; }
+        public int? ParentId { get; set; }
         // above props are columns on dbo.Sites
+
+        private Site relatedSite;
+        private bool checkedRelatedSite = false;
+
+        public Site RelatedSite
+        {
+            get
+            {
+                if (!checkedRelatedSite && relatedSite == null)
+                {
+                    if (ParentId == null)
+                    {
+                        relatedSite = Current.DB.Query<Site>("SELECT * FROM Sites WHERE ParentId = @id", new { Id }).FirstOrDefault();
+                    }
+                    else
+                    {
+                        relatedSite = Current.DB.Query<Site>("SELECT * FROM Sites WHERE Id = @parentId", new { parentId = ParentId.Value }).FirstOrDefault();
+                    }
+
+                    // We could just query for the related site when getting this site and avoid the need
+                    // for this variable, but we don't always need related site...so I'm not sure what's
+                    // "less silly"...
+                    checkedRelatedSite = true;
+                }
+
+                return relatedSite;
+            }
+            private set {}
+        }
 
         public string ConnectionString
         {
