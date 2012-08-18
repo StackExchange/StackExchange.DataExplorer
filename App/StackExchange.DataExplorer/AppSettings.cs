@@ -31,8 +31,8 @@ namespace StackExchange.DataExplorer
         [Default(false)]
         public static bool EnableEnforceSecureOpenId { get; private set; }
 
-        [Default(true)]
-        public static bool RelaxedIdentifierDefault { get; private set; }
+        [Default(false)]
+        public static bool EnforceSecureOpenIdDefault { get; private set; }
 
         [Default(false)]
         public static bool EnableWhiteList { get; private set; }

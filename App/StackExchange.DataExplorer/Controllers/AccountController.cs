@@ -176,7 +176,7 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             user = Current.DB.Users.Get(openId.UserId);
 
-                            if (AppSettings.EnableEnforceSecureOpenId && !user.AllowRelaxedIdentifierMatch && !isSecure && openId.IsSecure)
+                            if (AppSettings.EnableEnforceSecureOpenId && user.EnforceSecureOpenId && !isSecure && openId.IsSecure)
                             {
                                 ViewData["Message"] = "User preferences prohibit insecure (non-https) variants of the provided OpenID identifier";
                                 return View("Login");

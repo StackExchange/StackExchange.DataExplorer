@@ -15,15 +15,15 @@ namespace StackExchange.DataExplorer.Models
 
         private UserPreferenceDictionary _preferences = null;
 
-        public bool AllowRelaxedIdentifierMatch
+        public bool EnforceSecureOpenId
         {
             get
             {
-                return Preferences.Get<bool>(Preference.AllowRelaxedIdentifierMatch, AppSettings.RelaxedIdentifierDefault);
+                return Preferences.Get<bool>(Preference.EnforceSecureOpenId, AppSettings.EnforceSecureOpenIdDefault);
             }
             set
             {
-                Preferences.Set(Preference.AllowRelaxedIdentifierMatch, value);
+                Preferences.Set(Preference.EnforceSecureOpenId, value);
                 SavePreferences();
             }
         }
@@ -153,7 +153,7 @@ namespace StackExchange.DataExplorer.Helpers
         HideSchema = 1,
         DefaultQuerySort = 2,
         DefaultQueryPageSize = 3,
-        AllowRelaxedIdentifierMatch = 4
+        EnforceSecureOpenId = 4
     }
 
     public static class PreferenceKey

@@ -143,6 +143,11 @@ namespace StackExchange.DataExplorer.Controllers
                     user.Website = HtmlUtilities.Safe(updatedUser.Website);
                     user.Location = HtmlUtilities.Safe(updatedUser.Location);
 
+                    // Preferences are updated separately, so we should likely do this elsewhere instead...
+                    // Can likely move it out if we have introduce a fancier OpenID management panel like
+                    // the network has.
+                    user.EnforceSecureOpenId = updatedUser.EnforceSecureOpenId;
+
                     Current.DB.Users.Update(user.Id, snapshot.Diff());
 
                     return Redirect("/users/" + user.Id);

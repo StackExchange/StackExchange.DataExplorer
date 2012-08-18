@@ -26,6 +26,20 @@
                                     @Html.ValidationMessageFor(model=>model.Login)
                                 </td>
                             </tr>
+                            @if (AppSettings.EnableEnforceSecureOpenId)
+                            {
+                            <tr>
+                                <td>
+                                    <label for="">OpenID</label>
+                                </td>
+                                <td>
+                                    <label>
+                                        @Html.CheckBoxFor(model => model.EnforceSecureOpenId)
+                                        Only allow HTTPS version of HTTPS OpenID identifiers
+                                    </label>
+                                </td>
+                            </tr>
+                            }
                             <tr>
                                 <td>
                                     @Html.LabelFor(model=>model.Email)
