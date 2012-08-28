@@ -294,6 +294,11 @@ document.create = function create(element, attributes) {
             delete attributes.text;
         }
 
+        if (attributes.innerHTML != null) {
+            element.innerHTML = attributes.innerHTML;
+            delete attributes.innerHTML;
+        }
+
         var i, keys = Object.keys(attributes);
 
         for (i = 0; i < keys.length; ++i) {
@@ -505,7 +510,7 @@ DataExplorer.initComposeButton = function (site) {
         list = button.parentNode.parentNode,
         item = document.create('li', {
             className: 'site-selector-arrow ' + button.className,
-            text: "▾"
+            innerHTML: "&#9662;"
         }),
         icon = document.create('img', {
             src: site.IconUrl,
