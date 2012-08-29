@@ -21,6 +21,10 @@
         target = target[0];
 
         if (target.nodeName === 'TEXTAREA') {
+            function run() {
+                field.closest('form').submit();
+            }
+
             editor = CodeMirror.fromTextArea(target, $.extend({}, options, {
                 'lineNumbers': true,
                 'extraKeys': {
@@ -28,10 +32,6 @@
                     'F5': run
                 }
             }));
-
-            function run() {
-                field.closest('form').submit();
-            }
         } else {
             query = target[_textContent];
             editor = CodeMirror.runMode(query, options.mode, target);
