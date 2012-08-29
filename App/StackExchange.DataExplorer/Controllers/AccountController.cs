@@ -88,13 +88,28 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             // Ideally we'd be as strict as possible here and use originalClaim, but we might break existing deployments then
                             string lookupClaim = normalizedClaim;
+                            bool attemptUpdate = false;
 
-                            if (IsVerifiedEmailProvider(lookupClaim) && sreg.Email != null && sreg.Email.Length > 2)
+                            if (IsVerifiedEmailProvider(originalClaim) && sreg.Email != null && sreg.Email.Length > 2)
                             {
+                                attemptUpdate = true;
                                 lookupClaim = "email:" + sreg.Email;
                             }
 
                             var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList where lower(OpenId) = @lookupClaim", new { lookupClaim }).FirstOrDefault();
+
+                            if (whiteListEntry == null && attemptUpdate)
+                            {
+                                whiteListEntry = Current.DB.Query<OpenIdWhiteList>("SELECT * FROM OpenIdWhiteList WHERE LOWER(OpenId) = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
+
+                                if (whiteListEntry != null)
+                                {
+                                    whiteListEntry.OpenId = lookupClaim;
+
+                                    Current.DB.OpenIdWhiteList.Update(whiteListEntry.Id, new { OpenId = whiteListEntry.OpenId });
+                                }
+                            }
+                            
                             if (whiteListEntry == null || !whiteListEntry.Approved)
                             {
                                 if (whiteListEntry == null)
@@ -230,7 +245,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (identifier.Contains("@")) return false;
 
-            if (identifier.StartsWith(@"https://www.google.com/accounts/o8/id")) return true;
+            if (identifier.StartsWith(@"https://www.google.com/accounts/o8/id") || identifier.StartsWith(@"https://google.com/accounts/o8/id")) return true;
             if (identifier.StartsWith(@"https://me.yahoo.com")) return true;
             if (identifier.Contains(@"//www.google.com/profiles/")) return true;
             if (identifier.StartsWith(@"http://stackauth.com/")) return true;
