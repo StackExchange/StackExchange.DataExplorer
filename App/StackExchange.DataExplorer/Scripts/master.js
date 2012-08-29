@@ -621,11 +621,7 @@ DataExplorer.initComposeButton = function (site) {
                 return item.LongName;
             }
         }).result(function (event, site) {
-            hidePopup();
-
-            icon.src = site.IconUrl;
-            icon.title = "Switch site from " + site.LongName;
-            button.href = "/" + site.Name.toLowerCase() + "/query/new";
+            window.location = "/" + site.Name.toLowerCase() + "/query/new";
         });
         input.focus();
     }
