@@ -24,11 +24,14 @@
             editor = CodeMirror.fromTextArea(target, $.extend({}, options, {
                 'lineNumbers': true,
                 'extraKeys': {
-                    'Ctrl-Enter': function () {
-                        field.closest('form').submit();
-                    }
+                    'Ctrl-Enter': run,
+                    'F5': run
                 }
             }));
+
+            function run() {
+                field.closest('form').submit();
+            }
         } else {
             query = target[_textContent];
             editor = CodeMirror.runMode(query, options.mode, target);
