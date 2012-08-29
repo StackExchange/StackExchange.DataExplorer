@@ -35,7 +35,7 @@
     })());
 
     function init(tableData) {
-        var shema = document.getElementById('schema');
+        var schema = document.getElementById('schema');
         tables = tableData;
 
         $('ul .schema-table', schema).each(function () {
