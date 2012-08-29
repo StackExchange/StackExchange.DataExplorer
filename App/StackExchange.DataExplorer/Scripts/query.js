@@ -860,7 +860,7 @@ DataExplorer.ready(function () {
 
         this.getFormatter = function (column) {
             
-            if (column.name.toLowerCase() === 'tags' || column.name.toLowerCase() === 'tagName') {
+            if (column.name.toLowerCase() === 'tags' || column.name.toLowerCase() === 'tagname') {
                 return tagFormatter(siteColumnName);
             } else if (column.type) {
                 switch (column.type) {
