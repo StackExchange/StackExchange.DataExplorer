@@ -88,7 +88,8 @@ namespace StackExchange.DataExplorer
                             "/Scripts/codemirror/runmode.js",
                             "/Scripts/query.js",
                             "/Scripts/qp.js",
-                            "/Scripts/query.siteswitcher.js"
+                            "/Scripts/query.siteswitcher.js",
+                            "/Scripts/query.tablehelpers.js"
                         }
                     },
                     {

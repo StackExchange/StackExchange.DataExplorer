@@ -340,6 +340,7 @@
     <Content Include="Scripts\qp.js" />
     <Content Include="Scripts\query.js" />
     <Content Include="Scripts\query.siteswitcher.js" />
+    <Content Include="Scripts\query.tablehelpers.js" />
     <Content Include="Scripts\slick.core.js" />
     <Content Include="Scripts\slick.grid.js" />
     <Content Include="Content\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
