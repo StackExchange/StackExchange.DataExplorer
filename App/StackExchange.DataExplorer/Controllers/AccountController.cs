@@ -90,7 +90,7 @@ namespace StackExchange.DataExplorer.Controllers
                             string lookupClaim = normalizedClaim;
                             bool attemptUpdate = false;
 
-                            if (IsVerifiedEmailProvider(originalClaim) && sreg.Email != null && sreg.Email.Length > 2)
+                            if (IsVerifiedEmailProvider(normalizedClaim) && sreg.Email != null && sreg.Email.Length > 2)
                             {
                                 attemptUpdate = true;
                                 lookupClaim = "email:" + sreg.Email;
@@ -245,8 +245,8 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (identifier.Contains("@")) return false;
 
-            if (identifier.StartsWith(@"https://www.google.com/accounts/o8/id") || identifier.StartsWith(@"https://google.com/accounts/o8/id")) return true;
-            if (identifier.StartsWith(@"https://me.yahoo.com")) return true;
+            if (identifier.StartsWith(@"http://google.com/accounts/o8/id")) return true;
+            if (identifier.StartsWith(@"http://me.yahoo.com")) return true;
             if (identifier.Contains(@"//www.google.com/profiles/")) return true;
             if (identifier.StartsWith(@"http://stackauth.com/")) return true;
             if (identifier.StartsWith(@"http://openid.stackexchange.com/")) return true;
