@@ -72,6 +72,11 @@ namespace StackExchange.DataExplorer.Controllers
             ActionResult response = null;
             try
             {
+                if (!ValidateTargetSites(targetSites))
+                {
+                    throw new ApplicationException("Invalid target sites selection");
+                }
+
                 QuerySet querySet = null;
 
                 if (querySetId.HasValue)
@@ -291,6 +296,11 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             ActionResult response = null;
             try
             {
+                if (!ValidateTargetSites(targetSites))
+                {
+                    throw new ApplicationException("Invalid target sites selection");
+                }
+
                 QuerySet querySet = null;
 
                 
@@ -579,6 +589,13 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             {
                 throw new ApplicationException("Invalid site ID");
             }
+        }
+
+        private static bool ValidateTargetSites(TargetSites? targetSites)
+        {
+            // We could check if running against only non-meta was allowed too since there's an AppSetting for it,
+            // but I don't think that's necessary
+            return AppSettings.AllowRunOnAllDbsOption || targetSites == null;
         }
 
         private ActionResult TransformExecutionException(Exception ex)
