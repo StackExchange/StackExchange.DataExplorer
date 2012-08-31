@@ -97,7 +97,7 @@ namespace StackExchange.DataExplorer.Controllers
             ValidateRequest = false; // allow html/sql in form values - remember to validate!
             base.Initialize(requestContext);
 
-            if (AppSettings.EnableWhiteList && !(this is AccountController) && CurrentUser.IsAnonymous) {
+            if (AppSettings.EnableWhiteList && !(this is AccountController || this is IconController) && CurrentUser.IsAnonymous) {
                 requestContext.HttpContext.Response.Redirect("/account/login?returnurl=" + Request.RawUrl);
             }
 
