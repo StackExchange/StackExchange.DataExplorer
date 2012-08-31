@@ -22,7 +22,8 @@
             'User.guessedID': @(ViewData["GuessedUserId"] != null ? ViewData["GuessedUserId"] : "null"),
             'User.hideSchema': @((Current.User.HideSchema == true).ToString().ToLower()),
             'User.isAuthenticated': @((!Current.User.IsAnonymous).ToString().ToLower()),
-            'Site.id': @(Current.Controller.Site != null ? Current.Controller.Site.Id.ToString() : "null")
+            'Site.id': @(Current.Controller.Site != null ? Current.Controller.Site.Id.ToString() : "null"),
+            'WhitelistEnabled': @(AppSettings.EnableWhiteList.ToString().ToLower())
         });
     </script>
 </head>

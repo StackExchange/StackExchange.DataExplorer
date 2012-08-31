@@ -565,7 +565,11 @@ DataExplorer.initComposeButton = function (site) {
                 left: ((nav.offset().left + nav.outerWidth()) - popup.outerWidth())
             });
 
-            $.get('/sites', prepareAutocomplete);
+            if (DataExplorer.options.WhitelistEnabled && !DataExplorer.options.User.isAuthenticated) {
+                loader[_textContent] = "Please log in first";
+            } else {
+                $.get('/sites', prepareAutocomplete);
+            }
         }
 
         item.addClass('youarehere');
