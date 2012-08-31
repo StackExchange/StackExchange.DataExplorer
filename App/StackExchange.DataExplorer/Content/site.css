@@ -314,15 +314,21 @@ ul li.site-selector-arrow {
   float:left;
   font-size:100%;
   line-height:30px;
+  width: 810px;
 }
 
 #footer-flair {
   float:right;
   margin-left:12px;
+  text-align: right;
 }
 
 #footer-menu a {
   color:#FFFFFF;
+}
+
+#revision {
+  margin-top: 5px;
 }
 
 #copyright {
