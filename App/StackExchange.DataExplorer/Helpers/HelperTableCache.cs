@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -12,8 +13,8 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class HelperTableCache
     {
-        private static Dictionary<string, Dictionary<string, ResultSet>> cache = 
-            new Dictionary<string, Dictionary<string, ResultSet>>();
+        private static ConcurrentDictionary<string, Dictionary<string, ResultSet>> cache = 
+            new ConcurrentDictionary<string, Dictionary<string, ResultSet>>();
         private static HelperTableCachePreferences preferences = null;
         private static Regex tableMatcher;
 
@@ -30,9 +31,9 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        public static List<string> GetCachedTables()
+        public static SortedSet<string> GetCachedTables()
         {
-            var tables = new List<string>();
+            var tables = new SortedSet<string>();
 
             foreach (var siteCache in cache.Values)
             {
@@ -45,8 +46,6 @@ namespace StackExchange.DataExplorer.Helpers
                 }
             }
 
-            tables.Sort();
-
             return tables;
         }
 
@@ -54,7 +53,13 @@ namespace StackExchange.DataExplorer.Helpers
         {
             if (Preferences == null)
             {
-                Refresh();
+                lock (cache)
+                {
+                    if (Preferences == null)
+                    {
+                        Refresh();
+                    }
+                }
 
                 if (Preferences == null)
                 {
@@ -62,14 +67,16 @@ namespace StackExchange.DataExplorer.Helpers
                 }
             }
 
-            if (!Preferences.PerSite)
+            if (Preferences.PerSite)
             {
-                return cache.First().Value;
+                Dictionary<string, ResultSet> tablesCache;
+
+                cache.TryGetValue(site.TinyName, out tablesCache);
+
+                return tablesCache;
             }
-            else
-            {
-                return cache.ContainsKey(site.TinyName) ? cache[site.TinyName] : null;
-            }
+
+            return cache.First().Value;
         }
 
         public static string GetCacheAsJson(Site site)
@@ -112,16 +119,18 @@ namespace StackExchange.DataExplorer.Helpers
             foreach (var site in sites)
             {
                 IEnumerable<TableInfo> tables = site.GetTableInfos();
-                cache[site.TinyName] = new Dictionary<string, ResultSet>();
+                var tablesCache = new Dictionary<string, ResultSet>();
 
                 foreach (var table in tables) {
                     if (tableMatcher.IsMatch(table.Name))
                     {
                         using (SqlConnection connection = site.GetOpenConnection()) {
-                            cache[site.TinyName][table.Name] = GetTableResults(connection, table);
+                            tablesCache[table.Name] = GetTableResults(connection, table);
                         }
                     }
                 }
+
+                cache[site.TinyName] = tablesCache;
             }
         }
 
