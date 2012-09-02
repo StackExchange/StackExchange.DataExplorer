@@ -426,6 +426,18 @@ DataExplorer.ready(function () {
         return false;
     });
 
+    $('#query-options').find('input, select').each(function () {
+        var value = window.location.param('opt.' + this.name);
+
+        if (value) {
+            if (this.type === 'checkbox') {
+                this.checked = value;
+            } else {
+                this.value = value;
+            }
+        }
+    });
+
     $('#query-results').bind('show', function (event) {
         $('.download-button', this).hide();
         $(event.target.href.from('#') + 'Button').show();
@@ -583,8 +595,10 @@ DataExplorer.ready(function () {
                 return g1 ? g3 : "";
             });
 
-            if (params) {
+            if (params.length) {
                 params = '?' + params;
+            } else {
+                params = null;
             }
         }
 
@@ -623,6 +637,28 @@ DataExplorer.ready(function () {
         else if (response.targetSites == 2) { target = "all-meta-"; } // all meta sites
         else if (response.targetSites == 3) { target = "all-non-meta-"; } // all non meta sites
 
+        var options;
+
+        $('#query-options').find('input, select').each(function () {
+            var value;
+
+            if (this.type === 'checkbox') {
+                if (this.checked) {
+                    value = true;
+                }
+            } else {
+                value = this.value;
+            }
+
+            if (value) {
+                options = (options ? options + '&' : '') + 'opt.' + this.name + '=' + encodeURIComponent(value);
+            }
+        });
+
+        if (options) {
+            params = (params ? params + '&' : '?') + options;
+        }
+
         var formatOptions = {
             'targetsites': target,
             'site': response.siteName,
@@ -635,7 +671,9 @@ DataExplorer.ready(function () {
         DataExplorer.template('a.templated.site', 'href', formatOptions);
         DataExplorer.SiteSwitcher.update(formatOptions);
 
-        formatOptions.params = (params ? params + '&' : '?') + (userid ? 'UserId=' + userid : '');
+        if (userid) {
+            formatOptions.params = (params ? params + '&' : '?') + 'UserId=' + userid;
+        }
 
         DataExplorer.template('a.templated:not(.site), a.template.related-site', 'href', formatOptions);
 
