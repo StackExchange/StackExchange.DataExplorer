@@ -506,6 +506,12 @@ namespace StackExchange.DataExplorer.Helpers
         /// <param name="planOnly">Whether or not this is just an update to add the cached execution plan</param>
         private static void AddResultToCache(QueryResults results, ParsedQuery query, Site site, bool planOnly)
         {
+            // If the cache time is zero, just don't save a cache
+            if (AppSettings.AutoExpireCacheMinutes == 0)
+            {
+                return;
+            }
+
             if (!planOnly)
             {
                 Current.DB.Execute(@"

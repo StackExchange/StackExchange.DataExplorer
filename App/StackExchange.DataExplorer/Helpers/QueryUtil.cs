@@ -63,7 +63,7 @@ order by qr.Id asc", new {querySetId}).ToList();
         /// <returns>The cached results, or null if no results exist in the cache</returns>
         public static CachedResult GetCachedResults(ParsedQuery query, int siteId)
         {
-            if (query == null || !query.IsExecutionReady)
+            if (query == null || !query.IsExecutionReady || AppSettings.AutoExpireCacheMinutes == 0)
             {
                 return null;
             }
@@ -83,7 +83,7 @@ order by qr.Id asc", new {querySetId}).ToList();
                 }
             ).FirstOrDefault();
 
-            if (cache != null && AppSettings.AutoExpireCacheMinutes >= 0 && cache.CreationDate != null)
+            if (cache != null && AppSettings.AutoExpireCacheMinutes > 0 && cache.CreationDate != null)
             {
                 if (cache.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
                 {
