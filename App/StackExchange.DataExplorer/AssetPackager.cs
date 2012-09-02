@@ -97,13 +97,7 @@ namespace StackExchange.DataExplorer
                         {
                             "/Scripts/jquery-1.7.1.js"
                         }
-                    },
-                    {
-                        "jquery.validate", new AssetCollection("http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.pack.js")
-                        {
-                            "/Scripts/jquery.validate.js"
-                        }
-                    }  
+                    }
                 };
             }
         }

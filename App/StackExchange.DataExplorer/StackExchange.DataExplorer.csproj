@@ -335,8 +335,6 @@
     <Content Include="favicon.ico" />
     <Content Include="OData.svc" />
     <Content Include="Scripts\jquery-ui-1.8.1.custom.min.js" />
-    <Content Include="Scripts\jquery.rule.js" />
-    <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\qp.js" />
     <Content Include="Scripts\query.js" />
     <Content Include="Scripts\query.siteswitcher.js" />
