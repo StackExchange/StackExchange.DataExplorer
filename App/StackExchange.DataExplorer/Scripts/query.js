@@ -648,6 +648,12 @@ DataExplorer.ready(function () {
                 }
             } else {
                 value = this.value;
+
+                // If this is a select and the selected option is set in the HTML as the default one,
+                // there's no sense in appending it to the query string
+                if (this.tagName == 'SELECT' && this.options[this.selectedIndex].getAttribute('selected') !== null) {
+                    value = null;
+                }
             }
 
             if (value) {
