@@ -675,7 +675,7 @@ DataExplorer.ready(function () {
             formatOptions.params = (params ? params + '&' : '?') + 'UserId=' + userid;
         }
 
-        DataExplorer.template('a.templated:not(.site), a.template.related-site', 'href', formatOptions);
+        DataExplorer.template('a.templated:not(.site), a.templated.related-site', 'href', formatOptions);
 
         if (response.created) {
             var title = response.created.replace(/\.\d+Z/, 'Z'),
