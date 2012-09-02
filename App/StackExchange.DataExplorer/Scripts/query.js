@@ -812,7 +812,7 @@ DataExplorer.ready(function () {
                 'id': "col" + i,
                 'name': columns[i].name,
                 'field': "col" + i,
-                'type': columns[i].type.asVariable(),
+                'type': columns[i].type.toLowerCase(),
                 'width': Math.min((widths[i] || 50) + 16, maxWidth) 
             };
 

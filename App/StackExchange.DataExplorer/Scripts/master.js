@@ -361,23 +361,6 @@ String.prototype.from = function (ch, inclusive) {
     return this.substring(ch + (inclusive ? 0 : 1));
 }
 
-String.prototype.asVariable = function () {
-    var chunks = this.split(/\s+/),
-        result = chunks[0].toLowerCase();
-
-    if (chunks.length == 0) {
-        return result;
-    }
-
-    for (var i = 1; i < chunks.length; ++i) {
-        result = result
-            + chunks[i].substring(0, 1).toUpperCase()
-            + chunks[i].substring(1).toLowerCase();
-    }
-
-    return result;
-}
-
 if (!Date.now) {
     Date.now = function () {
         return +new Date();
