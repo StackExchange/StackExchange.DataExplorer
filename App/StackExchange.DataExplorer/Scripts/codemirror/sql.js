@@ -62,14 +62,14 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
                 return ret("operator", "sql-operator");
             }
         }
-        // another single line comment
-        // Should turn this into a token for magic variables if we can
-        /*
+        // Data Explorer input variables
         else if (ch == '#') {
-            stream.skipToEnd();
-            return ret("comment", "sql-comment");
+            if (stream.match(/^#([a-zA-Z][A-Za-z0-9]*)(?::([A-Za-z]+))?(?:\?([^#]+))?##/, true)) {
+                return ret("word", "sql-special");
+            } else {
+                return ret("word", "sql-word");
+            }
         }
-        */
         // sql variable?
         else if (ch == "@" || ch == "$") {
             stream.eatWhile(/[\w\d\$_]/);
