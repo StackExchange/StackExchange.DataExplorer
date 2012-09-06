@@ -151,53 +151,61 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
         return obj;
     }
     var cKeywords =
-        "alter grant revoke primary key table start top " +
-        "transaction select update insert delete create describe " +
-        "from into values where join inner left natural and " +
-        "or in not xor like using on order group by " +
-        "asc desc limit offset union all as distinct set " +
-        "commit rollback replace view database separator if " +
-        "exists null truncate status show lock unique having " +
-        "drop procedure begin end delimiter call else leave " +
-        "declare temporary then case when with is";
-
+        // http://msdn.microsoft.com/en-us/library/ms189822.aspx
+        "add alter as asc authorization backup begin break browse " +
+        "bulk by cascade case checkpoint close clustered coalesce " + 
+        "colate column commit compute constraint contains " +
+        "containstable continue convert create cross current cursor " +
+        "database dbcc deallocate declare default delete deny desc " + 
+        "disk distinct distributed drop dump else end escape " +
+        "exec execute exit external fetch file filefactor for " +
+        "foreign from function goto grant group having holdlock " +
+        "if index insert into key kill lineno load merge national " +
+        "nocheck nonclustered nocount off offsets on open opendatasource " + 
+        "openquery openrowset openxml option order over percent " +
+        "plan precision primary print proc procedure public read " +
+        "readtext reconfigure reference replication restore restrict " +
+        "return revert revoke rollback rowcount rowguidcol rule " +
+        "save schema select set setuser shutdown statistics " +
+        "table tablesample textsize then to top tran transaction " +
+        "trigger truncate unique update updatetext use user values " +
+        "varying view waitfor when where while with writetext";
 
     var cFunctions =
-        "abs acos adddate aes_encrypt aes_decrypt ascii " +
-        "asin atan atan2 avg benchmark bin bit_and " +
-        "bit_count bit_length bit_or cast ceil ceiling " +
-        "char_length character_length coalesce concat concat_ws " +
-        "connection_id conv convert cos cot count curdate " +
-        "current_date current_time current_timestamp current_user " +
-        "curtime database date_add date_format date_sub " +
-        "dayname dayofmonth dayofweek dayofyear decode degrees " +
-        "des_encrypt des_decrypt elt encode encrypt exp " +
-        "export_set extract field find_in_set floor format " +
-        "found_rows from_days from_unixtime get_lock greatest " +
-        "group_unique_users hex ifnull inet_aton inet_ntoa instr " +
-        "interval is_free_lock isnull last_insert_id lcase least " +
-        "left length ln load_file locate log log2 log10 " +
-        "lower lpad ltrim make_set master_pos_wait max md5 " +
-        "mid min mod monthname now nullif oct octet_length " +
-        "ord password period_add period_diff pi position " +
-        "pow power quarter quote radians rand release_lock " +
-        "repeat reverse right round rpad rtrim sec_to_time " +
-        "session_user sha sha1 sign sin soundex space sqrt " +
-        "std stddev strcmp subdate substring substring_index " +
-        "sum sysdate system_user tan time_format time_to_sec " +
-        "to_days trim ucase unique_users unix_timestamp upper " +
-        "user version week weekday yearweek ntile";
+        // http://msdn.microsoft.com/en-us/library/ms173454.aspx
+        "avg checksum_agg count count_big grouping grouping_id " +
+        "max min sum stdev stdevp var varp " +
+        // http://msdn.microsoft.com/en-us/library/ms186724.aspx
+        "sysdatetime sysdatetimeoffset sysutcdatetime " +
+        "current_timestamp getdate getutcdate datename" +
+        "datepart day month year datediff dateadd switchoffset " +
+        "todatetimeoffset isdate " +
+        // http://msdn.microsoft.com/en-us/library/ms177516.aspx
+        "abs acos asin atan atn2 ceiling cos cot degrees exp " +
+        "floor log log10 pi power radians rand round sign sin " +
+        "sqrt square tan" +
+        // http://msdn.microsoft.com/en-us/library/ms189798.aspx
+        "rank ntile dense_rank row_number " +
+        // http://msdn.microsoft.com/en-us/library/ms181984.aspx
+        "ascii char charindex difference left len lower ltrim " +
+        "nchar patindex quotename replace replicate reverse right " +
+        "rtrim soundex space str stuff substring unicode upper " +
+        // http://msdn.microsoft.com/en-us/library/ms187786.aspx
+        "cast convert isnull isnumeric nullif";
 
     var cTypes =
-        "bigint binary bit blob bool char character date " +
-        "datetime dec decimal double enum float float4 float8 " +
-        "int int1 int2 int3 int4 int8 integer long longblob " +
-        "longtext mediumblob mediumint mediumtext middleint nchar " +
-        "numeric real set smallint text time timestamp tinyblob " +
-        "tinyint tinytext varbinary varchar year";
+        // http://msdn.microsoft.com/en-us/library/ms187752.aspx
+        "bigint bit decimal int money numeric smallint smallmoney " +
+        "tinyint float real date datetime2 datetime datetimeoffset " +
+        "smalldatetime time char text varchar nchar ntext nvarchar " +
+        "binary image varbinary cursor hierarchyid sql_variant " +
+        "timestamp uniqueidentifier xml";
 
     var cOperators =
-        ":= < <= == <> > >= like rlike in xor between";
+        // http://msdn.microsoft.com/en-us/library/ms174986.aspx
+        "~ ^ >= <= <> != !< !> += -= *= /= %= &= ^= |= all and any " +
+        "between exists in like not or some except intersect union " +
+        "join inner outer left right is null pivot unpivot";
 
     CodeMirror.defineMIME("text/x-t-sql", {
         name: "sql",
