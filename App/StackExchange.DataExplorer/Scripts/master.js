@@ -236,7 +236,7 @@ DataExplorer.ready(function () {
     });
 });
 
-$.fn.tabs = function () {
+$.fn.tabs = function (passthrough) {
     return this.delegate("a:not(.youarehere)", "click", function () {
         $(this.hash).show();
         $(this).addClass("youarehere")
@@ -247,7 +247,7 @@ $.fn.tabs = function () {
                 $(this.hash).hide();
             });
     }).delegate("a", "click", function () {
-        return false;
+        return !passthrough;
     });
 };
 

@@ -327,7 +327,7 @@ DataExplorer.ready(function () {
         });
     });
 
-    $('.miniTabs').tabs();
+    $('.miniTabs').tabs(false);
 
     form.submit(function () {
         $('.report-option').hide();
@@ -718,25 +718,42 @@ DataExplorer.ready(function () {
         response.graph = !textOnly && isGraph(results);
 
         $('#query-results .miniTabs a.optional').each(function () {
-            $(this).toggleClass('hidden', !response[this.href.from('#', false)]);
+            $(this).toggleClass('hidden', !response[this.hash.substring(1)]);
         });
-
-        function selectFirst() {
-            $('#query-results .miniTabs a:not(.hidden):first').click();
-        }
-
-        selectFirst();
 
         // We have to start showing the contents so that SlickGrid can figure
         // out the heights of its components correctly
         $('.result-option').fadeIn('fast').promise().done(function () {
+            var tabset = $('#query-results .miniTabs a'),
+                firstTab = tabset.filter(':not(.hidden):first'),
+                selectedTab;
+
+            if (window.location.hash) {
+                selectedTab = $(window.location.hash + 'Tab');
+
+                if (!selectedTab.length || selectedTab.hasClass('hidden')) {
+                    selectedTab = null;
+                }
+            }
+            
             if (response.graph) {
                 // Work-around for the div being display: none; originally
                 $('#graphTab').click();
                 renderGraph(results);
             }
 
-            selectFirst();
+            var permalink = $('#permalink a')[0];
+
+            if (permalink) {
+                tabset.off('click.permalink');
+                tabset.on('click.permalink', function () {
+                    // We should probably be using the formatter here, but for now we'll
+                    // just hack around it because this whole mess needs tidying anyway
+                    permalink.href = permalink.href.replace(/#.*$/, '') + (this != firstTab[0] ? this.hash : '');
+                });
+            }
+
+            firstTab.click();
 
             if (response.executionPlan && QP && typeof QP.drawLines === 'function') {
                 $('#executionPlan').html(response.executionPlan);
@@ -745,6 +762,10 @@ DataExplorer.ready(function () {
             if (!textOnly) {
                 prepareTable($('#resultSets'), results, response);
                 resizeResults();
+            }
+
+            if (selectedTab && selectedTab[0] != firstTab[0]) {
+                selectedTab.click();
             }
         
             // Currently this always gives us 500 because it's what #resultset has
