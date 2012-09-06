@@ -25,8 +25,12 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
         if (ch == "'") {
             return chain(stream, state, tokenString(ch));
         }
-        // is it one of the special signs []{}().? 
-        else if (/[\[\]{}\(\)\.]/.test(ch)) {
+        else if (ch == "[") {
+            stream.skipTo("]");
+            return "sql-word";
+        }
+        // is it one of the special signs {}().? 
+        else if (/[{}\(\)\.]/.test(ch)) {
             return ret(ch);
         }
         // Seperator?
