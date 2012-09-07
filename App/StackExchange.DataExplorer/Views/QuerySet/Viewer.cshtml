@@ -22,13 +22,15 @@
     <div class="user-action-time">@(isEdit?"edited":"created") @date.ToRelativeTimeSpanMicro()</div>
     @if ((isOwner && !isEdit) || !isOwner)
     { 
-        <div class="user-gravatar32"><a href="/users/@user.Id">@Html.Raw(user.Gravatar(32))</a>
-            @if (user.IsAnonymous == null)
+        <div class="user-gravatar32">
+            @if (user.IsAnonymous)
             { 
+                @Html.Raw(user.Gravatar(32))
                 <span>anonymous</span>
             }
             else
             { 
+                <a href="/users/@user.Id">@Html.Raw(user.Gravatar(32))</a>
                 <a href="/users/@user.Id">@user.Login</a>
             }
         </div>
