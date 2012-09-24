@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="DeployWeb" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- Passed in Parameters -->
+    <configuration></configuration>
+    <workingDir></workingDir>
+    <connectionString></connectionString>
+    <readerConnectionString></readerConnectionString>
+
+    <WebSourceDirectory>$(workingDir)\App\StackExchange.DataExplorer</WebSourceDirectory>
+    <MigrationsDirectory>$(workingDir)\Migrations</MigrationsDirectory>
+    <MigrateBin>$(workingDir)\Build\Migrator.exe --connection="$(connectionString)"</MigrateBin>
+
+    <WebReleaseConfig>
+      <![CDATA[<?xml version="1.0"?>
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <connectionStrings>
+    <add name="AppConnection" connectionString="$(connectionString)" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
+    <add name="ReaderConnection" connectionString="$(readerConnectionString)" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
+  </connectionStrings>
+  <system.web>
+    <compilation xdt:Transform="RemoveAttributes(debug)"/>
+  </system.web>
+</configuration>]]></WebReleaseConfig>
+  </PropertyGroup>
+
+  <UsingTask TaskName="TransformXml" AssemblyFile="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\Web\Microsoft.Web.Publishing.Tasks.dll"/>
+
+  <Target Name="MigrateDatabase" DependsOnTargets="WriteParameters">
+    <Exec Command="$(MigrateBin)" WorkingDirectory="$(MigrationsDirectory)" />
+    <Message Text="MigrateDatabase complete"/>
+  </Target>
+
+  <Target Name="CompileWeb" DependsOnTargets="MigrateDatabase">
+    <WriteLinesToFile File="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
+      Overwrite="true" Lines="$(WebReleaseConfig)" />
+
+    <TransformXml Source="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.config"
+                 Transform="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
+                 Destination="$(WebSourceDirectory)\..\StackExchange.DataExplorer\WebRelease.config"/>
+
+    <RemoveDir Directories="$(WebSourceDirectory)\..\StackExchange.DataExplorer\bin"/>
+    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
+             Properties="Configuration=$(configuration);ReferencePath=$(WebSourceDirectory)\bin"
+             Targets="Build"/>
+
+    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackagerApp\AssetPackagerApp.csproj"
+             Properties="Configuration=$(configuration);ReferencePath=$(WebSourceDirectory)\bin"
+             Targets="Build"/>
+
+    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.DataExplorer\StackExchange.DataExplorer.csproj"
+             Properties="Configuration=$(configuration);ReferencePath=$(WebSourceDirectory)\bin"
+             Targets="Build"/>
+
+    <Message Text="CompileWeb complete" />
+  </Target>
+</Project>
