@@ -667,9 +667,37 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static List<object> GetPostLinks(SqlConnection cnn, IEnumerable<object> items)
         {
-            return LookupIds(cnn, items,
-                             @"select p1.Id, isnull(p1.Title,p2.Title) from Posts p1 
-                  left join Posts p2 on p1.ParentId = p2.Id where p1.Id in ");
+            if (AppSettings.EnableTagWikiTitleLookup)
+            {
+                return LookupIds(cnn, items, @"
+                    SELECT 
+                        post.Id,
+                        CASE WHEN post.Title IS NOT NULL THEN
+                            post.Title
+                        WHEN q.Title IS NOT NULL THEN
+                            q.Title
+                        WHEN te.TagName IS NOT NULL THEN
+                            te.TagName + ' tag wiki excerpt'
+                        WHEN tw.TagName IS NOT NULL THEN
+                            tw.TagName + ' tag wiki'
+                        END
+                    FROM
+                        Posts post
+                    LEFT JOIN
+                        Posts q ON post.ParentId = q.Id
+                    LEFT JOIN
+                        Tags te ON post.Id = te.ExcerptPostId
+                    LEFT JOIN
+                        Tags tw ON post.Id = tw.WikiPostId
+                    WHERE
+                        post.Id IN
+                ");
+            }
+            else
+            {
+                return LookupIds(cnn, items,
+                                 @"select p1.Id, isnull(p1.Title,p2.Title) from Posts p1  left join Posts p2 on p1.ParentId = p2.Id where p1.Id in ");
+            }
         }
 
 
