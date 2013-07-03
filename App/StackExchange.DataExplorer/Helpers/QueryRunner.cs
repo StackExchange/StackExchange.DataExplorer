@@ -105,6 +105,14 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 sites = sites.Where(s => s.Url.Contains("meta.")).ToList();
             }
+            else if (parsedQuery.TargetSites == TargetSites.AllNonMetaSitesButSO)
+            {
+                sites = sites.Where(s => !s.Url.Contains("meta.") && !s.Url.Contains("stackoverflow.")).ToList();
+            }
+            else if (parsedQuery.TargetSites == TargetSites.AllMetaSitesButMSO)
+            {
+                sites = sites.Where(s => s.Url.Contains("meta.") && !s.Url.Contains("stackoverflow.")).ToList();
+            }
 
             var firstSite = sites.First();
             var results = QueryRunner.GetSingleSiteResults(parsedQuery, firstSite, currentUser, result);

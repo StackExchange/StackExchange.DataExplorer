@@ -10,6 +10,8 @@ namespace StackExchange.DataExplorer.Helpers
         Current = 0, 
         AllSites = 1,
         AllMetaSites = 2,
-        AllNonMetaSites = 3
+        AllNonMetaSites = 3,
+        AllMetaSitesButMSO = 4,
+        AllNonMetaSitesButSO = 5
     }
 }

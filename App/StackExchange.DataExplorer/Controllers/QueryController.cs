@@ -430,6 +430,18 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             return GetCsv(sitename, revisionId, TargetSites.AllNonMetaSites);
         }
 
+        [Route(@"{sitename}/all-non-meta-but-so-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteWithoutMetaExcludingSOCsv(string sitename, int revisionId)
+        {
+            return GetCsv(sitename, revisionId, TargetSites.AllNonMetaSitesButSO);
+        }
+
+        [Route(@"{sitename}/all-meta-but-mso-csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
+        public ActionResult ShowMultiSiteMeteExclusingMSOCsv(string sitename, int revisionId)
+        {
+            return GetCsv(sitename, revisionId, TargetSites.AllMetaSitesButMSO);
+        }
+
         private ActionResult GetCsv(string sitename, int revisionId, TargetSites targetSites)
         {
             Query query = QueryUtil.GetQueryForRevision(revisionId);
