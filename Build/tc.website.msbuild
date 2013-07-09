@@ -22,14 +22,14 @@
     <!-- Replace the AppConnection -->
     <FileUpdate
         Files="$(WebConfigPath)"
-        Regex="name=&qout;AppConnection&qout; connectionString=.*"
-        ReplacementText="name=&qout;AppConnection&qout; connectionString=&quot;$(connectionString)&quot; providerName=&quot;System.Data.SqlClient&quot; /&gt;"
+        Regex="name=&quot;AppConnection&quot; connectionString=.*"
+        ReplacementText="name=&quot;AppConnection&quot; connectionString=&quot;$(connectionString)&quot; providerName=&quot;System.Data.SqlClient&quot; /&gt;"
         />
     <!-- Replace the ReaderConnection -->
     <FileUpdate
         Files="$(WebConfigPath)"
-        Regex="name=&qout;ReaderConnection&qout; connectionString=.*"
-        ReplacementText="name=&qout;ReaderConnection&qout; connectionString=&quot;$(readerConnectionString)&quot; /&gt;"
+        Regex="name=&quot;ReaderConnection&quot; connectionString=.*"
+        ReplacementText="name=&quot;ReaderConnection&quot; connectionString=&quot;$(readerConnectionString)&quot; /&gt;"
         />
     <!-- Always turn off web app debug setting -->
     <FileUpdate
