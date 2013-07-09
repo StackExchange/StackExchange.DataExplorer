@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="DeployWeb" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="CompileWeb" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <!-- Passed in Parameters -->
     <configuration></configuration>
@@ -8,38 +8,41 @@
     <readerConnectionString></readerConnectionString>
 
     <WebSourceDirectory>$(workingDir)\App\StackExchange.DataExplorer</WebSourceDirectory>
+    <WebConfigPath>$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.config</WebConfigPath>
     <MigrationsDirectory>$(workingDir)\Migrations</MigrationsDirectory>
     <MigrateBin>$(workingDir)\Build\Migrator.exe --connection="$(connectionString)"</MigrateBin>
-
-    <WebReleaseConfig>
-      <![CDATA[<?xml version="1.0"?>
-<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <connectionStrings>
-    <add name="AppConnection" connectionString="$(connectionString)" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
-    <add name="ReaderConnection" connectionString="$(readerConnectionString)" xdt:Transform="SetAttributes" xdt:Locator="Match(name)" />
-  </connectionStrings>
-  <system.web>
-    <compilation xdt:Transform="RemoveAttributes(debug)"/>
-  </system.web>
-</configuration>]]></WebReleaseConfig>
   </PropertyGroup>
-
-  <UsingTask TaskName="TransformXml" AssemblyFile="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\Web\Microsoft.Web.Publishing.Tasks.dll"/>
 
   <Target Name="MigrateDatabase">
     <Exec Command="$(MigrateBin)" WorkingDirectory="$(MigrationsDirectory)" />
     <Message Text="MigrateDatabase complete"/>
   </Target>
 
-  <Target Name="CompileWeb" DependsOnTargets="MigrateDatabase">
-    <WriteLinesToFile File="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
-      Overwrite="true" Lines="$(WebReleaseConfig)" />
+  <Target Name="ReplaceConfigs" DependsOnTargets="MigrateDatabase">
+    <!-- Replace the AppConnection -->
+    <FileUpdate
+        Files="$(WebConfigPath)"
+        Regex="name=&qout;AppConnection&qout; connectionString=.*"
+        ReplacementText="name=&qout;AppConnection&qout; connectionString=&quot;$(connectionString)&quot; providerName=&quot;System.Data.SqlClient&quot; /&gt;"
+        />
+    <!-- Replace the ReaderConnection -->
+    <FileUpdate
+        Files="$(WebConfigPath)"
+        Regex="name=&qout;ReaderConnection&qout; connectionString=.*"
+        ReplacementText="name=&qout;ReaderConnection&qout; connectionString=&quot;$(readerConnectionString)&quot; /&gt;"
+        />
+    <!-- Always turn off web app debug setting -->
+    <FileUpdate
+        Files="$(WebConfigPath)"
+        Regex="compilation debug=&quot;true&quot;"
+        ReplacementText="compilation debug=&quot;false&quot;"
+        />
+    <Message Text="ReplaceConfigs complete"/>
+  </Target>
 
-    <TransformXml Source="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.config"
-                 Transform="$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.Release.config"
-                 Destination="$(WebSourceDirectory)\..\StackExchange.DataExplorer\WebRelease.config"/>
 
-    <RemoveDir Directories="$(WebSourceDirectory)\..\StackExchange.DataExplorer\bin"/>
+  <Target Name="CompileWeb" DependsOnTargets="ReplaceConfigs">
+
     <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
              Properties="Configuration=$(configuration);ReferencePath=$(WebSourceDirectory)\bin"
              Targets="Build"/>
