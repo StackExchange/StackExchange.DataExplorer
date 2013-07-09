@@ -6,6 +6,7 @@
     <workingDir></workingDir>
     <connectionString></connectionString>
     <readerConnectionString></readerConnectionString>
+    <TargetsDirectory></TargetsDirectory>
 
     <WebSourceDirectory>$(workingDir)\App\StackExchange.DataExplorer</WebSourceDirectory>
     <WebConfigPath>$(WebSourceDirectory)\..\StackExchange.DataExplorer\Web.config</WebConfigPath>
@@ -13,6 +14,7 @@
     <MigrateBin>$(workingDir)\Build\Migrator.exe --connection="$(connectionString)"</MigrateBin>
   </PropertyGroup>
 
+  <Import Project="$(TargetsDirectory)\MSBuild.Community.Tasks.Targets"/>
   <Target Name="MigrateDatabase">
     <Exec Command="$(MigrateBin)" WorkingDirectory="$(MigrationsDirectory)" />
     <Message Text="MigrateDatabase complete"/>
