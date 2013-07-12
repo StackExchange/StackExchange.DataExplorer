@@ -89,15 +89,10 @@ namespace StackExchange.DataExplorer.Controllers
 
             title = title.URLFriendly();
 
-            // if this user has a display name, and the title is missing or does not match, permanently redirect to it
+            // if this query has a title, and the title is missing or does not match, permanently redirect to it
             if (title.HasValue() && (string.IsNullOrEmpty(slug) || slug != title))
             {
-                string url = "/{0}/query/{1}/{3}";
-
-                if (!latest)
-                {
-                    url = "/{0}/query/{1}/{2}/{3}";
-                }
+                string url = latest ? "/{0}/query/{1}/{3}" : "/{0}/revision/{1}/{2}/{3}";
 
                 return PageMovedPermanentlyTo(string.Format(url,
                     Site.Name.ToLower(),
