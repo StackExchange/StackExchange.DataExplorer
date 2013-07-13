@@ -48,16 +48,21 @@ namespace StackExchange.DataExplorer.Controllers
             set
             {
                 site = value;
-                Session["SiteId"] = site.Id;
-                foreach (SubHeaderViewData menuItem in menu)
+
+                if (site != null)
                 {
-                    if (menuItem.Title == "Queries")
+                    Session["SiteId"] = site.Id;
+
+                    foreach (SubHeaderViewData menuItem in menu)
                     {
-                        menuItem.Href = "/" + site.Name.ToLower() + "/queries";
-                    }
-                    if (menuItem.Title == "Compose Query")
-                    {
-                        menuItem.Href = "/" + site.Name.ToLower() + "/query/new";
+                        if (menuItem.Title == "Queries")
+                        {
+                            menuItem.Href = "/" + site.Name.ToLower() + "/queries";
+                        }
+                        if (menuItem.Title == "Compose Query")
+                        {
+                            menuItem.Href = "/" + site.Name.ToLower() + "/query/new";
+                        }
                     }
                 }
             }
