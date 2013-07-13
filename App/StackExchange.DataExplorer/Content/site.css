@@ -1665,6 +1665,11 @@ table#userList .user .user-details {
   float: left;
   width: 175px;
 }
+
+.user-summary-details .user-login {
+  overflow: hidden;
+}
+
 .user-summary-details div
 {
     margin-bottom: 6px;
