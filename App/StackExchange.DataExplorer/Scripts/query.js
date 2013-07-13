@@ -897,7 +897,7 @@ DataExplorer.ready(function () {
         });
 
         grid = new Slick.Grid(target, rows, columns, options);
-        grid.onColumnsResized = resizeResults;
+        grid.onColumnsResized.subscribe(resizeResults);
     }
 
     function ColumnFormatter(response) {
