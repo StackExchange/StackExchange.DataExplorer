@@ -152,7 +152,7 @@ namespace StackExchange.DataExplorer.Controllers
                             // work on allowing multiple OpenID logins, but for now I'll settle for not throwing an exception...
                             if (!currentOpenIds.Any(s => s.OpenIdClaim == normalizedClaim))
                             {
-                                Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = normalizedClaim });
+                                Current.DB.UserOpenIds.Update(currentOpenIds.First().Id, new { OpenIdClaim = normalizedClaim });
                             }
                           
                             user = CurrentUser;
