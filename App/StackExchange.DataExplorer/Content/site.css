@@ -756,18 +756,20 @@ ul.site-list .desc {
   text-align: right;
 }
 
+i.button {
+  color: #808080;
+  font-size: 14px;
+}
+
 .heading .buttons {
   float: right;
 }
 
 .heading .buttons .button, #schema ul .button, #schema .table-data-panel .button {
-  background: transparent url('/content/images/sprites.png') no-repeat scroll 0px 0px;
   cursor: pointer;
   float: left;
   margin-left: 4px;
-  overflow: hidden;
-  text-indent: -999em;
-  width: 12px;
+  margin-top: -1px;
 }
 
 #schema .table-data-panel .table-data-close {

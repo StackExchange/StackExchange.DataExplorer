@@ -1,13 +1,11 @@
 ﻿DataExplorer.TableHelpers = (function () {
     var tables,
-        infoTemplate = document.create('span', {
-            className: 'button table-data',
-            text: 'show table',
+        infoTemplate = document.create('i', {
+            className: 'icon-info button table-data',
             title: 'show the contents of this table'
         }),
-        closeTemplate = document.create('span', {
-            className: 'button table-data-close',
-            text: 'close table',
+        closeTemplate = document.create('i', {
+            className: 'icon-remove button table-data-close',
             title: 'hide the contents of this table'
         }),
         dataTemplate = document.create('div', {
