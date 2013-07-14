@@ -66,11 +66,6 @@
             </li>
         }
         </ul>
-        <script type="text/javascript">
-            DataExplorer.ready(function () {
-                DataExplorer.TableHelpers.init(@Html.Raw(ViewData["HelperTables"] as string));
-            });
-        </script>
     </div>
     @Html.Partial("RevisionHistory", Model)
 </div>
@@ -78,3 +73,7 @@
     <li id="permalink" class="result-option"><a class="templated" href="/:site/query/:id:slug:params">permalink</a></li>
     <li id="schema-toggle">hide sidebar</li>
 </ul>
+@Html.Raw(AssetPackager.ScriptSrc("editor"))
+<script type="text/javascript">
+    DataExplorer.TableHelpers.init(@Html.Raw(ViewData["HelperTables"] as string));
+</script>
