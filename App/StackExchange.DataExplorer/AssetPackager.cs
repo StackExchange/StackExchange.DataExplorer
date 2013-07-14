@@ -93,7 +93,7 @@ namespace StackExchange.DataExplorer
                         }
                     },
                     {
-                        "jquery", new AssetCollection("http://ajax.microsoft.com/ajax/jquery/jquery-1.7.1.min.js")
+                        "jquery", new AssetCollection("//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
                         {
                             "/Scripts/jquery-1.7.1.js"
                         }
