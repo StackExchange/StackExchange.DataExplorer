@@ -27,6 +27,8 @@
     }
 
     function initSchema() {
+        var orderSort = true;
+
         schema.TextAreaResizer(resizeSchema, {
             'offsetTop': schema.find('.heading').outerHeight(),
             'resizeSelector': 'ul'
@@ -40,6 +42,12 @@
         });
         schema.find('.collapse').on('click', function () {
             schema.find('dl').hide();
+        });
+        schema.find('.sort').on('click', function () {
+            sortSchema(orderSort = !orderSort);
+            $(this).prop('title', 'sort ' + (orderSort ? 'alphabetically' : 'normally'))
+                .toggleClass('icon-sort-by-alphabet', orderSort)
+                .toggleClass('icon-sort-by-order', !orderSort);
         });
     }
 
@@ -76,6 +84,32 @@
             offset = history.outerHeight() - list.height();
 
         list.height(remaining - offset);
+    }
+
+    function sortSchema(ordered) {
+        schema.children('ul').sortChildren(function (li) {
+            var table = $(li);
+
+            table.children('dl').sortChildren(
+                function (dt) {
+                    if (dt.tagName !== 'DT') {
+                        return false;
+                    }
+
+                    return ordered ? parseInt(dt.getAttribute('data-order')) : dt[_textContent];
+                },
+                function (parent, element) {
+                    var sibling = getNextElementSibling(element);
+
+                    parent.appendChild(element);
+                    parent.appendChild(sibling);
+                }
+            );
+
+            return ordered ? parseInt(li.getAttribute('data-order')) : table.children('.schema-table').text();
+        });
+
+        
     }
 
     function updateHistory(response) {

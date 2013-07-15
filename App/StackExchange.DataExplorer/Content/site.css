@@ -756,9 +756,20 @@ ul.site-list .desc {
   text-align: right;
 }
 
+#schema .sort {
+  width: 13px;
+}
+
 i.button {
   color: #808080;
   font-size: 14px;
+}
+
+.heading .buttons .button-group + .button-group {
+  border-left: 1px dotted #CCCCCC;
+  margin-left: 6px;
+  padding-left: 3px;
+  overflow: auto;
 }
 
 .heading .buttons {
@@ -767,7 +778,7 @@ i.button {
 
 .heading .buttons .button, #schema ul .button, #schema .table-data-panel .button {
   cursor: pointer;
-  float: left;
+  display: inline-block;
   margin-left: 4px;
   margin-top: -1px;
 }
