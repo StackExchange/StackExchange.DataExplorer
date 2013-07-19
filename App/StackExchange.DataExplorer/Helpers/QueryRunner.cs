@@ -18,6 +18,8 @@ namespace StackExchange.DataExplorer.Helpers
         private static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> magic_columns
             = GetMagicColumns();
 
+        public static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>.KeyCollection MagicColumnNames = magic_columns.Keys;
+
         static void AddBody(StringBuilder buffer, QueryResults results, Site site)
         {
             buffer.AppendLine(site.Name);
