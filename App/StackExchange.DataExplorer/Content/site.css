@@ -1925,3 +1925,177 @@ a.cc-wiki-link
 {
     margin-bottom: 10px;
 }
+
+/* Help Page Content */
+.hero {
+  border-bottom: 1px dotted #C0C0C0;
+  height: 1%;
+  overflow: auto;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.hero img {
+  float: left;
+}
+
+.hero .blurb {
+  margin-left: 265px;
+}
+
+.hero .blurb h2 {
+  color: #185297;
+  font-size: 30px;
+  margin-bottom: 0.6em;
+  margin-top: 0.6em;
+}
+
+.hero .blurb p {
+  clear: none;
+}
+
+.hero .blurb .external-links {
+  list-style-type: none;
+  margin-top: 26px;
+}
+
+.hero .blurb .external-links li {
+  background-color: #326EB6;
+  border-radius: 4px 4px;
+  float: left;
+  margin-left: 56px;
+  padding: 4px 0px;
+  text-align: center;
+  width: 140px;
+}
+
+.hero .blurb .external-links li i {
+  color: #FFFFFF;
+  float: left;
+  font-size: 28px;
+  margin-left: 12px;
+  margin-top: 4px;
+}
+
+.hero .blurb .external-links li a {
+  color: #F7F7F7;
+  display: block;
+  text-shadow: #1A375B 1px 1px 1px;
+}
+
+.hero .blurb .external-links li a:hover, .hero .blurb .external-links li a:hover i {
+  color: #C6EBFB;
+  text-decoration: none;
+}
+
+.hero .blurb .external-links li sub {
+  color: #E0E0E0;
+  display: block;
+  position: static;
+  font-size: 70%;
+}
+
+.sidebar {
+  float: right;
+  width: 180px;
+  list-style-type: none;
+  margin-top: -4px;
+  margin-left: 0;
+}
+
+.sidebar.undocked {
+  position: fixed;
+}
+
+.sidebar li {
+  padding: 4px 6px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.mainbar {
+  margin-right: 198px;
+  padding-left: 14px;
+}
+
+.mainbar h2 {
+  margin-left: -14px;
+  margin-top: 20px;
+  margin-bottom: 14px;
+}
+
+.mainbar h3 {
+  color: #185297;
+  margin-bottom: 10px;
+  font-size: 105%;
+}
+
+.mainbar p {
+  clear: none;
+}
+
+.mainbar pre {
+  font-size: 13px;
+  background-color: #FAFAFA;
+  border: 1px solid #DDD;
+}
+
+.mainbar code {
+  font-size: 14px;
+  background-color: transparent;
+}
+
+.mainbar ul {
+  margin-top: 8px;
+}
+
+.mainbar ul li {
+  margin-top: 0.2em;
+}
+
+.mainbar .block-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15px;
+}
+
+.qa-list dt {
+  color: #185297;
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.qa-list dt i {
+  color: #909090;
+  margin-right: 10px;
+  display: inline-block;
+  text-align: center;
+  width: 18px;
+}
+
+.qa-list dd {
+  margin-bottom: 16px;
+}
+
+/* Tags */
+.post-tag {
+  color: #3E6D8E;
+  background-color: #E0EAF1;
+  border-bottom: 1px solid #B3CEE1;
+  border-right: 1px solid #B3CEE1;
+  padding: 3px 4px 3px 4px;
+  margin: 2px 2px 2px 0;
+  text-decoration: none;
+  font-size: 80%;
+  line-height: 2.4;
+  white-space: nowrap;
+}
+
+.post-tag:hover {
+  background-color: #C4DAE9;
+  border-bottom: 1px solid #C4DAE9;
+  border-right: 1px solid #C4DAE9;
+  text-decoration: none;
+}

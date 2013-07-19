@@ -35,7 +35,7 @@ namespace StackExchange.DataExplorer.Models
             }
         }
 
-        private const string emptyLogin = "jon.doe";
+        public const string emptyLogin = "jon.doe";
 
         /// <summary>
         /// Should be set when ControllerBase determines CurrentUser

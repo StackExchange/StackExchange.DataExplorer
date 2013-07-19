@@ -36,6 +36,7 @@ namespace StackExchange.DataExplorer
                     {
                         "sitecss", new AssetCollection
                         {
+                            "/Content/font-awesome/css/font-awesome.min.css",
                             "/Content/site.css",
                             "/Content/jquery.autocomplete.css"
                         }
