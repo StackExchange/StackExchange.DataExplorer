@@ -1,0 +1,12 @@
+bin/
+obj/
+*.user
+*.suo
+Web.Release.config
+Content/packaged/
+App/StackExchange.DataExplorer.DB/sql/
+App/_ReSharper.DataExplorer/
+App/_ReSharper.DataExplorerFull/
+*.itrace.csdef
+App/TestResults/
+PublishProfiles/
