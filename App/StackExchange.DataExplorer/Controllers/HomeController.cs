@@ -43,18 +43,14 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("about")]
         public ActionResult About()
         {
-            SetHeader("About");
-
-            return View();
+            return Redirect("/help");
         }
 
 
         [Route("faq")]
         public ActionResult Faq()
         {
-            SetHeader("Frequently Asked Questions");
-
-            return View();
+            return Redirect("/help");
         }
 
         [Route("sites")]
