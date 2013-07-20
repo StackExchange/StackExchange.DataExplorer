@@ -215,6 +215,10 @@
     <Content Include="Content\codemirror\codemirror.css" />
     <Content Include="Content\codemirror\custom.css" />
     <Content Include="Content\codemirror\theme.css" />
+    <Content Include="Content\font-awesome\css\font-awesome.min.css" />
+    <Content Include="Content\font-awesome\font\fontawesome-webfont.svg" />
+    <Content Include="Content\images\help-icon.png" />
+    <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\Img\openid\openid-logos.png" />
     <Content Include="Content\jquery.autocomplete.css" />
     <Content Include="Content\qp\images\arithmetic_expression.gif" />
@@ -378,6 +382,10 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\font-awesome\font\fontawesome-webfont.eot" />
+    <Content Include="Content\font-awesome\font\fontawesome-webfont.ttf" />
+    <Content Include="Content\font-awesome\font\fontawesome-webfont.woff" />
+    <Content Include="Content\font-awesome\font\FontAwesome.otf" />
     <None Include="Content\qp\showplanxml.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -389,15 +397,9 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Master.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Home\Faq.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Account\LogIn.cshtml" />
     <Content Include="Views\Admin\Index.cshtml" />
     <Content Include="Views\Admin\WhiteList.cshtml" />
-    <Content Include="Views\Legal\ContentPolicy.cshtml" />
-    <Content Include="Views\Legal\PrivacyPolicy.cshtml" />
-    <Content Include="Views\Legal\TermsOfService.cshtml" />
-    <Content Include="Views\Legal\TrademarkGuidance.cshtml" />
     <Content Include="Views\QuerySet\Index.cshtml" />
     <Content Include="Views\User\Index.cshtml" />
     <Content Include="Views\User\Edit.cshtml" />
@@ -425,6 +427,7 @@
     <Content Include="Views\Shared\QueryResults.cshtml" />
     <Content Include="Views\Shared\RevisionHistory.cshtml" />
     <Content Include="Views\Shared\UserList.cshtml" />
+    <Content Include="Views\Home\Help.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
