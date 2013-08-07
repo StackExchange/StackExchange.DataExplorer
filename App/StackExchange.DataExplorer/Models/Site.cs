@@ -102,7 +102,7 @@ namespace StackExchange.DataExplorer.Models
         public SqlConnection GetConnection(int maxPoolSize)
         {
             // TODO: do we even need this method any longer? are we still supporting about odata?
-            var cs = ConnectionString + (UseConnectionStringOverride ? "" : string.Format("Max Pool Size={0};",maxPoolSize));
+            var cs = ConnectionString + (UseConnectionStringOverride ? "" : ((ConnectionString.EndsWith(";") ? "" : ";") + string.Format("Max Pool Size={0};",maxPoolSize)));
             return new SqlConnection(cs);
         }
 
