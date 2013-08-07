@@ -1074,7 +1074,7 @@ DataExplorer.ready(function () {
 function encodeColumn(s) {
     if (s != null && s.replace != null) {
         s = s.replace(/[\n\r]/g, " ")
-              .replace(/&(?!\w+([;\s]|$))/g, "&amp;")
+              .replace(/&/g, "&amp;")
               .replace(/</g, "&lt;")
               .replace(/>/g, "&gt;")
               .substring(0, 400);
