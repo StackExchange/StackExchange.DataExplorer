@@ -111,7 +111,7 @@
             columns, like a particular post's revision history:
         </p>
         <pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span><br>  <span class="cm-sql-literal">'site://posts/'</span> <span class="cm-sql-operator">+</span> <span class="cm-sql-function">CAST</span>(<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-type">nvarchar</span>) <span class="cm-sql-operator">+</span> <span class="cm-sql-literal">'/revisions|'</span> <span class="cm-sql-operator">+</span> <br>  <span class="cm-sql-literal">'Revision History for Post '</span> <span class="cm-sql-operator">+</span>  <span class="cm-sql-function">CAST</span>(<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-type">nvarchar</span>) <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[Revision Link</span><span class="cm-sql-word">]</span><br><span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">Id</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-special">##PostId##</span></pre>
-        <h2 id="#graphing">Graphing</h2>
+        <h2 id="graphing">Graphing</h2>
         <p>
             Being able to generate result sets is nice, but sometimes the output is more effectively conveyed as a graph. Data Explorer
             lets you create simple graphs by automatically plotting results that have one of the following column combinations:
