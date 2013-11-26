@@ -46,6 +46,9 @@ namespace StackExchange.DataExplorer
         [Default(true)]
         public static bool EnableCancelQuery { get; private set; }
 
+        [Default(false)]
+        public static bool EnableTagWikiTitleLookup { get; private set; }
+
         [Default("")]
         public static string RecaptchaPublicKey { get; private set; }
 
