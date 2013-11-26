@@ -72,5 +72,11 @@ namespace StackExchange.DataExplorer.Controllers
 
             return Json(sites);
         }
+
+        [Route("legal/{subpath?}")]
+        public ActionResult Legal(string subpath)
+        {
+            return RedirectPermanent("http://stackexchange.com/legal" + (subpath.HasValue() ? "/" + subpath : ""));
+        }
     }
 }
