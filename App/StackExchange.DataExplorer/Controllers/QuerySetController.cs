@@ -227,6 +227,12 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
 
+        [Route("{sitename}")]
+        public ActionResult IndexFallback(string sitename)
+        {
+            return RedirectPermanent(String.Format("/{0}/queries", sitename));
+        }
+
         [Route("{sitename}/queries")]
         public ActionResult Index(string sitename, string order_by, string q, int? page, int? pagesize)
         {
