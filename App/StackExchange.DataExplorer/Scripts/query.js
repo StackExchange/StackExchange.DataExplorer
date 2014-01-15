@@ -778,7 +778,8 @@ DataExplorer.ready(function () {
                 'name': columns[i].name,
                 'field': "col" + i,
                 'type': columns[i].type.toLowerCase(),
-                'width': Math.min((widths[i] || 50) + 16, maxWidth) 
+                'width': Math.min((widths[i] || 50) + 16, maxWidth),
+                'sortable': rows.length <= 5000
             };
 
             if (name === 'tags' || name === 'tagname') {
@@ -796,6 +797,15 @@ DataExplorer.ready(function () {
 
         grid = new Slick.Grid(target, rows, columns, options);
         grid.onColumnsResized.subscribe(resizeResults);
+        grid.onSort.subscribe(function (e, args) {
+            var field = args.sortCol.field;
+
+            args.grid.getData().sort(function (lhs, rhs) {
+                return (args.sortAsc ? 1 : -1) * (lhs[field] == rhs[field] ? 0 : lhs[field] < rhs[field] ? -1 : 1);
+            });
+
+            args.grid.invalidate();
+        });
     }
 
     function ColumnFormatter(response) {
