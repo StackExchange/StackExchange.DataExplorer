@@ -45,14 +45,6 @@
 
   <Target Name="CompileWeb" DependsOnTargets="ReplaceConfigs">
 
-    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackager\StackExchange.AssetPackager.csproj"
-             Properties="Configuration=$(configuration);ReferencePath=$(WebSourceDirectory)\bin"
-             Targets="Build"/>
-
-    <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.AssetPackagerApp\AssetPackagerApp.csproj"
-             Properties="Configuration=$(configuration);ReferencePath=$(WebSourceDirectory)\bin"
-             Targets="Build"/>
-
     <MSBuild Projects="$(WebSourceDirectory)\..\StackExchange.DataExplorer\StackExchange.DataExplorer.csproj"
              Properties="Configuration=$(configuration);ReferencePath=$(WebSourceDirectory)\bin"
              Targets="Build"/>
