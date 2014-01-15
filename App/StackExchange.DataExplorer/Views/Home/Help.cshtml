@@ -1,11 +1,12 @@
 ﻿@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Models
 @using StackExchange.DataExplorer.Helpers
+@using System.Web.Optimization
 @{this.SetPageTitle("Help - Stack Exchange Data Explorer");}
 
 @section AdditionalStyles
 {
-    @Html.Raw(AssetPackager.LinkCss("query"))
+    @Styles.Render("~/assets/css/query")
 }
 
 <div class="content-page">
