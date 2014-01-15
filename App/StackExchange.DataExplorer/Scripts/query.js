@@ -1,5 +1,143 @@
-﻿DataExplorer.QueryEditor = (function () {
-    var editor, field, params = {}, query,
+﻿DataExplorer.ParameterParser = (function () {
+    var States = {
+        Literal:   1 << 0,
+        String:    1 << 1,
+        Comment:   1 << 2,
+        Multiline: 1 << 3
+    };
+
+    
+    function parse(sql, options) {
+        var results = [];
+
+        var parameter = /##([a-zA-Z][A-Za-z0-9]*)(?::([A-Za-z]+))?(?:\?([^#]+))?##/,
+            description = /-- *([a-zA-Z][A-Za-z0-9]*) *: *([^"]+)(?:"([^"]+)")?/,
+            parameters = {};
+
+        function parseToken(token, state) {
+            if (!token || token == '\n') {
+                return;
+            }
+
+            var match, selected;
+
+            if (state & States.Comment) {
+                if (!(state & States.Multiline)) {
+                    if (match = token.match(description)) {
+                        selected = parameters[match[1]];
+
+                        if (!selected) {
+                            parameters[match[1]] = selected = {};
+                        }
+
+                        selected.label = match[2].trim();
+
+                        if (match[3]) {
+                            selected.description = match[3].trim();
+                        }
+                    }
+                }
+            } else {
+                while (match = token.match(parameter)) {
+                    selected = parameters[match[1]];
+
+                    if (!selected) {
+                        parameters[match[1]] = selected = {};
+                    }
+
+                    if (typeof (selected.index) === 'undefined') {
+                        selected.index = results.length;
+                        results.push(selected);
+                    }
+
+                    if (!selected.name) {
+                        selected.name = match[1];
+                    }
+
+                    if (match[2]) {
+                        selected.type = match[2];
+                    }
+
+                    if (match[3]) {
+                        selected.auto = match[3];
+                    }
+
+                    token = token.substring(match.index + match[0].length);
+                }
+            }
+        }
+
+        var state = States.Literal, token = '', depth = 0;
+        var current, next, i = 0;
+
+        while ((current = sql[i])) {
+            next = sql[++i];
+
+            var transition = true, savedState = state, skipNext = false;
+
+            if (state & States.Literal) {
+                if (current == "'") {
+                    state = States.String;
+                } else if (current + next == '--') {
+                    state = States.Comment;
+                } else if (options.multilineComments && current + next == '/*') {
+                    state = States.Comment | States.Multiline;
+                    ++depth;
+                    skipNext = true;
+                } else {
+                    transition = false;
+                }
+
+                if (transition) {
+                    parseToken(token, savedState);
+                    transition = false;
+                    token = '';
+                }
+            } else if (state & States.Comment) {
+                if (state & States.Multiline && current + next == '*/') {
+                    skipNext = true;
+                    transition = !--depth;
+                } else {
+                    transition = !(state & States.Multiline) && current == '\n';
+                }
+
+                if (options.nestedMultilineComments && !transition && current + next == '/*') {
+                    skipNext = true;
+                    ++depth;
+                }
+            } else if (state & States.String) {
+                if ((current + next == options.stringEscapeCharacter + "'")) {
+                    skipNext = true;
+                    transition = false;
+                } else {
+                    transition = (!options.multilineStrings && current == '\n') || current == "'";
+                }
+            }
+
+            token += current;
+
+            if (skipNext) {
+                token += next;
+                ++i;
+            }
+
+            if (transition || typeof(next) === 'undefined') {
+                parseToken(token, savedState);
+                token = '';
+                state = States.Literal;
+            }
+        }
+
+        return results;
+    }
+
+    return {
+        parse: parse
+    };
+})();
+
+DataExplorer.QueryEditor = (function () {
+    var editor, field, query,
         options = {
             'mode': 'text/x-t-sql'
         };
@@ -42,16 +180,6 @@
         }
     }
 
-    function dispatch(event, value) {
-        if (events[event]) {
-            event = events[event];
-
-            for (var i = 0; i < event.length; ++i) {
-                event[i](value);
-            }
-        }
-    }
-
     function getValue() {
         if (!exists()) {
             return null;
@@ -77,126 +205,10 @@
         return value;
     }
 
-    function parseParameters(sql) {
-        // Until we fix this to handle the non-editor view too...
-        var value = sql || getValue(),
-            pattern = /##([a-zA-Z][A-Za-z0-9]*)(?::([A-Za-z]+))?(?:\?([^#]+))?##/,
-            commented = 0, stringified = false,
-            params = { 'items': {}, 'count': 0 };
-
-        if (!value || !value.length) {
-            return;
-        }
-
-        value = value.split("\n");
-
-        try {
-            for (var i = 0; i < value.length; ++i) {
-                parseLine(value[i]);
-            }
-        } catch (ex) {}
-
-        return params;
-
-        function parseLine(line, depth) {
-            var line = line.trim(), param,
-                endComment, endString,
-                startComment, startString,
-                substitutes = [];
-
-            if (!line) {
-                return;
-            }
-
-            if (typeof depth === 'undefined') {
-                depth = 0;
-            } else if (depth === 10) {
-                throw new Error("The query body is too incomprehensible to continue "
-                    + "parsing, or logic has failed us");
-            } else {
-                ++depth;
-            }
-
-            if (commented) {
-                if ((endComment = line.indexOf('*/')) !== -1) {
-                    commented += line.substring(0, endComment).split('/*').length - 1;
-                    line = line.substring(endComment + '*/'.length);
-
-                    if (--commented) {
-                        return parseLine(line, depth);
-                    }
-                }
-            } else if (stringified) {
-                if ((endString = line.indexOf("'")) === -1) {
-                    return scan(line);
-                }
-
-                scan(line.substring(0, endString));
-                line = line.substring(endString + 1);
-
-                if (line[0] === "'") {
-                    return parseLine(line.substring(1), depth);
-                }
-
-                stringified = false;
-            }
-
-            line = line.replace("''", '');
-            line = line.replace(/'[^']+'/, function (match) {
-                substitutes.push(match);
-
-                return '~S' + (substitutes.length - 1);
-            });
-            line = line.split('--');
-            startString = line[0].indexOf("'");
-            startComment = line[0].indexOf('/*');
-
-            if (startString !== -1 || startComment !== -1) {
-                line = line.join('--');
-
-                if ((startString < startComment && startString !== -1) ||
-                        startComment === -1) {
-                    stringified = true;
-                } else {
-                    ++commented;
-                    parseLine(line.substring(startComment + '/*'.length), depth);
-                    line = line.substring(0, startComment);
-                }
-            } else if (commented) {
-                return;
-            } else {
-                line = line[0];
-            }
-
-            for (var i = 0; i < substitutes.length; ++i) {
-                line = line.replace('~S' + i, substitutes[i]);
-            }
-
-            scan(line);
-        }
-
-        function scan(segment) {
-            while (param = segment.match(pattern)) {
-                params.items[param[1]] = params.items[param[1]] || {};
-
-                if (typeof params.items[param[1]].index === 'undefined') {
-                    params.items[param[1]].index = params.count;
-                    ++params.count;
-                }
-
-                params.items[param[1]].type = param[2] || params.items[param[1]].type;
-                params.items[param[1]].auto = param[3] || params.items[param[1]].auto;
-
-                segment = segment.substring(param.index + param[0].length);
-            }
-        }
-    }
-
     return {
         'create': create,
         'value': getValue,
-        'exists': exists,
-        'parse': parseParameters
+        'exists': exists
     };
 })();
 
@@ -415,15 +427,20 @@ DataExplorer.ready(function () {
             return false;
         }
 
-        var params = DataExplorer.QueryEditor.parse(sql),
-            ordered = [],
-            complete = true,
+        var parameters = new DataExplorer.ParameterParser.parse(sql, {
+            multilineStrings: true,
+            multilineComments: true,
+            stringEscapeCharacter: "'",
+            nestedMultilineComments: true
+        });
+
+        var complete = true,
             wrapper = document.getElementById('query-params'),
             fieldList = wrapper.getElementsByTagName('input'),
             fields = {},
             field, name, label, row, value, hasValue, key, first;
 
-        $(wrapper).toggle(!!params.count);
+        $(wrapper).toggle(!!parameters.length);
 
         for (var i = fieldList.length - 1; i > -1 ; --i) {
             field = fieldList.item(i);
@@ -437,32 +454,30 @@ DataExplorer.ready(function () {
             field.parentNode.parentNode.removeChild(field.parentNode);
         }
 
-        for (key in params.items) {
-            ordered[params.items[key].index] = params.items[key];
-            ordered[params.items[key].index].name = key;
-        }
-
-        for (var i = 0; i < ordered.length; ++i) {
+        for (var i = 0; i < parameters.length; ++i) {
             label = document.createElement('label');
             label.htmlFor = 'dynParam' + i;
-            label[_textContent] = ordered[i].name;
+            label[_textContent] = parameters[i].label || parameters[i].name;
+            
+            if (parameters[i].description) {
+                label.title = parameters[i].description;
+            }
 
-            value = fields[ordered[i].name];
+            value = fields[parameters[i].name];
             hasValue = !(!value && value !== 0);
 
             if (!hasValue) {
-                value = window.location.param(ordered[i].name);
+                value = window.location.param(parameters[i].name);
                 hasValue = !(!value && value !== 0);
             }
 
             if (!hasValue) {
-                value = ordered[i].auto;
+                value = parameters[i].auto;
                 hasValue = !(!value && value !== 0);
             }
 
-            if (!hasValue && ordered[i].name.toLowerCase() === 'userid') {
-                if (DataExplorer.options.User.isAuthenticated &&
-                        DataExplorer.options.User.guessedID) {
+            if (!hasValue && parameters[i].name.toLowerCase() === 'userid') {
+                if (DataExplorer.options.User.isAuthenticated && DataExplorer.options.User.guessedID) {
                     hasValue = true;
                     value = DataExplorer.options.User.guessedID;
                 }
@@ -473,7 +488,7 @@ DataExplorer.ready(function () {
             }
 
             field = document.createElement('input');
-            field.name = ordered[i].name;
+            field.name = parameters[i].name;
             field.id = 'dynParam' + i;
             field.type = 'text';
 
