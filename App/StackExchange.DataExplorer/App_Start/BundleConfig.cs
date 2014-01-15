@@ -36,6 +36,10 @@ namespace StackExchange.DataExplorer.App_Start
                 .Include("~/Scripts/query.js")
                 .Include("~/Scripts/qp.js")
                 .Include("~/Scripts/query.siteswitcher.js")
+            );
+
+            bundles.Add(new ScriptBundle("~/assets/js/editor")
+                .Include("~/Scripts/query.sidebar.js")
                 .Include("~/Scripts/query.tablehelpers.js")
             );
 
