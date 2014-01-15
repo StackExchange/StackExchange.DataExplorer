@@ -227,14 +227,27 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
 
+        [Route("{sitename}", Priority = RoutePriority.Low)]
+        public ActionResult IndexFallback(string sitename)
+        {
+            return RedirectPermanent(String.Format("/{0}/queries", sitename));
+        }
+
         [Route("{sitename}/queries")]
         public ActionResult Index(string sitename, string order_by, string q, int? page, int? pagesize)
         {
-            Site = GetSite(sitename);
+            Site = GetSite(sitename, true);
 
             if (Site == null)
             {
                 return PageNotFound();
+            }
+
+            // This seems like the preferred URL (sitename == site.TinyName), but for now we'll
+            // redirect to the existing form to avoid the risk of breaking things...
+            if (Site.Name.ToLower() != sitename)
+            {
+                return Redirect(String.Format("/{0}/queries", Site.Name.ToLower()));
             }
 
             QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);

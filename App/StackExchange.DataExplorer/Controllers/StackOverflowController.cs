@@ -70,9 +70,11 @@ namespace StackExchange.DataExplorer.Controllers
 
         public SubHeader Header { get; private set; }
 
-        public Site GetSite(string sitename)
+        public Site GetSite(string sitename, bool searchTinyName = false)
         {
-            return Current.DB.Query<Models.Site>("select * from Sites where lower(Name) = @sitename", new { sitename }).FirstOrDefault(); 
+            return Current.DB.Query<Models.Site>(
+                "SELECT * from Sites WHERE LOWER(Name) = @sitename " + (searchTinyName ? " OR LOWER(TinyName) = @sitename"  : ""), new { sitename }
+            ).FirstOrDefault(); 
         }
 
         public Site GetSite(int siteId)
