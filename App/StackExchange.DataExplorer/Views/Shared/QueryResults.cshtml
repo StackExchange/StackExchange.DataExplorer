@@ -1,6 +1,7 @@
 ﻿@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
-@Html.Raw(AssetPackager.ScriptSrc("flot"))
+@using System.Web.Optimization
+@Scripts.Render("~/assets/js/flot")
 <div id="queryResults" style="display: none;">
     <div id="resultTabs" class="subheader">
         <div class="miniTabs">

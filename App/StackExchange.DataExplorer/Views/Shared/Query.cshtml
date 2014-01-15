@@ -1,6 +1,7 @@
 ﻿@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
 @using StackExchange.DataExplorer.Models
+@using System.Web.Optimization
 @{
     Layout = "~/Views/Shared/Master.cshtml";
 
@@ -18,7 +19,7 @@
 
 @section AdditionalStyles
 {
-    @Html.Raw(AssetPackager.LinkCss("query"))
+    @Styles.Render("~/assets/css/query")
 }
 
 <style type="text/css">
@@ -109,8 +110,8 @@
         <div id="execution-stats">:records rows returned in :time ms:cached</div>
     </div>
 </div>
-@Html.Raw(AssetPackager.ScriptSrc("query"))
-@Html.Raw(AssetPackager.ScriptSrc("flot"))
+@Scripts.Render("~/assets/js/query")
+@Scripts.Render("~/assets/js/flot")
 <script type="text/javascript">
     DataExplorer.ready(function () {
         if (loadCachedResults) {

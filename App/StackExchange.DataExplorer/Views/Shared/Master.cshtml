@@ -1,5 +1,6 @@
 ﻿@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Models
+@using System.Web.Optimization;
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,11 +10,15 @@
     {
         @Html.Raw(string.Format("<link rel=\"odata.service\" title=\"{0}\" href=\"{1}\"/>", site.Name, site.ODataEndpoint))
     }
-    @Html.Raw(AssetPackager.LinkCss("sitecss"))
+
+    
+
+    @Styles.Render("~/assets/css/master")
     @RenderSection("additionalStyles", required: false)
 
-    @Html.Raw(AssetPackager.ScriptSrc("jquery"))
-    @Html.Raw(AssetPackager.ScriptSrc("master"))
+    @Scripts.Render("~/assets/js/jquery")
+    @Scripts.Render("~/assets/js/master")
+
     @StackExchange.Profiling.MiniProfiler.RenderIncludes()
 
     <script type="text/javascript">

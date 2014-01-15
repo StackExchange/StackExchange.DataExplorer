@@ -8,7 +8,9 @@ using System.Web.Security;
 using SimpleErrorHandler;
 using StackExchange.DataExplorer.Helpers;
 using System.Linq;
+using System.Web.Optimization;
 using StackExchange.Profiling.MVCHelpers;
+using StackExchange.DataExplorer.App_Start;
 
 namespace StackExchange.DataExplorer
 {
@@ -37,6 +39,13 @@ namespace StackExchange.DataExplorer
         {
             // disable the X-AspNetMvc-Version: header
             MvcHandler.DisableMvcResponseHeader = true;
+
+            // register public resource bundles (css/js)
+#if !DEBUG
+            BundleTable.EnableOptimizations = true;
+#endif
+
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             // set up MVC routes so our app URLs actually work
             // IMPORTANT: this must be called last; nothing else appears to execute after this
