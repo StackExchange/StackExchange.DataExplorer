@@ -47,30 +47,31 @@
     <div id="schema" class="right-group">
         <span class="heading">Database Schema
             <span class="buttons">
-                <span class="button expand" title="expand all tables">expand</span>
-                <span class="button collapse" title="collapse all tables">collapse</span>
+                <span class="button-group">
+                    <i class="icon-sort-by-alphabet button sort" title="sort alphabetically"></i>
+                </span>
+                <span class="button-group">
+                    <i class="icon-plus button expand" title="expand all tables"></i>
+                    <i class="icon-minus button collapse" title="collapse all tables"></i>
+                </span>
             </span>
         </span>
         <ul>
+        @{ var n = 0; }
         @foreach (TableInfo table in (IEnumerable<TableInfo>)ViewData["Tables"])
         {
-            <li>
+            <li data-order="@(n++)">
                 <span class="schema-table">@table.Name</span>
                 <dl>
                 @for (int i = 0; i < table.ColumnNames.Count; i++)
                 {
-                    <dt>@table.ColumnNames[i]</dt>
+                    <dt data-order="@i">@table.ColumnNames[i]</dt>
                     <dd class="cm-variable-2">@table.DataTypes[i]</dd>
                 }
                 </dl>
             </li>
         }
         </ul>
-        <script type="text/javascript">
-            DataExplorer.ready(function () {
-                DataExplorer.TableHelpers.init(@Html.Raw(ViewData["HelperTables"] as string));
-            });
-        </script>
     </div>
     @Html.Partial("RevisionHistory", Model)
 </div>
@@ -78,3 +79,7 @@
     <li id="permalink" class="result-option"><a class="templated" href="/:site/query/:id:slug:params">permalink</a></li>
     <li id="schema-toggle">hide sidebar</li>
 </ul>
+@Html.Raw(AssetPackager.ScriptSrc("editor"))
+<script type="text/javascript">
+    DataExplorer.TableHelpers.init(@Html.Raw(ViewData["HelperTables"] as string));
+</script>

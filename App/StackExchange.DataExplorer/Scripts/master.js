@@ -251,6 +251,46 @@ $.fn.tabs = function (passthrough) {
     });
 };
 
+$.fn.sortChildren = function (map, insert) {
+    return this.each(function () {
+        var i, mapped = [],
+            children = this.children,
+            length = children.length,
+            value;
+
+        for (i = 0; i < length; ++i) {
+            value = map(children[i]);
+
+            if (value !== false) {
+                mapped.push({
+                    node: children[i],
+                    value: map(children[i])
+                });
+            }
+        }
+
+        mapped.sort(function (lhs, rhs) {
+            if (lhs.value === rhs.value) {
+                return 0;
+            }
+
+            return lhs.value > rhs.value ? 1 : -1;
+        });
+
+        if (!insert) {
+            insert = function (parent, node) {
+                parent.appendChild(node);
+            }
+        }
+
+        length = mapped.length;
+
+        for (i = 0; i < length; ++i) {
+            insert(this, mapped[i].node);
+        }
+    });
+};
+
 if (!Object.keys) {
     Object.keys = (function () {
         var hasOwnProperty = Object.prototype.hasOwnProperty,
@@ -314,6 +354,18 @@ document.create = function create(element, attributes) {
 
     return element;
 };
+
+function getNextElementSibling(element) {
+    if (element.nextElementSibling) {
+        return element.nextElementSibling;
+    }
+
+    do {
+        element = element.nextSibling;
+    } while (element && element.nodeType !== 1);
+
+    return element;
+}
 
 if (!String.prototype.trim) {
     String.prototype.trim = function () {

@@ -215,18 +215,13 @@ DataExplorer.ready(function () {
 
     DataExplorer.QueryEditor.create('#queryBodyText');
     DataExplorer.QueryEditor.create('#sql', function (editor) {
-        var wrapper,
-            toggle = $('#schema-toggle'),
-            toolbar = $('#editor-toolbar'),
-            schemaPreference = null;
+        var wrapper;
 
-        if (DataExplorer.options.User.isAuthenticated) {
-            schemaPreference = new DataExplorer.DeferredRequest({
-                'url': '/users/save-preference/:id/HideSchema'.format({
-                    'id': DataExplorer.options.User.id
-                })
-            });
-        }
+        DataExplorer.Sidebar.init({
+            editorTheme: editor.getOption('theme'),
+            panel: panel,
+            toolbar: '#editor-toolbar'
+        });
 
         if (editor) {
             wrapper = $(editor.getScrollerElement());
@@ -248,32 +243,6 @@ DataExplorer.ready(function () {
             }
         }
 
-        function resizeSchema() {
-            var available = panel.outerHeight(),
-                remaining = available - schema.outerHeight(),
-                list = history.children('ul'),
-                offset = history.outerHeight() - list.height();
-
-            list.height(remaining - offset);
-        }
-
-        schema.TextAreaResizer(resizeSchema, {
-            'offsetTop': schema.find('.heading').outerHeight(),
-            'resizeSelector': 'ul'
-        });
-        schema.addClass('cm-s-' + editor.getOption('theme') + '');
-        schema.delegate('.schema-table', 'click', function () {
-            var self = $(this);
-
-            self.next('dl').toggle();
-        });
-        schema.find('.expand').click(function () {
-            schema.find('dl').show();
-        });
-        schema.find('.collapse').click(function () {
-            schema.find('dl').hide();
-        });
-
         // Set this resizer up after because the grippie adds height to the
         // sidebar that we need to factor in
         $('#editor').TextAreaResizer(resizePanel, { 
@@ -281,49 +250,6 @@ DataExplorer.ready(function () {
             'resizeWrapper': true,
             'minHeight': 300,
             'initCallback': true
-        });
-
-        function showSchema() {
-            panel.add(toolbar).animate({ 'width': '70%' }, 'fast', function () {
-                schema.show();
-                history.show();
-            });
-            toggle.text("hide sidebar").removeClass('hidden');
-
-            if (schemaPreference) {
-                schemaPreference.request({ 'value': false });
-            }
-        }
-
-        function hideSchema(immediately) {
-            schema.hide();
-            history.hide();
-            
-            if (immediately !== true) {
-                panel.add(toolbar).animate({ 'width': '100%' }, 'fast');
-            } else {
-                panel.add(toolbar).css('width', '100%');
-            }
-
-            toggle.text("show sidebar").addClass('hidden');
-
-            if (schemaPreference) {
-                schemaPreference.request({ 'value': true });
-            }
-        }
-
-        if (DataExplorer.options.User.hideSchema) {
-            hideSchema(true);
-        }
-
-        toggle.click(function () {
-            var self = $(this);
-
-            if (self.hasClass('hidden')) {
-                showSchema();
-            } else {
-                hideSchema();
-            }
         });
     });
 
@@ -685,37 +611,9 @@ DataExplorer.ready(function () {
 
         DataExplorer.template('a.templated:not(.site), a.templated.related-site', 'href', formatOptions);
 
-        if (response.created) {
-            var title = response.created.replace(/\.\d+Z/, 'Z'),
-                href = "/" + response.siteName + "/revision/" + response.querySetId + "/" + response.revisionId + "/" + response.slug,
-                classes = "selected";
-
-            if (response.parentId) {
-                history.find('#revision-' + response.parentId).addClass('parent');
-            }
-
-            history.find('.empty').remove();
-            history.find('.selected').removeClass('selected');
-            history.children('ul').prepend(
-                '<li id="revision-' + response.revisionId + '" class="' + classes + '">' +
-                    '<a href="' + href + '">' +
-                        '<span class="revision-info">' + response.revisionId + '</span>' +
-                    '</a>' +
-                    '<span class="relativetime" title="' + title + '"></span>' +
-                    '<div style="clear:both"></div>' +
-                '</li>'
-            );
-            history.find('li:last').addClass('last');
-
-            if (window.history && window.history.pushState && document.URL.indexOf("query/edit") == -1)
-            {
-                window.history.pushState(null,"", "/" + response.siteName + "/query/edit/" + response.querySetId);
-            }
+        if (DataExplorer.Sidebar) {
+            DataExplorer.Sidebar.updateHistory(response);
         }
-
-        history.find('.relativetime').each(function () {
-            this[_textContent] = Date.parseTimestamp(this.title).toRelativeTimeMini();
-        });
 
         response.graph = !textOnly && isGraph(results);
 
