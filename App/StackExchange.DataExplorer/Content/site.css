@@ -163,7 +163,7 @@ img {
 
 .page
 {
-  width: 960px;
+  width: 980px;
   margin-left: auto;
   margin-right: auto;
   text-align:left;
@@ -471,8 +471,7 @@ div#title
 {
     display:block;
     clear: both;
-    text-align:left;
-    margin-top: -20px;
+    margin-top: 10px;
 }
 
 #query-description
@@ -1152,7 +1151,7 @@ ul.linkbar li {
 }
 
 #query-results .subheader .group, #execution-stats {
-  width: 960px;
+  width: 980px;
   margin: 0px auto 0px auto;
 }
 
@@ -1235,7 +1234,7 @@ ul.linkbar li {
 }
 
 #graph {
-  width: 960px;
+  width: 980px;
   height: 500px;
 }
 
@@ -1753,7 +1752,7 @@ font-weight:bold;
 }
 
 #mainbar-full {
-  width:960px;
+  width:980px;
 }
 
 #profile {

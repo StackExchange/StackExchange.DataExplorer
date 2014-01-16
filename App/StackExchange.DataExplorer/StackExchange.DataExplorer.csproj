@@ -349,6 +349,7 @@
     <Content Include="Content\qp\images\while.gif" />
     <Content Include="Content\qp\qp.css" />
     <Content Include="Content\qp\qp.xslt" />
+    <Content Include="Content\topbar.css" />
     <Content Include="Scripts\codemirror\codemirror.js" />
     <Content Include="Scripts\codemirror\runmode.js" />
     <Content Include="Scripts\codemirror\sql.js" />
