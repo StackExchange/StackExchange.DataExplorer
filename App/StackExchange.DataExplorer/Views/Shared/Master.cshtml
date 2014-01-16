@@ -68,23 +68,14 @@
     </div>
     <div class="page">
         <div id="header">
-            <div id="title">
-                <div id="hlogo">
-                    <a href="/" title="Stack Exchange Data Explorer">
-                        <img src="/Content/images/see_logo.png" alt="Stack Exchange Data Explorer" width="318"
-                            height="91" />
-                    </a>
-                </div>
-                @Html.Partial("Menu", ViewData["Menu"])
-                <script type="text/javascript">
-                    DataExplorer.initComposeButton({
-                        IconUrl: '/icon/@Current.Controller.Site.Id',
-                        LongName: '@Current.Controller.Site.LongName'
-                    });
-                </script>
-            </div>
-            <div class="clear">
-            </div>
+            <a id="logo" href="/" title="Stack Exchange Data Explorer">Stack Exchange Data Explorer</a>
+            @Html.Partial("Menu", ViewData["Menu"])
+            <script type="text/javascript">
+                DataExplorer.initComposeButton({
+                    IconUrl: '/icon/@Current.Controller.Site.Id',
+                    LongName: '@Current.Controller.Site.LongName'
+                });
+            </script>
         </div>
         @Html.Partial("SubHeader", ViewData["Header"])
         @RenderBody()
