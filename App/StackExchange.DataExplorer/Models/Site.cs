@@ -96,7 +96,7 @@ namespace StackExchange.DataExplorer.Models
 
         public string ODataEndpoint
         {
-            get { return "/" + Name.ToLower() + "/atom"; }
+            get { return "/" + TinyName.ToLower() + "/atom"; }
         }
 
         public SqlConnection GetConnection(int maxPoolSize)
@@ -317,7 +317,7 @@ order by TABLE_NAME, ORDINAL_POSITION
 
         #endregion
 
-        public SiteInfo SiteInfo { get { return new SiteInfo { Id = Id, Name = Name, Url = Url }; } }
+        public SiteInfo SiteInfo { get { return new SiteInfo { Id = Id, Name = LongName, Url = Url }; } }
 
         public object IconProxyUrl { 
             get 

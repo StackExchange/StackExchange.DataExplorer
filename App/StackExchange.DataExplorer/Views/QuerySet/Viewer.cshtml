@@ -46,17 +46,17 @@
         <div class="toolbar">
             @if (querySet.CurrentRevisionId != Model.Revision.Id)
             {
-                  <a href="/@Current.Controller.Site.Name.ToLower()/query/@querySet.Id@querySet.Slugify()">view current version</a>
+                  <a href="/@Current.Controller.Site.TinyName.ToLower()/query/@querySet.Id@querySet.Slugify()">view current version</a>
             }
             else
             {
                 if (querySet.OwnerId == Current.User.Id)
                 { 
-                <a href="/@Current.Controller.Site.Name.ToLower()/query/edit/@querySet.Id">edit query</a>
+                <a href="/@Current.Controller.Site.TinyName.ToLower()/query/edit/@querySet.Id">edit query</a>
                 }
                 else
                 { 
-                <a href="/@Current.Controller.Site.Name.ToLower()/query/fork/@querySet.Id">fork query</a>
+                <a href="/@Current.Controller.Site.TinyName.ToLower()/query/fork/@querySet.Id">fork query</a>
                 }
             }
         </div>

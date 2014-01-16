@@ -22,7 +22,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         static void AddBody(StringBuilder buffer, QueryResults results, Site site)
         {
-            buffer.AppendLine(site.Name);
+            buffer.AppendLine(site.LongName);
             buffer.AppendLine("-------------------------------------------------");
             buffer.AppendLine(results.Messages);
             buffer.AppendLine();
@@ -72,7 +72,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             current.ResultSets.First().Columns.Add(new ResultColumnInfo
             {
-                Name = site.Name + " Pivot",
+                Name = site.LongName + " Pivot",
                 Type = newResults.ResultSets.First().Columns[pivotIndex].Type
             });
 
@@ -125,7 +125,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     if (info.Name == "Pivot")
                     {
-                        info.Name = firstSite.Name + " Pivot";
+                        info.Name = firstSite.LongName + " Pivot";
                         break;
                     }
                 }
@@ -502,7 +502,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             results.Url = site.Url;
             results.SiteId = site.Id;
-            results.SiteName = site.Name.ToLower();
+            results.SiteName = site.TinyName.ToLower();
 
             return results;
         }

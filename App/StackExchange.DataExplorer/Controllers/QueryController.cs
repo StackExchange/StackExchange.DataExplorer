@@ -365,7 +365,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
 
         [Route(@"{sitename}/csv/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowSingleSiteCsv(string sitename, int revisionId)
+        public ActionResult ShowSingleSiteCsv(string sitename, int revisionId, string slug)
         {
             Query query = QueryUtil.GetQueryForRevision(revisionId);
 
@@ -374,11 +374,13 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                 return PageNotFound();
             }
 
-            var site = GetSite(sitename);
+            Site site;
 
-            if (sitename == null)
+            if (!TryGetSite(sitename, out site))
             {
-                return PageNotFound();
+                return site == null ?  (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/csv/{1}{2}",
+                    site.TinyName.ToLower(), revisionId, slug.HasValue() ? "/" + slug : ""
+                ));
             }
 
             var parsedQuery = new ParsedQuery(query.QueryBody, Request.Params);
@@ -481,18 +483,19 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             return new RedirectPermanentResult("/" + sitename + "/query/" + querySetId + slug);
         }
 
-        [Route(@"{sitename}/query/fork/{querySetId:\d+}/{slug?}")]
-        [Route(@"{sitename}/query/edit/{querySetId:\d+}/{slug?}")]
-        public ActionResult Edit(string sitename, int querySetId)
+        [Route(@"{sitename}/query/{operation:fork|edit}/{querySetId:\d+}/{slug?}")]
+        public ActionResult Edit(string sitename, string operation, int querySetId, string slug)
         {
-            bool foundSite = SetCommonQueryViewData(sitename);
+            Site site;
 
-            if (!foundSite)
+            if (!TryGetSite(sitename, out site))
             {
-                return PageNotFound();
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/query/{1}/{2}{3}",
+                    site.TinyName.ToLower(), operation, querySetId, slug.HasValue() ? "/" + slug : ""
+                ));
             }
 
-            SetHeader("Editing Query");
+            SetCommonQueryViewData(site, "Editing Query");
 
             QuerySet querySet = QueryUtil.GetFullQuerySet(querySetId);
 
@@ -517,13 +520,22 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
         /// Download a query execution plan as xml.
         /// </summary>
         [Route(@"{sitename}/plan/{revisionId:\d+}/{slug?}", RoutePriority.Low)]
-        public ActionResult ShowPlan(string sitename, int revisionId)
+        public ActionResult ShowPlan(string sitename, int revisionId, string slug)
         {
             Query query = QueryUtil.GetQueryForRevision(revisionId);
 
             if (query == null)
             {
                 return PageNotFound();
+            }
+
+            Site site;
+
+            if (!TryGetSite(sitename, out site))
+            {
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/plan/{1}{2}",
+                    site.TinyName.ToLower(), revisionId, slug.HasValue() ? "/" + slug : ""
+                ));
             }
 
             var parsedQuery = new ParsedQuery(query.QueryBody, Request.Params);
@@ -535,7 +547,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
             CachedResult cache = QueryUtil.GetCachedResults(
                 parsedQuery,
-                Site.Id
+                site.Id
             );
 
             if (cache == null || cache.ExecutionPlan == null)
@@ -549,12 +561,16 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
         [Route("{sitename}/query/new", RoutePriority.Low)]
         public ActionResult New(string sitename)
         {
-            bool foundSite = SetCommonQueryViewData(sitename);
+            Site site;
 
-            if (!foundSite)
+            if (!TryGetSite(sitename, out site))
             {
-                return PageNotFound();
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/query/new",
+                    site.TinyName.ToLower()
+                ));
             }
+
+            SetCommonQueryViewData(site, "Viewing Query");
 
             ViewData["query_action"] = "save/" + Site.Id;
             ViewData["HelperTables"] = HelperTableCache.GetCacheAsJson(Site);
@@ -688,21 +704,15 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
         }
 
-        private bool SetCommonQueryViewData(string sitename)
+        private void SetCommonQueryViewData(Site site, string header)
         {
-            SetHeader("Viewing Query");
-            var s = GetSite(sitename);
-            if (s==null)
-            {
-                return false;
-            }
-            Site = s;
+            Site = site;
+            
+            SetHeader(header);
             SelectMenuItem("Compose Query");
-
+            
             ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
             ViewData["Tables"] = Site.GetTableInfos();
-
-            return true;
         }
     }
 }

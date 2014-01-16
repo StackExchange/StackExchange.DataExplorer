@@ -8,7 +8,7 @@
     <title>@Html.Raw((string)ViewData["PageTitle"])</title>
     @if (site != null)
     {
-        @Html.Raw(string.Format("<link rel=\"odata.service\" title=\"{0}\" href=\"{1}\"/>", site.Name, site.ODataEndpoint))
+        @Html.Raw(string.Format("<link rel=\"odata.service\" title=\"{0} OData Endpoint\" href=\"{1}\"/>", site.LongName, site.ODataEndpoint))
     }
 
     
@@ -44,7 +44,7 @@
                     @if (site != null)
                     {
                         <span id="search">
-                            <form method="get" action="/@site.Name.ToLower()/queries">
+                            <form method="get" action="/@site.TinyName.ToLower()/queries">
                             @Html.TextBox("q", "", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, placeholder = "search" })
                             </form>
                         </span>
