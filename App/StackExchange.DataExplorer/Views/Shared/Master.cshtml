@@ -106,11 +106,11 @@
     </div>
     @if (HttpContext.Current.IsDebuggingEnabled)
     {
-        <div title="Debugging is enabled" style="position: fixed; right: 0; top: 0; background-color: #E8272C; color: #F7F7F7; padding: 6px; font-size: 18px; text-align: center;">
+        <div title="Debugging is enabled" style="position: fixed; right: 0; top: 0; background-color: #E8272C; color: #F7F7F7; padding: 6px; padding-top: 8px; font-size: 18px; text-align: center;">
             <i class="icon-wrench"></i>
             @if (Current.User.IsAdmin)
             {
-                <a style="display: block; background-color: #F7F7F7; color: #E8272C; margin: -6px; margin-top: 6px; padding: 6px;" href="/errors" title="View error log"><i class="icon-bell"></i></a>
+                <a style="display: block; background-color: #F7F7F7; color: #E8272C; margin: -6px; margin-top: 8px; padding: 6px;" href="/errors" title="View error log"><i class="icon-bell"></i></a>
             }
         </div>
     }
