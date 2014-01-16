@@ -2,7 +2,7 @@
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.ViewModel
 
-<div id="hmenus">
+<nav class="primary">
     <div class="nav">
         <ul>
             @foreach (SubHeaderViewData item in Model.Where(i=>!i.RightAlign))
@@ -41,4 +41,4 @@
             }
         </ul>
     </div>
-</div>
+</nav>
