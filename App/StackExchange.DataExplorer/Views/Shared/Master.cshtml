@@ -33,26 +33,41 @@
     </script>
 </head>
 <body>
-    <div class="page">
-        <div id="header">
-            <div id="topbar">
-                <div id="hlinks">
-                    <div id="hlinks-content">
-                        @Html.Partial("LogInUserControl")
-                        <span class="link-separator">|</span> <a href="/help">help</a>
-                    </div>
-                    @if (site != null)
-                    {
-                        <span id="search">
-                            <form method="get" action="/@site.Name.ToLower()/queries">
-                            @Html.TextBox("q", "", new { id = "searchtext", tabindex = 1, maxlength = 80, size = 28, placeholder = "search" })
-                            </form>
-                        </span>
+    <div id="topbar">
+        <div class="page">
+            <div class="network-items">
+                <a href="//stackexchange.com">Stack Exchange</a>
+            </div>
+            <div class="topbar-links">
+            @if (Request.IsAuthenticated)
+            {
+                <a href="/users/@Current.User.Id" class="my-profile">@Current.User.Login</a>
+            }
+                <span class="navigation-links">
+                @if (Request.IsAuthenticated)
+                {
+                    <a href="/account/logout">log out</a>
+                    if (Current.User.IsAdmin)
+                    { 
+                    <a href="/admin">mod</a>
                     }
+                }
+                else
+                {
+                    <a href="/account/login?returnurl=@Request.RawUrl">log in</a>
+                }
+                    <a href="/help">help</a>
+                </span>
+                <div class="search-form">
+                    <form method="GET" action="/@site.Name.ToLower()/queries">
+                        @Html.TextBox("q", "", new { id = "q", tabindex = 1, maxlength = 80, size = 28, placeholder = "search" })
+                    </form>
                 </div>
             </div>
-            <div class="clear">
-            </div>
+        </div>
+    </div>
+    <div class="page">
+        <div id="header">
             <div id="title">
                 <div id="hlogo">
                     <a href="/" title="Stack Exchange Data Explorer">
@@ -71,7 +86,7 @@
             <div class="clear">
             </div>
         </div>
-        @Html.Partial("SubHeader",ViewData["Header"])
+        @Html.Partial("SubHeader", ViewData["Header"])
         @RenderBody()
         @RenderSection("SecondaryContent", required: false)
     </div>
