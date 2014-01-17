@@ -41,7 +41,7 @@
             <div class="topbar-links">
             @if (Request.IsAuthenticated)
             {
-                <a href="/users/@Current.User.Id" class="my-profile">@Current.User.Login</a>
+                <a href="/users/@Current.User.ProfilePath" class="my-profile">@Current.User.Login</a>
             }
                 <span class="navigation-links">
                 @if (Request.IsAuthenticated)
