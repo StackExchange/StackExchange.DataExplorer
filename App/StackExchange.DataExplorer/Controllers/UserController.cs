@@ -230,7 +230,7 @@ namespace StackExchange.DataExplorer.Controllers
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
             if (user.UrlTitle.HasValue() && (string.IsNullOrEmpty(name) || name != user.UrlTitle))
             {
-                return PageMovedPermanentlyTo(string.Format("/users/{0}/{1}",user.Id, HtmlUtilities.URLFriendly(user.Login)) + Request.Url.Query);
+                return PageMovedPermanentlyTo(string.Format("/users/{0}{1}", user.ProfilePath, Request.Url.Query));
             }
 
             DataExplorerDatabase db = Current.DB;
@@ -247,20 +247,20 @@ namespace StackExchange.DataExplorer.Controllers
                     {
                         Description = "edited",
                         Title = "Recently edited queries",
-                        Href = "/users/" + user.Id + "?order_by=edited",
+                        Href = "/users/" + user.ProfilePath + "?order_by=edited",
                         Default = true,
                     },
                     new SubHeaderViewData
                     {
                         Description = "favorite",
                         Title = "Favorite queries",
-                        Href = "/users/" + user.Id + "?order_by=favorite"
+                        Href = "/users/" + user.ProfilePath + "?order_by=favorite"
                     },
                     new SubHeaderViewData
                     {
                         Description = "recent",
                         Title = "Recently executed queries",
-                        Href = "/users/" + user.Id + "?order_by=recent"
+                        Href = "/users/" + user.ProfilePath + "?order_by=recent"
                     }
                 }
             };
@@ -361,7 +361,7 @@ namespace StackExchange.DataExplorer.Controllers
             );
             int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
 
-            ViewData["Href"] = string.Format("/users/{0}/{1}", user.Id, HtmlUtilities.URLFriendly(user.Login)) + "?order_by=" + profileTabs.Selected;
+            ViewData["Href"] = string.Format("/users/{0}{1}", user.ProfilePath, "?order_by=" + profileTabs.Selected);
             ViewData["Queries"] = new PagedList<QueryExecutionViewData>(queries, page.Value, pagesize.Value, false, total);
 
             if (!queries.Any())
