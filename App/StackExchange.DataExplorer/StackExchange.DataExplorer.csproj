@@ -274,6 +274,7 @@
     <Content Include="Content\font-awesome\css\font-awesome.min.css" />
     <Content Include="Content\font-awesome\font\fontawesome-webfont.svg" />
     <Content Include="Content\header.css" />
+    <Content Include="Content\homepage.css" />
     <Content Include="Content\images\help-icon.png" />
     <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\slickgrid\images\sort-asc.gif" />
@@ -436,7 +437,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Site\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

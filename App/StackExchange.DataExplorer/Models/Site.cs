@@ -31,6 +31,7 @@ namespace StackExchange.DataExplorer.Models
         public string ImageBackgroundColor { get; set; }
         public string ConnectionStringOverride { get; set; }
         public int? ParentId { get; set; }
+        public string BadgeIconUrl { get; set; }
         // above props are columns on dbo.Sites
 
         private Site relatedSite;

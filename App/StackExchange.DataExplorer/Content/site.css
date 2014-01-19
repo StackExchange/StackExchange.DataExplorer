@@ -490,61 +490,6 @@ div#title
     width: 6em;
 }
 
-ul.site-list li img
-{
-   border: 0;
-}
-
-ul.site-list {
-  margin: 0; 
-  padding: 0;
-  list-style-type: none;  
-}
-
-ul.site-list li { margin-bottom: 30px; }
-
-ul.site-list li div {
-  float: left;  
-}
-
-ul.site-list li div span {
-  display: block;
-  width: 80px; 
-  text-align: center;
-
-}
-
-ul.site-list .siteName {
-  width: 380px;  
-  margin-bottom: 10px;
-}
-
-ul.site-list .siteName img {
-  margin-bottom: 5px;  
-  max-width: 350px;
-  padding: 4px;
-}
-
-ul.site-list .totalQuestions, ul.site-list .totalAnswers, ul.site-list .totalComments, ul.site-list .totalTags,  ul.site-list .latestPost, ul.site-list .odata {
-  width: 96px;  
-  margin-top: 35px;
-}
-
-ul.site-list .odata img {
-  margin-bottom: 5px;
-}
-
-.title .relativetime, .pretty-short {
-  font-size: 24px;  
-  margin-bottom: 5px;
-  color: #777;
-  font-weight: bold;
-}
-
-ul.site-list .desc {
-  color: #777;  
-}
-
 #query #aboutSite {
   float: right;
   width: 200px;
