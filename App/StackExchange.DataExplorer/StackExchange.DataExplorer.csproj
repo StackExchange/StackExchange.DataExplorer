@@ -273,6 +273,8 @@
     <Content Include="Content\codemirror\theme.css" />
     <Content Include="Content\font-awesome\css\font-awesome.min.css" />
     <Content Include="Content\font-awesome\font\fontawesome-webfont.svg" />
+    <Content Include="Content\header.css" />
+    <Content Include="Content\homepage.css" />
     <Content Include="Content\images\help-icon.png" />
     <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\slickgrid\images\sort-asc.gif" />
@@ -349,6 +351,7 @@
     <Content Include="Content\qp\images\while.gif" />
     <Content Include="Content\qp\qp.css" />
     <Content Include="Content\qp\qp.xslt" />
+    <Content Include="Content\topbar.css" />
     <Content Include="Scripts\codemirror\codemirror.js" />
     <Content Include="Scripts\codemirror\runmode.js" />
     <Content Include="Scripts\codemirror\sql.js" />
@@ -434,7 +437,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Site\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
@@ -465,7 +467,6 @@
     <Content Include="Views\User\Show.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\PageNotFound.cshtml" />
-    <Content Include="Views\Shared\LogInUserControl.cshtml" />
     <Content Include="Views\Shared\AboutSite.cshtml" />
     <Content Include="Views\Shared\GuessedUserId.cshtml" />
     <Content Include="Views\Shared\Menu.cshtml" />

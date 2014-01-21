@@ -1,0 +1,58 @@
+﻿.site-list {
+  margin: 0px;
+  padding: 0px;
+  list-style-type: none;
+}
+
+.site-list li {
+  clear: both;
+}
+
+.site-list li img {
+  float: left;
+  margin-bottom: 10px;
+}
+
+.site-list li .details {
+  float: left;
+  padding-left: 12px;
+}
+
+.site-list li .details .title {
+  padding-top: 10px;
+}
+
+.site-list li .details .tagline {
+  width: 390px;
+}
+
+.site-list li .stats {
+  float: left;
+  margin: 0 0 0 10px;
+  padding: 12px 0 0 0;
+  list-style-type: none;
+}
+
+.site-list li .stats li {
+  display: inline-block;
+  text-align: center;
+  font-size: 22px;
+  margin-left: 16px;
+  color: #0C57A0;
+}
+
+.site-list li .stats li.link {
+  font-size: 12px;
+}
+
+.site-list li .stats li .relativetime {
+  color: inherit;
+  font-weight: normal;
+}
+
+.site-list li .stats li .desc {
+  display: block;
+  font-size: 12px;
+  color: #909090;
+  padding-top: 2px;
+}

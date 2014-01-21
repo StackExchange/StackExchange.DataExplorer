@@ -1,0 +1,182 @@
+﻿#logo {
+  display: block;
+  float: left;
+  height: 90px;
+  width: 230px;
+  text-indent: -99em;
+  background-image: url('./images/topbar-sprite.png');
+  background-position: 0 -20px;
+  background-repeat: no-repeat;
+  margin-top: 22px;
+}
+
+nav.primary {
+  float: right;
+  padding: 57px 0 30px 40px;
+  width: 710px;
+}
+
+nav.primary .nav {
+  float:left;
+  font-size:125%;
+}
+
+nav.primary .nav a {
+  display: block;
+  padding: 6px 12px;
+  text-decoration: none;
+}
+
+nav.primary .nav ul {
+  margin:0;
+  line-height: 16px;
+}
+
+nav.primary .nav .youarehere, nav.primary .nav li a:hover {
+  background:none repeat scroll 0 0 #0C57A0;
+}
+
+nav.primary .nav li {
+  display:block;
+  float:left;
+  margin-right:7px;
+  background:none repeat scroll 0 0 #777777;
+}
+
+nav.primary .nav li a {
+  color: #FFFFFF;
+}
+
+nav.primary .nav li.site-selector-arrow {
+  border-left: 1px solid #666666;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-size: 20px;
+  margin-right: 0px;
+  padding: 6px 4px 5px 4px;
+}
+
+nav.primary .nav .site-selector-arrow .site-icon-wrapper {
+  background-color: #DADADA;
+  border-radius: 2px 2px;
+  float:left;
+  margin: -2px 4px -2px 2px;
+  padding: 2px;
+}
+
+nav.primary .nav .site-selector-arrow .site-icon-wrapper img {
+  height: 16px;
+  width: 16px;
+}
+
+nav.primary .nav li:hover + .site-selector-arrow, nav.primary .nav .site-selector-arrow:hover, nav.primary .nav .site-selector-arrow.youarehere {
+  background-color: #0C57A0;
+  border-left-color: #0B4680;
+}
+
+nav.primary .nav li:hover + .site-selector-arrow .site-icon-wrapper, nav.primary .nav .site-selector-arrow:hover .site-icon-wrapper, nav.primary .nav .site-selector-arrow.youarehere .site-icon-wrapper {
+  background-color: #D9E6F3;
+}
+
+nav.primary .site-selector-popup {
+  background-color: #F6F6F6;
+  border: 1px solid #0C57A0;
+  border-top-color: #0B4680;
+  display: none;
+  font-size: 14px;
+  position: absolute;
+  width: 300px;
+  z-index: 500;
+}
+
+nav.primary .site-selector-popup p.loading {
+  color: #0C57A0;
+  font-style: italic;
+  margin: 0.5em 8px;
+}
+
+nav.primary .site-selector-popup input {
+  margin: 0.5em 4px;
+}
+
+nav.primary .site-selector-popup .ac_results {
+  border: 0px;
+  padding: 0px;
+}
+
+nav.primary .site-selector-popup .ac_results li {
+  background-color: transparent;
+  float: none;  
+  margin: 2px 2px 2px 2px;
+  padding: 2px 5px;
+}
+
+nav.primary .site-selector-popup .ac_results li.ac_over {
+  background-color: #D9E6F3;
+}
+
+.subheader {
+  border-bottom: 1px solid #CCC;
+  clear: both;
+  height: 34px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.subheader h2 {
+  float: left;
+  font-size: 170%;
+  line-height: 34px;
+  margin-bottom: 0;
+}
+
+#tabs {
+  float: right;
+}
+
+.miniTabs {
+  margin-left: 5px;  
+}
+
+#tabs a, .miniTabs a {
+  background:none repeat scroll 0 0 #fff;
+  border: 1px solid #fff;
+  color: #777;
+  display: block;
+  float: left;
+  font-size: 90%;
+  height: 24px;
+  line-height: 22px;
+  margin: 8px 8px 0 0;
+  padding: 0 11px;
+  text-decoration: none;
+}
+
+#tabs a:hover, .miniTabs a:hover  {
+  background: none repeat scroll 0 0 #FFFFFF;
+  border-color: #CCC #CCC #FFFFFF;
+  border-style: solid;
+  border-width: 1px;
+  line-height: 20px;
+  margin-top: 9px;
+}
+
+#tabs a.youarehere, .miniTabs a.youarehere  {
+  background: none repeat scroll 0 0 #FFFFFF;
+  border-color: #CCC #CCC #FFFFFF;
+  border-style: solid;
+  border-width: 1px;
+  color: #000;
+  font-size: 120%;
+  height: 30px;
+  line-height: 28px;
+  margin-top: 3px;
+  padding: 0 11px;
+}
+
+.miniTabs a.youarehere  {
+  font-size: 100%; 
+  margin-top: 5px;
+  line-height: 26px;
+  height: 28px;
+}

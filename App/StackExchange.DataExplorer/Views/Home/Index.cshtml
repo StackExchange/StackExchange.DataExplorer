@@ -3,45 +3,44 @@
 @{this.SetPageTitle("Stack Exchange Data Explorer");}
 <div id="mainbar-full">
     <ul class="site-list">
-        @foreach (Site site in Model)
-        {
-            <li>
-                <div class="siteName">
-                    <a href="@site.TinyName.ToLower()/queries">
-                        <img src="@site.ImageUrl" alt="@site.LongName" class="site" style="@site.ImageCss" />
-                    </a>
-                    <p class="tagline">@site.Tagline</p>
-                </div>
-                <div class="totalQuestions">
+    @foreach (Site site in Model)
+    {
+        <li>
+            <a href="@site.TinyName.ToLower()/queries">
+                <img src="@(site.BadgeIconUrl ?? "/Content/images/db.png")" alt="@site.LongName" height="70" width="70" />
+            </a>
+            <div class="details">
+                <h2 class="title">
+                    <a href="@site.TinyName.ToLower()/queries">@site.LongName</a>
+                </h2>
+                <p class="tagline">@site.Tagline</p>
+            </div>
+            <ul class="stats">
+                <li>
                     @Html.Raw(site.TotalQuestions.PrettyShort())
-                    <span class="desc">questions </span>
-                </div>
-                <div class="totalAnswers">
+                    <span class="desc">questions</span>
+                </li>
+                <li>
                     @Html.Raw(site.TotalAnswers.PrettyShort())
-                    <span class="desc">answers </span>
-                </div>
-                <div class="totalComments">
+                    <span class="desc">answers</span>
+                </li>
+                <li>
                     @Html.Raw(site.TotalComments.PrettyShort())
-                    <span class="desc">comments </span>
-                </div>
-                <div class="totalTags">
+                    <span class="desc">comments</span>
+                </li>
+                <li>
                     @Html.Raw(site.TotalTags.PrettyShort())
-                    <span class="desc">tags </span>
-                </div>
-                <div class="latestPost">
-                    <span class="title">
-                        @site.LastPost.ToRelativeTimeSpanMicro()
-                    </span>
-                    <span class="desc">most recent </span>
-                </div>
-                <div class="latestPost">
-                    <span class="title">&nbsp;</span>
-                    <span class="desc">
-                        <a href="@site.Url">visit site</a>
-                    </span>
-                </div>
-                <div class="clear"></div>
-            </li>
-        }
+                    <span class="desc">tags</span>
+                </li>
+                <li>
+                    @site.LastPost.ToRelativeTimeSpanMicro()
+                    <span class="desc">most recent</span>
+                </li>
+                <li class="link">
+                    <a href="@site.Url">visit site <i class="icon-arrow-right"></i></a>
+                </li>
+            </ul>
+        </li>
+    }
     </ul>
 </div>

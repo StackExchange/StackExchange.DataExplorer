@@ -178,6 +178,11 @@ namespace StackExchange.DataExplorer.Models
             get { return HtmlUtilities.URLFriendly(Login); }
         }
 
+        public string ProfilePath
+        {
+            get { return Id + Login.Slugify(); }
+        }
+
         internal static bool MergeUsers(int masterId, int mergeId, StringBuilder log)
         {
             var db = Current.DB;
