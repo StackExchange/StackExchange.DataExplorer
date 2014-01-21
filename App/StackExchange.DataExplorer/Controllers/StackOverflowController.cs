@@ -57,11 +57,11 @@ namespace StackExchange.DataExplorer.Controllers
                     {
                         if (menuItem.Title == "Queries")
                         {
-                            menuItem.Href = "/" + site.Name.ToLower() + "/queries";
+                            menuItem.Href = "/" + site.TinyName.ToLower() + "/queries";
                         }
                         if (menuItem.Title == "Compose Query")
                         {
-                            menuItem.Href = "/" + site.Name.ToLower() + "/query/new";
+                            menuItem.Href = "/" + site.TinyName.ToLower() + "/query/new";
                         }
                     }
                 }
@@ -70,11 +70,13 @@ namespace StackExchange.DataExplorer.Controllers
 
         public SubHeader Header { get; private set; }
 
-        public Site GetSite(string sitename, bool searchTinyName = false)
+        public bool TryGetSite(string sitename, out Site site)
         {
-            return Current.DB.Query<Models.Site>(
-                "SELECT * from Sites WHERE LOWER(Name) = @sitename " + (searchTinyName ? " OR LOWER(TinyName) = @sitename"  : ""), new { sitename }
-            ).FirstOrDefault(); 
+            site = Current.DB.Query<Models.Site>(
+                "SELECT * from Sites WHERE LOWER(TinyName) = @sitename OR LOWER(Name) = @sitename", new { sitename }
+            ).FirstOrDefault();
+
+            return site != null && site.TinyName.ToLower() == sitename;
         }
 
         public Site GetSite(int siteId)
@@ -134,7 +136,7 @@ namespace StackExchange.DataExplorer.Controllers
                             {
                                 Title = "Queries",
                                 Description = "Queries",
-                                Href = "/" + Site.Name.ToLower() + "/queries"
+                                Href = "/" + Site.TinyName.ToLower() + "/queries"
                             });
 
             AddMenuItem(new SubHeaderViewData
@@ -150,7 +152,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 Id = "compose-button",
                                 Title = "Compose Query",
                                 Description = "Compose Query",
-                                Href = "/" + Site.Name.ToLower() + "/query/new",
+                                Href = "/" + Site.TinyName.ToLower() + "/query/new",
                                 RightAlign = true
                             });
 

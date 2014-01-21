@@ -14,7 +14,7 @@
         foreach (var revision in history.Reverse())
         {
             <li id="revision-@revision.Id" class="revision@(revision.Id == selectedRevisionId ? " selected" : "")">
-                <a class='revision' href="/@Current.Controller.Site.Name.ToLower()/revision/@Model.QuerySet.Id/@revision.Id@Model.QuerySet.Slugify()" title="@revision.Query.QueryBody">
+                <a class='revision' href="/@Current.Controller.Site.TinyName.ToLower()/revision/@Model.QuerySet.Id/@revision.Id@Model.QuerySet.Slugify()" title="@revision.Query.QueryBody">
                     <span class="revision-info" title="">@revision.Id</span>
                 </a>
 

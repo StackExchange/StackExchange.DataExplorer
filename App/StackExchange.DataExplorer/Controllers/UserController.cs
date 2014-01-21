@@ -298,7 +298,7 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 builder.Select("re.RevisionId AS Id");
                 builder.Select("re.LastRun");
-                builder.Select("s.Name AS SiteName");
+                builder.Select("s.TinyName AS SiteName");
                 builder.Where("re.UserId = @user", new { user = id });
                 builder.Join("Revisions r ON r.QueryId = q.Id");
                 builder.Join("RevisionExecutions re ON re.RevisionId = r.Id");
@@ -354,7 +354,7 @@ namespace StackExchange.DataExplorer.Controllers
             ).Select<QueryExecutionViewData, QueryExecutionViewData>(
                 (view) =>
                 {
-                    view.SiteName = (view.SiteName ?? Site.Name).ToLower();
+                    view.SiteName = (view.SiteName ?? Site.TinyName).ToLower();
 
                     return view;
                 }

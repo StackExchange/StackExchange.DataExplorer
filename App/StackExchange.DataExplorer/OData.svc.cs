@@ -112,7 +112,7 @@ namespace StackExchange.DataExplorer
             OperationContext.Current.IncomingMessageProperties["MicrosoftDataServicesRequestUri"] = builder.Uri;
 
 
-            SqlConnection sqlConnection = Current.DB.Query<Site>("select * from Sites where lower(Name) = @siteName", new {siteName}).First().GetConnection(ConnectionPoolSize);
+            SqlConnection sqlConnection = Current.DB.Query<Site>("SELECT * FROM Sites WHERE LOWER(Name) = @siteName OR LOWER(TinyName) = @siteName", new {siteName}).First().GetConnection(ConnectionPoolSize);
             Current.RegisterConnectionForDisposal(sqlConnection);
 
             var workspace = new MetadataWorkspace(

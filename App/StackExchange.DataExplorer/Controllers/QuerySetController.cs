@@ -29,18 +29,22 @@ namespace StackExchange.DataExplorer.Controllers
                 slug = "/" + slug;
             }
 
-            return new RedirectPermanentResult("/" + sitename + "/query/" + revision.QuerySet.Id + "/" + slug);
+            return new RedirectPermanentResult("/" + sitename + "/query/" + revision.QuerySet.Id + slug);
         }
 
         [Route(@"{sitename}/query/{querySetId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowLatest(string sitename, int querySetId, string slug)
         {
-            Site = GetSite(sitename);
-            if (Site == null)
+            Site site;
+
+            if (!TryGetSite(sitename, out site))
             {
-                return PageNotFound();
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/query/{1}{2}",
+                    site.TinyName.ToLower(), querySetId, slug.HasValue() ? "/" + slug : ""
+                ));
             }
 
+            Site = site;
             var querySet = QueryUtil.GetFullQuerySet(querySetId);
 
             if (querySet == null)
@@ -56,19 +60,25 @@ namespace StackExchange.DataExplorer.Controllers
         [Route(@"{sitename}/revision/{querySetId:\d+}/{revisionId:\d+}/{slug?}")]
         public ActionResult Show(string sitename, int querySetId, int revisionId, string slug)
         {
-            Site = GetSite(sitename);
+            Site site;
 
-            if (Site == null)
+            if (!TryGetSite(sitename, out site))
             {
-                return PageNotFound();
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/revision/{1}/{2}{3}",
+                    site.TinyName.ToLower(), querySetId, revisionId, slug.HasValue() ? "/" + slug : ""
+                ));
             }
 
+            Site = site;
             var querySet = QueryUtil.GetFullQuerySet(querySetId);
+
             if (querySet == null)
             {
                 return PageNotFound();
             }
+
             var revision = querySet.Revisions.FirstOrDefault(r => r.Id == revisionId);
+
             if (revision == null)
             {
                 return PageNotFound();
@@ -95,7 +105,7 @@ namespace StackExchange.DataExplorer.Controllers
                 string url = latest ? "/{0}/query/{1}/{3}" : "/{0}/revision/{1}/{2}/{3}";
 
                 return PageMovedPermanentlyTo(string.Format(url,
-                    Site.Name.ToLower(),
+                    Site.TinyName.ToLower(),
                     revision.QuerySet.Id,
                     revision.Id,
                     title
@@ -230,26 +240,27 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("{sitename}", Priority = RoutePriority.Low)]
         public ActionResult IndexFallback(string sitename)
         {
-            return RedirectPermanent(String.Format("/{0}/queries", sitename));
+            Site site;
+            TryGetSite(sitename, out site);
+
+            return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/queries",
+                site.TinyName.ToLower()
+            ));
         }
 
         [Route("{sitename}/queries")]
         public ActionResult Index(string sitename, string order_by, string q, int? page, int? pagesize)
         {
-            Site = GetSite(sitename, true);
+            Site site;
 
-            if (Site == null)
+            if (!TryGetSite(sitename, out site))
             {
-                return PageNotFound();
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/queries",
+                    site.TinyName.ToLower()
+                ));
             }
 
-            // This seems like the preferred URL (sitename == site.TinyName), but for now we'll
-            // redirect to the existing form to avoid the risk of breaking things...
-            if (Site.Name.ToLower() != sitename)
-            {
-                return Redirect(String.Format("/{0}/queries", Site.Name.ToLower()));
-            }
-
+            Site = site;
             QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);
 
             if (string.IsNullOrEmpty(order_by))
@@ -441,13 +452,13 @@ namespace StackExchange.DataExplorer.Controllers
             ).Select(
                 (view) =>
                 {
-                    view.SiteName = Site.Name.ToLower();
+                    view.SiteName = Site.TinyName.ToLower();
                     return view;
                 }
             );
             int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
             
-            string href = "/" + Site.Name.ToLower() + "/queries?order_by=" + order_by;
+            string href = "/" + Site.TinyName.ToLower() + "/queries?order_by=" + order_by;
 
             if (searchCriteria.IsValid)
             {
