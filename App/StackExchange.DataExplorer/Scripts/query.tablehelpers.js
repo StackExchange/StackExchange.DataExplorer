@@ -38,7 +38,7 @@
 
         $('ul .schema-table', schema).each(function () {
             var tableName = this[_textContent],
-                data = tables[tableName];
+                data = tables[tableName.toCamelCase()];
 
             if (data) {
                 var infoIcon = infoTemplate.cloneNode(true),
