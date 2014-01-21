@@ -59,7 +59,7 @@
                     <a href="/help">help</a>
                 </span>
                 <div class="search-form">
-                    <form method="GET" action="/@site.Name.ToLower()/queries">
+                    <form method="GET" action="/@site.TinyName.ToLower()/queries">
                         @Html.TextBox("q", "", new { id = "q", tabindex = 1, maxlength = 80, size = 28, placeholder = "search" })
                     </form>
                 </div>
