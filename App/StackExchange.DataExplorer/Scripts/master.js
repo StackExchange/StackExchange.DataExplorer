@@ -397,7 +397,11 @@ String.prototype.format = function (replacements) {
     }
 
     return result;
-}
+};
+
+String.prototype.toCamelCase = function () {
+    return this.charAt(0).toLowerCase() + this.substring(1);
+};
 
 String.prototype.from = function (ch, inclusive) {
     ch = this.indexOf(ch);
@@ -411,7 +415,7 @@ String.prototype.from = function (ch, inclusive) {
     }
 
     return this.substring(ch + (inclusive ? 0 : 1));
-}
+};
 
 if (!Date.now) {
     Date.now = function () {
