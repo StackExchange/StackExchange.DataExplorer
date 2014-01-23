@@ -191,7 +191,6 @@
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
-    <Compile Include="Controllers\IconController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\QuerySetController.cs" />
     <Compile Include="Controllers\StackOverflowController.cs" />

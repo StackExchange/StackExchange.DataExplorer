@@ -319,12 +319,5 @@ order by TABLE_NAME, ORDINAL_POSITION
         #endregion
 
         public SiteInfo SiteInfo { get { return new SiteInfo { Id = Id, Name = LongName, Url = Url }; } }
-
-        public object IconProxyUrl { 
-            get 
-            {
-                return "/icon/" + this.Id;
-            } 
-        }
     }
 }
