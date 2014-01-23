@@ -25,34 +25,38 @@ namespace StackExchange.DataExplorer.Controllers
         [Route("icon/{id:INT}")]
         public ActionResult GetIcon(int id)
         {
-            var s = Current.DB.Sites.Get(id);
+            var icon = GetCachedIcon(id);
 
-            if (s != null && !s.IconUrl.IsNullOrEmpty())
+            if (icon != null)
             {
-                var icon = GetCachedIcon(s);
-                if (icon != null)
-                {
-                    Response.AddHeader("Cache-Control", "max-age=604800");
-                    var ms = new MemoryStream(icon);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    return new FileStreamResult(ms, "image/x-icon");
-                }
+                Response.AddHeader("Cache-Control", "max-age=604800");
+                var ms = new MemoryStream(icon);
+                ms.Seek(0, SeekOrigin.Begin);
+                return new FileStreamResult(ms, "image/x-icon");
             }
  
-
             Response.StatusCode = (int)HttpStatusCode.NoContent;
+
             return Content(null);
         }
 
-        private static byte[] GetCachedIcon(Models.Site s)
+        private static byte[] GetCachedIcon(int siteId)
         {
             CacheInfo rval;
-            if (icons.TryGetValue(s.Id, out rval))
+
+            if (icons.TryGetValue(siteId, out rval))
             {
                 if (DateTime.UtcNow.AddMinutes(-720) < rval.CacheDate)
                 {
                     return rval.Image;
                 }
+            }
+
+            var site = Current.DB.Sites.Get(siteId);
+
+            if (site == null || site.IconUrl.IsNullOrEmpty())
+            {
+                return null;
             }
 
             rval = new CacheInfo { CacheDate = DateTime.UtcNow };
@@ -62,16 +66,16 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     using (var client = new WebClient())
                     {
-                        var stream = client.OpenRead(s.IconUrl);
+                        var stream = client.OpenRead(site.IconUrl);
                         rval.Image = ReadFully(stream);
-                        icons.TryAdd(s.Id, rval);
+                        icons.TryAdd(site.Id, rval);
                     }
                     
                 }
             }
             catch
             {
-                icons.TryAdd(s.Id, rval);
+                icons.TryAdd(site.Id, rval);
             }
             return rval.Image;
         }
