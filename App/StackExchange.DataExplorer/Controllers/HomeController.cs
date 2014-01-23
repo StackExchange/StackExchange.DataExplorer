@@ -18,6 +18,8 @@ namespace StackExchange.DataExplorer.Controllers
 
             var sites = Current.DB.Query<Models.Site>("select * from Sites order by TotalQuestions desc").ToList();
 
+            ViewData["LastUpdate"] = Current.DB.Query<DateTime?>("SELECT MAX(LastPost) FROM Sites").FirstOrDefault();
+
             return View(sites);
         }
 

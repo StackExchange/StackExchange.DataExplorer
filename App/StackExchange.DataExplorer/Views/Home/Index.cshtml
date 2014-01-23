@@ -2,6 +2,9 @@
 @using StackExchange.DataExplorer.Models
 @{this.SetPageTitle("Stack Exchange Data Explorer");}
 <div id="mainbar-full">
+    <div class="info-wrapper">
+        <span class="info">Data updated @((ViewData["LastUpdate"] as DateTime?).ToRelativeTime())</span>
+    </div>
     <ul class="site-list">
     @foreach (Site site in Model)
     {
@@ -31,10 +34,6 @@
                 <li>
                     @Html.Raw(site.TotalTags.PrettyShort())
                     <span class="desc">tags</span>
-                </li>
-                <li>
-                    @site.LastPost.ToRelativeTimeSpanMicro()
-                    <span class="desc">most recent</span>
                 </li>
                 <li class="link">
                     <a href="@site.Url">visit site <i class="icon-arrow-right"></i></a>
