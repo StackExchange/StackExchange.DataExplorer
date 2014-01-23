@@ -72,7 +72,7 @@
             @Html.Partial("Menu", ViewData["Menu"])
             <script type="text/javascript">
                 DataExplorer.initComposeButton({
-                    IconUrl: '/icon/@Current.Controller.Site.Id',
+                    IconUrl: '@Current.Controller.Site.IconUrl',
                     LongName: '@Current.Controller.Site.LongName'
                 });
             </script>

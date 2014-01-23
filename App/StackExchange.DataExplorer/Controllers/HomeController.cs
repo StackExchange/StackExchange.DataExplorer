@@ -66,7 +66,7 @@ namespace StackExchange.DataExplorer.Controllers
                         Id = site.Id,
                         Url = site.Url,
                         Name = site.Name,
-                        IconUrl = site.IconProxyUrl,
+                        IconUrl = site.IconUrl,
                         LongName = site.LongName
                     };
                 }

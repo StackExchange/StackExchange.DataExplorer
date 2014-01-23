@@ -106,58 +106,55 @@ namespace StackExchange.DataExplorer.Controllers
             ValidateRequest = false; // allow html/sql in form values - remember to validate!
             base.Initialize(requestContext);
 
-            if (AppSettings.EnableWhiteList && !(this is AccountController || this is IconController) && CurrentUser.IsAnonymous) {
+            if (AppSettings.EnableWhiteList && !(this is AccountController) && CurrentUser.IsAnonymous) {
                 requestContext.HttpContext.Response.Redirect("/account/login?returnurl=" + Request.RawUrl);
             }
 
-
-            if (!CurrentUser.IsAnonymous &&
-                (
-                    CurrentUser.LastSeenDate == null ||
-                    (DateTime.UtcNow - CurrentUser.LastSeenDate.Value).TotalSeconds > 120)
-                )
+            if (!CurrentUser.IsAnonymous && (CurrentUser.LastSeenDate == null || (DateTime.UtcNow - CurrentUser.LastSeenDate.Value).TotalSeconds > 120))
             {
                 CurrentUser.LastSeenDate = DateTime.UtcNow;
                 CurrentUser.IPAddress = GetRemoteIP();
                 Current.DB.Users.Update(CurrentUser.Id, new { CurrentUser.LastSeenDate, CurrentUser.IPAddress });
             }
 
-
-            AddMenuItem(new SubHeaderViewData
-                            {
-                                Description = "Home",
-                                Href = "/",
-                                RightAlign = false,
-                                Title = "Home"
-                            });
-
-
-            AddMenuItem(new SubHeaderViewData
-                            {
-                                Title = "Queries",
-                                Description = "Queries",
-                                Href = "/" + Site.TinyName.ToLower() + "/queries"
-                            });
-
-            AddMenuItem(new SubHeaderViewData
-                            {
-                                Description = "Users",
-                                Href = "/users",
-                                RightAlign = false,
-                                Title = "Users"
-                            });
-
-            AddMenuItem(new SubHeaderViewData
-                            {
-                                Id = "compose-button",
-                                Title = "Compose Query",
-                                Description = "Compose Query",
-                                Href = "/" + Site.TinyName.ToLower() + "/query/new",
-                                RightAlign = true
-                            });
+            if (!requestContext.HttpContext.Request.IsAjaxRequest())
+            {
+                AddMenuItem(new SubHeaderViewData
+                {
+                    Description = "Home",
+                    Href = "/",
+                    RightAlign = false,
+                    Title = "Home"
+                });
 
 
-            ViewData["Menu"] = menu;
+                AddMenuItem(new SubHeaderViewData
+                {
+                    Title = "Queries",
+                    Description = "Queries",
+                    Href = "/" + Site.TinyName.ToLower() + "/queries"
+                });
+
+                AddMenuItem(new SubHeaderViewData
+                {
+                    Description = "Users",
+                    Href = "/users",
+                    RightAlign = false,
+                    Title = "Users"
+                });
+
+                AddMenuItem(new SubHeaderViewData
+                {
+                    Id = "compose-button",
+                    Title = "Compose Query",
+                    Description = "Compose Query",
+                    Href = "/" + Site.TinyName.ToLower() + "/query/new",
+                    RightAlign = true
+                });
+
+
+                ViewData["Menu"] = menu;
+            }
         }
 
         public void AddMenuItem(SubHeaderViewData data)
