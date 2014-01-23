@@ -64,6 +64,7 @@ namespace StackExchange.DataExplorer
             routes.IgnoreRoute("{*allaspx}", new {allaspx = @".*\.aspx(/.*)?"});
             routes.IgnoreRoute("{*allaxd}", new {allaxd = @".*\.axd(/.*)?"});
             routes.IgnoreRoute("favicon.ico");
+            routes.IgnoreRoute("assets/{*pathInfo}");
 
             RouteAttribute.MapDecoratedRoutes(routes);
 
