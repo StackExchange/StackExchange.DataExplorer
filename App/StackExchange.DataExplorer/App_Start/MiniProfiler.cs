@@ -35,6 +35,14 @@ namespace StackExchange.DataExplorer.App_Start
             //Make sure the MiniProfiler handles BeginRequest and EndRequest
             DynamicModuleUtility.RegisterModule(typeof(MiniProfilerStartupModule));
 
+            // Profile views
+            var copy = ViewEngines.Engines.ToList();
+            ViewEngines.Engines.Clear();
+            foreach (var item in copy)
+            {
+                ViewEngines.Engines.Add(new ProfilingViewEngine(item));
+            }
+
             //Setup profiler for Controllers via a Global ActionFilter
             GlobalFilters.Filters.Add(new ProfilingActionFilter());
 

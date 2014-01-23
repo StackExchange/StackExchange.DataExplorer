@@ -40,25 +40,9 @@ namespace StackExchange.DataExplorer
             // disable the X-AspNetMvc-Version: header
             MvcHandler.DisableMvcResponseHeader = true;
 
-            // register public resource bundles (css/js)
-#if !DEBUG
-            BundleTable.EnableOptimizations = true;
-#endif
-
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
-
             // set up MVC routes so our app URLs actually work
             // IMPORTANT: this must be called last; nothing else appears to execute after this
             RegisterRoutes(RouteTable.Routes);
-
-            var copy = ViewEngines.Engines.ToList();
-            ViewEngines.Engines.Clear();
-            foreach (var item in copy)
-            {
-                ViewEngines.Engines.Add(new ProfilingViewEngine(item));
-            }
-
-            GlobalFilters.Filters.Add(new ProfilingActionFilter());
         }
 
         // http://msdn.microsoft.com/en-us/library/system.web.httpapplication.init(VS.71).aspx
@@ -168,8 +152,6 @@ namespace StackExchange.DataExplorer
                 {
                     if (HttpContext.Current.User.Identity is FormsIdentity)
                     {
-                        // let authenticated users get a taste of our awesome profiling
-            
                         var id = (FormsIdentity) HttpContext.Current.User.Identity;
                         FormsAuthenticationTicket ticket = id.Ticket;
 
@@ -179,9 +161,6 @@ namespace StackExchange.DataExplorer
                     }
                 }
             }
-
-           // profiling for everyone.
-           //StackExchange.Profiling.MiniProfiler.Stop(discardResults: true);
         }
     }
 }

@@ -4,11 +4,24 @@ using System.Linq;
 using System.Web;
 using System.Web.Optimization;
 
+[assembly: WebActivator.PreApplicationStartMethod(
+    typeof(StackExchange.DataExplorer.App_Start.BundleConfig), "PreStart")]
+
 namespace StackExchange.DataExplorer.App_Start
 {
     public class BundleConfig
     {
-        public static void RegisterBundles(BundleCollection bundles)
+        public static void PreStart()
+        {
+            // register public resource bundles (css/js)
+#if !DEBUG
+            BundleTable.EnableOptimizations = true;
+#endif
+
+            RegisterBundles(BundleTable.Bundles);
+        }
+
+        private static void RegisterBundles(BundleCollection bundles)
         {
 
 #if !DEBUG            
