@@ -39,10 +39,20 @@
   font-size: 22px;
   margin-left: 16px;
   color: #0C57A0;
+  width: 80px;
 }
 
 .site-list li .stats li.link {
   font-size: 12px;
+  text-align: right;
+}
+
+.site-list li .stats li.link a, .site-list li .stats li.link a:visited {
+  color: #909090;
+}
+
+.site-list li .stats li.link a:hover {
+  color: #07C;
 }
 
 .site-list li .stats li .relativetime {
@@ -55,4 +65,15 @@
   font-size: 12px;
   color: #909090;
   padding-top: 2px;
+}
+
+.info-wrapper {
+  position: relative;
+}
+
+.info-wrapper .info {
+  position: absolute;
+  right: 0;
+  top: -39px;
+  color: #909090;
 }
