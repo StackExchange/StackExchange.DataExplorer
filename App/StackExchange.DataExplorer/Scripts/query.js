@@ -249,7 +249,7 @@ DataExplorer.ready(function () {
     $(window).resize(resizeResults);
 
     function resizeResults() {
-        var defaultWidth = 958,
+        var defaultWidth = document.getElementById('query').clientWidth - 2,
             availableWidth = document.documentElement.clientWidth - 100,
             grid = $('#resultSets'),
             gridWidth = grid.outerWidth(),
