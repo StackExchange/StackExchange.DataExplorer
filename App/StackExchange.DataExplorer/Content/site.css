@@ -903,8 +903,8 @@ ul.linkbar li {
 }
 
 #switch-sites {
-  padding-left: 22px;
-  background: url('http://cdn.sstatic.net/beta/img/favicon.ico') no-repeat scroll 3px center;
+  padding-left: 22px;  
+  background: url('//cdn.sstatic.net/beta/img/icon-16.png') no-repeat scroll 3px center;
 }
 
 #error-message {
