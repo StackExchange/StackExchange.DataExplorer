@@ -31,7 +31,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             var query = new ParsedQuery(sql, null);
 
-            Assert.AreEqual("SELECT TOP 10 * FROM Posts", query.ExecutionSql);
+            Assert.AreEqual("SELECT\nTOP 10 *\nFROM\nPosts", query.ExecutionSql);
         }
 
         [TestMethod]
@@ -51,7 +51,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             var query = new ParsedQuery(sql, null);
 
-            Assert.AreEqual("SELECT TOP 10 * FROM Users", query.ExecutionSql);
+            Assert.AreEqual("SELECT\nTOP 10 *\nFROM\nUsers", query.ExecutionSql);
         }
 
         [TestMethod]
@@ -66,7 +66,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             var query = new ParsedQuery(sql, null);
 
-            Assert.AreEqual("SELECT TOP 10 * FROM Posts WHERE Body LIKE '%\n   }%' WHERE Id > 10", query.ExecutionSql);
+            Assert.AreEqual("SELECT TOP 10 * FROM Posts WHERE Body LIKE '%\n   }%'\nWHERE\nId > 10", query.ExecutionSql);
         }
 
         [TestMethod]
@@ -83,7 +83,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             Assert.AreEqual(2, batches.Length);
             Assert.AreEqual("SELECT 1", batches[0]);
-            Assert.AreEqual("SELECT 2 1", batches[1]);
+            Assert.AreEqual("SELECT 2\n1", batches[1]);
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
             var batches = query.ExecutionSqlBatches.ToArray();
 
             Assert.AreEqual(1, batches.Length);
-            Assert.AreEqual("SELECT 1\nSELECT 2 1", batches[0]);
+            Assert.AreEqual("SELECT 1\nSELECT 2\n1", batches[0]);
        
         }
 
@@ -206,7 +206,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             var query = new ParsedQuery(sql, parameters);
 
-            Assert.IsFalse(query.Parameters.ContainsKey("a"));
+            Assert.IsTrue(query.Parameters.ContainsKey("a"));
             Assert.AreEqual("a has unknown parameter type frog!", query.ErrorMessage);
             Assert.IsFalse(query.IsExecutionReady);
         }
@@ -337,7 +337,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             Assert.IsTrue(query.Parameters.ContainsKey("Reputation"));
             Assert.AreEqual(1, query.Errors.Count);
-            Assert.AreEqual("Expected default value trees for Reputation to be a int!", query.Errors[0]);
+            Assert.AreEqual("Reputation's default value of trees is invalid for the type int!", query.Errors[0]);
             Assert.IsFalse(query.IsExecutionReady);
         }
 
@@ -363,7 +363,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             Assert.IsTrue(query.ExecutionSqlBatches.Any());
             Assert.AreEqual("CREATE TABLE #Test (id int IDENTITY(1,1) NOT NULL, v VARCHAR(MAX) NOT NULL);\n" +
-                "go\nCREATE INDEX #IX_T on #Test(id)\ngo\nCREATE PROCEDURE #T_P2 @v VARCHAR(MAX) AS\nPRINT @v " +
+                "go\nCREATE INDEX #IX_T on #Test(id)\ngo\nCREATE PROCEDURE #T_P2 @v VARCHAR(MAX) AS\nPRINT @v\n" +
                 "RETURN\nGO\n#T_P2 'test'", query.ExecutionSql);
         }
 
@@ -381,7 +381,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             Assert.AreEqual("Select 'Select ''' + ''' As [DatabaseName], Case WHEN TagName IS NULL Then '''" +
                 " + 'Null' + ''' WHEN TagName = '''' Then ''Empty'' ELSE ''Unexpected'' End As [Type]," +
-                " Count(*) As [Count] from ' + '[' + ']' + '..Tags Where IsNull(TagName,'''')='''' Group" +
+                " Count(*) As [Count] from '\n+ '[' + ']' + '..Tags Where IsNull(TagName,'''')='''' Group" +
                 " By TagName UNION'", query.ExecutionSql);
         }
     }
