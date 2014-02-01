@@ -924,12 +924,14 @@ DataExplorer.ready(function () {
         function tagFormatter(siteColumnName) { 
             var siteColumnName = siteColumnName;
 
-            return function(row, cell, value, column, context) {
-                if (!value || value.search(/^(?:<[^<]+>)+$/) === -1) {
+            return function (row, cell, value, column, context) {
+                var isMultiTags;
+
+                if (!value || !(value.match(/^[a-z0-9#.+-]+$/) || (isMultiTags = (value.search(/^(?:<[a-z0-9#.+-]+>)+$/) > -1)))) {
                     return defaultFormatter(row, cell, value, column, context);
                 }
 
-                var tags = value.substring(1, value.length - 1).split('><'),
+                var tags = isMultiTags ? value.substring(1, value.length - 1).split('><') : [value],
                     template = '<a class="post-tag :class" href=":base/tags/:tag">:tag</a>',
                     value = '', tag;
 
