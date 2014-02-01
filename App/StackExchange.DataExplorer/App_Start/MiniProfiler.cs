@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
 using System.Linq;
@@ -32,8 +33,22 @@ namespace StackExchange.DataExplorer.App_Start
             WebRequestProfilerProvider.Settings.UserProvider = new ProxySafeUserProvider();
             MiniProfiler.Settings.SqlFormatter = new StackExchange.Profiling.SqlFormatters.SqlServerFormatter();
 
+            var ignored = MiniProfiler.Settings.IgnoredPaths.ToList();
+
+            ignored.Add("/assets/");
+
+            MiniProfiler.Settings.IgnoredPaths = ignored.ToArray();
+
             //Make sure the MiniProfiler handles BeginRequest and EndRequest
             DynamicModuleUtility.RegisterModule(typeof(MiniProfilerStartupModule));
+
+            // Profile views
+            var copy = ViewEngines.Engines.ToList();
+            ViewEngines.Engines.Clear();
+            foreach (var item in copy)
+            {
+                ViewEngines.Engines.Add(new ProfilingViewEngine(item));
+            }
 
             //Setup profiler for Controllers via a Global ActionFilter
             GlobalFilters.Filters.Add(new ProfilingActionFilter());
