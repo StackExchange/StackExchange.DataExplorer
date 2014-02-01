@@ -415,11 +415,16 @@ namespace StackExchange.DataExplorer.Helpers
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
                                 object col = reader.GetValue(i);
-                                if (col is DateTime)
+
+                                if (col is DBNull)
                                 {
-                                    var date = (DateTime)col;
-                                    col = date.ToJavascriptTime();
+                                    col = null;
                                 }
+                                else if (col is DateTime)
+                                {
+                                    col = ((DateTime)col).ToJavascriptTime();
+                                }
+
                                 row.Add(col);
                             }
                         }
