@@ -568,7 +568,7 @@ DataExplorer.ready(function () {
         }
 
         DataExplorer.template('#execution-stats', 'text', {
-            'records': records,
+            'records': textOnly ? "Results" : records + " rows",
             'time': response.executionTime === 0 ? "<1" : response.executionTime,
             'cached': response.fromCache ? ' (cached)' : ''
         });
