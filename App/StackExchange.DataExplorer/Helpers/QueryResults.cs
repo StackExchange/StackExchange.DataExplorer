@@ -73,6 +73,17 @@ namespace StackExchange.DataExplorer.Helpers
         public ResultColumnType Type { get; set; }
     }
 
+    public class MagicResult
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
+    }
+
     public class ResultSet
     {
         public ResultSet()
