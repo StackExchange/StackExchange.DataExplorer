@@ -398,7 +398,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
             if (cachedResults != null)
             {
-                resultSets = JsonConvert.DeserializeObject<List<ResultSet>>(cachedResults.Results);
+                resultSets = JsonConvert.DeserializeObject<List<ResultSet>>(cachedResults.Results, QueryResults.GetSettings());
             }
             else
             {
