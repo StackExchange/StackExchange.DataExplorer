@@ -29,6 +29,12 @@ namespace StackExchange.DataExplorer
             control.PublicKey = AppSettings.RecaptchaPublicKey;
             control.Theme = "clean";
 
+            if (!Context.Request.IsSecureConnection)
+            {
+                var forwarded = Context.Request.Headers["X-Forwarded-Proto"];
+                control.OverrideSecureMode = forwarded != null && forwarded.StartsWith("https");
+            }
+
             return control;
         }
 
