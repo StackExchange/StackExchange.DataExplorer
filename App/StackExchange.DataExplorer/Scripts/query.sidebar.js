@@ -11,6 +11,8 @@
         panels = panel.add(o.toolbar);
         toggle = panels.find('#schema-toggle').on('click', toggleSidebar);
 
+        initSchema();
+
         if (DataExplorer.options.User.isAuthenticated) {
             sidebarPreference = new DataExplorer.DeferredRequest({
                 'url': '/users/save-preference/:id/HideSchema'.format({
@@ -22,8 +24,6 @@
                 toggleSidebar(false, true);
             }
         }
-
-        initSchema();
     }
 
     function initSchema() {

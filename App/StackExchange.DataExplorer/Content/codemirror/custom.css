@@ -17,3 +17,6 @@
     overflow: visible;
 }
 
+.CodeMirror-scroll {
+  height: 480px;
+}
