@@ -10,3 +10,4 @@ App/_ReSharper.DataExplorerFull/
 *.itrace.csdef
 App/TestResults/
 PublishProfiles/
+!App/packages/**/lib/**/*.dll
