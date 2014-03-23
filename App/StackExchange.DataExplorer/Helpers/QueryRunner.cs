@@ -707,10 +707,13 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     while (reader.Read())
                     {
-                        var extraInfo = new Dictionary<string, object>();
-                        extraInfo["title"] = reader.IsDBNull(1) ? "unknown" : reader.GetString(1);
-                        extraInfo["id"] = reader.GetInt32(0);
-                        linkMap[reader.GetInt32(0)] = extraInfo;
+                        var info = new MagicResult
+                        {
+                            Id = reader.GetInt32(0),
+                            Title = reader.IsDBNull(1) ? "unknown" : reader.GetString(1)
+                        };
+
+                        linkMap[info.Id] = info;
                     }
                 }
             }

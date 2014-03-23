@@ -73,6 +73,40 @@ namespace StackExchange.DataExplorer.Helpers
         public ResultColumnType Type { get; set; }
     }
 
+    public class MagicResult
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
+    }
+
+    public class MagicResultConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return typeof(object) == objectType;
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            if (reader.TokenType == JsonToken.StartObject)
+            {
+                return serializer.Deserialize(reader, typeof(MagicResult));
+            }
+
+            return serializer.Deserialize(reader, reader.ValueType);
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            serializer.Serialize(writer, value);
+        }
+    }
+
     public class ResultSet
     {
         public ResultSet()
@@ -140,7 +174,11 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static JsonSerializerSettings GetSettings()
         {
-            return new JsonSerializerSettings {ContractResolver = new CamelCasePropertyNamesContractResolver()};
+            return new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                Converters = new List<JsonConverter> { new MagicResultConverter() }
+            };
         }
 
         public static QueryResults FromJson(string json)
