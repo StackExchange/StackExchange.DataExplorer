@@ -739,6 +739,7 @@ DataExplorer.ready(function () {
             sizer = document.createElement('span'),
             maxWidth = 290;
 
+        sizer.className = 'slick-cell';
         sizerParent.className = 'offscreen ui-widget';
         sizerParent.appendChild(sizer);
         document.body.appendChild(sizerParent);
@@ -770,6 +771,13 @@ DataExplorer.ready(function () {
             rows[i] = row;
         }
 
+        sizer[_textContent] = '';
+        sizer.className = 'slick-header-column slick-header-column-sorted ui-state-default';
+        sizerParent.appendChild(document.create('span', { classname: 'slick-sort-indicator' }));
+        sizerParent.appendChild(document.create('div', { classname: 'slick-resizable-handle' }));
+
+        var controlWidth = sizerParent.childNodes[1].offsetWidth + sizerParent.childNodes[2].offsetWidth;
+
         for (var i = 0; i < columns.length; ++i) {
             var name = columns[i].name.toLowerCase();
 
@@ -782,8 +790,8 @@ DataExplorer.ready(function () {
             } else {
                 sizer[_textContent] = columns[i].name;
 
-                if (sizer.offsetWidth > widths[i]) {
-                    widths[i] = sizer.offsetWidth;
+                if (sizer.offsetWidth + controlWidth > widths[i]) {
+                    widths[i] = sizer.offsetWidth + controlWidth;
                 }
             }
 
@@ -793,7 +801,7 @@ DataExplorer.ready(function () {
                 'name': columns[i].name,
                 'field': "col" + i,
                 'type': columns[i].type.toLowerCase(),
-                'width': Math.min((widths[i] || 50) + 16, maxWidth),
+                'width': Math.min(widths[i] || (50 + controlWidth), maxWidth),
                 'sortable': rows.length <= 5000
             };
 
