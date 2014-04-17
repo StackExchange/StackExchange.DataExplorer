@@ -37,7 +37,7 @@ Once done, you'll need to populate the `Sites` table with a record for each site
 
 ### Providing Feedback
 
-  - Submit [bugs](http://meta.stackoverflow.com/questions/ask?tags=data-explorer%20bug), [feature requests](http://meta.stackoverflow.com/questions/ask?tags=data-explorer%20feature-request), and [support questions](http://meta.stackoverflow.com/questions/ask?tags=data-explorer%20support) on [Meta Stack Overflow](http://meta.stackoverflow.com/) or [create a new GitHub issue](https://github.com/StackExchange/StackExchange.DataExplorer/issues/new).
+  - Submit [bugs](http://meta.stackexchange.com/questions/ask?tags=data-explorer%20bug), [feature requests](http://meta.stackexchange.com/questions/ask?tags=data-explorer%20feature-request), and [support questions](http://meta.stackexchange.com/questions/ask?tags=data-explorer%20support) on [Meta Stack Exchange](http://meta.stackexchange.com/) or [create a new GitHub issue](https://github.com/StackExchange/StackExchange.DataExplorer/issues/new).
 
 ## Miscellaneous
 
@@ -55,4 +55,4 @@ Once done, you'll need to populate the `Sites` table with a record for each site
  - [DotNetOpenAuth](http://www.dotnetopenauth.net/)
  - [reCAPTCHA](https://code.google.com/p/recaptcha/)
 
-For more information, see ["Which tools and technologies are used to build Data Explorer?"](http://meta.stackoverflow.com/questions/51967/which-tools-and-technologies-are-used-to-build-data-explorer)
+For more information, see ["Which tools and technologies are used to build Data Explorer?"](http://meta.stackexchange.com/questions/51967/which-tools-and-technologies-are-used-to-build-data-explorer)
