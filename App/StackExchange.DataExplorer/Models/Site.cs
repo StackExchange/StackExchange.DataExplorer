@@ -119,11 +119,11 @@ namespace StackExchange.DataExplorer.Models
         {
             var shares = false;
 
-            if (this.Url.StartsWith("http://meta.") && this.Url != "http://meta.stackoverflow.com")
+            if (this.Url.StartsWith("http://meta.") && this.Url != "http://meta.stackexchange.com")
             {
                 shares = this.Url.Substring("http://meta.".Length) == site.Url.Substring("http://".Length);
             }
-            else if (site.Url.StartsWith("http://meta.") && site.Url != "http://meta.stackoverflow.com")
+            else if (site.Url.StartsWith("http://meta.") && site.Url != "http://meta.stackexchange.com")
             {
                 shares = site.Url.Substring("http://meta.".Length) == this.Url.Substring("http://".Length);
             }

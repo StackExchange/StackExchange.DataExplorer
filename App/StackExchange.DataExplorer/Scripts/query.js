@@ -577,7 +577,7 @@ DataExplorer.ready(function () {
         if (response.targetSites == 1) { target = "all-"; } // all sites
         else if (response.targetSites == 2) { target = "all-meta-"; } // all meta sites
         else if (response.targetSites == 3) { target = "all-non-meta-"; } // all non meta sites
-        else if (response.targetSites == 4) { target = "all-meta-but-mso-"; } // all meta sites except mso
+        else if (response.targetSites == 4) { target = "all-meta-but-mse-"; } // all meta sites except mse
         else if (response.targetSites == 5) { target = "all-non-meta-but-so-"; } // all non meta sites except so
         
         var options;

@@ -111,9 +111,9 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 sites = sites.Where(s => !s.Url.Contains("meta.") && !s.Url.Contains("stackoverflow.")).ToList();
             }
-            else if (parsedQuery.TargetSites == TargetSites.AllMetaSitesButMSO)
+            else if (parsedQuery.TargetSites == TargetSites.AllMetaSitesButMSE)
             {
-                sites = sites.Where(s => s.Url.Contains("meta.") && !s.Url.Contains("stackoverflow.")).ToList();
+                sites = sites.Where(s => s.Url.Contains("meta.") && !s.Url.Contains("stackexchange.")).ToList();
             }
 
             var firstSite = sites.First();

@@ -11,7 +11,7 @@ namespace StackExchange.DataExplorer.Helpers
         AllSites = 1,
         AllMetaSites = 2,
         AllNonMetaSites = 3,
-        AllMetaSitesButMSO = 4,
+        AllMetaSitesButMSE = 4,
         AllNonMetaSitesButSO = 5
     }
 }
