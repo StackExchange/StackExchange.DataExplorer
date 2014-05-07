@@ -113,7 +113,7 @@ namespace StackExchange.DataExplorer.Helpers
             }
             else if (parsedQuery.TargetSites == TargetSites.AllMetaSitesButMSE)
             {
-                sites = sites.Where(s => s.Url.Contains("meta.") && !s.Url.Contains("stackexchange.")).ToList();
+                sites = sites.Where(s => s.Url.Contains("meta.") && s.Url != "http://www.stackexchange.com").ToList();
             }
 
             var firstSite = sites.First();
