@@ -940,7 +940,7 @@ DataExplorer.ready(function () {
                 }
 
                 var tags = isMultiTags ? value.substring(1, value.length - 1).split('><') : [value],
-                    template = '<a class="post-tag :class" href=":base/tags/:tag">:tag</a>',
+                    template = '<a class="post-tag :class" href=":base/tags/:url">:tag</a>',
                     value = '', tag;
 
                 var url = base;
@@ -955,7 +955,8 @@ DataExplorer.ready(function () {
                     value = value + template.format({
                         'base': url,
                         'class': '',
-                        'tag': tag
+                        'tag': tag,
+                        'url': encodeURIComponent(tag)
                     });
                 }
 
