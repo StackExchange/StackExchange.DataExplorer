@@ -282,46 +282,10 @@ namespace StackExchange.DataExplorer.Controllers
 
             ViewData["Site"] = Site;
             SelectMenuItem("Queries");
-            SetHeader(
-                "All Queries",
-                new SubHeaderViewData
-                {
-                    Description = "featured",
-                    Title = "Interesting queries selected by the administrators",
-                    Href = "/" + sitename + "/queries?order_by=featured",
-                    Selected = (order_by == "featured")
-                },
-                new SubHeaderViewData
-                {
-                    Description = "recent",
-                    Title = "Recently saved queries",
-                    Href = "/" + sitename + "/queries?order_by=recent",
-                    Selected = (order_by == "recent")
-                },
-                new SubHeaderViewData
-                {
-                    Description = "favorite",
-                    Title = "Favorite saved queries",
-                    Href = "/" + sitename + "/queries?order_by=favorite",
-                    Selected = (order_by == "favorite")
-                },
-                new SubHeaderViewData
-                {
-                    Description = "popular",
-                    Title = "Saved queries with the most views",
-                    Href = "/" + sitename + "/queries?order_by=popular",
-                    Selected = (order_by == "popular")
-                },
-                new SubHeaderViewData
-                {
-                    Description = "everything",
-                    Title = "All queries recently executed on the site",
-                    Href = "/" + sitename + "/queries?order_by=everything",
-                    Selected = (order_by == "everything")
-                }
-            );
 
-            if (!Current.User.IsAnonymous && !pagesize.HasValue)
+            var pagesizeProvided = pagesize.HasValue;
+
+            if (!Current.User.IsAnonymous && !pagesizeProvided)
             {
                 pagesize = Current.User.DefaultQueryPageSize;
             }
@@ -393,11 +357,16 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                     else
                     {
-                        order_by = "votes";
+                        order_by = "favorite";
                         builder.Where("qs.Votes > @threshold", new { threshold = threshold });
                         builder.OrderBy("qs.Votes DESC");
                         builder.OrderBy("qs.Views DESC");
                     }
+                }
+
+                if (searchCriteria.IsValid)
+                {
+                    builder.Where("qs.Title LIKE @search OR qs.[Description] LIKE @search", new { search = '%' + searchCriteria.SearchTerm + '%' });
                 }
             }
             else if (order_by == "everything")
@@ -405,23 +374,18 @@ namespace StackExchange.DataExplorer.Controllers
                 pager = builder.AddTemplate(@"
                     SELECT
                         /**select**/
-                    FROM
-                        (
-                            SELECT
-                                r.*, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
-                            FROM
-                                Revisions r
-                        ) AS r
+                    FROM (
+                        SELECT r.*, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber FROM Revisions r
+                    ) r
                     /**join**/
                     /**leftjoin**/
-                    /**where**/
-                    WHERE
+                    WHERE 
                         RowNumber BETWEEN @start AND @finish
                     ORDER BY
                         RowNumber",
                     new { start = start, finish = finish }
                 );
-                counter = builder.AddTemplate("SELECT COUNT(*) FROM Revisions");
+                counter = builder.AddTemplate("SELECT COUNT(*) FROM Revisions r");
 
                 builder.Select("r.Id AS RevisionId");
                 builder.Select("qs.Id as QuerySetId");
@@ -441,11 +405,6 @@ namespace StackExchange.DataExplorer.Controllers
             builder.Select("qs.Views AS Views");
             builder.Select("q.QueryBody AS [SQL]");
 
-            if (searchCriteria.IsValid)
-            {
-                builder.Where("qs.Title LIKE @search OR qs.[Description] LIKE @search", new { search = '%' + searchCriteria.SearchTerm + '%' });
-            }
-
             IEnumerable<QueryExecutionViewData> queries = Current.DB.Query<QueryExecutionViewData>(
                 pager.RawSql,
                 pager.Parameters
@@ -457,18 +416,71 @@ namespace StackExchange.DataExplorer.Controllers
                 }
             );
             int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
+
+            sitename = Site.TinyName.ToLower();
             
-            string href = "/" + Site.TinyName.ToLower() + "/queries?order_by=" + order_by;
+            var href = "/" + sitename + "/queries?order_by={0}";
+            var extra = "";
 
             if (searchCriteria.IsValid)
             {
-                href += "&q=" + HtmlUtilities.UrlEncode(searchCriteria.RawInput);
+                extra += "&q=" + HtmlUtilities.UrlEncode(searchCriteria.RawInput);
+            }
+
+            // TODO: This is a hack to avoid misrepresenting the fact we aren't actually doing the search in this case
+            if (order_by == "everything")
+            {
+                searchCriteria = new QuerySearchCriteria(null);
             }
 
             ViewData["SearchCriteria"] = searchCriteria;
-            ViewData["Href"] = href;
+            ViewData["Href"] = string.Format(href, order_by) + extra;
 
-            return View(new PagedList<QueryExecutionViewData>(queries,page.Value, pagesize.Value, false, total));
+            if (Current.User.IsAnonymous && pagesizeProvided)
+            {
+                extra += "&pagesize=" + pagesize.Value;
+            }
+
+            SetHeader(
+                "All Queries",
+                new SubHeaderViewData
+                {
+                    Description = "featured",
+                    Title = "Interesting queries selected by the administrators",
+                    Href = string.Format(href, "featured") + extra,
+                    Selected = (order_by == "featured")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "recent",
+                    Title = "Recently saved queries",
+                    Href = string.Format(href, "recent") + extra,
+                    Selected = (order_by == "recent")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "favorite",
+                    Title = "Favorite saved queries",
+                    Href = string.Format(href, "favorite") + extra,
+                    Selected = (order_by == "favorite")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "popular",
+                    Title = "Saved queries with the most views",
+                    Href = string.Format(href, "popular") + extra,
+                    Selected = (order_by == "popular")
+                },
+                new SubHeaderViewData
+                {
+                    Description = "everything",
+                    Title = "All queries recently executed on the site",
+                    Href = string.Format(href, "everything") + extra,
+                    Selected = (order_by == "everything")
+                }
+            );
+
+            return View(new PagedList<QueryExecutionViewData>(queries, page.Value, pagesize.Value, false, total));
         }
     }
 }
