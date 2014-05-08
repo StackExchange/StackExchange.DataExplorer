@@ -422,6 +422,8 @@
     <Content Include="Content\smoothness\jquery-ui-1.8.1.custom.css" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\jquery.textarearesizer.js" />
+    <Content Include="Scripts\xregexp\unicode-base.js" />
+    <Content Include="Scripts\xregexp\xregexp.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

@@ -834,6 +834,8 @@ DataExplorer.ready(function () {
     function ColumnFormatter(response) {
         var base = response.url,
             autolinker = /^(https?|site):\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.;]*[-A-Z0-9+&@#\/%=~_\[\]](?:\|.+?)?$/i,
+            isTag = XRegExp('^[\\p{L}+#.-]+$'),
+            isMultiTag = XRegExp('^(<[\\p{L}+#.-]+>)+$'),
             dummy = document.createElement('a'),
             wrapper = dummy,
             _outerHTML = 'outerHTML';
@@ -935,7 +937,7 @@ DataExplorer.ready(function () {
             return function (row, cell, value, column, context) {
                 var isMultiTags;
 
-                if (!value || !(value.match(/^[a-z0-9#.+-]+$/) || (isMultiTags = (value.search(/^(?:<[a-z0-9#.+-]+>)+$/) > -1)))) {
+                if (!value || !(XRegExp.test(value, isTag) || (isMultiTags = XRegExp.test(value, isMultiTag)))) {
                     return defaultFormatter(row, cell, value, column, context);
                 }
 

@@ -33,8 +33,10 @@ namespace StackExchange.DataExplorer.App_Start
             );
 
             bundles.Add(new ScriptBundle("~/assets/js/master")
-                .Include("~/Scripts/master.js")
+                .Include("~/Scripts/xregexp/xregexp.js")
+                .Include("~/Scripts/xregexp/unicode-base.js")
                 .Include("~/Scripts/jquery.autocomplete.js")
+                .Include("~/Scripts/master.js")
             );
 
             bundles.Add(new ScriptBundle("~/assets/js/query")
