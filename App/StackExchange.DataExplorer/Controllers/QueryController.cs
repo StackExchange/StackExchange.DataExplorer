@@ -591,8 +591,6 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
         private static QueryResults TranslateResults(ParsedQuery query, bool textResults, QueryResults results)
         {
-            textResults = textResults || (results.ResultSets.Count != 1);
-        
             if (textResults)
             {
                 results = results.ToTextResults();
