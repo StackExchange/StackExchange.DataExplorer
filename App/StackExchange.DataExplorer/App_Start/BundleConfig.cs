@@ -59,6 +59,7 @@ namespace StackExchange.DataExplorer.App_Start
 
             bundles.Add(new ScriptBundle("~/assets/js/flot")
                 .Include("~/Scripts/flot/jquery.flot.js")
+                .Include("~/Scripts/flot/jquery.colorhelpers.js")
             );
 
             bundles.Add(new StyleBundle("~/assets/css/master")
