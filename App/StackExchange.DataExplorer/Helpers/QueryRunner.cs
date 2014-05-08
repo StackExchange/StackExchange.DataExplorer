@@ -13,8 +13,6 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class QueryRunner
     {
-        private const int MAX_RESULTS = 50000;
-
         private static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> magic_columns
             = GetMagicColumns();
 
@@ -372,17 +370,8 @@ namespace StackExchange.DataExplorer.Helpers
                             plan.AppendStatementPlan(reader[0].ToString());
                         }
                     }
-                    else
+                    else if (reader.FieldCount != 0)
                     {
-                        if (reader.FieldCount == 0)
-                        {
-                            if (reader.RecordsAffected >= 0)
-                            {
-                                messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
-                            }
-                            continue;
-                        }
-
                         var resultSet = new ResultSet();
                         resultSet.MessagePosition = messages.Length;
                         results.ResultSets.Add(resultSet);
@@ -400,17 +389,18 @@ namespace StackExchange.DataExplorer.Helpers
                             resultSet.Columns.Add(columnInfo);
                         }
 
-                        int currentRow = 0;
+                        int currentRow = 0, totalRows = results.TotalResults;
+
                         while (reader.Read())
                         {
-                            if (currentRow++ >= MAX_RESULTS)
+                            if (++currentRow > AppSettings.MaxResultsPerResultSet || totalRows + currentRow > AppSettings.MaxTotalResults)
                             {
-                                results.Truncated = true;
-                                results.MaxResults = MAX_RESULTS;
+                                resultSet.Truncated = true;
+
                                 break;
                             }
+
                             var row = new List<object>();
-                            resultSet.Rows.Add(row);
 
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
@@ -427,24 +417,32 @@ namespace StackExchange.DataExplorer.Helpers
 
                                 row.Add(col);
                             }
+
+                            resultSet.Rows.Add(row);
                         }
-                        if (results.Truncated)
+
+                        results.TotalResults = totalRows + resultSet.Rows.Count;
+
+                        if (totalRows + currentRow > AppSettings.MaxTotalResults)
                         {
-                            // next result would force ado.net to fast forward
-                            //  through the result set, which is way too slow
+                            results.Truncated = true;
+
+                            // next result would force ado.net to fast forward through the result set, which is way too slow
                             break;
                         }
 
-                        if (reader.RecordsAffected >= 0)
-                        {
-                            messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
-                        }
+                        messages.AppendFormat("({0} row(s) returned)\n\n", resultSet.Rows.Count);
+                    }
 
-                        messages.AppendFormat("({0} row(s) affected)\n\n", resultSet.Rows.Count);
+                    if (reader.RecordsAffected >= 0)
+                    {
+                        messages.AppendFormat("({0} row(s) affected)\n\n", reader.RecordsAffected);
                     }
                 } while (reader.NextResult());
+
                 command.Cancel();
             }
+
             results.ExecutionPlan = plan.PlanXml;
         }
 

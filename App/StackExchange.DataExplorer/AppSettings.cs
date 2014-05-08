@@ -21,6 +21,12 @@ namespace StackExchange.DataExplorer
         [Default(2)]
         public static int ConcurrentQueries { get; private set; }
 
+        [Default(50000)]
+        public static int MaxResultsPerResultSet { get; private set; }
+
+        [Default(100000)]
+        public static int MaxTotalResults { get; private set; }
+
         [Default(true)]
         public static bool FetchDataInReadUncommitted { get; private set; }
 
