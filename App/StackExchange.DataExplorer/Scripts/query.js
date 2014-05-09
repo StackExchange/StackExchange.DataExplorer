@@ -635,6 +635,7 @@ DataExplorer.ready(function () {
 
         sizer[_textContent] = '';
         sizer.className = 'slick-header-column slick-header-column-sorted ui-state-default';
+        sizerParent.className += ' slick-header';
         sizerParent.appendChild(document.create('span', { classname: 'slick-sort-indicator' }));
         sizerParent.appendChild(document.create('div', { classname: 'slick-resizable-handle' }));
 

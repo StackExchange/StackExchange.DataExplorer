@@ -1035,32 +1035,6 @@ ul.linkbar li {
   border: 1px solid #D3D3D3;
 }
 
-#resultSets {
-  cursor: default;
-  height: 500px;
-}
-
-#resultSets .slick-header {
-  border-top-color: transparent;
-}
-
-#resultSets .slick-header-column {
-  text-align: center;
-}
-
-#resultSets .slick-cell {
-  
-}
-
-#resultSets .slick-row.even {
-  background-image: none;
-}
-
-#resultSets .slick-row.odd {
-  background-color: #FAFAFA;
-  background-image: none;
-}
-
 #query-params .form-row {
   clear: both;
 }
@@ -1420,11 +1394,6 @@ pre {
 
 #resultsToText label {
   margin-left: 5px; 
-}
-
-.slick-cell.number {
-  text-align: right;  
-
 }
 
 #user-filter {

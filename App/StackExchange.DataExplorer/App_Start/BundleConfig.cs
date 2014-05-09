@@ -72,11 +72,11 @@ namespace StackExchange.DataExplorer.App_Start
             );
 
             bundles.Add(new StyleBundle("~/assets/css/query")
-                .Include("~/Content/smoothness/jquery-ui-1.8.1.custom.css")
                 .Include("~/Content/codemirror/codemirror.css")
                 .Include("~/Content/codemirror/custom.css")
                 .Include("~/Content/codemirror/theme.css")
-                .Include("~/Content/slickgrid/slick.grid.css")
+                .Include("~/Content/slickgrid/slick.grid.css", new CssRewriteUrlTransform())
+                .Include("~/Content/slickgrid.css", new CssRewriteUrlTransform())
                 .Include("~/Content/qp/qp.css")
             );
         }

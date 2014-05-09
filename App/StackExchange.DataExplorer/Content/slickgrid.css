@@ -1,0 +1,47 @@
+﻿#resultSets {
+  cursor: default;
+  height: 500px;
+}
+
+.slick-header .slick-header-column {
+  background-color: #F7F7F7;
+  color: #606060;
+  border-bottom: 1px dotted #CCC;
+  display: block;
+  font-weight: bold;
+  padding: 6px 8px 5px 8px;
+  text-align: center;
+}
+
+.slick-header .slick-header-column-sorted {
+  color: #0C57A0;
+  font-style: normal;
+}
+
+.slick-sort-indicator {
+  background-image: url('./slickgrid/images/sort-asc-inactive.gif');
+  background-repeat: no-repeat;
+  height: 7px;
+}
+
+.slick-sort-indicator.slick-sort-indicator-asc {
+  background-image: url('./slickgrid/images/sort-asc.gif');
+}
+
+.slick-sort-indicator.slick-sort-indicator-desc {
+  background-image: url('./slickgrid/images/sort-desc.gif');
+}
+
+.slick-row.odd {
+  background-color: #FDFDFD;
+}
+
+.slick-cell {
+  padding: 6px 8px 5px 8px;
+  border-bottom: 1px dotted #CCC;
+  border-right: 1px dotted #CCC;
+}
+
+.slick-cell.number {
+  text-align: right;
+}
