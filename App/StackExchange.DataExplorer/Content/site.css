@@ -789,7 +789,7 @@ i.button {
   margin: 0px 5px 0px 0px;
 }
 
-#submit-query, #cancel-query {
+button.btn-normal {
   cursor: pointer;
   font-weight: bold;
   margin: 0px 6px 0px 0px;
@@ -907,7 +907,7 @@ ul.linkbar li {
   background: url('//cdn.sstatic.net/beta/img/icon-16.png') no-repeat scroll 3px center;
 }
 
-#error-message {
+.error-message {
   background-color: #F5E9E9;
   border: 1px solid #B50000;
   color: #B50000;
@@ -916,7 +916,7 @@ ul.linkbar li {
   padding: 10px 14px 10px 14px;
 }
 
-#error-message.notice {
+.error-message.notice {
   background-color: #E9F5E9;
   border: 1px solid #16B500;
   color: #209403;
@@ -1683,9 +1683,16 @@ a.cc-wiki-link
     width: 880px;    
 }
 
-#captcha h4
-{
-    margin-bottom: 10px;
+#captcha {
+  margin-bottom: 10px;
+}
+
+#captcha h4 {
+  margin-bottom: 10px;
+}
+
+#captcha .btn-normal, #captcha .error-message {
+  margin-top: 6px;
 }
 
 /* Help Page Content */

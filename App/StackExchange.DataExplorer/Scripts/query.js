@@ -376,12 +376,8 @@ DataExplorer.ready(function () {
     }
 
     function parseQueryResponse(response) {
-        if (showError(response)) {
+        if (showError(response) || showCaptcha(response)) {
             return;
-        }
-
-        if (response.captcha) {
-            return displayCaptcha();
         }
 
         var action = form[0].action, records = 0,
@@ -582,7 +578,51 @@ DataExplorer.ready(function () {
             return false;
         }
 
-        error.text(response.error).show()[0].className = className || '';
+        error.text(response.error).show()[0].className = 'error-message' + (className || '');
+
+        return true;
+    }
+
+    var captcha = $('#captcha'), captchaSubmit = captcha.find('button[type=submit]');
+
+    function showCaptcha(response) {
+        if (!response || !response.captcha) {
+            return false;
+        }
+
+        captcha.find('input[type=text]').off('keydown').on('keydown', function (key) {
+            if (key.keyCode === 13) {
+                captchaSubmit.click();
+
+                return false;
+            }
+
+            return true;
+        });
+
+        var submit = function () {
+            $.post('/captcha', captcha.find('input').serialize(), function (response) {
+                if (response.success) {
+                    $('form button[type=submit]').not(captchaSubmit).prop('disabled', true);
+                    captcha.hide().closest('form').submit();
+                } else {
+                    var error = captcha.find('.error-message');
+
+                    captcha.find('input[type=text]').one('keydown', function () {
+                        error.hide();
+                    });
+                    captchaSubmit.one('click', submit);
+                    error.show();
+                }
+            });
+
+            return false;
+        };
+
+        $('form button[type=submit]').not(captchaSubmit).prop('disabled', true);
+
+        captchaSubmit.one('click', submit);
+        captcha.show().find('input[type=text]').focus();
 
         return true;
     }
@@ -901,45 +941,6 @@ function populateParamsFromUrl() {
             this.value = value;
         }
     });
-}
-
-function displayCaptcha() {
-    $('form input[type=submit]').hide();
-    $('#captcha').show();
-
-    $("#recaptcha_response_field").keydown(function (key) {
-        if (key.keyCode == 13) {
-            $("#btn-captcha").click();
-            return false;
-        }
-        return true;
-    }).focus();
-
-    var captcha = function () {
-        $(this).unbind("click");
-        $.ajax({
-            url: '/captcha',
-            data: $('#captcha').closest('form').serialize(),
-            type: 'POST',
-            success: function (data) {
-                if (data.success) {
-                    $('form input[type=submit]').show();
-                    $('#captcha').hide();
-                    $('#captcha').closest('form').submit();
-                } else {
-                    $("#captcha-error").fadeIn();
-                    $("#btn-captcha").click(captcha);
-                    var text = $("#recaptcha_response_field");
-                    var once = function () { $("#captcha-error").fadeOut(); text.unbind("keydown", once) };
-                    text.keydown(once);
-                }
-            },
-            dataType: "json"
-        });
-
-    };
-
-    $("#btn-captcha").click(captcha);
 }
 
 function isGraph(resultSet) {
