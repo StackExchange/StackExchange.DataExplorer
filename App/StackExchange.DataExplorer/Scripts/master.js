@@ -239,13 +239,14 @@ DataExplorer.ready(function () {
 $.fn.tabs = function (passthrough) {
     return this.delegate("a:not(.youarehere)", "click", function () {
         $(this.hash).show();
-        $(this).addClass("youarehere")
-            .trigger('show') 
+        $(this).addClass("youarehere") 
             .siblings()
             .removeClass("youarehere")
             .each(function () {
                 $(this.hash).hide();
-            });
+            })
+            .end()
+            .trigger('show', [ this.hash ]);
     }).delegate("a", "click", function () {
         return !passthrough;
     });
@@ -291,7 +292,7 @@ $.fn.sortChildren = function (map, insert) {
     });
 };
 
-document.create = function create(element, attributes) {
+document.create = function create(element, attributes, appendTo) {
     element = document.createElement(element);
 
     if (attributes) {
@@ -316,6 +317,10 @@ document.create = function create(element, attributes) {
 
             element.setAttribute(key, attributes[keys[i]]);
         }
+    }
+
+    if (appendTo) {
+        appendTo.appendChild(element);
     }
 
     return element;
@@ -492,6 +497,35 @@ Date.prototype.toRelativeTimeMini = (function () {
         return rendered;
     };
 })();
+
+Number.prototype.prettify = function () {
+    var number = this,
+        current,
+        formatted = '',
+        negative = number < 0;
+
+    if (negative) {
+        number = -number;
+    }
+
+    if (number < 1000) {
+        return (negative ? '-' : '') + (Math.floor(number) == number ? number: number.toFixed(2));
+    }
+
+    do {
+        current = number / 1000;
+        number = Math.floor(current);
+        current = Math.round((current - number) * 1000);
+
+        formatted = current + formatted;
+
+        if (number > 0) {
+            formatted = (current < 100 ? '0' : '') + (current < 10 ? '0' : '') + formatted;
+        }
+    } while (number > 0 && (formatted = ',' + formatted));
+
+    return (negative ? '-' : '') + formatted;
+};
 
 function htmlEncode(text) {
     return document.createElement("div").appendChild(document.createTextNode(text)).parentNode.innerHTML;

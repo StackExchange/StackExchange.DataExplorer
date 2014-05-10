@@ -357,6 +357,7 @@
     <Content Include="Scripts\codemirror\runmode.js" />
     <Content Include="Scripts\codemirror\sql.js" />
     <Content Include="Scripts\date.js" />
+    <Content Include="Scripts\es5-shim.js" />
     <Content Include="Scripts\flot\jquery.colorhelpers.js" />
     <Content Include="Scripts\flot\jquery.flot.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />
@@ -389,6 +390,7 @@
     <Content Include="favicon.ico" />
     <Content Include="OData.svc" />
     <Content Include="Scripts\qp.js" />
+    <Content Include="Scripts\query.graph.js" />
     <Content Include="Scripts\query.js" />
     <Content Include="Scripts\query.parameterparser.js" />
     <Content Include="Scripts\query.sidebar.js" />

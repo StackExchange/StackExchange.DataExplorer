@@ -488,7 +488,7 @@ DataExplorer.ready(function () {
             DataExplorer.Sidebar.updateHistory(response);
         }
 
-        response.graph = !textOnly && isGraph(results);
+        response.graph = !textOnly && DataExplorer.Graph.isGraph(results);
 
         $('#query-results .miniTabs a.optional').each(function () {
             $(this).toggleClass('hidden', !response[this.hash.substring(1)]);
@@ -497,7 +497,7 @@ DataExplorer.ready(function () {
         // We have to start showing the contents so that SlickGrid can figure
         // out the heights of its components correctly
         $('.result-option').fadeIn('fast').promise().done(function () {
-            var tabset = $('#query-results .miniTabs a'),
+            var tabset = $('#query-results .miniTabs a').off('show'),
                 firstTab = tabset.filter(':not(.hidden):first'),
                 selectedTab;
 
@@ -510,9 +510,13 @@ DataExplorer.ready(function () {
             }
             
             if (response.graph) {
-                // Work-around for the div being display: none; originally
-                $('#graphTab').click();
-                renderGraph(results);
+                var graph = new DataExplorer.Graph(results, '#graph');
+
+                tabset.on('show', function (event, panel) {
+                    if (panel === '#graph' && !graph.isInitialized()) {
+                        graph.show();
+                    }
+                });
             }
 
             var permalink = $('#permalink a')[0];
@@ -941,131 +945,4 @@ function populateParamsFromUrl() {
             this.value = value;
         }
     });
-}
-
-function isGraph(resultSet) {
-    if (!resultSet || resultSet.columns.length < 2) {
-        return false;
-    }
-
-    var graph = true;
-
-    for (var i = 0; i < resultSet.columns.length; i++) {
-        var type = resultSet.columns[i]["type"];
-
-        // allow for strings in the second column provided there are only 3 cols 
-        if (type == 'Text' && i==1 && resultSet.columns.length == 3) {
-            continue;
-        }
-
-        if (i != 0 && type == 'Date') {
-            graph = false;
-            break;
-        }
-        if (type != 'Number' && type != 'Date') {
-            graph = false;
-            break;
-        } 
-    }
-    return graph;
-}
-
-function showTooltip(x, y, contents) {
-    $('<div id="tooltip">' + contents + '<\/div>').css({
-        position: 'absolute',
-        display: 'none',
-        top: y + 5,
-        left: x + 5,
-        border: '1px solid #fdd',
-        padding: '2px',
-        'background-color': '#fee',
-        opacity: 0.80
-    }).appendTo("body").fadeIn(200);
-}
-
-function addCommas(nStr) {
-    nStr += '';
-    x = nStr.split('.');
-    x1 = x[0];
-    x2 = x.length > 1 ? '.' + x[1] : '';
-    var rgx = /(\d+)(\d{3})/;
-    while (rgx.test(x1)) {
-        x1 = x1.replace(rgx, '$1' + ',' + '$2');
-    }
-    return x1 + x2;
-}
-
-function bindToolTip(graph, suffix) {
-    var previousPoint = null;
-    var lastCall = 0;
-    graph.bind("plothover", function (event, pos, item) {
-
-        var toolTip;
-
-        if (item) {
-
-            if (previousPoint == null || previousPoint[0] != item.datapoint[0] || previousPoint[1] != item.datapoint[1]) {
-                previousPoint = item.datapoint;
-
-                $("#tooltip").remove();
-                var x = item.datapoint[0].toFixed(2),
-                    y = item.datapoint[1].toFixed(2);
-
-                showTooltip(item.pageX - 10, item.pageY - 40, addCommas(parseInt(y)) + suffix);
-            }
-        }
-        else {
-            if (previousPoint != null) {
-                $("#tooltip").remove();
-            }
-            previousPoint = null;
-        }
-
-    });
-}
-
-function renderGraph(resultSet) {
-
-    var options = {
-        legend: { position: "nw" },
-        grid: { hoverable: true },
-        selection: { mode: "x" },
-        series: { lines: { show: true }, points: { show: true} }
-    };
-    if (resultSet.columns[0]["type"] == 'Date') {
-        options.xaxis = { mode: "time" };
-    }
-    var graph = $("#graph");
-
-    var series = [];
-
-    // if the second column is text we need to unpivot 
-    if (resultSet.columns[1]["type"] == 'Text')
-    {
-        var columns = {}; 
-        for (var row = 0; row < resultSet.rows.length; row++) {
-            var columnLabel = resultSet.rows[row][1],
-                columnName = "col_" + columnLabel;
-            if (columns[columnName] === undefined)
-            {
-                columns[columnName] = (series.push({label: columnLabel, data: [] }) - 1);
-            }
-            series[columns[columnName]].data.push([resultSet.rows[row][0],  resultSet.rows[row][2]]);
-        }
-    }
-    else 
-    {
-        for (var col = 1; col < resultSet.columns.length; col++) {
-            series.push({label: resultSet.columns[col].name, data: []});
-        }
-
-        for (var row = 0; row < resultSet.rows.length; row++) {
-            for (var col = 1; col < resultSet.columns.length; col++) {
-                series[col - 1].data.push([resultSet.rows[row][0], resultSet.rows[row][col]]);
-            }
-        }
-    }
-
-    $.plot(graph, series, options);
-    bindToolTip(graph, "");
 }

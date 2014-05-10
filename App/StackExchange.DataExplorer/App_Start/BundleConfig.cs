@@ -50,6 +50,7 @@ namespace StackExchange.DataExplorer.App_Start
                 .Include("~/Scripts/qp.js")
                 .Include("~/Scripts/query.parameterparser.js")
                 .Include("~/Scripts/query.siteswitcher.js")
+                .Include("~/Scripts/query.graph.js")
                 .Include("~/Scripts/query.js")
             );
 
