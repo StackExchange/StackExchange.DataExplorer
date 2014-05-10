@@ -33,6 +33,7 @@ namespace StackExchange.DataExplorer.App_Start
             );
 
             bundles.Add(new ScriptBundle("~/assets/js/master")
+                .Include("~/Scripts/es5-shim.js")
                 .Include("~/Scripts/master.js")
                 .Include("~/Scripts/jquery.autocomplete.js")
             );

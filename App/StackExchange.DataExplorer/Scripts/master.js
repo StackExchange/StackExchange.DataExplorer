@@ -291,40 +291,6 @@ $.fn.sortChildren = function (map, insert) {
     });
 };
 
-if (!Object.keys) {
-    Object.keys = (function () {
-        var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length
-
-        return function (obj) {
-            if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object')
-
-            var result = []
-
-            for (var prop in obj) {
-                if (hasOwnProperty.call(obj, prop)) result.push(prop)
-            }
-
-            if (hasDontEnumBug) {
-                for (var i = 0; i < dontEnumsLength; i++) {
-                    if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i])
-                }
-            }
-            return result
-        }
-    })();
-};
-
 document.create = function create(element, attributes) {
     element = document.createElement(element);
 
@@ -365,12 +331,6 @@ function getNextElementSibling(element) {
     } while (element && element.nodeType !== 1);
 
     return element;
-}
-
-if (!String.prototype.trim) {
-    String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/g, '');
-    };
 }
 
 String.prototype.format = function (replacements) {
@@ -416,12 +376,6 @@ String.prototype.from = function (ch, inclusive) {
 
     return this.substring(ch + (inclusive ? 0 : 1));
 };
-
-if (!Date.now) {
-    Date.now = function () {
-        return +new Date();
-    }
-}
 
 window.location.param = (function () {
     var cache = null;
