@@ -47,10 +47,11 @@ namespace StackExchange.DataExplorer.App_Start
                 .Include("~/Scripts/codemirror/codemirror.js")
                 .Include("~/Scripts/codemirror/sql.js")
                 .Include("~/Scripts/codemirror/runmode.js")
-                .Include("~/Scripts/qp.js")
                 .Include("~/Scripts/query.parameterparser.js")
-                .Include("~/Scripts/query.siteswitcher.js")
+                .Include("~/Scripts/query.resultset.js")
                 .Include("~/Scripts/query.graph.js")
+                .Include("~/Scripts/qp.js")
+                .Include("~/Scripts/query.siteswitcher.js")
                 .Include("~/Scripts/query.js")
             );
 

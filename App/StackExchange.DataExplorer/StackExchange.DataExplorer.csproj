@@ -393,6 +393,7 @@
     <Content Include="Scripts\query.graph.js" />
     <Content Include="Scripts\query.js" />
     <Content Include="Scripts\query.parameterparser.js" />
+    <Content Include="Scripts\query.resultset.js" />
     <Content Include="Scripts\query.sidebar.js" />
     <Content Include="Scripts\query.siteswitcher.js" />
     <Content Include="Scripts\query.tablehelpers.js" />
