@@ -459,8 +459,6 @@ DataExplorer.ready(function () {
             DataExplorer.Sidebar.updateHistory(response);
         }
 
-        response.graph = !textOnly && DataExplorer.Graph.isGraph(results);
-
         $('#query-results .miniTabs a.optional').each(function () {
             $(this).toggleClass('hidden', !response[this.hash.substring(1)]);
         });
@@ -480,7 +478,7 @@ DataExplorer.ready(function () {
                 }
             }
             
-            if (response.graph) {
+            if (!textOnly && DataExplorer.Graph.isGraph(results)) {
                 var graph = new DataExplorer.Graph(results, '#graph');
 
                 tabset.on('show', function (event, panel) {
