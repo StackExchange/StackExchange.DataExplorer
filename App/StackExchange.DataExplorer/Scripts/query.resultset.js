@@ -40,7 +40,10 @@
                 var field = args.sortCol.field;
 
                 args.grid.getData().sort(function (lhs, rhs) {
-                    return (args.sortAsc ? 1 : -1) * (lhs[field] == rhs[field] ? 0 : lhs[field] < rhs[field] ? -1 : 1);
+                    lhs = lhs[field] &&  typeof (lhs[field]) === 'object' ? lhs[field].id : lhs[field];
+                    rhs = rhs[field] &&  typeof (rhs[field]) === 'object' ? rhs[field].id : rhs[field];
+
+                    return (args.sortAsc ? 1 : -1) * (lhs == rhs ? 0 : lhs < rhs ? -1 : 1);
                 });
 
                 args.grid.invalidate();
