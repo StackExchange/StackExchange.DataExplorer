@@ -8,6 +8,10 @@
   color: #0077CC;
 }
 
+#resultSets {
+  position: relative;
+}
+
 #resultSets .subpanel {
   cursor: default;
   display: none;

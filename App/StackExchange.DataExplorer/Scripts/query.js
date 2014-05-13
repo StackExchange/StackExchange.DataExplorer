@@ -540,6 +540,8 @@ DataExplorer.ready(function () {
 
                         if (!grids[index - 1].isInitialized()) {
                             grids[index - 1].show();
+                        } else {
+                            grids[index - 1].refresh();
                         }
                     }
                 }

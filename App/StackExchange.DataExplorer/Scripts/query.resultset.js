@@ -49,6 +49,8 @@
                 args.grid.invalidate();
             });
 
+            resizeResults();
+
             $(window).resize(resizeResults);
         };
 
@@ -56,26 +58,28 @@
             return !!grid;
         }
 
+        this.refresh = resizeResults;
+
         function resizeResults() {
             var defaultWidth = document.getElementById('query').clientWidth - 2,
                 availableWidth = document.documentElement.clientWidth - 100,
-                gridWidth = target.outerWidth(),
                 canvas = target.find('.grid-canvas'),
+                parent = target.closest('.panel'),
                 canvasWidth = canvas.outerWidth(),
                 width = 0;
 
             if (canvasWidth < defaultWidth || availableWidth < defaultWidth) {
-                target.width(width = defaultWidth);
+                parent.width(width = defaultWidth);
             } else if (canvasWidth > availableWidth) {
-                target.width(width = availableWidth);
+                parent.width(width = availableWidth);
             } else {
-                target.width(width = canvasWidth);
+                parent.width(width = canvasWidth);
             }
 
             if (width === defaultWidth) {
-                target.css('left', '0px');
+                parent.css('left', '0px');
             } else {
-                target.css('left', '-' + Math.round((width - defaultWidth) / 2) + 'px');
+                parent.css('left', '-' + Math.round((width - defaultWidth) / 2) + 'px');
             }
         }
     }
