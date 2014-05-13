@@ -47,6 +47,8 @@ namespace StackExchange.DataExplorer.App_Start
                 .Include("~/Scripts/codemirror/codemirror.js")
                 .Include("~/Scripts/codemirror/sql.js")
                 .Include("~/Scripts/codemirror/runmode.js")
+                .Include("~/Scripts/flot/jquery.flot.js")
+                .Include("~/Scripts/flot/jquery.colorhelpers.js")
                 .Include("~/Scripts/query.parameterparser.js")
                 .Include("~/Scripts/query.resultset.js")
                 .Include("~/Scripts/query.graph.js")
@@ -58,11 +60,6 @@ namespace StackExchange.DataExplorer.App_Start
             bundles.Add(new ScriptBundle("~/assets/js/editor")
                 .Include("~/Scripts/query.sidebar.js")
                 .Include("~/Scripts/query.tablehelpers.js")
-            );
-
-            bundles.Add(new ScriptBundle("~/assets/js/flot")
-                .Include("~/Scripts/flot/jquery.flot.js")
-                .Include("~/Scripts/flot/jquery.colorhelpers.js")
             );
 
             bundles.Add(new StyleBundle("~/assets/css/master")
