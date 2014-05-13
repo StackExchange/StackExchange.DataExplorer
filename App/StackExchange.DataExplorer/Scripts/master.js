@@ -43,10 +43,10 @@
         }
 
         if (!target.length) {
-            return;
+            return target;
         }
 
-        target.each(function () {
+        return target.each(function () {
             var key = 'tmpl-' + attribute,
                 self = $(this),
                 template = self.data(key);

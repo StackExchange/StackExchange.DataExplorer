@@ -377,11 +377,11 @@ DataExplorer.ready(function () {
         }
 
         if (response.resultSets.length) {
-            results = response.resultSets[0];
-            records = results.rows.length;
+            response.resultSets.forEach(function (resultSet) {
+                records += resultSet.rows.length;
+            });
         } else {
             textOnly = true;
-            response.resultSets = null;
         }
 
         document.getElementById('messages').children[0][_textContent] = response.messages;
@@ -459,9 +459,28 @@ DataExplorer.ready(function () {
             DataExplorer.Sidebar.updateHistory(response);
         }
 
+        if (!textOnly) {
+            response.resultSets.every(function (resultSet) {
+                if (DataExplorer.Graph.isGraph(resultSet)) {
+                    response.graph = new DataExplorer.Graph(resultSet, '#graph');
+
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
         $('#query-results .miniTabs a.optional').each(function () {
-            $(this).toggleClass('hidden', !response[this.hash.substring(1)]);
+            $(this).toggleClass('hidden',
+                !(response[this.hash.substring(1)] && response[this.hash.substring(1)].length !== 0));
         });
+
+        var gridPanel = $('#resultSets').empty();
+        var gridToggle = DataExplorer.template('#resultSetsTab .tab-counter', 'text', {
+            current: 1,
+            total: response.resultSets.length
+        }).data('current-subpanel', 1).toggle(response.resultSets.length > 1).off('click');
 
         // We have to start showing the contents so that SlickGrid can figure
         // out the heights of its components correctly
@@ -478,12 +497,10 @@ DataExplorer.ready(function () {
                 }
             }
             
-            if (!textOnly && DataExplorer.Graph.isGraph(results)) {
-                var graph = new DataExplorer.Graph(results, '#graph');
-
+            if (response.graph) {
                 tabset.on('show', function (event, panel) {
-                    if (panel === '#graph' && !graph.isInitialized()) {
-                        graph.show();
+                    if (panel === '#graph' && !response.graph.isInitialized()) {
+                        response.graph.show();
                     }
                 });
             }
@@ -504,11 +521,48 @@ DataExplorer.ready(function () {
             }
 
             if (!textOnly) {
-                var grid = new DataExplorer.ResultSet(results, response.url, '#resultSets');
+                var grids = [];
+
+                for (var i = 0; i < response.resultSets.length; ++i) {
+                    gridPanel.append(document.create('div', { className: 'subpanel' }));
+                    grids.push(new DataExplorer.ResultSet(
+                        response.resultSets[i],
+                        response.url,
+                        '#resultSets .subpanel:nth-child(' + (i + 1) + ')'
+                    ));
+                }
+
+                function showCurrentGrid() {
+                    var index = gridToggle.data('current-subpanel');
+
+                    if (!$('#resultSets .subpanel:nth-child(' + index + ')').is(':visible')) {
+                        $('#resultSets .subpanel').hide().filter(':nth-child(' + index + ')').show();
+
+                        if (!grids[index - 1].isInitialized()) {
+                            grids[index - 1].show();
+                        }
+                    }
+                }
 
                 tabset.on('show', function (event, panel) {
-                    if (panel === '#resultSets' && !grid.isInitialized()) {
-                        grid.show();
+                    if (panel === '#resultSets') {
+                        showCurrentGrid();
+                    }
+                });
+                gridToggle.on('click', function () {
+                    if (gridToggle.parent().hasClass('youarehere')) {
+                        var index = gridToggle.data('current-subpanel') + 1;
+
+                        if (index > response.resultSets.length) {
+                            index = 1;
+                        }
+
+                        DataExplorer.template(gridToggle.data('current-subpanel', index), 'text', {
+                            current: index,
+                            total: response.resultSets.length
+                        });
+
+                        showCurrentGrid();
                     }
                 });
             }

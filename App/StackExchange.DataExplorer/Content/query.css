@@ -1,5 +1,16 @@
-﻿#resultSets {
+﻿.tab-counter {
+  color: #B0B0B0;
+  display: none;
+  margin-left: 4px;
+}
+
+.youarehere .tab-counter:hover {
+  color: #0077CC;
+}
+
+#resultSets .subpanel {
   cursor: default;
+  display: none;
   height: 500px;
 }
 

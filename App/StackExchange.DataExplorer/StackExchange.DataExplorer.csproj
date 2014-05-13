@@ -276,7 +276,7 @@
     <Content Include="Content\homepage.css" />
     <Content Include="Content\images\help-icon.png" />
     <Content Include="Content\images\help-sample-graph.png" />
-    <Content Include="Content\slickgrid.css" />
+    <Content Include="Content\query.css" />
     <Content Include="Content\slickgrid\images\sort-asc-inactive.gif" />
     <Content Include="Content\slickgrid\images\sort-asc.gif" />
     <Content Include="Content\slickgrid\images\sort-desc.gif" />

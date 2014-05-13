@@ -79,7 +79,7 @@ namespace StackExchange.DataExplorer.App_Start
                 .Include("~/Content/codemirror/custom.css")
                 .Include("~/Content/codemirror/theme.css")
                 .Include("~/Content/slickgrid/slick.grid.css", new CssRewriteUrlTransform())
-                .Include("~/Content/slickgrid.css", new CssRewriteUrlTransform())
+                .Include("~/Content/query.css", new CssRewriteUrlTransform())
                 .Include("~/Content/qp/qp.css")
             );
         }
