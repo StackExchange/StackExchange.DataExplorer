@@ -185,7 +185,7 @@ namespace StackExchange.DataExplorer.Controllers
                     RevisionId = revision.Id,
                     QuerySetId = revision.QuerySet.Id,
                     SiteId = Site.Id,
-                    SiteName = Site.Name,
+                    SiteName = Site.TinyName.ToLower(),
                     Slug = revision.QuerySet.Title.URLFriendly(),
                     Url = Site.Url
                 }.WithCache(cachedResults);
