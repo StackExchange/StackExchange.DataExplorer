@@ -39,8 +39,8 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!TryGetSite(sitename, out site))
             {
-                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/query/{1}{2}",
-                    site.TinyName.ToLower(), querySetId, slug.HasValue() ? "/" + slug : ""
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/query/{1}{2}{3}",
+                    site.TinyName.ToLower(), querySetId, slug.HasValue() ? "/" + slug : "", Request.Url.Query
                 ));
             }
 
@@ -64,8 +64,8 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!TryGetSite(sitename, out site))
             {
-                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/revision/{1}/{2}{3}",
-                    site.TinyName.ToLower(), querySetId, revisionId, slug.HasValue() ? "/" + slug : ""
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/revision/{1}/{2}{3}{4}",
+                    site.TinyName.ToLower(), querySetId, revisionId, slug.HasValue() ? "/" + slug : "", Request.Url.Query
                 ));
             }
 
