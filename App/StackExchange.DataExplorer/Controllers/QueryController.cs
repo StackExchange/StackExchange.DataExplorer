@@ -378,8 +378,8 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
             if (!TryGetSite(sitename, out site))
             {
-                return site == null ?  (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/csv/{1}{2}",
-                    site.TinyName.ToLower(), revisionId, slug.HasValue() ? "/" + slug : ""
+                return site == null ?  (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/csv/{1}{2}{3}",
+                    site.TinyName.ToLower(), revisionId, slug.HasValue() ? "/" + slug : "", Request.Url.Query 
                 ));
             }
 
@@ -533,8 +533,8 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
             if (!TryGetSite(sitename, out site))
             {
-                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/plan/{1}{2}",
-                    site.TinyName.ToLower(), revisionId, slug.HasValue() ? "/" + slug : ""
+                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/plan/{1}{2}{3}",
+                    site.TinyName.ToLower(), revisionId, slug.HasValue() ? "/" + slug : "", Request.Url.Query
                 ));
             }
 
