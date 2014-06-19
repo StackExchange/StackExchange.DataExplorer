@@ -39,10 +39,10 @@
             <h3>Enter Parameters</h3>
         </div>
         <div id="query-options">
-            <button id="submit-query" type="submit">Run Query</button>
+            <button id="submit-query" class="btn-normal" type="submit">Run Query</button>
             @if (AppSettings.EnableCancelQuery)
             {
-            <button id="cancel-query" type="button" disabled>Cancel</button>
+            <button id="cancel-query" class="btn-normal" type="button" disabled>Cancel</button>
             }
             <span class="options">
                 Options:
@@ -89,12 +89,12 @@
     <div id="loading">
         <img src="http://sstatic.net/img/progress-dots.gif" alt="loading" /> Hold tight while we fetch your results
     </div>
-    <div id="error-message"></div>
+    <div id="error-message" class="error-message"></div>
     <div id="query-results" class="result-option">
         <div class="subheader">
             <div class="group">
                 <div class="miniTabs">
-                    <a id="resultSetsTab" class="optional" href="#resultSets">Results</a>
+                    <a id="resultSetsTab" class="optional" href="#resultSets">Results<span class="tab-counter" title="Change result set">[:current/:total]</span></a>
                     <a id="messagesTab" href="#messages">Messages</a>
                     <a id="graphTab" class="optional" href="#graph">Graph</a>
                     <a id="executionPlanTab" class="optional" href="#executionPlan">Execution Plan</a>
@@ -111,7 +111,6 @@
     </div>
 </div>
 @Scripts.Render("~/assets/js/query")
-@Scripts.Render("~/assets/js/flot")
 <script type="text/javascript">
     DataExplorer.ready(function () {
         if (loadCachedResults) {

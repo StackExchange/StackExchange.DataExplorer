@@ -43,10 +43,10 @@
         }
 
         if (!target.length) {
-            return;
+            return target;
         }
 
-        target.each(function () {
+        return target.each(function () {
             var key = 'tmpl-' + attribute,
                 self = $(this),
                 template = self.data(key);
@@ -239,13 +239,14 @@ DataExplorer.ready(function () {
 $.fn.tabs = function (passthrough) {
     return this.delegate("a:not(.youarehere)", "click", function () {
         $(this.hash).show();
-        $(this).addClass("youarehere")
-            .trigger('show') 
+        $(this).addClass("youarehere") 
             .siblings()
             .removeClass("youarehere")
             .each(function () {
                 $(this.hash).hide();
-            });
+            })
+            .end()
+            .trigger('show', [ this.hash ]);
     }).delegate("a", "click", function () {
         return !passthrough;
     });
@@ -291,41 +292,7 @@ $.fn.sortChildren = function (map, insert) {
     });
 };
 
-if (!Object.keys) {
-    Object.keys = (function () {
-        var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length
-
-        return function (obj) {
-            if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object')
-
-            var result = []
-
-            for (var prop in obj) {
-                if (hasOwnProperty.call(obj, prop)) result.push(prop)
-            }
-
-            if (hasDontEnumBug) {
-                for (var i = 0; i < dontEnumsLength; i++) {
-                    if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i])
-                }
-            }
-            return result
-        }
-    })();
-};
-
-document.create = function create(element, attributes) {
+document.create = function create(element, attributes, appendTo) {
     element = document.createElement(element);
 
     if (attributes) {
@@ -352,6 +319,10 @@ document.create = function create(element, attributes) {
         }
     }
 
+    if (appendTo) {
+        appendTo.appendChild(element);
+    }
+
     return element;
 };
 
@@ -365,12 +336,6 @@ function getNextElementSibling(element) {
     } while (element && element.nodeType !== 1);
 
     return element;
-}
-
-if (!String.prototype.trim) {
-    String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/g, '');
-    };
 }
 
 String.prototype.format = function (replacements) {
@@ -416,12 +381,6 @@ String.prototype.from = function (ch, inclusive) {
 
     return this.substring(ch + (inclusive ? 0 : 1));
 };
-
-if (!Date.now) {
-    Date.now = function () {
-        return +new Date();
-    }
-}
 
 window.location.param = (function () {
     var cache = null;
@@ -538,6 +497,35 @@ Date.prototype.toRelativeTimeMini = (function () {
         return rendered;
     };
 })();
+
+Number.prototype.prettify = function () {
+    var number = this,
+        current,
+        formatted = '',
+        negative = number < 0;
+
+    if (negative) {
+        number = -number;
+    }
+
+    if (number < 1000) {
+        return (negative ? '-' : '') + (Math.floor(number) == number ? number: number.toFixed(2));
+    }
+
+    do {
+        current = number / 1000;
+        number = Math.floor(current);
+        current = Math.round((current - number) * 1000);
+
+        formatted = current + formatted;
+
+        if (number > 0) {
+            formatted = (current < 100 ? '0' : '') + (current < 10 ? '0' : '') + formatted;
+        }
+    } while (number > 0 && (formatted = ',' + formatted));
+
+    return (negative ? '-' : '') + formatted;
+};
 
 function htmlEncode(text) {
     return document.createElement("div").appendChild(document.createTextNode(text)).parentNode.innerHTML;

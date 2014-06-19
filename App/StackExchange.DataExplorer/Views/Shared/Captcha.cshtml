@@ -12,12 +12,8 @@
        } 
        @Html.Raw(r)
     </div>
-    <p></p>
-    <div style="padding:5px; display:none;" class="ui-state-error ui-corner-all" id="captcha-error">
-        <p>
-            <span style="float:left; margin-right:0.3em;" class="ui-icon ui-icon-alert"></span>
-            <strong>Error:</strong> looks like you typed in the wrong words - try again
-        </p>
+    <div class="error-message">
+        <strong>Whoops!</strong> Looks like you didn't get the captcha quite right, please try again.
     </div>
-    <input id="btn-captcha" style="font-weight:bold;" type="button" name="submit-captcha" value="&nbsp;I'm a Human Being&nbsp;"/><br>
+    <button class="btn-normal" type="submit">I'm a Human Being!</button>
 </div>

@@ -789,7 +789,7 @@ i.button {
   margin: 0px 5px 0px 0px;
 }
 
-#submit-query, #cancel-query {
+button.btn-normal {
   cursor: pointer;
   font-weight: bold;
   margin: 0px 6px 0px 0px;
@@ -907,7 +907,7 @@ ul.linkbar li {
   background: url('//cdn.sstatic.net/beta/img/icon-16.png') no-repeat scroll 3px center;
 }
 
-#error-message {
+.error-message {
   background-color: #F5E9E9;
   border: 1px solid #B50000;
   color: #B50000;
@@ -916,7 +916,7 @@ ul.linkbar li {
   padding: 10px 14px 10px 14px;
 }
 
-#error-message.notice {
+.error-message.notice {
   background-color: #E9F5E9;
   border: 1px solid #16B500;
   color: #209403;
@@ -1035,32 +1035,6 @@ ul.linkbar li {
   border: 1px solid #D3D3D3;
 }
 
-#resultSets {
-  cursor: default;
-  height: 500px;
-}
-
-#resultSets .slick-header {
-  border-top-color: transparent;
-}
-
-#resultSets .slick-header-column {
-  text-align: center;
-}
-
-#resultSets .slick-cell {
-  
-}
-
-#resultSets .slick-row.even {
-  background-image: none;
-}
-
-#resultSets .slick-row.odd {
-  background-color: #FAFAFA;
-  background-image: none;
-}
-
 #query-params .form-row {
   clear: both;
 }
@@ -1077,6 +1051,15 @@ ul.linkbar li {
 #graph {
   width: 980px;
   height: 500px;
+}
+
+.graph-tooltip {
+  background-color: #FEE;
+  border: 1px solid #fdd;
+  display: none;
+  opacity: 0.8;
+  padding: 3px;
+  position: absolute;
 }
 
 .offscreen {
@@ -1422,11 +1405,6 @@ pre {
   margin-left: 5px; 
 }
 
-.slick-cell.number {
-  text-align: right;  
-
-}
-
 #user-filter {
   margin-bottom: 8px;
 }
@@ -1714,9 +1692,16 @@ a.cc-wiki-link
     width: 880px;    
 }
 
-#captcha h4
-{
-    margin-bottom: 10px;
+#captcha {
+  margin-bottom: 10px;
+}
+
+#captcha h4 {
+  margin-bottom: 10px;
+}
+
+#captcha .btn-normal, #captcha .error-message {
+  margin-top: 6px;
 }
 
 /* Help Page Content */

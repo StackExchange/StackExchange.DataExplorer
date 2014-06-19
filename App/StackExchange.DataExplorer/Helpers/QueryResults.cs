@@ -120,6 +120,7 @@ namespace StackExchange.DataExplorer.Helpers
         // the position of the message when we started rendering this result set
         //  required so we can render in text
         public int MessagePosition { get; set; }
+        public bool Truncated { get; set; }
     }
 
     public class QueryResults
@@ -154,6 +155,7 @@ namespace StackExchange.DataExplorer.Helpers
         public int SiteId { get; set; }
         public string SiteName { get; set; }
         public int QueryId { get; set; }
+        public int TotalResults { get; set; }
         public int MaxResults { get; set; }
         public string FirstRun { get; set; }
         public bool Truncated { get; set; }

@@ -9,8 +9,25 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class ParsedQuery
     {
+        [Flags]
+        private enum StateFlags
+        {
+            Literal = 1 << 0,
+            String = 1 << 1,
+            Comment = 1 << 2,
+            Multiline = 1 << 3
+        }
+
+        private static readonly Regex WhitespaceRegex = new Regex(@"(?<!^)(?<whitespace>[\n ])\1+(?!$)", RegexOptions.Compiled);
+        private static readonly Regex BoundarySpacesRegex = new Regex(@"(?<!\A)^ *| *$(?!\Z)", RegexOptions.Compiled | RegexOptions.Multiline);
+
         private static readonly Regex ParamsRegex = new Regex(
             @"##(?<name>[a-zA-Z][a-zA-Z0-9]*)(?::(?<type>[a-zA-Z]+))?(?:\?(?<default>[^#]+))?##",
+            RegexOptions.Compiled
+        );
+
+        private static readonly Regex DescriptionRegex = new Regex(
+            @"-- *(?<name>[a-zA-Z][A-Za-z0-9]*) *: *(?<label>[^""]+)(?:""(?<description>[^""]+)"")?",
             RegexOptions.Compiled
         );
 
@@ -42,20 +59,22 @@ namespace StackExchange.DataExplorer.Helpers
             RegexOptions.IgnoreCase | RegexOptions.Multiline
         );
 
-        private static readonly HashSet<string> PreBreakWords = new HashSet<string>
-        {
-            "SET", "DECLARE", "SELECT", "WITH", "INSERT", "GO", "PRINT"
-        };
-
-        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan = false, TargetSites targetSites = Helpers.TargetSites.Current)
+        public ParsedQuery(string sql, NameValueCollection requestParams, bool executionPlan = false, TargetSites targetSites = TargetSites.Current)
         {
             IncludeExecutionPlan = executionPlan;
             TargetSites = targetSites;
             Parameters = new Dictionary<string, QueryParameter>();
+            Errors = new List<String>();
             Parse(sql, requestParams);
         }
 
         public List<string> Errors { get; private set; }
+        public string ErrorMessage { 
+            get
+            {
+                return string.Join("\n", Errors);
+            } 
+        }
 
         public Dictionary<string, QueryParameter> Parameters { get; private set; }
         public string Name { get; private set; }
@@ -71,7 +90,7 @@ namespace StackExchange.DataExplorer.Helpers
         public bool IncludeExecutionPlan {
             get
             {
-                return TargetSites == Helpers.TargetSites.Current && includeExecutionPlan;
+                return TargetSites == TargetSites.Current && includeExecutionPlan;
             }
 
             private set
@@ -86,13 +105,19 @@ namespace StackExchange.DataExplorer.Helpers
         public TargetSites TargetSites { get; private set; }
 
 
-        public string ErrorMessage { get; private set; }
+        
 
         /// <summary>
         /// Sql with param placeholders, initial comment is stripped, newlines normalized and query is trimmed 
         ///   all final and initial empty lines are removed
         /// </summary>
-        public string Sql { get; private set; }
+        private StringBuilder sql = new StringBuilder();
+        public string Sql {
+            get
+            {
+                return sql.ToString().Trim();
+            }
+        }
 
         /// <summary>
         /// Sql we are supposed to execute, newlines are normalizes, initial comment is stripped
@@ -132,372 +157,244 @@ namespace StackExchange.DataExplorer.Helpers
         public Guid ExecutionHash { get; private set; }
 
         private void Parse(string sql, NameValueCollection requestParams)
-        {            
-            Sql = Normalize(sql.Trim());
-            ExecutionSql = ReduceAndPopulate(Sql, requestParams);
+        {
+            var prepared = PrepareSQL(sql);
+
+            if (Errors.Count == 0)
+            {
+                ExecutionSql = SubstituteParameters(prepared, requestParams).Trim();
+            }
+
             IsExecutionReady = Errors.Count == 0;
-
-            if (Errors.Count > 0)
-            {
-                ErrorMessage = string.Join("\n", Errors);
-            }
-
-            ExecutionHash = Util.GetMD5(ExecutionSql);
             Hash = Util.GetMD5(Sql);
+
+            if (IsExecutionReady)
+            {
+                ExecutionHash = Util.GetMD5(ExecutionSql);
+            }
         }
 
-        private string SubstituteParams(string sql, NameValueCollection requestParams)
+        private StringBuilder PrepareSQL(String raw)
         {
-            Errors = new List<string>();
+            var state = StateFlags.Literal;
+            var token = new StringBuilder();
+            var executionSql = new StringBuilder();
+            char? current, next;
+            int depth = 0, i = 0;
 
-            if (requestParams == null)
+            while (i < raw.Length)
             {
-                return sql;
-            }
+                current = raw[i];
+                next = ++i < raw.Length ? raw[i] : (char?)null;
 
-            MatchCollection matches = ParamsRegex.Matches(sql);
+                bool transition = true, skipNext = false;
+                var savedState = state;
 
-            foreach (Match match in matches)
-            {
-                string name = match.Groups[1].Value;
-                string type = match.Groups[2].Value;
-                string subst = requestParams[name];
-
-                if (string.IsNullOrEmpty(subst))
+                if (state.HasFlag(StateFlags.Literal))
                 {
-                    continue;
-                }
-
-                if (!CheckIfTypeIsKnown(type))
-                {
-                    Errors.Add(string.Format("Unknown parameter type {0}!", type));
-                    continue;
-                }
-
-                if (!ValidateType(type, subst))
-                {
-                    Errors.Add(string.Format("Expected {0} to be of type {1}!", name, type));
-                    continue;
-                }
-
-                subst = EncodeType(type, subst);
-
-                string param;
-                if (string.IsNullOrEmpty(type))
-                {
-                    param = "##" + name + "##";
-                }
-                else
-                {
-                    param = "##" + name + ":" + type + "##";
-                }
-                sql = sql.Replace(param, subst);
-            }
-
-            return sql;
-        }
-
-        private string ReduceAndPopulate(string sql, NameValueCollection requestParams)
-        {
-            bool stringified = false;
-            int commented = 0;
-            string result = null;
-
-            // The goal here is to reduce the SQL to as basic of a representation as possible,
-            // without changing the actuale execution results.
-            try
-            {
-                Errors = new List<string>();
-                var buffer = new StringBuilder();
-                Action<string, int> ParseLine = null;
-
-                #region Inner Function: ParseLine
-
-                ParseLine = (line, depth) =>
-                {
-                    int startComment, startString, startSingleComment, endComment, endString;
-
-                    if (line.Length == 0 || (!stringified && line.Trim().Length == 0))
+                    if (current == '\'')
                     {
-                        return;
+                        state = StateFlags.String;
                     }
-
-                    if (depth == 10)
+                    else if (current.Append(next) == "--")
                     {
-                        // Should never happen, but if we get this deep it's just safer to bail
-                        throw new StackOverflowException("SQL reduction has likely gone wrong");
+                        state = StateFlags.Comment;
+                    }
+                    else if (/*options.multilineComments &&*/ current.Append(next) == "/*")
+                    {
+                        state = StateFlags.Comment | StateFlags.Multiline;
+                        ++depth;
+                        skipNext = true;
                     }
                     else
                     {
+                        transition = false;
+                    }
+
+                    if (transition)
+                    {
+                        ParseToken(token, savedState, state, executionSql);
+                        transition = false;
+                        token.Clear();
+                    }
+                }
+                else if (state.HasFlag(StateFlags.Comment))
+                {
+                    if (state.HasFlag(StateFlags.Multiline) && current.Append(next) == "*/")
+                    {
+                        skipNext = true;
+                        transition = --depth == 0;
+                    }
+                    else
+                    {
+                        transition = !state.HasFlag(StateFlags.Multiline) && current == '\n';
+                    }
+
+                    if (/*options.nestedMultlineComments &&*/ !transition && current.Append(next) == "/*")
+                    {
+                        skipNext = true;
                         ++depth;
                     }
-
-                    if (commented > 0)
+                }
+                else if (state.HasFlag(StateFlags.String))
+                {
+                    if (current.Append(next) == /*options.stringEscapeCharacter*/ "'" + "'")
                     {
-                        endComment = line.IndexOf("*/");
-
-                        if (endComment != -1)
-                        {
-                            commented += line.Substring(0, endComment).OccurencesOf("/*") - 1;
-                            line = line.Substring(endComment + 2);
-
-                            if (commented > 0)
-                            {
-                                ParseLine(line, depth);
-
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            commented += line.OccurencesOf("/*");
-
-                            return;
-                        }
-                    }
-                    else if (stringified)
-                    {
-                        endString = line.IndexOf("'");
-
-                        if (endString == -1)
-                        {
-                            buffer.Append(ScanSegment(line)).Append('\n');
-
-                            return;
-                        }
-
-                        buffer.Append(ScanSegment(line.Substring(0, endString + 1)));
-
-                        line = line.Substring(endString + 1);
-
-                        if (line.Length > 0 && line[0] == '\'')
-                        {
-                            // We didn't actually end the string, because the single quote we
-                            // indexed before was actually escaping this single quote.
-                            buffer.Append('\'');
-                            ParseLine(line.Substring(1), depth);
-
-                            return;
-                        }
-                        else if (line.Length == 0)
-                        {
-                            // We run into spacing issues without this if this string terminates the line
-                            buffer.Append(" ");
-                        }
-
-                        stringified = false;
-                    }
-
-                    List<string> substitutions = new List<string>();
-                    string remainder = null;
-
-                    line = QuotesRegex.Replace(line, (match) =>
-                    {
-                        substitutions.Add(match.Value);
-
-                        return "~S" + (substitutions.Count - 1);
-                    });
-
-                    startSingleComment = line.IndexOf("--");
-                    startSingleComment = startSingleComment == -1 ? line.Length : startSingleComment;
-                    startString = line.IndexOf('\'', 0, startSingleComment);
-                    startComment = line.IndexOf("/*", 0, startSingleComment);
-
-                    if (startString != -1 || startComment != -1)
-                    {
-                        if ((startString < startComment && startString != -1) || startComment == -1)
-                        {
-                            stringified = true;
-                        }
-                        else
-                        {
-                            ++commented;
-                            remainder = line.Substring(startComment + 2);
-                            line = line.Substring(0, startComment);
-                        }
+                        skipNext = true;
+                        transition = false;
                     }
                     else
                     {
-                        line = line.Substring(0, startSingleComment);
+                        transition = /*(options.multilineStrings && current == '\n') ||*/  current == '\'';
                     }
-
-                    for (int i = substitutions.Count - 1; i > -1; --i)
-                    {
-                        line = line.Replace("~S" + i, substitutions[i]);
-                    }
-
-                    if (!stringified)
-                    {
-                        line = line.Trim();
-                    }
-                    else if (startString != -1)
-                    {
-                        line = line.TrimStart();
-                    }
-
-                    if (line.Length > 0 || stringified)
-                    {
-                        string firstWord = null;
-
-                        if (!stringified)
-                        {
-                            int space = line.IndexOf(' ');
-                            firstWord = line;
-
-                            if (space != -1)
-                            {
-                                firstWord = firstWord.Substring(0, space);
-                            }
-
-                            firstWord = firstWord.ToUpper();
-
-                            if (PreBreakWords.Contains(firstWord) && buffer.Length > 0)
-                            {
-                                if (buffer[buffer.Length - 1] == ' ')
-                                {
-                                    buffer[buffer.Length - 1] = '\n';
-                                }
-                                else
-                                {
-                                    buffer.Append('\n');
-                                }
-                            }
-                        }
-
-                        buffer.Append(ScanSegment(line));
-
-                        if (stringified || firstWord == "GO")
-                        {
-                            buffer.Append('\n');
-                        }
-                        else
-                        {
-                            buffer.Append(' ');
-                        }
-                    }
-
-                    if (remainder != null)
-                    {
-                        ParseLine(remainder, depth);
-                    }
-                };
-                #endregion
-
-                foreach (string line in sql.Split('\n'))
-                {
-                    ParseLine(line, 0);
                 }
 
-                result = buffer.ToString().Trim();
+                token.Append(current);
 
-                foreach (string name in Parameters.Keys)
+                if (skipNext)
                 {
-                    var parameter = Parameters[name];
-                    string value = requestParams != null ? requestParams[name] : null;
-                    ParameterType type = null;
-
-                    if (!string.IsNullOrEmpty(parameter.Type))
-                    {
-                        type = GetType(parameter.Type);
-                    }
-
-                    if (!string.IsNullOrEmpty(parameter.Default) && type != null)
-                    {
-                        if (!type.Validator(parameter.Default))
-                        {
-                            Errors.Add(string.Format("Expected default value {0} for {1} to be a {2}!",
-                                parameter.Default, name, type.TypeName));
-
-                            continue;
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(value))
-                    {
-                        if (!string.IsNullOrEmpty(parameter.Default))
-                        {
-                            value = parameter.Default;
-                        }
-                        else
-                        {
-                            Errors.Add(string.Format("Missing value for {0}!", name));
-
-                            continue;
-                        }
-                    }
-
-                    if (type != null)
-                    {
-                        if (!type.Validator(value))
-                        {
-                            Errors.Add(string.Format("Expected value of {0} to be a {1}!",
-                                name, type.TypeName));
-
-                            continue;
-                        }
-
-                        value = type.Encoder(value);
-                    }
-
-                    parameter.Value = value;
-                    result = result.Replace("##" + name + "##", value);
+                    token.Append(next);
+                    ++i;
                 }
 
-                if (commented > 0)
+                if (transition || next == null)
                 {
-                    Errors.Add("Missing end comment mark */");
+                    ParseToken(token, savedState, null, executionSql);
+                    token.Clear();
+
+                    state = StateFlags.Literal;
                 }
             }
-            catch (StackOverflowException)
-            {
-                result = SubstituteParams(sql, requestParams);
-            }
 
-            return result;
+            return executionSql;
         }
 
-        private string ScanSegment(string segment) {
-            MatchCollection matches = ParamsRegex.Matches(segment);
-            string scanned = segment;
+        private void ParseToken(StringBuilder buffer, StateFlags state, StateFlags? nextState, StringBuilder executionSql)
+        {
+            var token = buffer.ToString().Replace("\r", "");
 
-            foreach (Match match in matches)
-            {
-                string name = match.Groups["name"].Value;
-                QueryParameter parameter;
-
-                if (Parameters.ContainsKey(name))
+            if (state.HasFlag(StateFlags.Comment)) {
+                if (!state.HasFlag(StateFlags.Multiline))
                 {
-                    parameter = Parameters[name];
-                }
-                else
-                {
-                    parameter = new QueryParameter();
-                }
+                    var match = DescriptionRegex.Match(token);
 
-                if (match.Groups["type"].Success)
-                {
-                    string type = match.Groups["type"].Value.ToLower();
-
-                    if (!CheckIfTypeIsKnown(type))
+                    if (match.Success)
                     {
-                        Errors.Add(string.Format("{0} has unknown parameter type {1}!", name, type));
+                        var name = match.Groups["name"].Value;
+                        var parameter = Parameters.ContainsKey(name) ? Parameters[name] : new QueryParameter();
+
+                        parameter.Label = match.Groups["label"].Value;
+
+                        if (match.Groups["description"].Success)
+                        {
+                            parameter.Description = match.Groups["description"].Value;
+                        }
+
+                        Parameters[name] = parameter;
+                    }
+
+                    executionSql.Append('\n');
+                }
+
+                sql.Append(token);
+            }
+            else
+            {
+                sql.Append(token);
+
+                if (!state.HasFlag(StateFlags.String))
+                {
+                    token = WhitespaceRegex.Replace(token, "${whitespace}");
+                    token = BoundarySpacesRegex.Replace(token, "");
+
+                    if (nextState.HasValue && nextState.Value.HasFlag(StateFlags.Comment) && !nextState.Value.HasFlag(StateFlags.Multiline))
+                    {
+                        token = token.TrimEnd(' ');
+                    }
+                }
+
+                var matches = ParamsRegex.Matches(token);
+
+                foreach (Match match in matches)
+                {
+                    var name = match.Groups["name"].Value;
+                    var parameter = Parameters.ContainsKey(name) ? Parameters[name] : new QueryParameter();
+
+                    if (match.Groups["type"].Success)
+                    {
+                        var type = match.Groups["type"].Value.ToLower();
+
+                        if (CheckIfTypeIsKnown(type))
+                        {
+                            parameter.Type = type;
+                        }
+                        else
+                        {
+                            Errors.Add(string.Format("{0} has unknown parameter type {1}!", name, type));
+                        }
+
+                        
+                    }
+
+                    if (match.Groups["default"].Success)
+                    {
+                        var value = match.Groups["default"].Value;
+
+                        if (!parameter.Type.HasValue() || ValidateType(parameter.Type, value))
+                        {
+                            parameter.Default = value;
+                        }
+                        else
+                        {
+                            Errors.Add(string.Format("{0}'s default value of {1} is invalid for the type {2}!", name, value, parameter.Type));
+                        }
+                    }
+
+                    parameter.Required = parameter.Default == null;
+
+                    Parameters[name] = parameter;
+                    token = token.ReplaceFirst(match.Value, "##" + name + "##");
+                }
+
+                if (executionSql.Length > 0 && executionSql[executionSql.Length - 1] == '\n')
+                {
+                    token = token.TrimStart('\n', ' ');
+                }
+
+                executionSql.Append(token);
+            }
+        }
+
+        private string SubstituteParameters(StringBuilder sql, NameValueCollection requestParams)
+        {
+            foreach (string name in Parameters.Keys)
+            {
+                var parameter = Parameters[name];
+                var value = requestParams != null && requestParams.Contains(name) ? requestParams[name] : parameter.Default;
+
+                if (parameter.Required && !value.HasValue())
+                {
+                    Errors.Add(string.Format("Missing value for {0}!", name));
+
+                    continue;
+                }
+
+                if (parameter.Type.HasValue())
+                {
+                    if (!ValidateType(parameter.Type, value))
+                    {
+                        Errors.Add(string.Format("Expected value of {0} to be a {1}!", name, parameter.Type));
 
                         continue;
                     }
 
-                    parameter.Type = type;
+                    value = EncodeType(parameter.Type, value);
                 }
 
-                if (match.Groups["default"].Success)
-                {
-                    parameter.Default = match.Groups["default"].Value;
-                }
-
-                Parameters[name] = parameter;
-                scanned = scanned.ReplaceFirst(match.Value, "##" + name + "##");
+                sql.Replace("##" + name + "##", value);
             }
 
-            return scanned;
+            return sql.ToString();
         }
 
         private static bool CheckIfTypeIsKnown(string type)
@@ -520,44 +417,14 @@ namespace StackExchange.DataExplorer.Helpers
             return GetType(type).Encoder(data);
         }
 
-
-        private string Normalize(string sql)
-        {
-            var buffer = new StringBuilder();
-            bool started = false;
-            foreach (string line in sql.Split('\n'))
-            {
-                string current = line;
-
-                if (current.EndsWith("\r"))
-                {
-                    current = current.Substring(0, current.Length - 1);
-                }
-
-                if (current.Length == 0 && !started)
-                {
-                    continue;
-                }
-
-                buffer.Append(current).Append("\n");
-                started = true;
-            }
-
-            string normalized = buffer.ToString();
-            int endTrim = normalized.Length - 1;
-            while (endTrim > 0 && normalized[endTrim] == '\n')
-            {
-                endTrim--;
-            }
-
-            return normalized.Substring(0, endTrim + 1);
-        }
-
         public struct QueryParameter
         {
             public string Type { get; set; }
             public string Default { get; set; }
             public string Value { get; set; }
+            public string Label { get; set; }
+            public string Description { get; set; }
+            public bool Required { get; set; }
         }
 
         #region Nested type: ParameterType

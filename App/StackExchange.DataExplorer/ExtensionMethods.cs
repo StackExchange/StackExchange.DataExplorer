@@ -767,5 +767,9 @@ namespace StackExchange.DataExplorer
             return input.Substring(0, index) + replace + input.Substring(index + search.Length);
         }
 
+        public static string Append(this char? input, char? next)
+        {
+            return (input.HasValue ? input.ToString() : "") + (next.HasValue ? next.ToString() : "");
+        }
     }
 }

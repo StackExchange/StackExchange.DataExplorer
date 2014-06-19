@@ -33,6 +33,7 @@ namespace StackExchange.DataExplorer.App_Start
             );
 
             bundles.Add(new ScriptBundle("~/assets/js/master")
+                .Include("~/Scripts/es5-shim.js")
                 .Include("~/Scripts/master.js")
                 .Include("~/Scripts/jquery.autocomplete.js")
             );
@@ -46,18 +47,19 @@ namespace StackExchange.DataExplorer.App_Start
                 .Include("~/Scripts/codemirror/codemirror.js")
                 .Include("~/Scripts/codemirror/sql.js")
                 .Include("~/Scripts/codemirror/runmode.js")
-                .Include("~/Scripts/query.js")
+                .Include("~/Scripts/flot/jquery.flot.js")
+                .Include("~/Scripts/flot/jquery.colorhelpers.js")
+                .Include("~/Scripts/query.parameterparser.js")
+                .Include("~/Scripts/query.resultset.js")
+                .Include("~/Scripts/query.graph.js")
                 .Include("~/Scripts/qp.js")
                 .Include("~/Scripts/query.siteswitcher.js")
+                .Include("~/Scripts/query.js")
             );
 
             bundles.Add(new ScriptBundle("~/assets/js/editor")
                 .Include("~/Scripts/query.sidebar.js")
                 .Include("~/Scripts/query.tablehelpers.js")
-            );
-
-            bundles.Add(new ScriptBundle("~/assets/js/flot")
-                .Include("~/Scripts/flot/jquery.flot.js")
             );
 
             bundles.Add(new StyleBundle("~/assets/css/master")
@@ -70,11 +72,11 @@ namespace StackExchange.DataExplorer.App_Start
             );
 
             bundles.Add(new StyleBundle("~/assets/css/query")
-                .Include("~/Content/smoothness/jquery-ui-1.8.1.custom.css")
                 .Include("~/Content/codemirror/codemirror.css")
                 .Include("~/Content/codemirror/custom.css")
                 .Include("~/Content/codemirror/theme.css")
-                .Include("~/Content/slickgrid/slick.grid.css")
+                .Include("~/Content/slickgrid/slick.grid.css", new CssRewriteUrlTransform())
+                .Include("~/Content/query.css", new CssRewriteUrlTransform())
                 .Include("~/Content/qp/qp.css")
             );
         }
