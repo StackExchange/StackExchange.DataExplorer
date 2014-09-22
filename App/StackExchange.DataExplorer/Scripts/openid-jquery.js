@@ -20,7 +20,7 @@ var providers_large = {
     },
     yahoo: {
         name: 'Yahoo',
-        url: 'http://yahoo.com/',
+        url: 'https://me.yahoo.com/',
         x: -1,
         y: -63
     },
