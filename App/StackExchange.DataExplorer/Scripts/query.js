@@ -93,7 +93,7 @@ DataExplorer.ready(function () {
         });
 
         if (editor) {
-            wrapper = $(editor.getScrollerElement());
+            wrapper = $(editor.getScrollerElement()).closest('.CodeMirror');
         }
 
         function resizePanel(available) {
@@ -105,7 +105,7 @@ DataExplorer.ready(function () {
             DataExplorer.TableHelpers.resize((available - offset) + 9);
 
             if (wrapper) {
-                offset = wrapper.closest('.CodeMirror').outerHeight() - wrapper.height();
+                offset = wrapper.outerHeight() - wrapper.height();
                 
                 wrapper.height(available - offset);
                 editor.refresh();
