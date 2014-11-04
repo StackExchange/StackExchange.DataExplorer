@@ -5,6 +5,7 @@
     line-height: 16px;
     border: 1px solid #CCCCCC;
     border-top-color: #999999;
+    height: 480px;
 }
 /*
 .CodeMirror-focused
@@ -15,8 +16,4 @@
 .CodeMirror pre 
 {
     overflow: visible;
-}
-
-.CodeMirror-scroll {
-  height: 480px;
 }
