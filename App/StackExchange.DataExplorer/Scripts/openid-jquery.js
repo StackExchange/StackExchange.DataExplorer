@@ -24,12 +24,6 @@ var providers_large = {
         x: -1,
         y: -63
     },
-    myopenid: {
-        name: 'MyOpenID',
-        url: 'http://myopenid.com/',
-        x: -1,
-        y: -187
-    },
     aol: {
         name: 'AOL',
         label: 'Enter your AOL screenname',
@@ -67,27 +61,6 @@ var providers_small = {
         url: 'http://{username}.pip.verisignlabs.com/',
         x: -1,
         y: -378
-    },
-    claimid: {
-        name: 'ClaimID',
-        label: 'Enter your ClaimID username',
-        url: 'http://openid.claimid.com/{username}',
-        x: -1,
-        y: -326
-    },
-    clickpass: {
-        name: 'ClickPass',
-        label: 'Enter your ClickPass username',
-        url: 'http://clickpass.com/public/{username}',
-        x: -1,
-        y: -274
-    },
-    google_profile: {
-        name: 'Google_Profile',
-        label: 'Enter your Google Profile username',
-        url: 'http://www.google.com/profiles/{username}',
-        x: -1,
-        y: -300
     }
 };
 

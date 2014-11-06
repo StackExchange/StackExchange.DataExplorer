@@ -247,7 +247,6 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (identifier.StartsWith(@"http://google.com/accounts/o8/id")) return true;
             if (identifier.StartsWith(@"http://me.yahoo.com")) return true;
-            if (identifier.Contains(@"//www.google.com/profiles/")) return true;
             if (identifier.StartsWith(@"http://stackauth.com/")) return true;
             if (identifier.StartsWith(@"http://openid.stackexchange.com/")) return true;
             return false;
