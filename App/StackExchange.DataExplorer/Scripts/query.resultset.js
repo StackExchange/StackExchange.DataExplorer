@@ -84,9 +84,9 @@
         }
     }
 
-    function ColumnFormatter(resultSet, url) {
-        var base = url,
-            autolinker = /^(https?|site):\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.;]*[-A-Z0-9+&@#\/%=~_\[\]](?:\|.+?)?$/i,
+    function ColumnFormatter(resultSet, siteInfo) {
+        var base = siteInfo.url,
+            autolinker = /^(https?|site|query):\/\/[-A-Z0-9+&@#\/%?=~_\[\]\(\)!:,\.;]*[-A-Z0-9+&@#\/%=~_\[\]](?:\|.+?)?$/i,
             dummy = document.createElement('a'),
             wrapper = dummy,
             _outerHTML = 'outerHTML';
@@ -157,6 +157,9 @@
                     } else {
                         url = base + url;
                     }
+                } else if (matches[1] === 'query') {
+                    url = url.substring('query://'.length);
+                    url = '/' + siteInfo.name + '/query/' + url;
                 }
 
                 dummy.setAttribute('href', url);
