@@ -8,12 +8,13 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+using System.Data.EntityClient;
 using System.Data.Objects;
 using System.Data.Objects.DataClasses;
-using System.Data.EntityClient;
-using System.ComponentModel;
-using System.Xml.Serialization;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 [assembly: EdmSchemaAttribute()]
 #region EDM Relationship Metadata
@@ -187,6 +188,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         private ObjectSet<VoteType> _VoteTypes;
 
         #endregion
+
         #region AddTo Methods
     
         /// <summary>
@@ -246,11 +248,11 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
     }
-    
 
     #endregion
-    
+
     #region Entities
     
     /// <summary>
@@ -275,6 +277,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -377,6 +380,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         partial void OnDateChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -419,6 +423,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -443,6 +448,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -593,6 +599,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         partial void OnUserIdChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -673,6 +680,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -697,6 +705,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1159,6 +1168,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         partial void OnCommunityOwnedDateChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -1245,6 +1255,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -1269,6 +1280,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1323,6 +1335,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         partial void OnTagNameChanged();
 
         #endregion
+
     
     }
     
@@ -1348,6 +1361,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1666,6 +1680,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         partial void OnDownVotesChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -1714,6 +1729,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -1738,6 +1754,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1888,6 +1905,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         partial void OnUserIdChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -1930,6 +1948,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -1954,6 +1973,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -2008,6 +2028,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         partial void OnNameChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -2034,8 +2055,10 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         }
 
         #endregion
+
     }
 
     #endregion
+
     
 }
