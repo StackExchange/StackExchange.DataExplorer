@@ -1106,7 +1106,7 @@ div.grippie {
 }
 
 .openid-identifier {
-  background:url("http://sstatic.net/img/openid-large.png") no-repeat scroll left center transparent;
+  background:url("//cdn.sstatic.net/img/openid-large.png") no-repeat scroll left center transparent;
   height:22px;
   line-height:22px;
   padding-left:32px;
@@ -1550,7 +1550,7 @@ font-weight:bold;
   width:33px;
   cursor:pointer;
   display: block;
-  background-image:url("http://sstatic.net/stackoverflow/img/sprites.png?v=272483674ecb");
+  background-image:url("./images/so-sprites.png");
   background-repeat:no-repeat;
   overflow:hidden;
 }
@@ -1676,7 +1676,7 @@ a.odata {
 
 a.cc-wiki-link 
 {
-    background-image: url(http://sstatic.net/stackoverflow/img/sprites.png?v=2);
+    background-image: url('./images/so-sprites.png');
     background-repeat: no-repeat;
     overflow: hidden;
     background-position: 0px -70px;
