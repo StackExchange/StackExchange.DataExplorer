@@ -573,7 +573,7 @@ DataExplorer.ready(function () {
                 selectedTab = firstTab;
             }
 
-            selectedTab.click();
+            selectedTab.removeClass('youarehere').click();
 
             var height = 0,
                 maxHeight = 500;
