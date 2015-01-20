@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using System.Web.Script.Serialization;
 using MarkdownSharp;
 
 namespace StackExchange.DataExplorer.Helpers

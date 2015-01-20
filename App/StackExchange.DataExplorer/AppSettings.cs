@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using StackExchange.DataExplorer.Helpers;
+using System;
 using System.Linq;
 using System.Reflection;
-using Dapper;
-using StackExchange.DataExplorer.Helpers;
-using StackExchange.DataExplorer.Models;
-using Newtonsoft.Json;
 
 namespace StackExchange.DataExplorer
 {

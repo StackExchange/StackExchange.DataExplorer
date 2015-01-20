@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.ViewModel

@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using StackExchange.DataExplorer.Models;
 using System.Data;
-using Dapper;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
 using System.Data.Common;
-using StackExchange.Profiling;
-using System.Diagnostics;
 using System.Reflection.Emit;
 
 namespace Dapper

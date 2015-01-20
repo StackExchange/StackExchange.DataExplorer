@@ -14,7 +14,6 @@ using log4net;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
-using Dapper;
 using System.Web;
 
 namespace StackExchange.DataExplorer.Controllers
