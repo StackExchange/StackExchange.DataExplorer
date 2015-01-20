@@ -3,12 +3,13 @@
         var rows = resultSet.rows,
             columns = resultSet.columns,
             widths = estimateColumnSizes(columns, rows),
-            hasTags = false,
             grid;
 
         target = $(target);
 
         for (var i = 0; i < columns.length; ++i) {
+            var name = columns[i].name.toLowerCase();
+
             columns[i] = {
                 'cssClass': columns[i].type === 'Number' ? 'number' : 'text',
                 'name': columns[i].name,
@@ -20,7 +21,7 @@
             };
 
             if (name === 'tags' || name === 'tagname') {
-                hasTags = true;
+                columns[i].cssClass = 'tags';
             }
         }
 
@@ -30,7 +31,7 @@
             'enableCellRangeSelection': false,
             'enableTextSelectionOnCells': true,
             'formatterFactory': new ColumnFormatter(resultSet, url),
-            'rowHeight': hasTags ? 35 : 25            
+            'rowHeight': 29            
         };
 
         this.show = function () {
