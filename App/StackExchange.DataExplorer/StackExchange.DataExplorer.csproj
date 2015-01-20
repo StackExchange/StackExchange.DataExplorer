@@ -361,6 +361,7 @@
     <Content Include="Scripts\es5-shim.js" />
     <Content Include="Scripts\flot\jquery.colorhelpers.js" />
     <Content Include="Scripts\flot\jquery.flot.js" />
+    <Content Include="Scripts\flot\jquery.flot.time.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />
     <Content Include="Scripts\jquery.autocomplete.js" />
     <Content Include="Scripts\jquery.event.drag-2.0.js" />

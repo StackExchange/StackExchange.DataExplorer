@@ -48,6 +48,7 @@ namespace StackExchange.DataExplorer.App_Start
                 .Include("~/Scripts/codemirror/sql.js")
                 .Include("~/Scripts/codemirror/runmode.js")
                 .Include("~/Scripts/flot/jquery.flot.js")
+                .Include("~/Scripts/flot/jquery.flot.time.js")
                 .Include("~/Scripts/flot/jquery.colorhelpers.js")
                 .Include("~/Scripts/query.parameterparser.js")
                 .Include("~/Scripts/query.resultset.js")
