@@ -1861,19 +1861,14 @@ a.cc-wiki-link
 .post-tag {
   color: #3E6D8E;
   background-color: #E0EAF1;
-  border-bottom: 1px solid #B3CEE1;
-  border-right: 1px solid #B3CEE1;
   padding: 3px 4px 3px 4px;
   margin: 2px 2px 2px 0;
   text-decoration: none;
-  font-size: 80%;
-  line-height: 2.4;
+  font-size: 90%;
   white-space: nowrap;
 }
 
 .post-tag:hover {
   background-color: #C4DAE9;
-  border-bottom: 1px solid #C4DAE9;
-  border-right: 1px solid #C4DAE9;
   text-decoration: none;
 }

@@ -22,9 +22,6 @@
     @Styles.Render("~/assets/css/query")
 }
 
-<style type="text/css">
-    @Html.Raw(site.TagCss)
-</style>
 <div id="query">
     <form id="runQueryForm" action="/query/@ViewData["query_action"]" method='post'>
         <div id="metadata">
