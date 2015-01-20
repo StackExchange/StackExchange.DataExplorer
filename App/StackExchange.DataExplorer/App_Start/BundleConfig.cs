@@ -64,7 +64,7 @@ namespace StackExchange.DataExplorer.App_Start
 
             bundles.Add(new StyleBundle("~/assets/css/master")
                 .Include("~/Content/font-awesome/css/font-awesome.min.css", new CssRewriteUrlTransform())
-                .Include("~/Content/site.css")
+                .Include("~/Content/site.css", new CssRewriteUrlTransform())
                 .Include("~/Content/homepage.css")
                 .Include("~/Content/topbar.css", new CssRewriteUrlTransform())
                 .Include("~/Content/header.css", new CssRewriteUrlTransform())
