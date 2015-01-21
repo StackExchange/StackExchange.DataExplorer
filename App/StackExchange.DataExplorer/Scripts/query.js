@@ -29,6 +29,8 @@
                 'lineNumbers': true,
                 'extraKeys': {
                     'Ctrl-Enter': run,
+                    'Shift-Tab': 'indentLess',
+                    'Tab': 'indentMore',
                     'F5': run
                 }
             }));
