@@ -529,7 +529,10 @@ DataExplorer.ready(function () {
                     gridPanel.append(document.create('div', { className: 'subpanel' }));
                     grids.push(new DataExplorer.ResultSet(
                         response.resultSets[i],
-                        response.url,
+                        {
+                            url: response.url,
+                            name: response.siteName
+                        },
                         '#resultSets .subpanel:nth-child(' + (i + 1) + ')'
                     ));
                 }
