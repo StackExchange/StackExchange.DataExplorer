@@ -569,9 +569,10 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static void ProcessMagicColumns(QueryResults results, SqlConnection cnn)
         {
-            int index = 0;
             foreach (ResultSet resultSet in results.ResultSets)
             {
+                int index = 0;
+
                 foreach (ResultColumnInfo column in resultSet.Columns)
                 {
                     if (magic_columns.ContainsKey(column.Name))
@@ -583,10 +584,10 @@ namespace StackExchange.DataExplorer.Helpers
                         {
                             int siteNameIndex = 0;
                             foreach (var item in resultSet.Columns)
-	                        {
-		                        if (item.Type == ResultColumnType.Site) break;
+                            {
+                                if (item.Type == ResultColumnType.Site) break;
                                 siteNameIndex++;
-	                        }
+                            }
 
                             var sites = Current.DB.Sites.All();
                             foreach (var group in resultSet.Rows.GroupBy(r => r[siteNameIndex]))
@@ -602,6 +603,7 @@ namespace StackExchange.DataExplorer.Helpers
                             ProcessColumn(cnn, index, resultSet.Rows, column);
                         }
                     }
+
                     index++;
                 }
             }
