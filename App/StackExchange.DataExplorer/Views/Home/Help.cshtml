@@ -16,7 +16,7 @@
             <h2>Stack Exchange Data Explorer is&hellip;</h2>
             <p>
                 &hellip;an open source tool for running arbitrary queries against public data from the Stack Exchange network.
-                Features include collaborative query editing and <a href="http://www.odata.org/">OData</a> endpoints for all graduated
+                Features include collaborative query editing @if (AppSettings.EnableOdata) { @("and") <a href="http://www.odata.org/">OData</a> @("endpoints")} for all graduated
                 and public beta Stack Exchange sites.
             </p>
             <p>

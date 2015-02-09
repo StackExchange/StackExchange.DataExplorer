@@ -64,6 +64,9 @@ namespace StackExchange.DataExplorer
         [Default(null)]
         public static HelperTableCachePreferences HelperTableOptions { get; private set; }
 
+        [Default(false)]
+        public static bool EnableOdata { get; private set; }
+
         public static void Refresh()
         {
             var data = Current.DB.AppSettings.All().ToDictionary(v => v.Setting, v => v.Value);

@@ -54,7 +54,9 @@
             <span class="title">@site.LastPost.ToRelativeTimeSpanMicro()</span>
             <span class="desc">most recent </span>
         </div>
-
+        
+        @if (AppSettings.EnableOdata)
+        { 
         <div class="module odata">
             <span class="desc image">
                 <a href="@site.ODataEndpoint" title="Open Data Protocol endpoint for @site.LongName">
@@ -65,6 +67,7 @@
                 <a href="@site.ODataEndpoint" title="Open Data Protocol endpoint for @site.LongName" alt="Open Data Protocol endpoint for @site.LongName">OData</a>
             </span>
         </div>
+        }
     </div>
 }
 
