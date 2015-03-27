@@ -45,10 +45,10 @@ Once done, you'll need to populate the `Sites` table with a record for each site
 
  - [ASP.NET MVC 3](http://www.asp.net/mvc/mvc3)
  - [MiniProfiler](http://nuget.org/packages/MiniProfiler)
- - [Dapper](https://github.com/SamSaffron/dapper-dot-net)
+ - [Dapper](https://github.com/StackExchange/dapper-dot-net)
  - [jQuery](http://jquery.com/)
  - [CodeMirror](http://codemirror.net/)
- - [SlickGrid](https://github.com/mleibman/SlickGrid)
+ - [SlickGrid](https://github.com/mleibman/SlickGrid) (currently using [a fork](https://github.com/tms/SlickGrid) for updates)
  - [Flot](http://www.flotcharts.org/)
  - [Elmah](http://code.google.com/p/elmah/)
  - [Json.NET](http://james.newtonking.com/json)
