@@ -6,7 +6,7 @@
 <head>
     @{Site site = Current.Controller.Site;}
     <title>@Html.Raw((string)ViewData["PageTitle"])</title>
-    @if (site != null)
+    @if (site != null && AppSettings.EnableOdata)
     {
         @Html.Raw(string.Format("<link rel=\"odata.service\" title=\"{0} OData Endpoint\" href=\"{1}\"/>", site.LongName, site.ODataEndpoint))
     }
