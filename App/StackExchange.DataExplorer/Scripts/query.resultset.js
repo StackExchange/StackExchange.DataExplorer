@@ -178,7 +178,7 @@
         }
 
         function dateFormatter(row, cell, value, column, context) {
-            if (!value) {
+            if (!value && value !== 0) {
                 return defaultFormatter(row, cell, value, column, context);
             }
 
