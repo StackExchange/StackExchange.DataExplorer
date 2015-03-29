@@ -99,7 +99,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
             var batches = query.ExecutionSqlBatches.ToArray();
 
             Assert.AreEqual(1, batches.Length);
-            Assert.AreEqual("SELECT 1\nSELECT 2\n1", batches[0]);
+            Assert.AreEqual("SELECT 1\n\nSELECT 2\n1", batches[0]);
        
         }
 
@@ -363,7 +363,7 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             Assert.IsTrue(query.ExecutionSqlBatches.Any());
             Assert.AreEqual("CREATE TABLE #Test (id int IDENTITY(1,1) NOT NULL, v VARCHAR(MAX) NOT NULL);\n" +
-                "go\nCREATE INDEX #IX_T on #Test(id)\ngo\nCREATE PROCEDURE #T_P2 @v VARCHAR(MAX) AS\nPRINT @v\n" +
+                "go\nCREATE INDEX #IX_T on #Test(id)\ngo\n\n\n\nCREATE PROCEDURE #T_P2 @v VARCHAR(MAX) AS\nPRINT @v\n" +
                 "RETURN\nGO\n#T_P2 'test'", query.ExecutionSql);
         }
 

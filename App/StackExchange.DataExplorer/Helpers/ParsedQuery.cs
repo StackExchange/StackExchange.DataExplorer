@@ -196,11 +196,11 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         state = StateFlags.String;
                     }
-                    else if (current.Append(next) == "--")
+                    else if (current == '-' && next == '-')
                     {
                         state = StateFlags.Comment;
                     }
-                    else if (/*options.multilineComments &&*/ current.Append(next) == "/*")
+                    else if (/*options.multilineComments &&*/ current == '/' && next == '*')
                     {
                         state = StateFlags.Comment | StateFlags.Multiline;
                         ++depth;
@@ -220,7 +220,7 @@ namespace StackExchange.DataExplorer.Helpers
                 }
                 else if (state.HasFlag(StateFlags.Comment))
                 {
-                    if (state.HasFlag(StateFlags.Multiline) && current.Append(next) == "*/")
+                    if (state.HasFlag(StateFlags.Multiline) && current == '*' && next == '/')
                     {
                         skipNext = true;
                         transition = --depth == 0;
@@ -230,7 +230,7 @@ namespace StackExchange.DataExplorer.Helpers
                         transition = !state.HasFlag(StateFlags.Multiline) && current == '\n';
                     }
 
-                    if (/*options.nestedMultlineComments &&*/ !transition && current.Append(next) == "/*")
+                    if (/*options.nestedMultlineComments &&*/ !transition && current == '/' && next == '*')
                     {
                         skipNext = true;
                         ++depth;
@@ -238,7 +238,7 @@ namespace StackExchange.DataExplorer.Helpers
                 }
                 else if (state.HasFlag(StateFlags.String))
                 {
-                    if (current.Append(next) == /*options.stringEscapeCharacter*/ "'" + "'")
+                    if (current == '\'' && next == '\'' /*options.stringEscapeCharacter*/)
                     {
                         skipNext = true;
                         transition = false;
