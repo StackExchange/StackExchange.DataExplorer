@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2012
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackExchange.DataExplorer", "StackExchange.DataExplorer\StackExchange.DataExplorer.csproj", "{E3A21146-D76B-487D-96A8-9D15222662FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackExchange.DataExplorer.Tests", "StackExchange.DataExplorer.Tests\StackExchange.DataExplorer.Tests.csproj", "{792E4739-E617-4DAD-8F36-A86CB17F22E8}"
