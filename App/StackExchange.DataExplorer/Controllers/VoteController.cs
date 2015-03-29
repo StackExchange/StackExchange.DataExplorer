@@ -9,7 +9,7 @@ namespace StackExchange.DataExplorer.Controllers
     public class VoteController : StackOverflowController
     {
         [HttpPost]
-        [Route(@"vote/{querySetId:\d+}")]
+        [StackRoute(@"vote/{querySetId:\d+}")]
         public ActionResult Vote(int querySetId, string voteType)
         {
             if (Current.User.IsAnonymous)

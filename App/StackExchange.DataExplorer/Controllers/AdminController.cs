@@ -23,7 +23,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/whitelist/approve/{id:int}", HttpVerbs.Post)]
+        [StackRoute("admin/whitelist/approve/{id:int}", HttpVerbs.Post)]
         public ActionResult ApproveWhiteListEntry(int id)
         {
             Current.DB.OpenIdWhiteList.Update(id, new { Approved = true });
@@ -31,14 +31,14 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/whitelist/remove/{id:int}", HttpVerbs.Post)]
+        [StackRoute("admin/whitelist/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveWhiteListEntry(int id)
         {
             Current.DB.OpenIdWhiteList.Delete(id);
             return Json("ok");
         }
 
-        [Route("admin/whitelist")]
+        [StackRoute("admin/whitelist")]
         public ActionResult WhiteList()
         {
             SetHeader("OpenID Whitelist");
@@ -46,7 +46,7 @@ namespace StackExchange.DataExplorer.Controllers
             return View(Current.DB.OpenIdWhiteList.All()); 
         }
 
-        [Route("admin")]
+        [StackRoute("admin")]
         public ActionResult Index()
         {
             SetHeader("Administration Utilities");
@@ -57,7 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/refresh-settings", HttpVerbs.Post)]
+        [StackRoute("admin/refresh-settings", HttpVerbs.Post)]
         public ActionResult RefreshSettings()
         {
             AppSettings.Refresh();
@@ -66,7 +66,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/clear-table-cache", HttpVerbs.Post)]
+        [StackRoute("admin/clear-table-cache", HttpVerbs.Post)]
         public ActionResult ClearTableCache()
         {
             HelperTableCache.Refresh();
@@ -75,7 +75,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/clear-cache", HttpVerbs.Post)]
+        [StackRoute("admin/clear-cache", HttpVerbs.Post)]
         public ActionResult ClearCache()
         {
             Current.DB.Execute("truncate table CachedResults");
@@ -85,7 +85,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/refresh-stats", HttpVerbs.Post)]
+        [StackRoute("admin/refresh-stats", HttpVerbs.Post)]
         public ActionResult RefreshStats()
         {
             foreach (Site site in Current.DB.Sites.All())
@@ -114,7 +114,7 @@ namespace StackExchange.DataExplorer.Controllers
             { "newest", whitelist => whitelist.OrderByDescending(w => w.CreationDate) }
         };
 
-        [Route("admin/find-dupe-users")]
+        [StackRoute("admin/find-dupe-users")]
         public ActionResult FindDuplicateUsers(string sort, bool useEmail = false)
         {
             var sorter = userSorts[sort ?? "oldest"];
@@ -166,7 +166,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
 
         }
 
-        [Route("admin/normalize-openids")]
+        [StackRoute("admin/normalize-openids")]
         public ActionResult NormalizeOpenIds()
         {
             foreach (var openId in Current.DB.UserOpenIds.All())
@@ -180,7 +180,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             return TextPlain("Done.");
         }
 
-        [Route("admin/find-dupe-whitelist-openids")]
+        [StackRoute("admin/find-dupe-whitelist-openids")]
         public ActionResult FindDuplicateWhitelistOpenIds(string sort)
         {
             var sorter = whitelistSorts[sort ?? "approved"];
@@ -198,7 +198,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             return View(dupeOpenIds);
         }
 
-        [Route("admin/normalize-whitelist-openids")]
+        [StackRoute("admin/normalize-whitelist-openids")]
         public ActionResult NormalizeWhitelistOpenIds()
         {
             foreach (var openid in Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList"))
@@ -212,7 +212,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             return TextPlain("Done.");
         }
 
-        [Route("admin/merge-users", HttpVerbs.Get)]
+        [StackRoute("admin/merge-users", HttpVerbs.Get)]
         public ActionResult MergeUsers(int masterId, int mergeId)
         {
             var canMergeMsg = "";
@@ -227,7 +227,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/merge-users-submit", HttpVerbs.Post)]
+        [StackRoute("admin/merge-users-submit", HttpVerbs.Post)]
         public ActionResult MergeSubmit(int masterId, int mergeId)
         {
             var log = new StringBuilder();
@@ -235,7 +235,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             return TextPlain(log.ToString());
         }
 
-        [Route("admin/find-dupe-user-openids")]
+        [StackRoute("admin/find-dupe-user-openids")]
         public ActionResult FindDuplicateUserOpenIds()
         {
 
@@ -250,7 +250,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         }
 
         [ValidateAntiForgeryToken]
-        [Route("admin/useropenid/remove/{id:int}", HttpVerbs.Post)]
+        [StackRoute("admin/useropenid/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveUserOpenIdEntry(int id)
         {
             Current.DB.UserOpenIds.Delete(id);

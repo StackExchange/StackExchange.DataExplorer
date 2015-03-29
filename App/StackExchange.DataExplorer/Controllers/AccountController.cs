@@ -18,14 +18,14 @@ namespace StackExchange.DataExplorer.Controllers
         private static readonly OpenIdRelyingParty openid = new OpenIdRelyingParty();
 
 
-        [Route("account/logout")]
+        [StackRoute("account/logout")]
         public ActionResult Logout()
         {
             FormsAuthentication.SignOut();
             return Redirect("~/");
         }
 
-        [Route("account/login", HttpVerbs.Get)]
+        [StackRoute("account/login", HttpVerbs.Get)]
         public ActionResult Login(string returnUrl)
         {
             SetHeader(CurrentUser.IsAnonymous ? "Log in with OpenID" : "Log in below to change your OpenID");
@@ -33,7 +33,7 @@ namespace StackExchange.DataExplorer.Controllers
             return View("Login");
         }
 
-        [Route("user/authenticate")]
+        [StackRoute("user/authenticate")]
         [ValidateInput(false)]
         public ActionResult Authenticate(string returnUrl)
         {
@@ -59,7 +59,7 @@ namespace StackExchange.DataExplorer.Controllers
                             }
                         );
 
-                        return request.RedirectingResponse.AsActionResult();
+                        return request.RedirectingResponse.AsActionResultMvc5();
                     }
                     catch (ProtocolException ex)
                     {

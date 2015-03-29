@@ -17,7 +17,7 @@ namespace StackExchange.DataExplorer.Controllers
             "OrderBy"
         };
 
-        [Route("users")]
+        [StackRoute("users")]
         public ActionResult Index(string order_by, int? page, string search)
         {
             SetHeader("Users", order_by, 
@@ -43,7 +43,7 @@ namespace StackExchange.DataExplorer.Controllers
             return View(users);
         }
 
-        [Route("users/search")]
+        [StackRoute("users/search")]
         public ActionResult Search(string order_by, string search)
         {
             var users = GetUserList(order_by == "active" ? "active" : "all", null, search);
@@ -119,7 +119,7 @@ namespace StackExchange.DataExplorer.Controllers
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
         [HttpPost]
-        [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
+        [StackRoute(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id, User updatedUser)
         {
             User user = Current.DB.Users.Get(id);
@@ -172,7 +172,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpGet]
-        [Route(@"users/edit/{id:\d+}", RoutePriority.High)]
+        [StackRoute(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id)
         {
             User user = Current.DB.Users.Get(id);
@@ -195,7 +195,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpPost]
-        [Route(@"users/save-preference/{id:\d+}/{preference}")]
+        [StackRoute(@"users/save-preference/{id:\d+}/{preference}")]
         public ActionResult SavePreference(int id, string preference, string value)
         {
             if (!AllowedPreferences.Contains(preference)) {
@@ -217,7 +217,7 @@ namespace StackExchange.DataExplorer.Controllers
             return Content("ok");
         }
 
-        [Route(@"users/{id:INT}/{name?}")]
+        [StackRoute(@"users/{id:INT}/{name?}")]
         public ActionResult Show(int id, string name, string order_by, int? page)
         {
             User user = !Current.User.IsAnonymous && Current.User.Id == id ? Current.User : Current.DB.Users.Get(id);

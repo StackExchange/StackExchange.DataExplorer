@@ -13,7 +13,7 @@ namespace StackExchange.DataExplorer.Helpers
     /// Allows MVC routing urls to be declared on the action they map to.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class RouteAttribute : ActionMethodSelectorAttribute, IComparable<RouteAttribute>
+    public class StackRouteAttribute : ActionMethodSelectorAttribute, IComparable<StackRouteAttribute>
     {
         /// <summary>
         /// Contains keys that can be used in routes for well-known constraints, e.g. "users/{id:INT}" - this route would ensure the 'id' parameter
@@ -34,29 +34,29 @@ namespace StackExchange.DataExplorer.Helpers
 
         private string _url;
 
-        public RouteAttribute(string url)
+        public StackRouteAttribute(string url)
             : this(url, "", null, RoutePriority.Default)
         {
         }
 
 
-        public RouteAttribute(string url, HttpVerbs verbs)
+        public StackRouteAttribute(string url, HttpVerbs verbs)
             : this(url, "", verbs, RoutePriority.Default)
         {
         }
 
 
-        public RouteAttribute(string url, RoutePriority priority)
+        public StackRouteAttribute(string url, RoutePriority priority)
             : this(url, "", null, priority)
         {
         }
 
-        public RouteAttribute(string url, HttpVerbs verbs, RoutePriority priority)
+        public StackRouteAttribute(string url, HttpVerbs verbs, RoutePriority priority)
             : this(url, "", verbs, priority)
         {
         }
 
-        private RouteAttribute(string url, string name, HttpVerbs? verbs, RoutePriority priority)
+        private StackRouteAttribute(string url, string name, HttpVerbs? verbs, RoutePriority priority)
         {
             Url = url.ToLower();
             Name = name;
@@ -108,9 +108,9 @@ namespace StackExchange.DataExplorer.Helpers
         /// </summary>
         public Dictionary<string, string> Constraints { get; private set; }
 
-        #region IComparable<RouteAttribute> Members
+        #region IComparable<StackRouteAttribute> Members
 
-        public int CompareTo(RouteAttribute other)
+        public int CompareTo(StackRouteAttribute other)
         {
             int diff = other.Priority.CompareTo(Priority);
             if (diff == 0)
@@ -142,21 +142,21 @@ namespace StackExchange.DataExplorer.Helpers
             IEnumerable<MethodInfo> decoratedMethods = from t in assemblyToSearch.GetTypes()
                                                        where t.IsSubclassOf(typeof (Controller))
                                                        from m in t.GetMethods()
-                                                       where m.IsDefined(typeof (RouteAttribute), false)
+                                                       where m.IsDefined(typeof (StackRouteAttribute), false)
                                                        select m;
 
             Debug.WriteLine(string.Format("MapDecoratedRoutes - found {0} methods decorated with RouteAttribute",
                                           decoratedMethods.Count()));
 
-            var methodsToRegister = new SortedDictionary<RouteAttribute, MethodInfo>();
+            var methodsToRegister = new SortedDictionary<StackRouteAttribute, MethodInfo>();
                 // sort urls alphabetically via RouteAttribute's IComparable implementation
 
             // first, collect all the methods decorated with our RouteAttribute
             foreach (MethodInfo method in decoratedMethods)
             {
-                foreach (object attr in method.GetCustomAttributes(typeof (RouteAttribute), false))
+                foreach (object attr in method.GetCustomAttributes(typeof (StackRouteAttribute), false))
                 {
-                    var ra = (RouteAttribute) attr;
+                    var ra = (StackRouteAttribute) attr;
                     if (!methodsToRegister.Any(p => p.Key.Url.Equals(ra.Url)))
                         methodsToRegister.Add(ra, method);
                     else
@@ -167,7 +167,7 @@ namespace StackExchange.DataExplorer.Helpers
             // now register the unique urls to the Controller.Method that they were decorated upon
             foreach (var pair in methodsToRegister)
             {
-                RouteAttribute attr = pair.Key;
+                StackRouteAttribute attr = pair.Key;
                 MethodInfo method = pair.Value;
                 string action = method.Name;
 

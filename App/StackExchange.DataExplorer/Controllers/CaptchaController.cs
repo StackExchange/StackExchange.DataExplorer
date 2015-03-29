@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using System.Net;
 
@@ -10,12 +6,11 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class CaptchaController : StackOverflowController
     {
-        
         /// <summary>
         /// Handles user captcha submission, either returning user to final destination or the captcha form,
         /// depending on captcha validation success.
         /// </summary>
-        [Route("captcha", HttpVerbs.Post)]
+        [StackRoute("captcha", HttpVerbs.Post)]
         public ActionResult Captcha(FormCollection form)
         {
             var challenge = form.Get<string>("recaptcha_challenge_field", "");
@@ -57,6 +52,8 @@ namespace StackExchange.DataExplorer.Controllers
 
         public static bool CaptchaPassed(string ipAddress)
         {
+            if (AppSettings.RecaptchaPrivateKey.IsNullOrEmpty()) return true;
+
             return Current.GetCachedObject(CaptchaKey(ipAddress)) != null;
         }
     }

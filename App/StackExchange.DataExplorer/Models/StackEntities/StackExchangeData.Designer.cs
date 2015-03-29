@@ -278,7 +278,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-        #region Primitive Properties
+        #region Simple Properties
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -297,7 +297,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 {
                     OnIdChanging(value);
                     ReportPropertyChanging("Id");
-                    _Id = StructuralObject.SetValidValue(value);
+                    _Id = StructuralObject.SetValidValue(value, "Id");
                     ReportPropertyChanged("Id");
                     OnIdChanged();
                 }
@@ -322,7 +322,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnUserIdChanging(value);
                 ReportPropertyChanging("UserId");
-                _UserId = StructuralObject.SetValidValue(value);
+                _UserId = StructuralObject.SetValidValue(value, "UserId");
                 ReportPropertyChanged("UserId");
                 OnUserIdChanged();
             }
@@ -346,7 +346,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnNameChanging(value);
                 ReportPropertyChanging("Name");
-                _Name = StructuralObject.SetValidValue(value, true);
+                _Name = StructuralObject.SetValidValue(value, true, "Name");
                 ReportPropertyChanged("Name");
                 OnNameChanged();
             }
@@ -370,7 +370,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnDateChanging(value);
                 ReportPropertyChanging("Date");
-                _Date = StructuralObject.SetValidValue(value);
+                _Date = StructuralObject.SetValidValue(value, "Date");
                 ReportPropertyChanged("Date");
                 OnDateChanged();
             }
@@ -381,7 +381,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-    
         #region Navigation Properties
     
         /// <summary>
@@ -449,7 +448,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-        #region Primitive Properties
+        #region Simple Properties
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -468,7 +467,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 {
                     OnIdChanging(value);
                     ReportPropertyChanging("Id");
-                    _Id = StructuralObject.SetValidValue(value);
+                    _Id = StructuralObject.SetValidValue(value, "Id");
                     ReportPropertyChanged("Id");
                     OnIdChanged();
                 }
@@ -493,7 +492,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnPostIdChanging(value);
                 ReportPropertyChanging("PostId");
-                _PostId = StructuralObject.SetValidValue(value);
+                _PostId = StructuralObject.SetValidValue(value, "PostId");
                 ReportPropertyChanged("PostId");
                 OnPostIdChanged();
             }
@@ -517,7 +516,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnScoreChanging(value);
                 ReportPropertyChanging("Score");
-                _Score = StructuralObject.SetValidValue(value);
+                _Score = StructuralObject.SetValidValue(value, "Score");
                 ReportPropertyChanged("Score");
                 OnScoreChanged();
             }
@@ -541,7 +540,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnTextChanging(value);
                 ReportPropertyChanging("Text");
-                _Text = StructuralObject.SetValidValue(value, true);
+                _Text = StructuralObject.SetValidValue(value, true, "Text");
                 ReportPropertyChanged("Text");
                 OnTextChanged();
             }
@@ -565,7 +564,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnCreationDateChanging(value);
                 ReportPropertyChanging("CreationDate");
-                _CreationDate = StructuralObject.SetValidValue(value);
+                _CreationDate = StructuralObject.SetValidValue(value, "CreationDate");
                 ReportPropertyChanged("CreationDate");
                 OnCreationDateChanged();
             }
@@ -589,7 +588,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnUserIdChanging(value);
                 ReportPropertyChanging("UserId");
-                _UserId = StructuralObject.SetValidValue(value);
+                _UserId = StructuralObject.SetValidValue(value, "UserId");
                 ReportPropertyChanged("UserId");
                 OnUserIdChanged();
             }
@@ -600,7 +599,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-    
         #region Navigation Properties
     
         /// <summary>
@@ -706,7 +704,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-        #region Primitive Properties
+        #region Simple Properties
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -725,7 +723,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 {
                     OnIdChanging(value);
                     ReportPropertyChanging("Id");
-                    _Id = StructuralObject.SetValidValue(value);
+                    _Id = StructuralObject.SetValidValue(value, "Id");
                     ReportPropertyChanged("Id");
                     OnIdChanged();
                 }
@@ -750,7 +748,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnPostTypeIdChanging(value);
                 ReportPropertyChanging("PostTypeId");
-                _PostTypeId = StructuralObject.SetValidValue(value);
+                _PostTypeId = StructuralObject.SetValidValue(value, "PostTypeId");
                 ReportPropertyChanged("PostTypeId");
                 OnPostTypeIdChanged();
             }
@@ -774,7 +772,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnAcceptedAnswerIdChanging(value);
                 ReportPropertyChanging("AcceptedAnswerId");
-                _AcceptedAnswerId = StructuralObject.SetValidValue(value);
+                _AcceptedAnswerId = StructuralObject.SetValidValue(value, "AcceptedAnswerId");
                 ReportPropertyChanged("AcceptedAnswerId");
                 OnAcceptedAnswerIdChanged();
             }
@@ -798,7 +796,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnCreationDateChanging(value);
                 ReportPropertyChanging("CreationDate");
-                _CreationDate = StructuralObject.SetValidValue(value);
+                _CreationDate = StructuralObject.SetValidValue(value, "CreationDate");
                 ReportPropertyChanged("CreationDate");
                 OnCreationDateChanged();
             }
@@ -822,7 +820,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnScoreChanging(value);
                 ReportPropertyChanging("Score");
-                _Score = StructuralObject.SetValidValue(value);
+                _Score = StructuralObject.SetValidValue(value, "Score");
                 ReportPropertyChanged("Score");
                 OnScoreChanged();
             }
@@ -846,7 +844,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnViewCountChanging(value);
                 ReportPropertyChanging("ViewCount");
-                _ViewCount = StructuralObject.SetValidValue(value);
+                _ViewCount = StructuralObject.SetValidValue(value, "ViewCount");
                 ReportPropertyChanged("ViewCount");
                 OnViewCountChanged();
             }
@@ -870,7 +868,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnBodyChanging(value);
                 ReportPropertyChanging("Body");
-                _Body = StructuralObject.SetValidValue(value, true);
+                _Body = StructuralObject.SetValidValue(value, true, "Body");
                 ReportPropertyChanged("Body");
                 OnBodyChanged();
             }
@@ -894,7 +892,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnOwnerUserIdChanging(value);
                 ReportPropertyChanging("OwnerUserId");
-                _OwnerUserId = StructuralObject.SetValidValue(value);
+                _OwnerUserId = StructuralObject.SetValidValue(value, "OwnerUserId");
                 ReportPropertyChanged("OwnerUserId");
                 OnOwnerUserIdChanged();
             }
@@ -918,7 +916,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnLastEditorUserIdChanging(value);
                 ReportPropertyChanging("LastEditorUserId");
-                _LastEditorUserId = StructuralObject.SetValidValue(value);
+                _LastEditorUserId = StructuralObject.SetValidValue(value, "LastEditorUserId");
                 ReportPropertyChanged("LastEditorUserId");
                 OnLastEditorUserIdChanged();
             }
@@ -942,7 +940,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnLastEditDateChanging(value);
                 ReportPropertyChanging("LastEditDate");
-                _LastEditDate = StructuralObject.SetValidValue(value);
+                _LastEditDate = StructuralObject.SetValidValue(value, "LastEditDate");
                 ReportPropertyChanged("LastEditDate");
                 OnLastEditDateChanged();
             }
@@ -966,7 +964,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnLastActivityDateChanging(value);
                 ReportPropertyChanging("LastActivityDate");
-                _LastActivityDate = StructuralObject.SetValidValue(value);
+                _LastActivityDate = StructuralObject.SetValidValue(value, "LastActivityDate");
                 ReportPropertyChanged("LastActivityDate");
                 OnLastActivityDateChanged();
             }
@@ -990,7 +988,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnTitleChanging(value);
                 ReportPropertyChanging("Title");
-                _Title = StructuralObject.SetValidValue(value, true);
+                _Title = StructuralObject.SetValidValue(value, true, "Title");
                 ReportPropertyChanged("Title");
                 OnTitleChanged();
             }
@@ -1014,7 +1012,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnTagsChanging(value);
                 ReportPropertyChanging("Tags");
-                _Tags = StructuralObject.SetValidValue(value, true);
+                _Tags = StructuralObject.SetValidValue(value, true, "Tags");
                 ReportPropertyChanged("Tags");
                 OnTagsChanged();
             }
@@ -1038,7 +1036,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnAnswerCountChanging(value);
                 ReportPropertyChanging("AnswerCount");
-                _AnswerCount = StructuralObject.SetValidValue(value);
+                _AnswerCount = StructuralObject.SetValidValue(value, "AnswerCount");
                 ReportPropertyChanged("AnswerCount");
                 OnAnswerCountChanged();
             }
@@ -1062,7 +1060,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnCommentCountChanging(value);
                 ReportPropertyChanging("CommentCount");
-                _CommentCount = StructuralObject.SetValidValue(value);
+                _CommentCount = StructuralObject.SetValidValue(value, "CommentCount");
                 ReportPropertyChanged("CommentCount");
                 OnCommentCountChanged();
             }
@@ -1086,7 +1084,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnFavoriteCountChanging(value);
                 ReportPropertyChanging("FavoriteCount");
-                _FavoriteCount = StructuralObject.SetValidValue(value);
+                _FavoriteCount = StructuralObject.SetValidValue(value, "FavoriteCount");
                 ReportPropertyChanged("FavoriteCount");
                 OnFavoriteCountChanged();
             }
@@ -1110,7 +1108,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnClosedDateChanging(value);
                 ReportPropertyChanging("ClosedDate");
-                _ClosedDate = StructuralObject.SetValidValue(value);
+                _ClosedDate = StructuralObject.SetValidValue(value, "ClosedDate");
                 ReportPropertyChanged("ClosedDate");
                 OnClosedDateChanged();
             }
@@ -1134,7 +1132,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnParentIdChanging(value);
                 ReportPropertyChanging("ParentId");
-                _ParentId = StructuralObject.SetValidValue(value);
+                _ParentId = StructuralObject.SetValidValue(value, "ParentId");
                 ReportPropertyChanged("ParentId");
                 OnParentIdChanged();
             }
@@ -1158,7 +1156,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnCommunityOwnedDateChanging(value);
                 ReportPropertyChanging("CommunityOwnedDate");
-                _CommunityOwnedDate = StructuralObject.SetValidValue(value);
+                _CommunityOwnedDate = StructuralObject.SetValidValue(value, "CommunityOwnedDate");
                 ReportPropertyChanged("CommunityOwnedDate");
                 OnCommunityOwnedDateChanged();
             }
@@ -1169,7 +1167,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-    
         #region Navigation Properties
     
         /// <summary>
@@ -1281,7 +1278,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-        #region Primitive Properties
+        #region Simple Properties
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -1300,7 +1297,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 {
                     OnIdChanging(value);
                     ReportPropertyChanging("Id");
-                    _Id = StructuralObject.SetValidValue(value);
+                    _Id = StructuralObject.SetValidValue(value, "Id");
                     ReportPropertyChanged("Id");
                     OnIdChanged();
                 }
@@ -1325,7 +1322,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnTagNameChanging(value);
                 ReportPropertyChanging("TagName");
-                _TagName = StructuralObject.SetValidValue(value, true);
+                _TagName = StructuralObject.SetValidValue(value, true, "TagName");
                 ReportPropertyChanged("TagName");
                 OnTagNameChanged();
             }
@@ -1336,7 +1333,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-    
     }
     
     /// <summary>
@@ -1362,7 +1358,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-        #region Primitive Properties
+        #region Simple Properties
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -1381,7 +1377,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 {
                     OnIdChanging(value);
                     ReportPropertyChanging("Id");
-                    _Id = StructuralObject.SetValidValue(value);
+                    _Id = StructuralObject.SetValidValue(value, "Id");
                     ReportPropertyChanged("Id");
                     OnIdChanged();
                 }
@@ -1406,7 +1402,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnReputationChanging(value);
                 ReportPropertyChanging("Reputation");
-                _Reputation = StructuralObject.SetValidValue(value);
+                _Reputation = StructuralObject.SetValidValue(value, "Reputation");
                 ReportPropertyChanged("Reputation");
                 OnReputationChanged();
             }
@@ -1430,7 +1426,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnEmailHashChanging(value);
                 ReportPropertyChanging("EmailHash");
-                _EmailHash = StructuralObject.SetValidValue(value, true);
+                _EmailHash = StructuralObject.SetValidValue(value, true, "EmailHash");
                 ReportPropertyChanged("EmailHash");
                 OnEmailHashChanged();
             }
@@ -1454,7 +1450,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnCreationDateChanging(value);
                 ReportPropertyChanging("CreationDate");
-                _CreationDate = StructuralObject.SetValidValue(value);
+                _CreationDate = StructuralObject.SetValidValue(value, "CreationDate");
                 ReportPropertyChanged("CreationDate");
                 OnCreationDateChanged();
             }
@@ -1478,7 +1474,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnDisplayNameChanging(value);
                 ReportPropertyChanging("DisplayName");
-                _DisplayName = StructuralObject.SetValidValue(value, true);
+                _DisplayName = StructuralObject.SetValidValue(value, true, "DisplayName");
                 ReportPropertyChanged("DisplayName");
                 OnDisplayNameChanged();
             }
@@ -1502,7 +1498,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnLastAccessDateChanging(value);
                 ReportPropertyChanging("LastAccessDate");
-                _LastAccessDate = StructuralObject.SetValidValue(value);
+                _LastAccessDate = StructuralObject.SetValidValue(value, "LastAccessDate");
                 ReportPropertyChanged("LastAccessDate");
                 OnLastAccessDateChanged();
             }
@@ -1526,7 +1522,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnWebsiteUrlChanging(value);
                 ReportPropertyChanging("WebsiteUrl");
-                _WebsiteUrl = StructuralObject.SetValidValue(value, true);
+                _WebsiteUrl = StructuralObject.SetValidValue(value, true, "WebsiteUrl");
                 ReportPropertyChanged("WebsiteUrl");
                 OnWebsiteUrlChanged();
             }
@@ -1550,7 +1546,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnLocationChanging(value);
                 ReportPropertyChanging("Location");
-                _Location = StructuralObject.SetValidValue(value, true);
+                _Location = StructuralObject.SetValidValue(value, true, "Location");
                 ReportPropertyChanged("Location");
                 OnLocationChanged();
             }
@@ -1574,7 +1570,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnAgeChanging(value);
                 ReportPropertyChanging("Age");
-                _Age = StructuralObject.SetValidValue(value);
+                _Age = StructuralObject.SetValidValue(value, "Age");
                 ReportPropertyChanged("Age");
                 OnAgeChanged();
             }
@@ -1598,7 +1594,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnAboutMeChanging(value);
                 ReportPropertyChanging("AboutMe");
-                _AboutMe = StructuralObject.SetValidValue(value, true);
+                _AboutMe = StructuralObject.SetValidValue(value, true, "AboutMe");
                 ReportPropertyChanged("AboutMe");
                 OnAboutMeChanged();
             }
@@ -1622,7 +1618,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnViewsChanging(value);
                 ReportPropertyChanging("Views");
-                _Views = StructuralObject.SetValidValue(value);
+                _Views = StructuralObject.SetValidValue(value, "Views");
                 ReportPropertyChanged("Views");
                 OnViewsChanged();
             }
@@ -1646,7 +1642,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnUpVotesChanging(value);
                 ReportPropertyChanging("UpVotes");
-                _UpVotes = StructuralObject.SetValidValue(value);
+                _UpVotes = StructuralObject.SetValidValue(value, "UpVotes");
                 ReportPropertyChanged("UpVotes");
                 OnUpVotesChanged();
             }
@@ -1670,7 +1666,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnDownVotesChanging(value);
                 ReportPropertyChanging("DownVotes");
-                _DownVotes = StructuralObject.SetValidValue(value);
+                _DownVotes = StructuralObject.SetValidValue(value, "DownVotes");
                 ReportPropertyChanged("DownVotes");
                 OnDownVotesChanged();
             }
@@ -1681,7 +1677,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-    
         #region Navigation Properties
     
         /// <summary>
@@ -1755,7 +1750,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-        #region Primitive Properties
+        #region Simple Properties
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -1774,7 +1769,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 {
                     OnIdChanging(value);
                     ReportPropertyChanging("Id");
-                    _Id = StructuralObject.SetValidValue(value);
+                    _Id = StructuralObject.SetValidValue(value, "Id");
                     ReportPropertyChanged("Id");
                     OnIdChanged();
                 }
@@ -1799,7 +1794,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnPostIdChanging(value);
                 ReportPropertyChanging("PostId");
-                _PostId = StructuralObject.SetValidValue(value);
+                _PostId = StructuralObject.SetValidValue(value, "PostId");
                 ReportPropertyChanged("PostId");
                 OnPostIdChanged();
             }
@@ -1823,7 +1818,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnVoteTypeIdChanging(value);
                 ReportPropertyChanging("VoteTypeId");
-                _VoteTypeId = StructuralObject.SetValidValue(value);
+                _VoteTypeId = StructuralObject.SetValidValue(value, "VoteTypeId");
                 ReportPropertyChanged("VoteTypeId");
                 OnVoteTypeIdChanged();
             }
@@ -1847,7 +1842,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnCreationDateChanging(value);
                 ReportPropertyChanging("CreationDate");
-                _CreationDate = StructuralObject.SetValidValue(value);
+                _CreationDate = StructuralObject.SetValidValue(value, "CreationDate");
                 ReportPropertyChanged("CreationDate");
                 OnCreationDateChanged();
             }
@@ -1871,7 +1866,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnBountyAmountChanging(value);
                 ReportPropertyChanging("BountyAmount");
-                _BountyAmount = StructuralObject.SetValidValue(value);
+                _BountyAmount = StructuralObject.SetValidValue(value, "BountyAmount");
                 ReportPropertyChanged("BountyAmount");
                 OnBountyAmountChanged();
             }
@@ -1895,7 +1890,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnUserIdChanging(value);
                 ReportPropertyChanging("UserId");
-                _UserId = StructuralObject.SetValidValue(value);
+                _UserId = StructuralObject.SetValidValue(value, "UserId");
                 ReportPropertyChanged("UserId");
                 OnUserIdChanged();
             }
@@ -1906,7 +1901,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-    
         #region Navigation Properties
     
         /// <summary>
@@ -1974,7 +1968,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-        #region Primitive Properties
+        #region Simple Properties
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -1993,7 +1987,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
                 {
                     OnIdChanging(value);
                     ReportPropertyChanging("Id");
-                    _Id = StructuralObject.SetValidValue(value);
+                    _Id = StructuralObject.SetValidValue(value, "Id");
                     ReportPropertyChanged("Id");
                     OnIdChanged();
                 }
@@ -2018,7 +2012,7 @@ namespace StackExchange.DataExplorer.Models.StackEntities
             {
                 OnNameChanging(value);
                 ReportPropertyChanging("Name");
-                _Name = StructuralObject.SetValidValue(value, true);
+                _Name = StructuralObject.SetValidValue(value, true, "Name");
                 ReportPropertyChanged("Name");
                 OnNameChanged();
             }
@@ -2029,7 +2023,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
         #endregion
 
-    
         #region Navigation Properties
     
         /// <summary>
@@ -2060,5 +2053,4 @@ namespace StackExchange.DataExplorer.Models.StackEntities
 
     #endregion
 
-    
 }

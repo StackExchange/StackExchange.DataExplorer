@@ -10,7 +10,7 @@ namespace StackExchange.DataExplorer.Controllers
     [HandleError]
     public class HomeController : StackOverflowController
     {
-        [Route("")]
+        [StackRoute("")]
         public ActionResult Index()
         {
             SetHeader("Choose a Site");
@@ -23,7 +23,7 @@ namespace StackExchange.DataExplorer.Controllers
             return View(sites);
         }
 
-        [Route("help")]
+        [StackRoute("help")]
         public ActionResult Help()
         {
             SetHeader("Using Data Explorer");
@@ -42,20 +42,20 @@ namespace StackExchange.DataExplorer.Controllers
             return View();
         }
 
-        [Route("about")]
+        [StackRoute("about")]
         public ActionResult About()
         {
             return Redirect("/help");
         }
 
 
-        [Route("faq")]
+        [StackRoute("faq")]
         public ActionResult Faq()
         {
             return Redirect("/help");
         }
 
-        [Route("sites")]
+        [StackRoute("sites")]
         public ActionResult SearchSites()
         {
             var sites = Current.DB.Query<Site>("SELECT * FROM Sites").Select<Site, object>(
@@ -75,7 +75,7 @@ namespace StackExchange.DataExplorer.Controllers
             return Json(sites);
         }
 
-        [Route("legal/{subpath?}")]
+        [StackRoute("legal/{subpath?}")]
         public ActionResult Legal(string subpath)
         {
             return RedirectPermanent("http://stackexchange.com/legal" + (subpath.HasValue() ? "/" + subpath : ""));

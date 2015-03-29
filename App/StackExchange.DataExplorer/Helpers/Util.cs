@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web.Security;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -17,9 +16,22 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
+        private static string GetMD5String(string value)
+        {
+            using (var md5 = new MD5CryptoServiceProvider())
+            {
+                var e = new UTF8Encoding();
+                var sb = new StringBuilder(32);
+                var b = md5.ComputeHash(e.GetBytes(value));
+                for (int i = 0; i < b.Length; i++)
+                    sb.Append(b[i].ToString("x2"));
+                return sb.ToString();
+            }
+        }
+
         public static string GravatarHash(string str)
         {
-            return FormsAuthentication.HashPasswordForStoringInConfigFile(str.ToLower().Trim(), "MD5").ToLower();
+            return GetMD5String(str.ToLower().Trim()).ToLower();
         }
 
         public static DateTime FromJavaScriptTime(long milliseconds)

@@ -14,7 +14,7 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class QuerySetController : StackOverflowController
     {
-        [Route(@"{sitename}/s/{queryId:\d+}/{slug?}")]
+        [StackRoute(@"{sitename}/s/{queryId:\d+}/{slug?}")]
         public ActionResult MapQuery(string sitename, int queryId, string slug)
         {
             Revision revision = QueryUtil.GetMigratedRevision(queryId, MigrationType.Saved);
@@ -32,7 +32,7 @@ namespace StackExchange.DataExplorer.Controllers
             return new RedirectPermanentResult("/" + sitename + "/query/" + revision.QuerySet.Id + slug);
         }
 
-        [Route(@"{sitename}/query/{querySetId:\d+}/{slug?}", RoutePriority.Low)]
+        [StackRoute(@"{sitename}/query/{querySetId:\d+}/{slug?}", RoutePriority.Low)]
         public ActionResult ShowLatest(string sitename, int querySetId, string slug)
         {
             Site site;
@@ -57,7 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
             return ShowCommon(revision, slug, true);
         }
 
-        [Route(@"{sitename}/revision/{querySetId:\d+}/{revisionId:\d+}/{slug?}")]
+        [StackRoute(@"{sitename}/revision/{querySetId:\d+}/{revisionId:\d+}/{slug?}")]
         public ActionResult Show(string sitename, int querySetId, int revisionId, string slug)
         {
             Site site;
@@ -208,7 +208,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpPost]
-        [Route(@"feature_query/{querySetId:\d+}")]
+        [StackRoute(@"feature_query/{querySetId:\d+}")]
         public ActionResult Feature(int querySetId, bool feature)
         {
             if (Current.User.IsAdmin)
@@ -225,7 +225,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [HttpPost]
-        [Route(@"skip_query/{id:\d+}")]
+        [StackRoute(@"skip_query/{id:\d+}")]
         public ActionResult Skip(int id, bool skip)
         {
             if (Current.User.IsAdmin)
@@ -237,7 +237,7 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
 
-        [Route("{sitename}", Priority = RoutePriority.Low)]
+        [StackRoute("{sitename}", Priority = RoutePriority.Low)]
         public ActionResult IndexFallback(string sitename)
         {
             Site site;
@@ -248,7 +248,7 @@ namespace StackExchange.DataExplorer.Controllers
             ));
         }
 
-        [Route("{sitename}/queries")]
+        [StackRoute("{sitename}/queries")]
         public ActionResult Index(string sitename, string order_by, string q, int? page, int? pagesize)
         {
             Site site;

@@ -6,28 +6,28 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class LegalController : StackOverflowController
     {
-        [Route("legal")]
+        [StackRoute("legal")]
         public ActionResult TermsOfService()
         {
             SetHeaderData("terms of service");
             return View();
         }
 
-        [Route("legal/privacy-policy")]
+        [StackRoute("legal/privacy-policy")]
         public ActionResult PrivacyPolicy()
         {
             SetHeaderData("privacy policy");
             return View();
         }
 
-        [Route("legal/content-policy")]
+        [StackRoute("legal/content-policy")]
         public ActionResult ContentPolicy()
         {
             SetHeaderData("content policy");
             return View();
         }
 
-        [Route("legal/trademark-guidance")]
+        [StackRoute("legal/trademark-guidance")]
         public ActionResult TrademarkGuidance()
         {
             SetHeaderData("trademark guidance");

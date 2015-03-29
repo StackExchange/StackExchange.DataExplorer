@@ -1,23 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Optimization;
+﻿using System.Web.Optimization;
 
-[assembly: WebActivator.PreApplicationStartMethod(
-    typeof(StackExchange.DataExplorer.App_Start.BundleConfig), "PreStart")]
-
-namespace StackExchange.DataExplorer.App_Start
+namespace StackExchange.DataExplorer
 {
     public class BundleConfig
     {
-        public static void PreStart()
+        public static void Start()
         {
             // register public resource bundles (css/js)
 #if !DEBUG
             BundleTable.EnableOptimizations = true;
 #endif
-
             RegisterBundles(BundleTable.Bundles);
         }
 

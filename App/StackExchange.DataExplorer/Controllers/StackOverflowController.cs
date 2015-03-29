@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Security;
-using log4net;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
@@ -21,8 +20,6 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class StackOverflowController : Controller
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly List<SubHeaderViewData> menu = new List<SubHeaderViewData>();
 
         private Site site;
@@ -36,11 +33,15 @@ namespace StackExchange.DataExplorer.Controllers
                     int siteId = -1;
                     if (Int32.TryParse((Session["SiteId"] ?? "").ToString(), out siteId))
                     {
-                        site = Current.DB.Query<Models.Site>("select * from Sites where Id = @siteId", new { siteId }).FirstOrDefault();
+                        site = Current.DB.Query<Site>("select * from Sites where Id = @siteId", new { siteId }).FirstOrDefault();
                     }
                     if (site == null)
                     {
-                        site = Current.DB.Query<Models.Site>("select top 1 * from Sites order by TotalQuestions desc").Single();  
+                        site = Current.DB.Query<Site>("select top 1 * from Sites order by TotalQuestions desc").SingleOrDefault();  
+                    }
+                    if (site == null)
+                    {
+                        throw new Exception("There are no sites in the Sites table. There must be at least one for anything to work!");
                     }
                 }
                 return site;
@@ -228,7 +229,6 @@ namespace StackExchange.DataExplorer.Controllers
         /// </summary>
         protected override void OnActionExecuted(ActionExecutedContext filterContext)
         {
-            log.Debug("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " + watch.ElapsedMilliseconds);
             Trace.WriteLine("OnActionExecuted -> " + Request.Url.PathAndQuery + " Duration: " +
                             watch.ElapsedMilliseconds);
 
