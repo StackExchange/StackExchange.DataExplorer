@@ -8,6 +8,7 @@ using DotNetOpenAuth.OpenId;
 using DotNetOpenAuth.OpenId.Extensions.SimpleRegistration;
 using DotNetOpenAuth.OpenId.RelyingParty;
 using StackExchange.DataExplorer.Helpers;
+using StackExchange.DataExplorer.Helpers.Security;
 using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.Controllers
@@ -16,7 +17,6 @@ namespace StackExchange.DataExplorer.Controllers
     public class AccountController : StackOverflowController
     {
         private static readonly OpenIdRelyingParty openid = new OpenIdRelyingParty();
-
 
         [StackRoute("account/logout")]
         public ActionResult Logout()
@@ -28,13 +28,66 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute("account/login", HttpVerbs.Get)]
         public ActionResult Login(string returnUrl)
         {
-            SetHeader(CurrentUser.IsAnonymous ? "Log in with OpenID" : "Log in below to change your OpenID");
-
-            return View("Login");
+            switch (AppSettings.AuthMethod)
+            {
+                case AppSettings.AuthenitcationMethod.ActiveDirectory:
+                    SetHeader("Log in with Active Directory");
+                    return View("LoginActiveDirectory");
+                //case AppSettings.AuthenitcationMethod.Default:
+                default:
+                    SetHeader(CurrentUser.IsAnonymous ? "Log in with OpenID" : "Log in below to change your OpenID");
+                    return View("Login");
+            }
         }
 
-        [StackRoute("user/authenticate")]
-        [ValidateInput(false)]
+        [StackRoute("account/ad-login", HttpVerbs.Post), ValidateInput(false)]
+        public ActionResult LoginActiveDirectory(string returnUrl)
+        {
+            string username = Request.Form["username"].IsNullOrEmptyReturn("").Trim(),
+                   password = Request.Form["password"].IsNullOrEmptyReturn("").Trim();
+
+            // TODO: Sanitize username
+            try
+            {
+                if (!ActiveDirectory.AuthenticateUser(username, password))
+                {
+                    return ErrorLogin("Authentication failed.", returnUrl);
+                }
+                if (!ActiveDirectory.IsUser(username))
+                {
+                    return ErrorLogin("User is now in allowed Active Directory groups.", returnUrl);
+                }
+                var user = Models.User.GetByADLogin(username);
+                if (user == null)
+                {
+                    user = Models.User.CreateUser(username);
+                }
+                if (user == null)
+                {
+                    return ErrorLogin("Error creating user for " + username + ".", returnUrl);
+                }
+                var isAdmin = ActiveDirectory.IsAdmin(username);
+                user.SetAdmin(isAdmin); // Intentionally refresh admin status on login
+                ActiveDirectory.SetProperties(user); // TODO: Optimize this down to a single PricipalContext open/close
+
+                IssueFormsTicket(user);
+            }
+            catch (Exception ex)
+            {
+                Current.LogException(ex);
+                return ErrorLogin("Error: " + ex.Message, returnUrl);
+            }
+
+            return Redirect(returnUrl);
+        }
+
+        public ActionResult ErrorLogin(string message, string returnUrl)
+        {
+            ViewData["Message"] = message;
+            return Login(returnUrl);
+        }
+
+        [StackRoute("user/authenticate"), ValidateInput(false)]
         public ActionResult Authenticate(string returnUrl)
         {
             IAuthenticationResponse response = openid.GetResponse();
@@ -202,23 +255,7 @@ namespace StackExchange.DataExplorer.Controllers
                             }
                         }
 
-                        string Groups = user.IsAdmin ? "Admin" : "";
-
-                        var ticket = new FormsAuthenticationTicket(
-                            1,
-                            user.Id.ToString(),
-                            DateTime.Now,
-                            DateTime.Now.AddYears(2),
-                            true,
-                            Groups);
-
-                        string encryptedTicket = FormsAuthentication.Encrypt(ticket);
-
-                        var authenticationCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
-                        authenticationCookie.Expires = ticket.Expiration;
-                        authenticationCookie.HttpOnly = true;
-                        Response.Cookies.Add(authenticationCookie);
-
+                        IssueFormsTicket(user);
 
                         if (!string.IsNullOrEmpty(returnUrl))
                         {
@@ -239,16 +276,38 @@ namespace StackExchange.DataExplorer.Controllers
             return new EmptyResult();
         }
 
+        private void IssueFormsTicket(Models.User user)
+        {
+            var ticket = new FormsAuthenticationTicket(
+                1,
+                user.Id.ToString(),
+                DateTime.Now,
+                DateTime.Now.AddYears(2),
+                true,
+                "");
+
+            string encryptedTicket = FormsAuthentication.Encrypt(ticket);
+
+            var authenticationCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
+            {
+                Expires = ticket.Expiration,
+                HttpOnly = true,
+                Secure = Current.IsSecureConnection
+            };
+            Response.Cookies.Add(authenticationCookie);
+        }
+
         private bool IsVerifiedEmailProvider(string identifier)
         {
             identifier = identifier.ToLowerInvariant();
 
             if (identifier.Contains("@")) return false;
-
-            if (identifier.StartsWith(@"http://google.com/accounts/o8/id")) return true;
-            if (identifier.StartsWith(@"http://me.yahoo.com")) return true;
+            if (identifier.StartsWith(@"https://www.google.com/accounts/o8/id")) return true;
+            if (identifier.StartsWith(@"https://me.yahoo.com/")) return true;
             if (identifier.StartsWith(@"http://stackauth.com/")) return true;
-            if (identifier.StartsWith(@"http://openid.stackexchange.com/")) return true;
+            if (identifier.StartsWith(@"https://openid.stackexchange.com/")) return true;
+            if (identifier.StartsWith(@"https://plus.google.com/")) return true;
+
             return false;
         }
     }

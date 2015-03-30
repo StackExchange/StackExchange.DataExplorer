@@ -91,6 +91,20 @@ namespace StackExchange.DataExplorer
         }
 
         /// <summary>
+        /// Is this request is over HTTPS (or behind an HTTPS load balancer)?
+        /// </summary>
+        public static bool IsSecureConnection
+        {
+            get
+            {
+                return Request.IsSecureConnection ||
+                    // This can be "http", "https", or the more fun "https, http, https, https" even.
+                       (Request.Headers["X-Forwarded-Proto"] != null &&
+                        Request.Headers["X-Forwarded-Proto"].StartsWith("https"));
+            }
+        }
+
+        /// <summary>
         /// Gets the controller for the current request; should be set during init of current request's controller.
         /// </summary>
         public static StackOverflowController Controller
@@ -335,9 +349,12 @@ namespace StackExchange.DataExplorer
         /// <summary>
         /// manually write a message (wrapped in a simple Exception) to our standard exception log
         /// </summary>
-        public static void LogException(string message)
+        public static void LogException(string message, Exception inner = null)
         {
-            GlobalApplication.LogException(message);
+            if (inner != null)
+                GlobalApplication.LogException(new Exception(message, inner));
+            else 
+                GlobalApplication.LogException(message);
         }
 
         /// <summary>

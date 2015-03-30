@@ -282,6 +282,5 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         {
             return CurrentUser.IsAdmin;
         }
-
     }
 }

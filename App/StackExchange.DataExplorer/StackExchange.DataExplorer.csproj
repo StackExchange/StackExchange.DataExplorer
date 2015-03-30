@@ -113,6 +113,7 @@
     <Reference Include="System.Data.Services" />
     <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Data.Services.Design" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.ComponentModel.DataAnnotations">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -211,7 +212,13 @@
     <Compile Include="Helpers\HelperTableCache.cs" />
     <Compile Include="Helpers\Crc16.cs" />
     <Compile Include="Helpers\CsvResult.cs" />
+    <Compile Include="Helpers\Security\ActiveDirectory.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Helpers\SiteInfo.cs" />
+    <Compile Include="Helpers\StringSplits.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Helpers\TargetSites.cs" />
     <Compile Include="Helpers\UIHelper.cs" />
     <Compile Include="Models\QuerySetRevision.cs" />
@@ -465,6 +472,7 @@
     <Content Include="Views\Shared\RevisionHistory.cshtml" />
     <Content Include="Views\Shared\UserList.cshtml" />
     <Content Include="Views\Home\Help.cshtml" />
+    <Content Include="Views\Account\LogInActiveDirectory.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

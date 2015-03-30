@@ -1,0 +1,15 @@
+﻿@using StackExchange.DataExplorer
+@{this.SetPageTitle("Log In - Stack Exchange Data Explorer");}
+<div class="page-description">
+    <div class="form-error">
+    </div>
+    <form id="openid_form" action="/account/ad-login?returnurl=@Request.Params["returnurl"]" method="post">
+        <div style="width: 250px; margin: 0 auto;">
+            <input name="username" class="" style="height: 28px; width: 250px;" tabindex="1" placeholder="Username (e.g. ilastname)" />
+            <input name="password" class="" style="height: 28px; width: 250px;" tabindex="2" placeholder="Password" type="password" />
+
+            <button type="submit" style="height: 26px; width: 100px; margin: 0 auto; display: block;">Log in</button>
+        </div>
+        <div class="error" style="text-align: center;" tabindex="3">@ViewData["Message"]</div>
+    </form>
+</div>

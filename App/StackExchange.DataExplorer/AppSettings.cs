@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using Dapper;
 using StackExchange.DataExplorer.Helpers;
-using StackExchange.DataExplorer.Models;
 using Newtonsoft.Json;
 
 namespace StackExchange.DataExplorer
@@ -67,6 +65,23 @@ namespace StackExchange.DataExplorer
         [Default(false)]
         public static bool EnableOdata { get; private set; }
 
+        [Default(AuthenitcationMethod.Default)]
+        public static AuthenitcationMethod AuthMethod { get; private set; }
+
+        [Default("")]
+        public static string ActiveDirectoryViewGroups { get; private set; }
+
+        [Default("")]
+        public static string ActiveDirectoryAdminGroups { get; private set; }
+
+        public enum AuthenitcationMethod
+        {
+            Default, // OpenID & Oauth
+            ActiveDirectory
+        }
+
+        public static Action Refreshed;
+
         public static void Refresh()
         {
             var data = Current.DB.AppSettings.All().ToDictionary(v => v.Setting, v => v.Value);
@@ -95,6 +110,10 @@ namespace StackExchange.DataExplorer
                     {
                         property.SetValue(null, overrideData, null);
                     }
+                    else if (property.PropertyType.IsEnum)
+                    {
+                        property.SetValue(null, Enum.Parse(property.PropertyType, overrideData), null);
+                    }
                     else if (overrideData[0] == '{' && overrideData[overrideData.Length - 1] == '}')
                     {
                         try
@@ -114,6 +133,9 @@ namespace StackExchange.DataExplorer
                     property.SetValue(null, attrib.DefaultValue, null);
                 }
             }
+            // For anyone who wants to listen and update their downstream data...
+            var handler = Refreshed;
+            if (handler != null) handler();
         }
     }
 }

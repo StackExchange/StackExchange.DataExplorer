@@ -1,4 +1,6 @@
 ﻿@model StackExchange.DataExplorer.Models.User
+@using System.Configuration
+@using System.IdentityModel.Tokens
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
 @using StackExchange.DataExplorer.ViewModel
@@ -19,12 +21,12 @@
                     </tr>
                 </table>
             </td>
-            <td style="vertical-align:top; width:350px;>
+            <td style="vertical-align:top; width:350px;">
                 @if (isCurrentUser || Current.User.IsAdmin)
                 {
                     <div style="float:right; margin-top: 19px; margin-right: 4px;">
                         <a href="/users/edit/@Model.Id">edit</a>
-                        @if (isCurrentUser)
+                        @if (isCurrentUser && AppSettings.AuthMethod == AppSettings.AuthenitcationMethod.Default)
                         {
                             <span class="lsep">|</span>
                             <a href="/account/login/" title="overwrite your primary openid by logging in with a new openid">change openid</a>
@@ -43,10 +45,22 @@
                     </tr>
                     @if (isCurrentUser || (Current.User != null && Current.User.IsAdmin))
                     {
-                        <tr>
-                            <td>openid</td>
-                            <td class="overflowing"><div class="no-overflow">@Model.UserOpenIds[0].OpenIdClaim</div></td>
-                        </tr>
+                        switch (AppSettings.AuthMethod)
+                        {
+                            case AppSettings.AuthenitcationMethod.ActiveDirectory:
+                                <tr>
+                                    <td>login</td>
+                                    <td class="overflowing"><div class="no-overflow">@Model.ADLogin</div></td>
+                                </tr>
+                                break;
+                            //case AppSettings.AuthenitcationMethod.Default:
+                            default:
+                                 <tr>
+                                     <td>openid</td>
+                                     <td class="overflowing"><div class="no-overflow">@Model.UserOpenIds[0].OpenIdClaim</div></td>
+                                 </tr>
+                                 break;
+                         }
                     }
                     @if (Model.Website != null && Model.Website.Length > 4)
                     {

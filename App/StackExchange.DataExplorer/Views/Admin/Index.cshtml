@@ -12,7 +12,9 @@
 </ul>
 <h3>User Management</h3>
 <ul>
-    <li><a href="/admin/whitelist">OpenID whitelist</a></li>
+    @if(AppSettings.AuthMethod == AppSettings.AuthenitcationMethod.Default) {
+        <li><a href="/admin/whitelist">OpenID whitelist</a></li>
+    }
     <li><a href="/admin/find-dupe-users">Find dupe users</a> (<a href="/admin/find-dupe-users?useemail=true">by email</a>)</li>
 </ul>
 <h3>Application Settings</h3>

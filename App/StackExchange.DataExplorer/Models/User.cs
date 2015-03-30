@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -24,6 +23,7 @@ namespace StackExchange.DataExplorer.Models
         public DateTime? LastActivityDate { get; set; }
         public DateTime? LastSeenDate { get; set; }
         public string PreferencesRaw { get; set; }
+        public string ADLogin { get; set; }
 
         List<UserOpenId> _userOpenIds;
         public List<UserOpenId> UserOpenIds
@@ -91,7 +91,29 @@ namespace StackExchange.DataExplorer.Models
 
             return violations;
         }
-    
+
+        public static User CreateUser(string accountLogin)
+        {
+            var u = new User
+            {
+                CreationDate = DateTime.UtcNow,
+                Login = accountLogin,
+                ADLogin = accountLogin,
+            };
+            u.Id = Current.DB.Users.Insert(new { u.Login, u.ADLogin, u.CreationDate }).Value;
+
+            return u;
+        }
+
+        public void SetAdmin(bool isAdmin)
+        {
+            Current.DB.Execute("Update Users Set IsAdmin = @isAdmin Where Id = @Id", new {Id, isAdmin});
+        }
+
+        public static User GetByADLogin(string accountLogin)
+        {
+            return Current.DB.Query<User>("Select * From Users Where ADLogin = @accountLogin", new {accountLogin}).SingleOrDefault();
+        }
 
         public static User CreateUser(string login, string email, string openIdClaim)
         {
@@ -168,8 +190,8 @@ namespace StackExchange.DataExplorer.Models
         {
             return
                 String.Format(
-                    "<img src=\"http://www.gravatar.com/avatar/{0}?s={1}&amp;d=identicon&amp;r=PG\" height=\"{1}\" width=\"{1}\" class=\"logo\">",
-                    Util.GravatarHash(Email ?? Id.ToString()), width + "px"
+                    "<img src=\"http://www.gravatar.com/avatar/{0}?s={2}&amp;d=identicon&amp;r=PG\" height=\"{1}\" width=\"{1}\" class=\"logo\">",
+                    Util.GravatarHash(Email ?? Id.ToString()), width + "px", width * 2
                     );
         }
 
