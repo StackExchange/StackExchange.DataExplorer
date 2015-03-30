@@ -257,6 +257,26 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             return Json("ok");
         }
 
+        [StackRoute("admin/error-test")]
+        public ActionResult ErrorTestPage()
+        {
+            GlobalApplication.LogException(new Exception("Test Exception via GlobalApplication.LogException()"));
+
+            throw new NotImplementedException("I AM IMPLEMENTED, I WAS BORN TO THROW ERRORS!");
+        }
+
+        [StackRoute("admin/errors/{resource?}/{subResource?}")]
+        public ActionResult InvokeErrorHandler(string resource, string subResource)
+        {
+            var context = System.Web.HttpContext.Current;
+            var factory = new Exceptional.HandlerFactory();
+
+            var page = factory.GetHandler(context, Request.RequestType, Request.Url.ToString(), Request.PathInfo);
+            page.ProcessRequest(context);
+
+            return null;
+        }
+
 
         public bool Allowed()
         {

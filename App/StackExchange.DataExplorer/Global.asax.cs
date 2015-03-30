@@ -5,8 +5,8 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Security;
-using SimpleErrorHandler;
 using StackExchange.DataExplorer.Helpers;
+using StackExchange.Exceptional;
 using StackExchange.Profiling;
 
 namespace StackExchange.DataExplorer
@@ -16,8 +16,6 @@ namespace StackExchange.DataExplorer
 
     public class GlobalApplication : HttpApplication
     {
-        private static ErrorLogModule ErrorModule;
-
         public static string AppRevision
         {
             get
@@ -42,15 +40,6 @@ namespace StackExchange.DataExplorer
             RegisterRoutes(RouteTable.Routes);
             BundleConfig.Start();
             MiniProfilerPackage.Start();
-        }
-
-        // http://msdn.microsoft.com/en-us/library/system.web.httpapplication.init(VS.71).aspx
-        public override void Init()
-        {
-            base.Init();
-
-            // Get our error handler, so we can write exceptions
-            ErrorModule = Modules["ErrorLog"] as ErrorLogModule; // this requires full trust
         }
 
         /// <summary>
@@ -135,19 +124,14 @@ namespace StackExchange.DataExplorer
         /// <summary>
         /// manually write an exception to our standard exception log
         /// </summary>
-        public static void LogException(Exception ex)
+        public static void LogException(Exception ex, bool rollupPerServer = false)
         {
             try
             {
-                if (ErrorModule != null)
-                    ErrorModule.LogException(ex, HttpContext.Current);
+                ErrorStore.LogException(ex, Current.Context, appendFullStackTrace: true, rollupPerServer: rollupPerServer);
             }
-            catch
-            {
-                /* Do nothing */
-            }
+            catch { /* Do nothing */ }
         }
-
 
         protected void Application_AuthenticateRequest(Object sender, EventArgs e)
         {

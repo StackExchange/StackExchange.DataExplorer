@@ -103,8 +103,8 @@
     <Reference Include="Recaptcha">
       <HintPath>..\..\Lib\Recaptcha.dll</HintPath>
     </Reference>
-    <Reference Include="SimpleErrorHandler">
-      <HintPath>..\..\Lib\SimpleErrorHandler.dll</HintPath>
+    <Reference Include="StackExchange.Exceptional">
+      <HintPath>..\packages\StackExchange.Exceptional.1.0.111\lib\StackExchange.Exceptional.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
