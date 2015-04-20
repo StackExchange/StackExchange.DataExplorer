@@ -190,7 +190,7 @@ namespace StackExchange.DataExplorer.Models
         {
             return
                 String.Format(
-                    "<img src=\"http://www.gravatar.com/avatar/{0}?s={2}&amp;d=identicon&amp;r=PG\" height=\"{1}\" width=\"{1}\" class=\"logo\">",
+                    "<img src=\"//www.gravatar.com/avatar/{0}?s={2}&amp;d=identicon&amp;r=PG\" height=\"{1}\" width=\"{1}\" class=\"logo\">",
                     Util.GravatarHash(Email ?? Id.ToString()), width + "px", width * 2
                     );
         }
