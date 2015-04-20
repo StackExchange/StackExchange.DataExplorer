@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using StackExchange.DataExplorer.Helpers;
@@ -85,6 +86,12 @@ namespace StackExchange.DataExplorer
         public static void Refresh()
         {
             var data = Current.DB.AppSettings.All().ToDictionary(v => v.Setting, v => v.Value);
+
+            // Also allow overriding keys from the web.config
+            foreach (var k in ConfigurationManager.AppSettings.AllKeys)
+            {
+                data[k] = ConfigurationManager.AppSettings[k];
+            }
 
             foreach (var property in typeof(AppSettings).GetProperties(BindingFlags.Static | BindingFlags.Public))
             {
