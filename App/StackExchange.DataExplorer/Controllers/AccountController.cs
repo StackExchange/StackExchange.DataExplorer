@@ -55,7 +55,7 @@ namespace StackExchange.DataExplorer.Controllers
                 }
                 if (!ActiveDirectory.IsUser(username))
                 {
-                    return ErrorLogin("User is now in allowed Active Directory groups.", returnUrl);
+                    return ErrorLogin("User is not in allowed Active Directory groups.", returnUrl);
                 }
                 var user = Models.User.GetByADLogin(username);
                 if (user == null)

@@ -81,15 +81,17 @@ namespace StackExchange.DataExplorer.Helpers.Security
             dict[userName] = value = RunCommand(pc =>
             {
                 using (MiniProfiler.Current.Step("Getting group access for " + userName))
-                using (var up = UserPrincipal.FindByIdentity(pc, userName))
                 {
-                    if (up == null) return false;
                     foreach (var group in groupNames)
                     {
                         using (var gp = GroupPrincipal.FindByIdentity(pc, @group))
                         {
-                            if(gp == null) continue;
-                            if (up.IsMemberOf(gp)) return true;
+                            if (gp == null) continue;
+                            // Fastest recursive way to get groups, especially when going against a remote DC
+                            if (gp.GetMembers(true)
+                                .Select(m => m.SamAccountName)
+                                .Any(sam => string.Equals(sam, userName, StringComparison.InvariantCultureIgnoreCase)))
+                                return true;
                         }
                     }
                 }
