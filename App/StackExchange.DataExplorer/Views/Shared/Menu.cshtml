@@ -1,5 +1,4 @@
-﻿@model IEnumerable<StackExchange.DataExplorer.ViewModel.SubHeaderViewData>
-@using StackExchange.DataExplorer
+﻿@model IEnumerable<SubHeaderViewData>
 @using StackExchange.DataExplorer.ViewModel
 
 <nav class="primary">
@@ -8,16 +7,7 @@
             @foreach (SubHeaderViewData item in Model.Where(i=>!i.RightAlign))
             {
                 <li>
-                    <a 
-                    @if (item.Id.HasValue())
-                    {
-                        <text>id="@item.Id"</text>    
-                    }
-                    @if (item.Selected)
-                    {
-                        <text>class="youarehere"</text>
-                    }
-                    href="@item.Href" title="@item.Title">@item.Description</a>
+                    <a id="@item.Id" class="@(item.Selected ? "youarehere" : null)" href="@item.Href" title="@item.Title">@item.Description</a>
                 </li>                
             }
         </ul>
@@ -27,16 +17,7 @@
             @foreach (SubHeaderViewData item in Model.Where(i=>i.RightAlign))
             {
                 <li style="margin-right:0px;">
-                    <a
-                    @if (item.Id.HasValue())
-                    {
-                        <text>id="@item.Id"</text>    
-                    }
-                    @if (item.Selected)
-                    {
-                        <text>class="youarehere"</text>
-                    }
-                    href="@item.Href" title="@item.Title">@item.Description</a>
+                    <a id="@item.Id" class="@(item.Selected ? "youarehere" : null)" href="@item.Href" title="@item.Title">@item.Description</a>
                 </li>
             }
         </ul>
