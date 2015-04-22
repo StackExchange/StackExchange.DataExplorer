@@ -198,7 +198,7 @@ namespace StackExchange.DataExplorer.Controllers
                                 if (sreg != null)
                                 {
                                     email = sreg.Email;
-                                    login = sreg.Nickname;
+                                    login = sreg.Nickname ?? sreg.FullName;
                                 }
                                 user = Models.User.CreateUser(login, email, normalizedClaim);
                             }

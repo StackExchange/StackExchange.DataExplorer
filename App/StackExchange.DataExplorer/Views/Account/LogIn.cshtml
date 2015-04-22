@@ -13,20 +13,20 @@
             {
                 <div class="preferred-login" data-provider='{ "name": "Google", "oauth2url": "https://accounts.google.com/o/oauth2/auth" }'>
                     <p>
-                        <span class="icon" style="background-position-x: 0;"></span>
+                        <span class="icon" style="background-position: -426px 0;"></span>
                         <span>Log in using Google</span>
                     </p>
                 </div>
             }
             @*<div class="preferred-login" data-provider='{ "name": "Facebook", "oauth2url": "https://www.facebook.com/v2.0/dialog/oauth" }'>
                 <p>
-                    <span class="icon" style="background-position-x: -18px;"></span>
+                    <span class="icon" style="background-position: -390px 0;"></span>
                     <span>Log in using Facebook</span>
                 </p>
             </div>*@
             <div class="preferred-login" data-provider='{ " name": "Stack Exchange", "url": "https://openid.stackexchange.com/" }'>
                 <p>
-                    <span class="icon" style="background-position-x: -38px;"></span>
+                    <span class="icon" style="background-position: -356px 0;"></span>
                     <span>Log in using Stack Exchange</span>
                 </p>
             </div>
@@ -36,32 +36,36 @@
                 <p class="noscript-notice">Open ID is a service that allows you to log on to many different websites using a single identity. Find out <a href="http://openid.net/what/">more about OpenId</a> and <a href="http://openid.net/get/">how to get an OpenID-enabled account</a>.</p>
             </noscript>
         </div>
-        <div class="small-buttons js-script-only">
-            <a title="Login with Yahoo" href="#" data-provider='{ "name": "Yahoo", "url": "https://me.yahoo.com/" }'>
-                <span style="background-position-x: -78px;"></span>
-            </a>
-            <a title="Login with LiveJournal" href="#" data-provider='{ "name": "LiveJournal", "url": "http://{username}.livejournal.com/" }'>
-                <span style="background-position-x: -158px;"></span>
-            </a>
-            <a title="Login with WordPress" href="#" data-provider='{ "name": "Wordpress", "url": "http://{username}.wordpress.com/" }'>
-                <span style="background-position-x: -178px;"></span>
-            </a>
-            <a title="Login with Blogger" href="#" data-provider='{ "name": "Blogger", "url": "https://{username}.blogspot.com/" }'>
-                <span style="background-position-x: -138px;"></span>
-            </a>
-            <a title="Login with Verisign" href="#" data-provider='{ "name": "Verisign", "url": "https://{username}.pip.verisignlabs.com/" }'>
-                <span style="background-position-x: -218px;"></span>
-            </a>
-            <a title="Login with AOL" href="#" data-provider='{ "name": "AOL", "url": "https://openid.aol.com/{username}" }'>
-                <span style="background-position-x: -98px;"></span>
-            </a>
-        </div>
         <form class="openid-form" action="/user/authenticate" method="POST">
             <input type="hidden" id="oauth2url" name="@Keys.OAuth2Url" value="">
+            <div class="small-buttons js-script-only">
+                <div>
+                    <a title="Login with Yahoo" href="#" data-provider='{ "name": "Yahoo", "url": "https://me.yahoo.com/" }'
+                       style="background-position: 1px 4px;"></a>
+                </div>
+                <div>
+                    <a title="Login with LiveJournal" href="#" data-provider='{ "name": "LiveJournal", "url": "http://{username}.livejournal.com/" }'
+                       style="background-position: -73px 4px;"></a>
+                </div>
+                <div>
+                    <a title="Login with WordPress" href="#" data-provider='{ "name": "Wordpress", "url": "http://{username}.wordpress.com/" }'
+                       style="background-position: -38px 4px;"></a>
+                </div>
+                <div>
+                    <a title="Login with Blogger" href="#" data-provider='{ "name": "Blogger", "url": "https://{username}.blogspot.com/" }'
+                       style="background-position: -108px 4px;"></a>
+                </div>
+                <div>
+                    <a title="Login with Verisign" href="#" data-provider='{ "name": "Verisign", "url": "https://{username}.pip.verisignlabs.com/" }'
+                       style="background-position: -458px 4px;"></a>
+                </div>
+                <div>
+                    <a title="Login with AOL" href="#" data-provider='{ "name": "AOL", "url": "https://openid.aol.com/{username}" }'
+                       style="background-position: -142px 4px;"></a>
+                </div>
+            </div>
             <div class="username-area js-script-only">
-                <p class="openid-username-label"></p>
                 <input class="openid-username" type="text" value="">
-                <input type="submit" value="Log In">
             </div>
             <div class="openid-url-area">
                 <noscript>
@@ -76,7 +80,7 @@
     </div>
 </div>
 <script>
-    var currentUrl;
+    var currentUrl, usernameBox = $(".openid-username");
     $('.js-script-only:not(.username-area)').show();
     $('.js-openid-wrap').on('click', '[data-provider]', function(e) {
         e.preventDefault();
@@ -88,10 +92,16 @@
         } else {
             $('#oauth2url').val('');
             if (provider.url.indexOf('{username}') > -1) {
+                var parent = $(this).parent();
+                if (parent.hasClass('selected')) return;
+                parent.addClass('selected').siblings().removeClass('selected');
+                usernameBox.width(20)
+                           .insertAfter(this)
+                           .stop(true, true)
+                           .animate({ width: 150 }, 300)
+                           .attr('placeholder', provider.name + ' username')
+                           .focus();
                 currentUrl = provider.url;
-                $('.openid-username-label').text('Login with your ' + provider.name + ' username');
-                $('.username-area').slideDown(50);
-                $('.openid-username').focus();
                 $('#openid_identifier').val('');
             } else {
                 $('#openid_identifier').val(provider.url);

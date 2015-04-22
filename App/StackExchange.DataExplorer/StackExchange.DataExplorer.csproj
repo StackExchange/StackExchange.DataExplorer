@@ -282,6 +282,7 @@
     <Content Include="Content\images\help-icon.png" />
     <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\images\so-sprites.png" />
+    <Content Include="Content\Img\login-icons.svg" />
     <Content Include="Content\login.css">
       <DependentUpon>login.less</DependentUpon>
     </Content>
@@ -292,7 +293,6 @@
     <Content Include="Content\slickgrid\images\sort-asc-inactive.gif" />
     <Content Include="Content\slickgrid\images\sort-asc.gif" />
     <Content Include="Content\slickgrid\images\sort-desc.gif" />
-    <Content Include="Content\Img\openid\openid-logos.png" />
     <Content Include="Content\jquery.autocomplete.css" />
     <Content Include="Content\qp\images\arithmetic_expression.gif" />
     <Content Include="Content\qp\images\assert.gif" />
