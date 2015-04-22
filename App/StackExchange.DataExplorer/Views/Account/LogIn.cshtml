@@ -1,45 +1,106 @@
 ﻿@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Helpers
 @{this.SetPageTitle("Log In or Register - Stack Exchange Data Explorer");}
+<link rel="stylesheet" type="text/css" href="/Content/login.min.css" />
 <div class="page-description">
-    <div class="form-error">
-    </div>
-    <form id="openid_form" action="/user/authenticate?returnurl=@Request.Params["returnurl"]" method="post">
-        <div id="openid_choice">
-            <p>Click your <a href="http://openid.net/what/">OpenID</a> account provider:</p>
-            <div id="openid_btns"></div>
+    @if (ViewData["Message"] != null)
+    {
+        <div class="val-message val-error">@ViewData["Message"]</div>
+    }
+    <div class="js-openid-wrap">
+        <div class="js-script-only">
+            @if (AppSettings.EnableGoogleLogin)
+            {
+                <div class="preferred-login" data-provider='{ "name": "Google", "oauth2url": "https://accounts.google.com/o/oauth2/auth" }'>
+                    <p>
+                        <span class="icon" style="background-position-x: 0;"></span>
+                        <span>Log in using Google</span>
+                    </p>
+                </div>
+            }
+            @*<div class="preferred-login" data-provider='{ "name": "Facebook", "oauth2url": "https://www.facebook.com/v2.0/dialog/oauth" }'>
+                <p>
+                    <span class="icon" style="background-position-x: -18px;"></span>
+                    <span>Log in using Facebook</span>
+                </p>
+            </div>*@
+            <div class="preferred-login" data-provider='{ " name": "Stack Exchange", "url": "https://openid.stackexchange.com/" }'>
+                <p>
+                    <span class="icon" style="background-position-x: -38px;"></span>
+                    <span>Log in using Stack Exchange</span>
+                </p>
+            </div>
         </div>
-        <div id="openid_input_area"></div>
         <div>
             <noscript>
-                <p>
-                    OpenID is a service that allows you to log on to many different websites using a
-                    single identity. Find out <a href="http://openid.net/what/">more about OpenID</a>
-                    and <a href="http://openid.net/get/">how to get an OpenID enabled account</a>.
-                </p>
+                <p class="noscript-notice">Open ID is a service that allows you to log on to many different websites using a single identity. Find out <a href="http://openid.net/what/">more about OpenId</a> and <a href="http://openid.net/get/">how to get an OpenID-enabled account</a>.</p>
             </noscript>
         </div>
-        <p>Or, manually enter your OpenID:</p>
-        <table id="openid-url-input">
-            <tr>
-                <td class="vt large">
-                    <input id="openid_identifier" name="openid_identifier" class="openid-identifier"
-                        style="height: 28px; width: 500px;" tabindex="100" />
-                </td>
-                <td class="vt large">
-                    <input id="submit-button" style="margin-left: 5px; height: 36px;" type="submit" value="Log in"
-                        tabindex="101" />
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" class="error" style="text-align: center;">@ViewData["Message"]</td>
-            </tr>
-        </table>
-    </form>
+        <div class="small-buttons js-script-only">
+            <a title="Login with Yahoo" href="#" data-provider='{ "name": "Yahoo", "url": "https://me.yahoo.com/" }'>
+                <span style="background-position-x: -78px;"></span>
+            </a>
+            <a title="Login with LiveJournal" href="#" data-provider='{ "name": "LiveJournal", "url": "http://{username}.livejournal.com/" }'>
+                <span style="background-position-x: -158px;"></span>
+            </a>
+            <a title="Login with WordPress" href="#" data-provider='{ "name": "Wordpress", "url": "http://{username}.wordpress.com/" }'>
+                <span style="background-position-x: -178px;"></span>
+            </a>
+            <a title="Login with Blogger" href="#" data-provider='{ "name": "Blogger", "url": "https://{username}.blogspot.com/" }'>
+                <span style="background-position-x: -138px;"></span>
+            </a>
+            <a title="Login with Verisign" href="#" data-provider='{ "name": "Verisign", "url": "https://{username}.pip.verisignlabs.com/" }'>
+                <span style="background-position-x: -218px;"></span>
+            </a>
+            <a title="Login with AOL" href="#" data-provider='{ "name": "AOL", "url": "https://openid.aol.com/{username}" }'>
+                <span style="background-position-x: -98px;"></span>
+            </a>
+        </div>
+        <form class="openid-form" action="/user/authenticate" method="POST">
+            <input type="hidden" id="oauth2url" name="@Keys.OAuth2Url" value="">
+            <div class="username-area js-script-only">
+                <p class="openid-username-label"></p>
+                <input class="openid-username" type="text" value="">
+                <input type="submit" value="Log In">
+            </div>
+            <div class="openid-url-area">
+                <noscript>
+                    <p class="noscript-notice">Because JavaScript is disabled, you can only log in by entering your OpenID URL manually:</p>
+                </noscript>
+                <div class="vt large">
+                    <input id="openid_identifier" name="@Keys.OpenId" placeholder="Or, you can manually enter your OpenID" class="openid-identifier" type="text">
+                    <input name="submit-button" type="submit" value="Submit">
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
-<script src="/Scripts/openid-jquery.js?v=4" type="text/javascript"></script>
-<script type="text/javascript">
-    $(function () {
-        openid.init('openid_identifier');
-        $("#openid_identifier").focus();
+<script>
+    var currentUrl;
+    $('.js-script-only:not(.username-area)').show();
+    $('.js-openid-wrap').on('click', '[data-provider]', function(e) {
+        e.preventDefault();
+        var form = $('.openid-form');
+        var provider = $(this).data('provider');
+        if (provider.oauth2url) {
+            $('#oauth2url').val(provider.oauth2url);
+            form.submit();
+        } else {
+            $('#oauth2url').val('');
+            if (provider.url.indexOf('{username}') > -1) {
+                currentUrl = provider.url;
+                $('.openid-username-label').text('Login with your ' + provider.name + ' username');
+                $('.username-area').slideDown(50);
+                $('.openid-username').focus();
+                $('#openid_identifier').val('');
+            } else {
+                $('#openid_identifier').val(provider.url);
+                form.submit();
+            }
+        }
+    });
+    $('.openid-username').on('keydown keyup change', function () {
+        var val = $(this).val();
+        $('#openid_identifier').val(val ? currentUrl.replace('{username}', $(this).val()) : '');
     });
 </script>

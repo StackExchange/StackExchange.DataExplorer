@@ -75,6 +75,18 @@ namespace StackExchange.DataExplorer
         [Default("")]
         public static string ActiveDirectoryAdminGroups { get; private set; }
 
+        [Default("")]
+        public static string OAuthSessionSalt { get; private set; }
+
+        [Default("")]
+        public static string GoogleOAuthClientId { get; private set; }
+
+        [Default("")]
+        public static string GoogleOAuthSecret { get; private set; }
+
+        public static bool EnableGoogleLogin { get { return GoogleOAuthClientId.HasValue() && GoogleOAuthSecret.HasValue(); } }
+
+
         public enum AuthenitcationMethod
         {
             Default, // OpenID & Oauth
@@ -101,13 +113,13 @@ namespace StackExchange.DataExplorer
                 {
                     if (property.PropertyType == typeof(bool))
                     {
-                        bool parsed = false;
+                        bool parsed;
                         Boolean.TryParse(overrideData, out parsed);
                         property.SetValue(null, parsed, null);
                     }
                     else if (property.PropertyType == typeof(int))
                     {
-                        int parsed = -1;
+                        int parsed;
                         if (int.TryParse(overrideData, out parsed))
                         {
                             property.SetValue(null, parsed, null);
@@ -136,8 +148,12 @@ namespace StackExchange.DataExplorer
                 }
                 else
                 {
-                    DefaultAttribute attrib = (DefaultAttribute)property.GetCustomAttributes(typeof(DefaultAttribute), false)[0];
-                    property.SetValue(null, attrib.DefaultValue, null);
+                    var attribs = property.GetCustomAttributes(typeof (DefaultAttribute), false);
+                    if (attribs.Length > 0)
+                    {
+                        var attrib = (DefaultAttribute) attribs[0];
+                        property.SetValue(null, attrib.DefaultValue, null);
+                    }
                 }
             }
             // For anyone who wants to listen and update their downstream data...

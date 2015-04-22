@@ -155,8 +155,8 @@ namespace StackExchange.DataExplorer.Models
             }
 
             u.Id = Current.DB.Users.Insert(new { u.Email, u.Login, u.CreationDate }).Value;
-            Current.DB.UserOpenIds.Insert(new { OpenIdClaim = openIdClaim, UserId = u.Id });
-
+            if (openIdClaim != null)
+                Current.DB.UserOpenIds.Insert(new {OpenIdClaim = openIdClaim, UserId = u.Id});
             return u;
         }
 

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -10,13 +13,15 @@ using DotNetOpenAuth.OpenId.RelyingParty;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Helpers.Security;
 using StackExchange.DataExplorer.Models;
+using Newtonsoft.Json;
 
 namespace StackExchange.DataExplorer.Controllers
 {
     [HandleError]
     public class AccountController : StackOverflowController
     {
-        private static readonly OpenIdRelyingParty openid = new OpenIdRelyingParty();
+        private static readonly OpenIdRelyingParty OpenIdRelay = new OpenIdRelyingParty();
+        const int GoogleAuthRetryAttempts = 3;
 
         [StackRoute("account/logout")]
         public ActionResult Logout()
@@ -26,8 +31,9 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [StackRoute("account/login", HttpVerbs.Get)]
-        public ActionResult Login(string returnUrl)
+        public ActionResult Login(string returnUrl, string message = null)
         {
+            ViewData["Message"] = message;
             switch (AppSettings.AuthMethod)
             {
                 case AppSettings.AuthenitcationMethod.ActiveDirectory:
@@ -55,7 +61,7 @@ namespace StackExchange.DataExplorer.Controllers
                 }
                 if (!ActiveDirectory.IsUser(username))
                 {
-                    return ErrorLogin("User is not in allowed Active Directory groups.", returnUrl);
+                    return ErrorLogin("User is now in allowed Active Directory groups.", returnUrl);
                 }
                 var user = Models.User.GetByADLogin(username);
                 if (user == null)
@@ -90,17 +96,23 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute("user/authenticate"), ValidateInput(false)]
         public ActionResult Authenticate(string returnUrl)
         {
-            IAuthenticationResponse response = openid.GetResponse();
+            IAuthenticationResponse response = OpenIdRelay.GetResponse();
             if (response == null)
             {
+                if (Request.Params[Keys.OAuth2Url].HasValue())
+                {
+                    // Push the form and mark it valid (nothing to confirm, anything that comes down via OAuth is clean right now
+                    return OAuthLogin();
+                }
+
                 // Stage 2: user submitting Identifier
                 Identifier id;
 
-                if (Identifier.TryParse(Request.Form["openid_identifier"], out id))
+                if (Identifier.TryParse(Request.Form[Keys.OpenId], out id))
                 {
                     try
                     {
-                        IAuthenticationRequest request = openid.CreateRequest(id);
+                        IAuthenticationRequest request = OpenIdRelay.CreateRequest(id);
 
                         request.AddExtension(
                             new ClaimsRequest
@@ -116,15 +128,11 @@ namespace StackExchange.DataExplorer.Controllers
                     }
                     catch (ProtocolException ex)
                     {
-                        ViewData["Message"] = ex.Message;
-                        return View("Login");
+                        return LoginError(ex.Message);
                     }
                 }
-                else
-                {
-                    ViewData["Message"] = "Invalid identifier";
-                    return View("Login");
-                }
+
+                return LoginError("Invalid identifier");
             }
             else
             {
@@ -137,53 +145,10 @@ namespace StackExchange.DataExplorer.Controllers
                         var sreg = response.GetExtension<ClaimsResponse>();
                         var isSecure = originalClaim.StartsWith("https://");
 
-                        if (AppSettings.EnableWhiteList)
-                        {
-                            // Ideally we'd be as strict as possible here and use originalClaim, but we might break existing deployments then
-                            string lookupClaim = normalizedClaim;
-                            bool attemptUpdate = false;
-
-                            if (IsVerifiedEmailProvider(normalizedClaim) && sreg.Email != null && sreg.Email.Length > 2)
-                            {
-                                attemptUpdate = true;
-                                lookupClaim = "email:" + sreg.Email;
-                            }
-
-                            var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("select * from OpenIdWhiteList where lower(OpenId) = @lookupClaim", new { lookupClaim }).FirstOrDefault();
-
-                            if (whiteListEntry == null && attemptUpdate)
-                            {
-                                whiteListEntry = Current.DB.Query<OpenIdWhiteList>("SELECT * FROM OpenIdWhiteList WHERE LOWER(OpenId) = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
-
-                                if (whiteListEntry != null)
-                                {
-                                    whiteListEntry.OpenId = lookupClaim;
-
-                                    Current.DB.OpenIdWhiteList.Update(whiteListEntry.Id, new { OpenId = whiteListEntry.OpenId });
-                                }
-                            }
-                            
-                            if (whiteListEntry == null || !whiteListEntry.Approved)
-                            {
-                                if (whiteListEntry == null)
-                                {
-                                    // add a non approved entry to the list
-                                    var newEntry = new 
-                                    {
-                                        Approved = false,
-                                        CreationDate = DateTime.UtcNow,
-                                        OpenId = lookupClaim,
-                                        IpAddress = Request.UserHostAddress
-                                    };
-
-                                    Current.DB.OpenIdWhiteList.Insert(newEntry);
- 
-                                }
-
-                                // not allowed in 
-                                return TextPlain("Not allowed");
-                            }
-                        }
+                        var whitelistEmail = sreg != null && sreg.Email != null && sreg.Email.Length > 2 ? sreg.Email : null;
+                        var whiteListResponse = CheckWhitelist(normalizedClaim, whitelistEmail);
+                        if (whiteListResponse != null) 
+                            return whiteListResponse;
 
                         User user = null;
                         var openId = Current.DB.Query<UserOpenId>("SELECT * FROM UserOpenIds WHERE OpenIdClaim = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
@@ -193,9 +158,8 @@ namespace StackExchange.DataExplorer.Controllers
                             if (openId != null && openId.UserId != CurrentUser.Id) //Does another user have this OpenID
                             {
                                 //TODO: Need to perform a user merge
-                                ViewData["Message"] = "Another user with this OpenID already exists, merging is not possible at this time.";
                                 SetHeader("Log in below to change your OpenID");
-                                return View("Login");
+                                return LoginError("Another user with this OpenID already exists, merging is not possible at this time.");
                             }
 
                             var currentOpenIds = Current.DB.Query<UserOpenId>("select * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id});
@@ -213,7 +177,6 @@ namespace StackExchange.DataExplorer.Controllers
                         }
                         else if (openId == null)
                         {
-
                             if (sreg != null && IsVerifiedEmailProvider(normalizedClaim))
                             {
                                 // Eh...We can trust the verified email provider, but we can't really trust Users.Email.
@@ -246,8 +209,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                             if (AppSettings.EnableEnforceSecureOpenId && user.EnforceSecureOpenId && !isSecure && openId.IsSecure)
                             {
-                                ViewData["Message"] = "User preferences prohibit insecure (non-https) variants of the provided OpenID identifier";
-                                return View("Login");
+                                return LoginError("User preferences prohibit insecure (non-https) variants of the provided OpenID identifier");
                             }
                             else if (isSecure && !openId.IsSecure)
                             {
@@ -266,17 +228,278 @@ namespace StackExchange.DataExplorer.Controllers
                             return RedirectToAction("Index", "Home");
                         }
                     case AuthenticationStatus.Canceled:
-                        ViewData["Message"] = "Canceled at provider";
-                        return View("Login");
+                        return LoginError("Canceled at provider");
                     case AuthenticationStatus.Failed:
-                        ViewData["Message"] = response.Exception.Message;
-                        return View("Login");
+                        return LoginError(response.Exception.Message);
                 }
             }
             return new EmptyResult();
         }
 
-        private void IssueFormsTicket(Models.User user)
+        private ActionResult LoginViaEmail(string email, string displayName, string returnUrl)
+        {
+            var whiteListResponse = CheckWhitelist("", email, trustEmail: true);
+            if (whiteListResponse != null)
+                return whiteListResponse;
+
+            var user = Current.DB.Query<User>("Select * From Users Where Email = @email", new { email }).FirstOrDefault();
+
+            // Create the user if not found
+            if (user == null)
+            {
+                user = Models.User.CreateUser(displayName, email, null);
+            }
+
+            IssueFormsTicket(user);
+
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
+        private ActionResult CheckWhitelist(string normalizedClaim, string email = null, bool trustEmail = false)
+        {
+            if (!AppSettings.EnableWhiteList) return null;
+
+            // Ideally we'd be as strict as possible here and use originalClaim, but we might break existing deployments then
+            string lookupClaim = normalizedClaim;
+            bool attemptUpdate = false;
+
+            if ((trustEmail || IsVerifiedEmailProvider(normalizedClaim)) && email != null)
+            {
+                attemptUpdate = true;
+                lookupClaim = "email:" + email;
+            }
+
+            var whiteListEntry = Current.DB.Query<OpenIdWhiteList>("SELECT * FROM OpenIdWhiteList WHERE lower(OpenId) = @lookupClaim", new { lookupClaim }).FirstOrDefault();
+            if (whiteListEntry == null && attemptUpdate)
+            {
+                whiteListEntry = Current.DB.Query<OpenIdWhiteList>("SELECT * FROM OpenIdWhiteList WHERE LOWER(OpenId) = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
+                if (whiteListEntry != null)
+                {
+                    whiteListEntry.OpenId = lookupClaim;
+                    Current.DB.OpenIdWhiteList.Update(whiteListEntry.Id, new { whiteListEntry.OpenId });
+                }
+            }
+
+            if (whiteListEntry == null || !whiteListEntry.Approved)
+            {
+                if (whiteListEntry == null)
+                {
+                    // add a non approved entry to the list
+                    var newEntry = new
+                    {
+                        Approved = false,
+                        CreationDate = DateTime.UtcNow,
+                        OpenId = lookupClaim,
+                        IpAddress = Request.UserHostAddress
+                    };
+                    Current.DB.OpenIdWhiteList.Insert(newEntry);
+
+                }
+
+                // not allowed in 
+                return TextPlain("Not allowed");
+            }
+
+            return null;
+        }
+
+        private ActionResult LoginError(string message)
+        {
+            return RedirectToAction("Login", new {message});
+        }
+
+        private string BaseUrl
+        {
+            get { return Current.Request.Url.Scheme + "://" + Current.Request.Url.Host; }
+        }
+
+        private ActionResult OAuthLogin()
+        {
+            var server = Request.Params["oauth2url"];
+            string clientId, secret, path,
+                   session = Guid.NewGuid().ToString().Replace("-", "");
+
+            var hash = (AppSettings.OAuthSessionSalt + ":" + session).ToMD5Hash();
+            var stateJson = JsonConvert.SerializeObject(new OAuthLoginState { ses = session, hash = hash });
+
+            switch (server)
+            {
+                //case "https://graph.facebook.com/oauth/authorize": // Facebook
+                //    GetFacebookConfig(out secret, out clientId);
+                //    var redirect = string.Format(
+                //        "{0}?client_id={1}&scope=email&redirect_uri={2}/{3}&state={4}",
+                //        server,
+                //        clientId,
+                //        host,
+                //        session,
+                //        state);
+                //    return Redirect(redirect);
+                case "https://accounts.google.com/o/oauth2/auth": // Google
+                    GetGoogleConfig(out secret, out clientId, out path);
+                    return Redirect(string.Format(
+                            "{0}?client_id={1}&scope=openid+email&redirect_uri={2}&state={3}&response_type=code",
+                            server,
+                            clientId,
+                            (BaseUrl + path).UrlEncode(),
+                            stateJson.UrlEncode()
+                            ));
+            }
+
+            return LoginError("Unsupported OAuth version or server");
+        }
+
+        private void GetGoogleConfig(out string secret , out string clientId, out string path)
+        {
+            secret = AppSettings.GoogleOAuthSecret;
+            clientId = AppSettings.GoogleOAuthClientId;
+            path = "/user/oauth/google";
+        }
+
+        [StackRoute("user/oauth/google")]
+        public ActionResult GoogleCallback(string code, string state, string error)
+        {
+            if (code.IsNullOrEmpty() || error == "access_denied")
+            {
+                return LoginError("(From Google) Access Denied");
+            }
+            string secret, clientId, path;
+            GetGoogleConfig(out secret, out clientId, out path);
+
+            // Verify state
+            var oAuthState = JsonConvert.DeserializeObject<OAuthLoginState>(state);
+            var hash = (AppSettings.OAuthSessionSalt + ":" + oAuthState.ses).ToMD5Hash();
+            if (oAuthState.hash != hash)
+            {
+                return LoginError("Invalid verification hash");
+            }
+
+            var postForm = HttpUtility.ParseQueryString("");
+            postForm["code"] = code;
+            postForm["client_id"] = clientId;
+            postForm["client_secret"] = secret;
+            postForm["redirect_uri"] = BaseUrl + path;
+            postForm["grant_type"] = "authorization_code";
+
+            for (var retry = 0; retry < GoogleAuthRetryAttempts; retry++)
+            {
+                GoogleAuthResponse authResponse;
+                try
+                {
+                    using (var wc = new WebClient())
+                    {
+                        var response = wc.UploadValues("https://accounts.google.com/o/oauth2/token", postForm);
+                        var responseStr = Encoding.UTF8.GetString(response);
+                        authResponse = JsonConvert.DeserializeObject<GoogleAuthResponse>(responseStr);
+                    }
+                    if (authResponse != null)
+                    {
+                        var loginResponse = FetchFromGoogle(authResponse.access_token);
+                        if (loginResponse != null) return loginResponse;
+                    }
+                }
+                catch (WebException e)
+                {
+                    using (var reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        var text = reader.ReadToEnd();
+                        LogAuthError(new Exception("Error contacting google: " + text));
+                    }
+                    continue;
+                }
+                catch(Exception e)
+                {
+                    LogAuthError(e);
+                    continue;
+                }
+                if (authResponse != null && authResponse.error.HasValue())
+                {
+                    return LoginError(authResponse.error + " " + authResponse.error_description);
+                }
+
+                if (retry == GoogleAuthRetryAttempts - 1)
+                {
+                    if (authResponse != null)
+                        LogAuthError(new Exception(authResponse.error + ": " + authResponse.error_description));
+                }
+            }
+
+            return LoginError("Google authentication failed");
+        }
+
+        private ActionResult FetchFromGoogle(string accessToken)
+        {
+            string result = null;
+            Exception lastException = null;
+            for (var retry = 0; retry < GoogleAuthRetryAttempts; retry++)
+            {
+                try
+                {
+                    var url = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + accessToken;
+                    using (var wc = new WebClient())
+                    {
+                        result = wc.DownloadString(url);
+                        if (result.HasValue())
+                        {
+                            break;
+                        }
+                    }
+                }
+                catch (WebException e)
+                {
+                    using (var reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        var text = reader.ReadToEnd();
+                        LogAuthError(new Exception("Error fetching from google: " + text));
+                    }
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    lastException = e;
+                }
+                if (retry == GoogleAuthRetryAttempts - 1)
+                    LogAuthError(lastException);
+            }
+
+            if (result.IsNullOrEmpty() || result == "false")
+            {
+                return LoginError("Error accessing Google account");
+            }
+
+            try
+            {
+                var person = JsonConvert.DeserializeObject<GooglePerson>(result);
+
+                if (person == null)
+                    return LoginError("Error fetching user from Google");
+                if (person.email == null)
+                    return LoginError("Error fetching email from Google");
+
+                return LoginViaEmail(person.email, person.name, "/");
+            }
+            catch (Exception e)
+            {
+                GlobalApplication.LogException(new Exception("Error in parsing google response: " + result, e));
+                return LoginError("There was an error fetching your account from Google.  Please try logging in again");
+            }
+        }
+
+        private void LogAuthError(Exception e)
+        {
+            if (e == null) return;
+            if (e.Message.Contains("Unable to fetch from"))
+            {
+                //return;
+            }
+
+            GlobalApplication.LogException(e);
+        }
+
+        private void IssueFormsTicket(User user)
         {
             var ticket = new FormsAuthenticationTicket(
                 1,
@@ -310,5 +533,47 @@ namespace StackExchange.DataExplorer.Controllers
 
             return false;
         }
+
+        // ReSharper disable InconsistentNaming
+
+        public class OAuthLoginState
+        {
+            public string ses { get; set; }
+            public int sid { get; set; }
+            public string hash { get; set; }
+        }
+
+        public class GoogleAuthResponse
+        {
+            public string access_token { get; set; }
+            public string error { get; set; }
+            public string error_description { get; set; }
+        }
+        public class GooglePerson
+        {
+            // Example response:
+            //{
+            //    "id": "00000000000000",
+            //    "email": "fred.example@gmail.com",
+            //    "verified_email": true,
+            //    "name": "Fred Example",
+            //    "given_name": "Fred",
+            //    "family_name": "Example",
+            //    "picture": "https://lh5.googleusercontent.com/-2Sv-4bBMLLA/AAAAAAAAAAI/AAAAAAAAABo/bEG4kI2mG0I/photo.jpg",
+            //    "gender": "male",
+            //    "locale": "en-US"
+            //}
+            public string id { get; set; }
+            public string email { get; set; }
+            public bool verified_email { get; set; }
+            public string name { get; set; }
+            public string given_name { get; set; }
+            public string family_name { get; set; }
+            public string picture { get; set; }
+            public string gender { get; set; }
+            public string locale { get; set; }
+        }
+
+        // ReSharper restore InconsistentNaming
     }
 }

@@ -1089,46 +1089,6 @@ div.grippie {
   width: 95%;
 }
 
-.openid_large_btn  {
-  border:1px solid #DDDDDD;
-  float:left;
-  height:60px;
-  margin:3px;
-  width:100px;
-}
-
-.openid_small_btn {
-  border:1px solid #DDDDDD;
-  float:left;
-  height:24px;
-  margin:3px;
-  width:24px;
-}
-
-.openid-identifier {
-  background:url("//cdn.sstatic.net/img/openid-large.png") no-repeat scroll left center transparent;
-  height:22px;
-  line-height:22px;
-  padding-left:32px;
-}
-
-#openid_form > p {
-  clear: both;
-  padding-top: 15px;
-  margin-bottom: 8px;
-}
-
-#openid_btns, #openid_btns br {
-clear:both;
-margin-left:30px;
-}
-
-#openid_highlight {
-  background-color:#FFFCC9;
-  float:left;
-  padding:3px;
-}
-
 #user-about-me {
 background-color:#EEEEEE;
 height:225px;

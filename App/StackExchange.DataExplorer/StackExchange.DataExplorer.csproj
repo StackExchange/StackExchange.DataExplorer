@@ -282,6 +282,12 @@
     <Content Include="Content\images\help-icon.png" />
     <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\images\so-sprites.png" />
+    <Content Include="Content\login.css">
+      <DependentUpon>login.less</DependentUpon>
+    </Content>
+    <Content Include="Content\login.min.css">
+      <DependentUpon>login.css</DependentUpon>
+    </Content>
     <Content Include="Content\query.css" />
     <Content Include="Content\slickgrid\images\sort-asc-inactive.gif" />
     <Content Include="Content\slickgrid\images\sort-asc.gif" />
@@ -371,7 +377,6 @@
     <Content Include="Scripts\jquery.autocomplete.js" />
     <Content Include="Scripts\jquery.event.drag-2.0.js" />
     <Content Include="Scripts\master.js" />
-    <Content Include="Scripts\openid-jquery.js" />
     <Content Include="robots.txt" />
     <Compile Include="ViewModel\QueryExecutionViewData.cs" />
     <Compile Include="ViewModel\QuerySetViewModel.cs" />
@@ -432,6 +437,7 @@
     <Content Include="Content\font-awesome\font\fontawesome-webfont.ttf" />
     <Content Include="Content\font-awesome\font\fontawesome-webfont.woff" />
     <Content Include="Content\font-awesome\font\FontAwesome.otf" />
+    <Content Include="Content\login.less" />
     <Content Include="appSettings.config" />
     <None Include="Content\qp\showplanxml.xsd">
       <SubType>Designer</SubType>
