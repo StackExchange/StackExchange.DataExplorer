@@ -55,12 +55,22 @@
                                 break;
                             //case AppSettings.AuthenitcationMethod.Default:
                             default:
-                                 <tr>
-                                     <td>openid</td>
-                                     <td class="overflowing"><div class="no-overflow">@Model.UserOpenIds[0].OpenIdClaim</div></td>
-                                 </tr>
-                                 break;
-                         }
+                                if (Model.UserOpenIds.Any())
+                                {
+                                    <tr>
+                                        <td>openid</td>
+                                        <td class="overflowing"><div class="no-overflow">@Model.UserOpenIds[0].OpenIdClaim</div></td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td>email (private)</td>
+                                        <td class="overflowing"><div class="no-overflow">@Model.Email</div></td>
+                                    </tr>
+                                }
+                                break;
+                        }
                     }
                     @if (Model.Website != null && Model.Website.Length > 4)
                     {
