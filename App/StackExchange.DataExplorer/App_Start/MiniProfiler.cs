@@ -1,9 +1,11 @@
+using System;
 using System.Web;
 using System.Web.Mvc;
 using System.Linq;
 using StackExchange.DataExplorer.Controllers;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Mvc;
+using StackExchange.Profiling.Storage;
 
 namespace StackExchange.DataExplorer
 {
@@ -21,11 +23,10 @@ namespace StackExchange.DataExplorer
         {
             WebRequestProfilerProvider.Settings.UserProvider = new ProxySafeUserProvider();
             MiniProfiler.Settings.SqlFormatter = new Profiling.SqlFormatters.SqlServerFormatter();
+            MiniProfiler.Settings.Storage = new HttpRuntimeCacheStorage(TimeSpan.FromMinutes(20));
 
             var ignored = MiniProfiler.Settings.IgnoredPaths.ToList();
-
             ignored.Add("/assets/");
-
             MiniProfiler.Settings.IgnoredPaths = ignored.ToArray();
 
             // Profile views
