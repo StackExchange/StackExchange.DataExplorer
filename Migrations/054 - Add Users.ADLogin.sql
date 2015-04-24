@@ -3,7 +3,7 @@ Begin
 	Alter Table dbo.[Users] Add ADLogin varchar(20);
 End
 
-If dbo.fnIndexExists('Users','Idx_Users_ADLogin') = 0
+If dbo.fnIndexExists('Users','Users_ADLogin') = 0
 Begin
   Create Nonclustered Index Users_ADLogin ON Users (ADLogin);
 End
