@@ -819,9 +819,9 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             if (prevdash)
-                return sb.ToString().Substring(0, sb.Length - 1);
-            else
-                return sb.ToString();
+                sb.Length -= 1;
+            
+            return sb.ToString();
         }
 
         /// <summary>
