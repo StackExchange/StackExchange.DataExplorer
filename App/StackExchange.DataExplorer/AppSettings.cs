@@ -52,7 +52,7 @@ namespace StackExchange.DataExplorer
         public static bool EnableCancelQuery { get; private set; }
 
         [Default(false)]
-        public static bool EnableClearCache { get; private set; }
+        public static bool EnableBypassCache { get; private set; }
 
         [Default("")]
         public static string RecaptchaPublicKey { get; private set; }

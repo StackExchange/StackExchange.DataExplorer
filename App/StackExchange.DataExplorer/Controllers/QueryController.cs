@@ -96,7 +96,7 @@ namespace StackExchange.DataExplorer.Controllers
                     targetSites ?? TargetSites.Current
                 );
 
-                if (AppSettings.EnableClearCache && bypassCache.HasValue && bypassCache.Value)
+                if (AppSettings.EnableBypassCache && bypassCache.HasValue && bypassCache.Value)
                 {
                     QueryUtil.ClearCachedResults(parsedQuery, siteId);
                 }
@@ -331,7 +331,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                     targetSites ?? TargetSites.Current
                 );
 
-                if (AppSettings.EnableClearCache && bypassCache.HasValue && bypassCache.Value)
+                if (AppSettings.EnableBypassCache && bypassCache.HasValue && bypassCache.Value)
                 {
                     QueryUtil.ClearCachedResults(parsedQuery, siteId);
                 }
