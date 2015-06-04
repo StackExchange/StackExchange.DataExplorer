@@ -87,13 +87,51 @@ order by qr.Id asc", new {querySetId}).ToList();
             {
                 if (cache.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
                 {
-                    Current.DB.Execute("DELETE CachedResults WHERE Id = @id", new { id = cache.Id });
+                    ClearCachedResults(cache.Id);
 
                     cache = null;
                 }
             }
 
             return cache;
+        }
+
+        /// <summary>
+        /// Clears the cached results for the given query
+        /// </summary>
+        /// <param name="query">The query to clear cache for</param>
+        /// <param name="siteId">The site ID that the query is run against</param>
+        public static void ClearCachedResults(ParsedQuery query, int siteId)
+        {
+            if (query == null || !query.IsExecutionReady || AppSettings.AutoExpireCacheMinutes == 0)
+            {
+                return;
+            }
+
+            var cache = Current.DB.Query<CachedResult>(@"
+                SELECT
+                    *
+                FROM
+                    CachedResults
+                WHERE
+                    QueryHash = @hash AND
+                    SiteId = @site",
+                new
+                {
+                    hash = query.ExecutionHash,
+                    site = siteId
+                }
+            ).FirstOrDefault();
+
+            if (cache != null)
+            {
+                ClearCachedResults(cache.Id);
+            }
+        }
+
+        private static void ClearCachedResults(int cacheId)
+        {
+            Current.DB.Execute("DELETE CachedResults WHERE Id = @id", new { id = cacheId });
         }
 
         public static Revision GetMigratedRevision(int id, MigrationType type)
