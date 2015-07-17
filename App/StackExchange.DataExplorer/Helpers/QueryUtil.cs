@@ -87,7 +87,7 @@ order by qr.Id asc", new {querySetId}).ToList();
             {
                 if (cache.CreationDate.Value.AddMinutes(AppSettings.AutoExpireCacheMinutes) < DateTime.UtcNow)
                 {
-                    ClearCachedResults(cache.Id);
+                    Current.DB.Execute("DELETE CachedResults WHERE Id = @id", new { id = cache.Id });
 
                     cache = null;
                 }
@@ -108,10 +108,8 @@ order by qr.Id asc", new {querySetId}).ToList();
                 return;
             }
 
-            var cache = Current.DB.Query<CachedResult>(@"
-                SELECT
-                    *
-                FROM
+            Current.DB.Query<CachedResult>(@"
+                DELETE
                     CachedResults
                 WHERE
                     QueryHash = @hash AND
@@ -121,17 +119,7 @@ order by qr.Id asc", new {querySetId}).ToList();
                     hash = query.ExecutionHash,
                     site = siteId
                 }
-            ).FirstOrDefault();
-
-            if (cache != null)
-            {
-                ClearCachedResults(cache.Id);
-            }
-        }
-
-        private static void ClearCachedResults(int cacheId)
-        {
-            Current.DB.Execute("DELETE CachedResults WHERE Id = @id", new { id = cacheId });
+            );
         }
 
         public static Revision GetMigratedRevision(int id, MigrationType type)
