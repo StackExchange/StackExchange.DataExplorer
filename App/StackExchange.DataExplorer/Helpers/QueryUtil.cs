@@ -96,6 +96,32 @@ order by qr.Id asc", new {querySetId}).ToList();
             return cache;
         }
 
+        /// <summary>
+        /// Clears the cached results for the given query
+        /// </summary>
+        /// <param name="query">The query to clear cache for</param>
+        /// <param name="siteId">The site ID that the query is run against</param>
+        public static void ClearCachedResults(ParsedQuery query, int siteId)
+        {
+            if (query == null || !query.IsExecutionReady || AppSettings.AutoExpireCacheMinutes == 0)
+            {
+                return;
+            }
+
+            Current.DB.Query<CachedResult>(@"
+                DELETE
+                    CachedResults
+                WHERE
+                    QueryHash = @hash AND
+                    SiteId = @site",
+                new
+                {
+                    hash = query.ExecutionHash,
+                    site = siteId
+                }
+            );
+        }
+
         public static Revision GetMigratedRevision(int id, MigrationType type)
         {
             return Current.DB.Query<Revision,QuerySet,Revision>(@"

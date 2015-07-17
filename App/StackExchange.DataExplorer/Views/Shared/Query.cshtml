@@ -45,6 +45,10 @@
                 Options:
                 <label title="Return results in text format"><input type="checkbox" name="textResults" value="true" />Text-only results</label>
                 <label title="Include the execution plan for this query in the results"><input type="checkbox" name="withExecutionPlan" value="true" />Include execution plan</label>
+                @if (AppSettings.EnableBypassCache)
+                {
+                <label title="Ignore previously cached results"><input type="checkbox" name="bypassCache" value="true" />Bypass cache</label>
+                }
             @if (AppSettings.AllowRunOnAllDbsOption)
             {
                 <label title="Targe sites">Run on: 
