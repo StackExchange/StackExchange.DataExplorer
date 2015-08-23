@@ -251,14 +251,6 @@ img {
   line-height: 1.7em;
 }
 
-#footer-flair {
-  float: right;
-  width: 130px;
-  margin-top: -40px;
-  margin-bottom: -2px;
-  text-align: right;
-}
-
 #footer-menu a {
   color: #FFFFFF;
   margin: 0 0.8em 0 0;
@@ -266,14 +258,17 @@ img {
 
 #revision {
   margin-top: 5px;
-  font-size: 10px;
+  font-size: 11px;
+  line-height: 1.3em;
+  font-weight: 400;
   color: #CCC;
 }
 
 #copyright {
   color: #CCC;
   clear: both;
-  font-weight: bold;
+  font-size: 11px;
+  font-weight: 400;
 }
 
 #copyright a {
