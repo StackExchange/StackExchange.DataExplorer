@@ -261,7 +261,7 @@
     <Compile Include="Models\User.Preferences.cs">
       <DependentUpon>User.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\UserOpenId.cs" />
+    <Compile Include="Models\UserAuthClaim.cs" />
     <Compile Include="Models\Vote.cs" />
     <Compile Include="Models\VoteType.cs" />
     <Compile Include="Models\_Database.Specific.cs">

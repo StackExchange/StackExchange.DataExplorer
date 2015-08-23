@@ -25,13 +25,13 @@ namespace StackExchange.DataExplorer.Models
         public string PreferencesRaw { get; set; }
         public string ADLogin { get; set; }
 
-        List<UserOpenId> _userOpenIds;
-        public List<UserOpenId> UserOpenIds
+        List<UserAuthClaim> _userAuthClaims;
+        public List<UserAuthClaim> UserAuthClaims
         {
             get
             {
-                _userOpenIds = _userOpenIds ?? Current.DB.Query<UserOpenId>("select * from UserOpenIds where UserId = @Id", new { Id }).ToList();
-                return _userOpenIds;
+                _userAuthClaims = _userAuthClaims ?? Current.DB.Query<UserAuthClaim>("select * from UserAuthClaims where UserId = @Id", new { Id }).ToList();
+                return _userAuthClaims;
             }
         }
 
@@ -156,7 +156,7 @@ namespace StackExchange.DataExplorer.Models
 
             u.Id = Current.DB.Users.Insert(new { u.Email, u.Login, u.CreationDate }).Value;
             if (openIdClaim != null)
-                Current.DB.UserOpenIds.Insert(new {OpenIdClaim = openIdClaim, UserId = u.Id});
+                Current.DB.UserAuthClaims.Insert(new { ClaimIdentifier = openIdClaim, UserId = u.Id});
             return u;
         }
 
@@ -242,7 +242,7 @@ where UserId = @mergeId", new { mergeId, masterId });
 
             // User Open Ids
             {
-                var rempped = db.Execute("update UserOpenIds set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
+                var rempped = db.Execute("update UserAuthClaims set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
                 log.AppendLine(string.Format("Remapped {0} user open ids", rempped));
             }
 

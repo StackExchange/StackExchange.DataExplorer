@@ -151,7 +151,7 @@ namespace StackExchange.DataExplorer.Controllers
                             return whiteListResponse;
 
                         User user = null;
-                        var openId = Current.DB.Query<UserOpenId>("SELECT * FROM UserOpenIds WHERE OpenIdClaim = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
+                        var openId = Current.DB.Query<UserAuthClaim>("SELECT * FROM UserAuthClaims WHERE ClaimIdentifier = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
 
                         if (!CurrentUser.IsAnonymous)
                         {
@@ -162,14 +162,14 @@ namespace StackExchange.DataExplorer.Controllers
                                 return LoginError("Another user with this OpenID already exists, merging is not possible at this time.");
                             }
 
-                            var currentOpenIds = Current.DB.Query<UserOpenId>("select * from UserOpenIds  where UserId = @Id", new {CurrentUser.Id});
+                            var currentOpenIds = Current.DB.Query<UserAuthClaim>("select * from UserAuthClaims  where UserId = @Id", new {CurrentUser.Id});
 
                             // If a user is merged and then tries to add one of the OpenIDs used for the two original users,
                             // this update will fail...so don't attempt it if we detect that's the case. Really we should
                             // work on allowing multiple OpenID logins, but for now I'll settle for not throwing an exception...
-                            if (!currentOpenIds.Any(s => s.OpenIdClaim == normalizedClaim))
+                            if (!currentOpenIds.Any(s => s.ClaimIdentifier == normalizedClaim))
                             {
-                                Current.DB.UserOpenIds.Update(currentOpenIds.First().Id, new { OpenIdClaim = normalizedClaim });
+                                Current.DB.UserAuthClaims.Update(currentOpenIds.First().Id, new { ClaimIdentifier = normalizedClaim });
                             }
                           
                             user = CurrentUser;
@@ -186,7 +186,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                                 if (user != null)
                                 {
-                                    Current.DB.UserOpenIds.Insert(new { UserId = user.Id, OpenIdClaim = normalizedClaim, isSecure });
+                                    Current.DB.UserAuthClaims.Insert(new { UserId = user.Id, ClaimIdentifier = normalizedClaim, isSecure });
                                 }
                             }
 
@@ -213,7 +213,7 @@ namespace StackExchange.DataExplorer.Controllers
                             }
                             else if (isSecure && !openId.IsSecure)
                             {
-                                Current.DB.UserOpenIds.Update(openId.Id, new { IsSecure = true });
+                                Current.DB.UserAuthClaims.Update(openId.Id, new { IsSecure = true });
                             }
                         }
 

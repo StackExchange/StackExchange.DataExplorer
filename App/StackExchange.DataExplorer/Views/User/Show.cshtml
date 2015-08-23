@@ -55,11 +55,11 @@
                                 break;
                             //case AppSettings.AuthenitcationMethod.Default:
                             default:
-                                if (Model.UserOpenIds.Any())
+                                if (Model.UserAuthClaims.Any())
                                 {
                                     <tr>
                                         <td>openid</td>
-                                        <td class="overflowing"><div class="no-overflow">@Model.UserOpenIds[0].OpenIdClaim</div></td>
+                                        <td class="overflowing"><div class="no-overflow">@Model.UserAuthClaims[0].ClaimIdentifier</div></td>
                                     </tr>
                                 }
                                 else
