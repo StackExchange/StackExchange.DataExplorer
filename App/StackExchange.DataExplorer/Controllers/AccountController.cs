@@ -150,83 +150,8 @@ namespace StackExchange.DataExplorer.Controllers
                         if (whiteListResponse != null) 
                             return whiteListResponse;
 
-                        User user = null;
-                        var openId = Current.DB.Query<UserAuthClaim>("SELECT * FROM UserAuthClaims WHERE ClaimIdentifier = @normalizedClaim", new { normalizedClaim }).FirstOrDefault();
-
-                        if (!CurrentUser.IsAnonymous)
-                        {
-                            if (openId != null && openId.UserId != CurrentUser.Id) //Does another user have this OpenID
-                            {
-                                //TODO: Need to perform a user merge
-                                SetHeader("Log in below to change your OpenID");
-                                return LoginError("Another user with this OpenID already exists, merging is not possible at this time.");
-                            }
-
-                            var currentOpenIds = Current.DB.Query<UserAuthClaim>("select * from UserAuthClaims  where UserId = @Id", new {CurrentUser.Id});
-
-                            // If a user is merged and then tries to add one of the OpenIDs used for the two original users,
-                            // this update will fail...so don't attempt it if we detect that's the case. Really we should
-                            // work on allowing multiple OpenID logins, but for now I'll settle for not throwing an exception...
-                            if (!currentOpenIds.Any(s => s.ClaimIdentifier == normalizedClaim))
-                            {
-                                Current.DB.UserAuthClaims.Update(currentOpenIds.First().Id, new { ClaimIdentifier = normalizedClaim });
-                            }
-                          
-                            user = CurrentUser;
-                            returnUrl = "/users/" + user.Id;
-                        }
-                        else if (openId == null)
-                        {
-                            if (sreg != null && IsVerifiedEmailProvider(normalizedClaim))
-                            {
-                                // Eh...We can trust the verified email provider, but we can't really trust Users.Email.
-                                // I can't think of a particularly malicious way this could be exploited, but it's likely
-                                // worth reviewing at some point.
-                                user = Current.DB.Query<User>("select * from Users where Email = @Email", new { sreg.Email }).FirstOrDefault();
-
-                                if (user != null)
-                                {
-                                    Current.DB.UserAuthClaims.Insert(new { UserId = user.Id, ClaimIdentifier = normalizedClaim, isSecure });
-                                }
-                            }
-
-                            if (user == null)
-                            {
-                                // create new user
-                                string email = "";
-                                string login = "";
-                                if (sreg != null)
-                                {
-                                    email = sreg.Email;
-                                    login = sreg.Nickname ?? sreg.FullName;
-                                }
-                                user = Models.User.CreateUser(login, email, normalizedClaim);
-                            }
-                        }
-                        else
-                        {
-                            user = Current.DB.Users.Get(openId.UserId);
-
-                            if (AppSettings.EnableEnforceSecureOpenId && user.EnforceSecureOpenId && !isSecure && openId.IsSecure)
-                            {
-                                return LoginError("User preferences prohibit insecure (non-https) variants of the provided OpenID identifier");
-                            }
-                            else if (isSecure && !openId.IsSecure)
-                            {
-                                Current.DB.UserAuthClaims.Update(openId.Id, new { IsSecure = true });
-                            }
-                        }
-
-                        IssueFormsTicket(user);
-
-                        if (!string.IsNullOrEmpty(returnUrl))
-                        {
-                            return Redirect(returnUrl);
-                        }
-                        else
-                        {
-                            return RedirectToAction("Index", "Home");
-                        }
+                        return LoginUser(whitelistEmail, normalizedClaim, sreg != null ? sreg.Nickname ?? sreg.FullName : null, returnUrl,
+                            UserAuthClaim.ClaimType.OpenID, IsVerifiedEmailProvider(originalClaim), isSecure);
                     case AuthenticationStatus.Canceled:
                         return LoginError("Canceled at provider");
                     case AuthenticationStatus.Failed:
@@ -236,18 +161,49 @@ namespace StackExchange.DataExplorer.Controllers
             return new EmptyResult();
         }
 
-        private ActionResult LoginViaEmail(string email, string displayName, string returnUrl)
+        private ActionResult LoginUser(string email, string identifier, string displayName, string returnUrl, UserAuthClaim.ClaimType type, bool trustEmail, bool isSecure = false)
         {
-            var whiteListResponse = CheckWhitelist("", email, trustEmail: true);
+            var whiteListResponse = CheckWhitelist(identifier, email, trustEmail: trustEmail);
+
             if (whiteListResponse != null)
                 return whiteListResponse;
 
-            var user = Current.DB.Query<User>("Select * From Users Where Email = @email", new { email }).FirstOrDefault();
+            Tuple<User, UserAuthClaim> identity = Models.User.FindUserIdentityByAuthClaim(email, identifier, type, CurrentUser.IsAnonymous && trustEmail);
 
-            // Create the user if not found
+            var user = identity.Item1;
+            var claim = identity.Item2;
+
+            if (!CurrentUser.IsAnonymous && user != null && user.Id != CurrentUser.Id)
+            {
+                //TODO: Need to perform a user merge
+                SetHeader("Log in below to change your OpenID");
+
+                return LoginError("Another user with this login already exists, merging is not possible at this time.");
+            }
+
             if (user == null)
             {
-                user = Models.User.CreateUser(displayName, email, null);
+                user = !CurrentUser.IsAnonymous ? CurrentUser : Models.User.CreateUser(displayName, email);
+            }
+
+            if (claim == null)
+            {
+                Current.DB.UserAuthClaims.Insert(new { UserId = user.Id, ClaimIdentifier = identifier, IdentifierType = type, IsSecure = isSecure });
+            }
+            else if (claim.UserId != user.Id)
+            {
+                // This implies there's an orphan claim record somehow, I don't think this should be possible
+                Current.DB.UserAuthClaims.Update(claim.Id, new { UserId = user.Id });
+            }
+
+            // This checking is only relevant to OpenID…which is kind of auth-type specific logic for this method, but meh
+            if (AppSettings.EnableEnforceSecureOpenId && user.EnforceSecureOpenId && !isSecure && claim.IsSecure)
+            {
+                return LoginError("User preferences prohibit insecure (non-https) variants of the provided OpenID identifier");
+            }
+            else if (isSecure && !claim.IsSecure)
+            {
+                Current.DB.UserAuthClaims.Update(claim.Id, new { IsSecure = true });
             }
 
             IssueFormsTicket(user);
@@ -256,6 +212,7 @@ namespace StackExchange.DataExplorer.Controllers
             {
                 return Redirect(returnUrl);
             }
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -479,7 +436,7 @@ namespace StackExchange.DataExplorer.Controllers
                 if (person.email == null)
                     return LoginError("Error fetching email from Google");
 
-                return LoginViaEmail(person.email, person.name, "/");
+                return LoginUser(person.email, person.email, person.name, "/", UserAuthClaim.ClaimType.Google, true);
             }
             catch (Exception e)
             {

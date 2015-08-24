@@ -15,7 +15,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
         public void TestBatchingBatch() {
             string sql = "print 1 \nGO\nprint 2";
             var site = Current.DB.Sites.First();
-            var user = User.CreateUser("Fred", "a@a.com", "xyzdsa");
+            var user = User.CreateUser("Fred", "a@a.com");
             var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user, null);
 
             Assert.AreEqual(0, results.ResultSets.Count());
@@ -27,7 +27,7 @@ namespace StackExchange.DataExplorer.Tests.Models {
         public void TestMultiResultSetsInStatement() {
             string sql = "select 1 select 2";
             var site = Current.DB.Sites.First();
-            var user = User.CreateUser("Fred", "a@a.com", "xyzdsa");
+            var user = User.CreateUser("Fred", "a@a.com");
             var results = QueryRunner.ExecuteNonCached(new ParsedQuery(sql, null), site, user, null);
 
             Assert.AreEqual(2, results.ResultSets.Count());

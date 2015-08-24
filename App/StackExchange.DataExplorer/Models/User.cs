@@ -105,6 +105,27 @@ namespace StackExchange.DataExplorer.Models
             return u;
         }
 
+        public static Tuple<User, UserAuthClaim> FindUserIdentityByAuthClaim(string email, string identifier, UserAuthClaim.ClaimType type, bool useEmailFallback = true)
+        {
+            var claim = Current.DB.Query<UserAuthClaim>(
+                "SELECT * FROM UserAuthClaims WHERE ClaimIdentifier = @identifier AND IdentifierType = @type",
+                new { identifier, type }
+            ).FirstOrDefault();
+
+            User user = null;
+
+            if (claim != null)
+            {
+                user = Current.DB.Users.Get(claim.UserId);
+            }
+            else if (useEmailFallback && email.HasValue())
+            {
+                user = Current.DB.Query<User>("SELECT * FROM Users WHERE Email = @email", new { email }).FirstOrDefault();
+            }
+
+            return Tuple.Create<User, UserAuthClaim>(user, claim);
+        }
+
         public void SetAdmin(bool isAdmin)
         {
             Current.DB.Execute("Update Users Set IsAdmin = @isAdmin Where Id = @Id", new {Id, isAdmin});
@@ -115,7 +136,7 @@ namespace StackExchange.DataExplorer.Models
             return Current.DB.Query<User>("Select * From Users Where ADLogin = @accountLogin", new {accountLogin}).SingleOrDefault();
         }
 
-        public static User CreateUser(string login, string email, string openIdClaim)
+        public static User CreateUser(string login, string email)
         {
             var u = new User();
             u.CreationDate = DateTime.UtcNow;
@@ -155,8 +176,7 @@ namespace StackExchange.DataExplorer.Models
             }
 
             u.Id = Current.DB.Users.Insert(new { u.Email, u.Login, u.CreationDate }).Value;
-            if (openIdClaim != null)
-                Current.DB.UserAuthClaims.Insert(new { ClaimIdentifier = openIdClaim, UserId = u.Id});
+
             return u;
         }
 
