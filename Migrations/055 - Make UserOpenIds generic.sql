@@ -26,6 +26,13 @@ END
 
 GO
 
+IF dbo.fnColumnExists('UserAuthClaims', 'Display') = 0
+BEGIN
+	ALTER TABLE UserAuthClaims ADD Display NVARCHAR(150)
+END
+
+GO
+
 IF dbo.fnIndexExists('UserAuthClaims', 'ClaimIdentifierIdx') = 0
 BEGIN
 	ALTER TABLE UserAuthClaims ALTER COLUMN ClaimIdentifier NVARCHAR(449) NOT NULL

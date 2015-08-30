@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IdentityModel.Tokens;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -144,14 +145,11 @@ namespace StackExchange.DataExplorer.Controllers
                         var normalizedClaim = Models.User.NormalizeOpenId(response.ClaimedIdentifier.ToString());
                         var sreg = response.GetExtension<ClaimsResponse>();
                         var isSecure = originalClaim.StartsWith("https://");
+                        var email = sreg != null && sreg.Email != null && sreg.Email.Length > 2 ? sreg.Email : null;
+                        var displayName = sreg != null ? sreg.Nickname ?? sreg.FullName : null;
 
-                        var whitelistEmail = sreg != null && sreg.Email != null && sreg.Email.Length > 2 ? sreg.Email : null;
-                        var whiteListResponse = CheckWhitelist(normalizedClaim, whitelistEmail);
-                        if (whiteListResponse != null) 
-                            return whiteListResponse;
-
-                        return LoginUser(whitelistEmail, normalizedClaim, sreg != null ? sreg.Nickname ?? sreg.FullName : null, returnUrl,
-                            UserAuthClaim.ClaimType.OpenID, IsVerifiedEmailProvider(originalClaim), isSecure);
+                        return LoginUser(new UserAuthClaim.Identifier(normalizedClaim, UserAuthClaim.ClaimType.OpenID),  email, displayName,
+                            returnUrl, IsVerifiedEmailProvider(originalClaim), isSecure);
                     case AuthenticationStatus.Canceled:
                         return LoginError("Canceled at provider");
                     case AuthenticationStatus.Failed:
@@ -161,14 +159,14 @@ namespace StackExchange.DataExplorer.Controllers
             return new EmptyResult();
         }
 
-        private ActionResult LoginUser(string email, string identifier, string displayName, string returnUrl, UserAuthClaim.ClaimType type, bool trustEmail, bool isSecure = false)
+        private ActionResult LoginUser(UserAuthClaim.Identifier identifier, string email, string displayName, string returnUrl, bool trustEmail, bool isSecure = false, UserAuthClaim.Identifier legacyIdentifier = null)
         {
-            var whiteListResponse = CheckWhitelist(identifier, email, trustEmail: trustEmail);
+            var whiteListResponse = CheckWhitelist(identifier.Value, email, trustEmail: trustEmail);
 
             if (whiteListResponse != null)
                 return whiteListResponse;
 
-            Tuple<User, UserAuthClaim> identity = Models.User.FindUserIdentityByAuthClaim(email, identifier, type, CurrentUser.IsAnonymous && trustEmail);
+            Tuple<User, UserAuthClaim> identity = Models.User.FindUserIdentityByAuthClaim(email, identifier, CurrentUser.IsAnonymous && trustEmail, legacyIdentifier: legacyIdentifier);
 
             var user = identity.Item1;
             var claim = identity.Item2;
@@ -188,22 +186,29 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (claim == null)
             {
-                Current.DB.UserAuthClaims.Insert(new { UserId = user.Id, ClaimIdentifier = identifier, IdentifierType = type, IsSecure = isSecure });
+                Current.DB.UserAuthClaims.Insert(new { UserId = user.Id, ClaimIdentifier = identifier.Value, IdentifierType = identifier.Type, IsSecure = isSecure, Display = trustEmail ? email : null });
             }
             else if (claim.UserId != user.Id)
             {
                 // This implies there's an orphan claim record somehow, I don't think this should be possible
                 Current.DB.UserAuthClaims.Update(claim.Id, new { UserId = user.Id });
             }
+            else
+            {
+                // This checking is only relevant to OpenID…which is kind of auth-type specific logic for this method, but meh
+                if (AppSettings.EnableEnforceSecureOpenId && user.EnforceSecureOpenId && !isSecure && claim.IsSecure)
+                {
+                    return LoginError("User preferences prohibit insecure (non-https) variants of the provided OpenID identifier");
+                }
+                else if (isSecure && !claim.IsSecure)
+                {
+                    Current.DB.UserAuthClaims.Update(claim.Id, new { IsSecure = true });
+                }
 
-            // This checking is only relevant to OpenID…which is kind of auth-type specific logic for this method, but meh
-            if (AppSettings.EnableEnforceSecureOpenId && user.EnforceSecureOpenId && !isSecure && claim.IsSecure)
-            {
-                return LoginError("User preferences prohibit insecure (non-https) variants of the provided OpenID identifier");
-            }
-            else if (isSecure && !claim.IsSecure)
-            {
-                Current.DB.UserAuthClaims.Update(claim.Id, new { IsSecure = true });
+                if (trustEmail && claim.Display != email)
+                {
+                    Current.DB.UserAuthClaims.Update(claim.Id, new { Display = email });
+                }
             }
 
             IssueFormsTicket(user);
@@ -297,13 +302,14 @@ namespace StackExchange.DataExplorer.Controllers
                 //    return Redirect(redirect);
                 case "https://accounts.google.com/o/oauth2/auth": // Google
                     GetGoogleConfig(out secret, out clientId, out path);
+
                     return Redirect(string.Format(
-                            "{0}?client_id={1}&scope=openid+email&redirect_uri={2}&state={3}&response_type=code",
-                            server,
-                            clientId,
-                            (BaseUrl + path).UrlEncode(),
-                            stateJson.UrlEncode()
-                            ));
+                        "{0}?client_id={1}&scope=openid+email&redirect_uri={2}&state={3}&response_type=code&openid.realm={2}",
+                        server,
+                        clientId,
+                        (BaseUrl + path).UrlEncode(),
+                        stateJson.UrlEncode()
+                    ));
             }
 
             return LoginError("Unsupported OAuth version or server");
@@ -352,9 +358,10 @@ namespace StackExchange.DataExplorer.Controllers
                         var responseStr = Encoding.UTF8.GetString(response);
                         authResponse = JsonConvert.DeserializeObject<GoogleAuthResponse>(responseStr);
                     }
-                    if (authResponse != null)
+
+                    if (authResponse != null && !authResponse.error.HasValue())
                     {
-                        var loginResponse = FetchFromGoogle(authResponse.access_token);
+                        var loginResponse = FetchFromGoogle(authResponse.access_token, authResponse.id_token);
                         if (loginResponse != null) return loginResponse;
                     }
                 }
@@ -387,8 +394,11 @@ namespace StackExchange.DataExplorer.Controllers
             return LoginError("Google authentication failed");
         }
 
-        private ActionResult FetchFromGoogle(string accessToken)
+        private ActionResult FetchFromGoogle(string accessToken, string idToken)
         {
+            // We're not bothering to validate the id token because we just got it back directly from Google over HTTPS
+            var legacyIdentifier = (string)new JwtSecurityToken(idToken).Payload["openid_id"];
+
             string result = null;
             Exception lastException = null;
             for (var retry = 0; retry < GoogleAuthRetryAttempts; retry++)
@@ -436,7 +446,14 @@ namespace StackExchange.DataExplorer.Controllers
                 if (person.email == null)
                     return LoginError("Error fetching email from Google");
 
-                return LoginUser(person.email, person.email, person.name, "/", UserAuthClaim.ClaimType.Google, true);
+                return LoginUser(
+                    new UserAuthClaim.Identifier(person.id, UserAuthClaim.ClaimType.Google),
+                    person.email,
+                    person.name,
+                    "/",
+                    person.verified_email,
+                    legacyIdentifier: legacyIdentifier.HasValue() ? new UserAuthClaim.Identifier(Models.User.NormalizeOpenId(legacyIdentifier), UserAuthClaim.ClaimType.OpenID) : null
+                );
             }
             catch (Exception e)
             {
@@ -503,6 +520,7 @@ namespace StackExchange.DataExplorer.Controllers
         public class GoogleAuthResponse
         {
             public string access_token { get; set; }
+            public string id_token { get; set; }
             public string error { get; set; }
             public string error_description { get; set; }
         }

@@ -105,12 +105,26 @@ namespace StackExchange.DataExplorer.Models
             return u;
         }
 
-        public static Tuple<User, UserAuthClaim> FindUserIdentityByAuthClaim(string email, string identifier, UserAuthClaim.ClaimType type, bool useEmailFallback = true)
+        public static Tuple<User, UserAuthClaim> FindUserIdentityByAuthClaim(string email, UserAuthClaim.Identifier identifier, bool useEmailFallback = true, UserAuthClaim.Identifier legacyIdentifier = null)
         {
             var claim = Current.DB.Query<UserAuthClaim>(
                 "SELECT * FROM UserAuthClaims WHERE ClaimIdentifier = @identifier AND IdentifierType = @type",
-                new { identifier, type }
+                new { identifier = identifier.Value, type = identifier.Type }
             ).FirstOrDefault();
+
+            if (claim == null && legacyIdentifier != null)
+            {
+                claim = Current.DB.Query<UserAuthClaim>(
+                    "SELECT * FROM UserAuthClaims WHERE ClaimIdentifier = @identifier AND IdentifierType = @type",
+                    new { identifier = legacyIdentifier.Value, type = legacyIdentifier.Type }
+                ).FirstOrDefault();
+
+                if (claim != null)
+                {
+                    // Update the legacy auth claim (only Google OpenID -> email right now)
+                    Current.DB.UserAuthClaims.Update(claim.Id, new { ClaimIdentifier = identifier.Value, IdentifierType = identifier.Type, IsSecure = false, Display = email });
+                }
+            }
 
             User user = null;
 
