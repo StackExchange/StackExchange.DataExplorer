@@ -42,7 +42,7 @@ namespace StackExchange.DataExplorer.Controllers
                     return View("LoginActiveDirectory");
                 //case AppSettings.AuthenitcationMethod.Default:
                 default:
-                    SetHeader(CurrentUser.IsAnonymous ? "Log in with OpenID" : "Log in below to change your OpenID");
+                    SetHeader(CurrentUser.IsAnonymous ? "Log in to access your Data Explorer account" : "Add a new login method to your account");
                     return View("Login");
             }
         }

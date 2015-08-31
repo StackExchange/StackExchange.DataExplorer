@@ -122,7 +122,12 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id, User updatedUser)
         {
-            User user = Current.DB.Users.Get(id);
+            User user = CanViewPrivateInfoFor(id) ? GetUser(id) : null;
+
+            if (user == null)
+            {
+                return PageNotFound();
+            }
 
             if (updatedUser.DOB < DateTime.UtcNow.AddYears(-100) || updatedUser.DOB > DateTime.UtcNow.AddYears(-6))
             {
@@ -175,23 +180,32 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id)
         {
-            User user = Current.DB.Users.Get(id);
+            User user = CanViewPrivateInfoFor(id) ? GetUser(id) : null;
+
             if (user == null)
             {
                 return PageNotFound();
             }
 
-            if (user.Id == CurrentUser.Id || CurrentUser.IsAdmin)
-            {
-                SetHeader(user.Login + " - Edit");
-                SelectMenuItem("Users");
+            SetProfileMetadata(user, true);
 
-                return View(user);
-            }
-            else
+            return View(user);
+        }
+
+        [HttpGet]
+        [StackRoute(@"users/logins/{id:\d+}", RoutePriority.High)]
+        public ActionResult Logins(int id)
+        {
+            User user = AppSettings.AuthMethod == AppSettings.AuthenitcationMethod.Default && CanViewPrivateInfoFor(id) ? GetUser(id) : null;
+            
+            if (user == null)
             {
-                return Redirect("/");
+                return PageNotFound();
             }
+
+            SetProfileMetadata(user, true, "logins");
+
+            return View(user);
         }
 
         [HttpPost]
@@ -202,9 +216,9 @@ namespace StackExchange.DataExplorer.Controllers
                 return ContentError("Invalid preference");
             }
 
-            User user = Current.DB.Users.Get(id);
+            User user = CanViewPrivateInfoFor(id) ? GetUser(id) : null;
 
-            if (user == null || (user.Id != CurrentUser.Id && !CurrentUser.IsAdmin))
+            if (user == null)
             {
                 return ContentError("Invalid action");
             }
@@ -220,7 +234,7 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute(@"users/{id:INT}/{name?}")]
         public ActionResult Show(int id, string name, string order_by, int? page)
         {
-            User user = !Current.User.IsAnonymous && Current.User.Id == id ? Current.User : Current.DB.Users.Get(id);
+            User user = GetUser(id);
 
             if (user == null)
             {
@@ -235,8 +249,7 @@ namespace StackExchange.DataExplorer.Controllers
 
             DataExplorerDatabase db = Current.DB;
 
-            SetHeader(user.Login);
-            SelectMenuItem("Users");
+            SetProfileMetadata(user, false);
 
             var profileTabs = new SubHeader
             {
@@ -370,6 +383,67 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             return View(user);
+        }
+
+        private bool CanViewPrivateInfoFor(int id)
+        {
+            return !CurrentUser.IsAnonymous && (CurrentUser.Id == id || CurrentUser.IsAdmin);
+        }
+
+        private User GetUser(int id)
+        {
+            return CurrentUser.Id == id ? CurrentUser : Current.DB.Users.Get(id);
+        }
+
+        private void SetProfileMetadata(User user, bool isEditing, string currentEditPage = null)
+        {
+            var subheaders = new List<SubHeaderViewData>
+            {
+                new SubHeaderViewData
+                {
+                    Description = "Profile",
+                    Href = "/users/" + user.ProfilePath,
+                    Default = true
+                }
+            };
+
+            if (CanViewPrivateInfoFor(user.Id))
+            {
+                subheaders.Add(new SubHeaderViewData
+                {
+                    Name = "edit",
+                    Description = "Edit Profile & Logins",
+                    Href = "/users/edit/" + user.Id
+                });
+            }
+
+            ViewData["BodyClass"] = "user-profile";
+            SelectMenuItem("Users");
+            SetHeader(null, isEditing ? "edit" : null, subheaders.ToArray<SubHeaderViewData>());
+
+            if (isEditing)
+            {
+                ViewData["ProfileNav"] = new SubHeader
+                {
+                    Selected = currentEditPage,
+                    Items = new List<SubHeaderViewData>
+                    {
+                        new SubHeaderViewData
+                        {
+                            Name = "profile",
+                            Description = "Edit Profile",
+                            Href = "/users/edit/" + user.Id,
+                            Default = true
+                        },
+                        new SubHeaderViewData
+                        {
+                            Name = "logins",
+                            Description = "My Logins",
+                            Href = "/users/logins/" + user.Id
+                        }
+                    }
+                };
+            }
         }
     }
 }

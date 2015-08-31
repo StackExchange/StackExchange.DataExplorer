@@ -1,7 +1,8 @@
 ﻿@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
+@using System.Web.Optimization;
 @{this.SetPageTitle("Log In or Register - Stack Exchange Data Explorer");}
-<link rel="stylesheet" type="text/css" href="/Content/login.min.css" />
+@Styles.Render("~/assets/css/login")
 <div class="page-description">
     @if (ViewData["Message"] != null)
     {

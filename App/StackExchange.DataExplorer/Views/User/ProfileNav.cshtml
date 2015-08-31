@@ -1,0 +1,14 @@
+﻿@model StackExchange.DataExplorer.ViewModel.SubHeader
+<ul class="sectioned-nav">
+    @foreach(var item in Model.Items)
+    {
+        <li
+        @if (item.Selected)
+        {
+            <text>class="youarehere"</text>
+        }
+        >
+            <a href="@item.Href">@item.Description</a>
+        </li>
+    }
+</ul>

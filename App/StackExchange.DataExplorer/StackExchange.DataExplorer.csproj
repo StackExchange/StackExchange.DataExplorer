@@ -288,6 +288,7 @@
     <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\images\so-sprites.png" />
     <Content Include="Content\Img\login-icons.svg" />
+    <Content Include="Content\login-providers.css" />
     <Content Include="Content\login.css">
       <DependentUpon>login.less</DependentUpon>
     </Content>
@@ -370,6 +371,7 @@
     <Content Include="Content\qp\qp.css" />
     <Content Include="Content\qp\qp.xslt" />
     <Content Include="Content\topbar.css" />
+    <Content Include="Content\user.css" />
     <Content Include="Scripts\codemirror\codemirror.js" />
     <Content Include="Scripts\codemirror\runmode.js" />
     <Content Include="Scripts\codemirror\sql.js" />
@@ -485,6 +487,8 @@
     <Content Include="Views\Shared\UserList.cshtml" />
     <Content Include="Views\Home\Help.cshtml" />
     <Content Include="Views\Account\LogInActiveDirectory.cshtml" />
+    <Content Include="Views\User\Logins.cshtml" />
+    <Content Include="Views\User\ProfileNav.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

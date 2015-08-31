@@ -1,6 +1,4 @@
 ﻿@model StackExchange.DataExplorer.Models.User
-@using System.Configuration
-@using System.IdentityModel.Tokens
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
 @using StackExchange.DataExplorer.ViewModel
@@ -22,18 +20,7 @@
                 </table>
             </td>
             <td style="vertical-align:top; width:350px;">
-                @if (isCurrentUser || Current.User.IsAdmin)
-                {
-                    <div style="float:right; margin-top: 19px; margin-right: 4px;">
-                        <a href="/users/edit/@Model.Id">edit</a>
-                        @if (isCurrentUser && AppSettings.AuthMethod == AppSettings.AuthenitcationMethod.Default)
-                        {
-                            <span class="lsep">|</span>
-                            <a href="/account/login/" title="overwrite your primary openid by logging in with a new openid">change openid</a>
-                        }
-                    </div>
-                }
-                <h2 style="margin-top:20px;">Registered User</h2>
+                <h2 style="margin-top:20px;">@Model.Login</h2>
                 <table class="user-details">
                     <tr>
                         <td>member for</td>
@@ -52,23 +39,6 @@
                                     <td>login</td>
                                     <td class="overflowing"><div class="no-overflow">@Model.ADLogin</div></td>
                                 </tr>
-                                break;
-                            //case AppSettings.AuthenitcationMethod.Default:
-                            default:
-                                if (Model.UserAuthClaims.Any())
-                                {
-                                    <tr>
-                                        <td>openid</td>
-                                        <td class="overflowing"><div class="no-overflow">@Model.UserAuthClaims[0].ClaimIdentifier</div></td>
-                                    </tr>
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td>email (private)</td>
-                                        <td class="overflowing"><div class="no-overflow">@Model.Email</div></td>
-                                    </tr>
-                                }
                                 break;
                         }
                     }
