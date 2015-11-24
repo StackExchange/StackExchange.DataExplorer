@@ -1,7 +1,10 @@
 ﻿DataExplorer.Graph = (function () {
     function Graph(resultSet, target) {
         var options = {
-            legend: { position: 'nw' },
+            legend: {
+                position: 'nw',
+                labelFormatter: htmlEncode
+            },
             grid: { hoverable: true },
             selection: { mode: 'x' },
             series: { lines: { show: true }, points: { show: true } }
