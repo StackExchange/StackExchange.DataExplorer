@@ -6,8 +6,8 @@ The Stack Exchange [Data Explorer](http://data.stackexchange.com) is a tool for 
 
 ### Prerequisites
 
- - [Visual Studio](http://www.visualstudio.com/) 2010 or later
- - [.NET Framework 4.0](http://www.microsoft.com/en-us/download/details.aspx?id=17851)
+ - [Visual Studio](https://www.visualstudio.com/en-us/visual-studio-homepage-vs.aspx) 2015 or later
+ - [.NET Framework 4.5](https://www.microsoft.com/en-us/download/details.aspx?id=30653)
  - [SQL Server 2010 Express](https://www.microsoft.com/en-us/sqlserver/editions/2012-editions/express.aspx) or later/higher
  - [IIS7](http://www.iis.net/) or later
     - The [URL Rewrite 2.0 extension](http://www.iis.net/downloads/microsoft/url-rewrite) is required for OData endpoint support. If you don't need this, you can comment out the `<rewrite>` section in `web.config`.
@@ -43,7 +43,7 @@ Once done, you'll need to populate the `Sites` table with a record for each site
 
 ### Third Party Components
 
- - [ASP.NET MVC 3](http://www.asp.net/mvc/mvc3)
+ - [ASP.NET MVC 5](http://www.asp.net/vnext/overview/aspnet-vnext)
  - [MiniProfiler](http://nuget.org/packages/MiniProfiler)
  - [Dapper](https://github.com/StackExchange/dapper-dot-net)
  - [jQuery](http://jquery.com/)
