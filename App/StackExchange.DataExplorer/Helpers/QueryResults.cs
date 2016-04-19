@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using System.Web;
 using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Xsl;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -293,25 +292,18 @@ namespace StackExchange.DataExplorer.Helpers
                 return null;
             }
 
-            var schema = new XmlSchemaSet();
-            schema.Add("http://schemas.microsoft.com/sqlserver/2004/07/showplan", HttpContext.Current.Server.MapPath(@"~/Content/qp/showplanxml.xsd"));
-
-            var settings = new XmlReaderSettings()
-            {
-                ValidationType = ValidationType.Schema,
-                Schemas = schema,
-            };
-
-            using (var reader = System.Xml.XmlReader.Create(new StringReader(plan), settings))
+            using (var reader = XmlReader.Create(new StringReader(plan)))
             {
                 XslCompiledTransform t = new XslCompiledTransform(true);
                 t.Load(HttpContext.Current.Server.MapPath(@"~/Content/qp/qp.xslt"));
 
                 StringBuilder returnValue = new StringBuilder();
-                using (var writer = System.Xml.XmlWriter.Create(returnValue, t.OutputSettings))
+
+                using (var writer = XmlWriter.Create(returnValue, t.OutputSettings))
                 {
                     t.Transform(reader, writer);
                 }
+
                 return returnValue.ToString();
             }
         }

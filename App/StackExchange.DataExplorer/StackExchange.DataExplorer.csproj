@@ -439,9 +439,6 @@
     <Content Include="Content\font-awesome\font\FontAwesome.otf" />
     <Content Include="Content\login.less" />
     <Content Include="appSettings.config" />
-    <None Include="Content\qp\showplanxml.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <Content Include="Views\Web.config" />
     <EntityDeploy Include="Models\StackEntities\StackExchangeData.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
