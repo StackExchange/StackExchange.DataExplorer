@@ -1,0 +1,104 @@
+﻿.user-profile .page > .subheader {
+  height: 40px;
+}
+
+.user-profile .page > .subheader .nav-tabs {
+  float: left;
+}
+
+.user-profile .page > .subheader .nav-tabs a,
+.user-profile .page > .subheader .nav-tabs a.youarehere {
+  border: 0px;
+  font-size: 13px;
+  line-height: 1.3em;
+  height: auto;
+  padding: 11px 7px 12px 7px;
+  margin: 0 20px 0 0;
+}
+
+.user-profile .page > .subheader .nav-tabs a:hover {
+  color: #0C57A0;
+  border-bottom: 2px solid #0C57A0;
+}
+
+.user-profile .page > .subheader .nav-tabs a.youarehere {
+  font-weight: bold;
+  color: #0C57A0;
+  border-bottom: 2px solid #0C57A0;
+}
+
+.user-profile #add-login {
+  float: right;
+  font-weight: bold;
+  margin-top: -22px;
+}
+
+.user-profile #user-logins {
+  list-style-type: none;
+  margin: 0;
+}
+
+.user-profile .user-login {
+  margin-top: 14px;
+  margin-bottom: 20px;
+  padding-left: 24px;
+}
+
+.user-profile .user-login h2 {
+  font-size: 16px;
+  margin-left: -24px;
+}
+
+.user-profile .user-login span.icon {
+  background-image: url('./img/login-icons.svg');
+  background-repeat: no-repeat;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-bottom: -2px;
+  margin-right: 8px;
+}
+
+.user-profile .user-login .claim-identifier {
+  display: block;
+  margin-top: 5px;
+  color: #CCC;
+}
+
+.sectioned-nav {
+  float: left;
+  list-style-type: none;
+  margin: 0;
+  width: 220px;
+}
+
+.sectioned-nav li {
+  padding: 10px;
+  padding-right: 0;
+}
+
+.sectioned-nav li:hover {
+  background-color: #D8E8F7;
+}
+
+.sectioned-nav li a {
+  display: block;
+  color: #777;
+  padding: 4px;
+}
+
+.sectioned-nav li:hover a, .sectioned-nav li.youarehere a {
+  text-decoration: none;
+  border-right: 3px solid #0C57A0;
+  color: #0C57A0;
+}
+
+.sectioned-nav li.youarehere a {
+  font-weight: bold;
+}
+
+.sectioned-content {
+  margin-left: 220px;
+  padding-left: 50px;
+  padding-top: 10px;
+}

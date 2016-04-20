@@ -1,0 +1,30 @@
+﻿
+@model User
+@using StackExchange.DataExplorer
+@using StackExchange.DataExplorer.Models
+@using StackExchange.DataExplorer.ViewModel
+@using System.Web.Optimization;
+@{
+    this.SetPageTitle("User " + Model.Login + " Logins - Stack Exchange Data Explorer");
+}
+@Styles.Render("~/assets/css/login")
+@Html.Partial("ProfileNav", ViewData["ProfileNav"] as SubHeader)
+<div class="sectioned-content">
+    <h1>My Logins</h1>
+    <a id="add-login" href="/account/login">add login</a>
+    <ul id="user-logins">
+        @foreach (var claim in Model.UserAuthClaims)
+        {
+            <li class="user-login">
+                <h2>
+                    <span class="icon @claim.Provider.IconClass"></span>@claim.Provider.Name
+                </h2>
+                <span class="friendly-identifier">@claim.Display</span>
+                @if (claim.Display != claim.ClaimIdentifier)
+                {
+                    <span class="claim-identifier">@claim.ClaimIdentifier</span>
+                }
+            </li>
+        }
+    </ul>
+</div>

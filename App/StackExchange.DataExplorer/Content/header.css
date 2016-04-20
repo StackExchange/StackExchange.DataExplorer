@@ -130,7 +130,7 @@ nav.primary .site-selector-popup .ac_results li.ac_over {
   margin-bottom: 0;
 }
 
-#tabs {
+.nav-tabs {
   float: right;
 }
 
@@ -138,7 +138,7 @@ nav.primary .site-selector-popup .ac_results li.ac_over {
   margin-left: 5px;  
 }
 
-#tabs a, .miniTabs a {
+.nav-tabs a, .miniTabs a {
   background:none repeat scroll 0 0 #fff;
   border: 1px solid #fff;
   color: #777;
@@ -152,7 +152,7 @@ nav.primary .site-selector-popup .ac_results li.ac_over {
   text-decoration: none;
 }
 
-#tabs a:hover, .miniTabs a:hover  {
+.nav-tabs a:hover, .miniTabs a:hover  {
   background: none repeat scroll 0 0 #FFFFFF;
   border-color: #CCC #CCC #FFFFFF;
   border-style: solid;
@@ -161,7 +161,7 @@ nav.primary .site-selector-popup .ac_results li.ac_over {
   margin-top: 9px;
 }
 
-#tabs a.youarehere, .miniTabs a.youarehere  {
+.nav-tabs a.youarehere, .miniTabs a.youarehere  {
   background: none repeat scroll 0 0 #FFFFFF;
   border-color: #CCC #CCC #FFFFFF;
   border-style: solid;

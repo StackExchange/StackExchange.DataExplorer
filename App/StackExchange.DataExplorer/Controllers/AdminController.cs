@@ -137,9 +137,9 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             }
             else
             {
-                var openids = Current.DB.Query<UserOpenId>("select * from UserOpenIds").ToList();
+                var openids = Current.DB.UserAuthClaims.All();
                 dupeUserIds = (from openid in openids
-                               group openid by Models.User.NormalizeOpenId(openid.OpenIdClaim)
+                               group openid by Models.User.NormalizeOpenId(openid.ClaimIdentifier)
                                    into grp
                                    where grp.Count() > 1
                                    select new Tuple<string, IEnumerable<int>>(grp.Key, grp.Select(id => id.UserId).OrderBy(id => id))).ToList();
@@ -169,12 +169,12 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         [StackRoute("admin/normalize-openids")]
         public ActionResult NormalizeOpenIds()
         {
-            foreach (var openId in Current.DB.UserOpenIds.All())
+            foreach (var openId in Current.DB.UserAuthClaims.All())
             {
-                var cleanClaim = Models.User.NormalizeOpenId(openId.OpenIdClaim);
-                if (cleanClaim != openId.OpenIdClaim)
+                var cleanClaim = Models.User.NormalizeOpenId(openId.ClaimIdentifier);
+                if (cleanClaim != openId.ClaimIdentifier)
                 {
-                    Current.DB.UserOpenIds.Update(openId.Id, new { OpenIdClaim = cleanClaim });
+                    Current.DB.UserAuthClaims.Update(openId.Id, new { ClaimIdentifier = cleanClaim });
                 }
             }
             return TextPlain("Done.");
@@ -239,12 +239,12 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         public ActionResult FindDuplicateUserOpenIds()
         {
 
-            var sql = "select * from UserOpenIds where UserId in (select UserId from UserOpenId having count(*) > 0)";
+            var sql = "select * from UserAuthClaims where UserId in (select UserId from UserAuthClaims having count(*) > 0)";
 
-            var dupes = (from uoi in Current.DB.Query<UserOpenId>(sql)
+            var dupes = (from uoi in Current.DB.Query<UserAuthClaim>(sql)
                         group uoi by uoi.UserId
                         into grp
-                        select new Tuple<int?, IEnumerable<UserOpenId>>(grp.Key, grp.Select(g=>g))).ToList();
+                        select new Tuple<int?, IEnumerable<UserAuthClaim>>(grp.Key, grp.Select(g=>g))).ToList();
             SetHeader("Possible Duplicate User OpenId records");
             return View(dupes);
         }
@@ -253,7 +253,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         [StackRoute("admin/useropenid/remove/{id:int}", HttpVerbs.Post)]
         public ActionResult RemoveUserOpenIdEntry(int id)
         {
-            Current.DB.UserOpenIds.Delete(id);
+            Current.DB.UserAuthClaims.Delete(id);
             return Json("ok");
         }
 

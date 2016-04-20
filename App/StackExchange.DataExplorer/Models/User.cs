@@ -25,13 +25,13 @@ namespace StackExchange.DataExplorer.Models
         public string PreferencesRaw { get; set; }
         public string ADLogin { get; set; }
 
-        List<UserOpenId> _userOpenIds;
-        public List<UserOpenId> UserOpenIds
+        List<UserAuthClaim> _userAuthClaims;
+        public List<UserAuthClaim> UserAuthClaims
         {
             get
             {
-                _userOpenIds = _userOpenIds ?? Current.DB.Query<UserOpenId>("select * from UserOpenIds where UserId = @Id", new { Id }).ToList();
-                return _userOpenIds;
+                _userAuthClaims = _userAuthClaims ?? Current.DB.Query<UserAuthClaim>("select * from UserAuthClaims where UserId = @Id", new { Id }).ToList();
+                return _userAuthClaims;
             }
         }
 
@@ -105,6 +105,41 @@ namespace StackExchange.DataExplorer.Models
             return u;
         }
 
+        public static Tuple<User, UserAuthClaim> FindUserIdentityByAuthClaim(string email, UserAuthClaim.Identifier identifier, bool useEmailFallback = true, UserAuthClaim.Identifier legacyIdentifier = null)
+        {
+            var claim = Current.DB.Query<UserAuthClaim>(
+                "SELECT * FROM UserAuthClaims WHERE ClaimIdentifier = @identifier AND IdentifierType = @type",
+                new { identifier = identifier.Value, type = identifier.Type }
+            ).FirstOrDefault();
+
+            if (claim == null && legacyIdentifier != null)
+            {
+                claim = Current.DB.Query<UserAuthClaim>(
+                    "SELECT * FROM UserAuthClaims WHERE ClaimIdentifier = @identifier AND IdentifierType = @type",
+                    new { identifier = legacyIdentifier.Value, type = legacyIdentifier.Type }
+                ).FirstOrDefault();
+
+                if (claim != null)
+                {
+                    // Update the legacy auth claim (only Google OpenID -> email right now)
+                    Current.DB.UserAuthClaims.Update(claim.Id, new { ClaimIdentifier = identifier.Value, IdentifierType = identifier.Type, IsSecure = false, Display = email });
+                }
+            }
+
+            User user = null;
+
+            if (claim != null)
+            {
+                user = Current.DB.Users.Get(claim.UserId);
+            }
+            else if (useEmailFallback && email.HasValue())
+            {
+                user = Current.DB.Query<User>("SELECT * FROM Users WHERE Email = @email", new { email }).FirstOrDefault();
+            }
+
+            return Tuple.Create<User, UserAuthClaim>(user, claim);
+        }
+
         public void SetAdmin(bool isAdmin)
         {
             Current.DB.Execute("Update Users Set IsAdmin = @isAdmin Where Id = @Id", new {Id, isAdmin});
@@ -115,7 +150,7 @@ namespace StackExchange.DataExplorer.Models
             return Current.DB.Query<User>("Select * From Users Where ADLogin = @accountLogin", new {accountLogin}).SingleOrDefault();
         }
 
-        public static User CreateUser(string login, string email, string openIdClaim)
+        public static User CreateUser(string login, string email)
         {
             var u = new User();
             u.CreationDate = DateTime.UtcNow;
@@ -155,8 +190,7 @@ namespace StackExchange.DataExplorer.Models
             }
 
             u.Id = Current.DB.Users.Insert(new { u.Email, u.Login, u.CreationDate }).Value;
-            if (openIdClaim != null)
-                Current.DB.UserOpenIds.Insert(new {OpenIdClaim = openIdClaim, UserId = u.Id});
+
             return u;
         }
 
@@ -242,7 +276,7 @@ where UserId = @mergeId", new { mergeId, masterId });
 
             // User Open Ids
             {
-                var rempped = db.Execute("update UserOpenIds set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
+                var rempped = db.Execute("update UserAuthClaims set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
                 log.AppendLine(string.Format("Remapped {0} user open ids", rempped));
             }
 

@@ -61,7 +61,13 @@ namespace StackExchange.DataExplorer
                 .Include("~/Content/homepage.css")
                 .Include("~/Content/topbar.css", new CssRewriteUrlTransform())
                 .Include("~/Content/header.css", new CssRewriteUrlTransform())
+                .Include("~/Content/user.css")
                 .Include("~/Content/jquery.autocomplete.css")
+            );
+
+            bundles.Add(new StyleBundle("~/assets/css/login")
+                .Include("~/Content/login.css", new CssRewriteUrlTransform())
+                .Include("~/Content/login-providers.css", new CssRewriteUrlTransform())
             );
 
             bundles.Add(new StyleBundle("~/assets/css/query")
