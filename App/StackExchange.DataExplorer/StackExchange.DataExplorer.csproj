@@ -283,6 +283,18 @@
     <Content Include="Content\images\help-icon.png" />
     <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\images\so-sprites.png" />
+    <Content Include="Content\images\tutorial\answered-questions.png" />
+    <Content Include="Content\images\tutorial\composer-table-list.png" />
+    <Content Include="Content\images\tutorial\composer-table-post-types-2.png" />
+    <Content Include="Content\images\tutorial\composer-table-post-types.png" />
+    <Content Include="Content\images\tutorial\composer-table-posts.png" />
+    <Content Include="Content\images\tutorial\join-posts-users.png" />
+    <Content Include="Content\images\tutorial\most-effective-answerers.png" />
+    <Content Include="Content\images\tutorial\post-types.png" />
+    <Content Include="Content\images\tutorial\posts-missing-titles.png" />
+    <Content Include="Content\images\tutorial\results-with-links.png" />
+    <Content Include="Content\images\tutorial\select-100-posts-output.png" />
+    <Content Include="Content\images\tutorial\specify-parameters.png" />
     <Content Include="Content\Img\login-icons.svg" />
     <Content Include="Content\login.css">
       <DependentUpon>login.less</DependentUpon>

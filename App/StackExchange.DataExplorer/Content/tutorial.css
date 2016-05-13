@@ -28,3 +28,32 @@ a.next {
     font-size: 110%;
     float: right;
 }
+
+table.example-set {
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+    margin-bottom: 1em;
+}
+
+table.example-set th, table.example-set td {
+    font-size: 80%;
+    border: 1px dotted #CCC;
+    padding: 3px 5px;
+}
+
+table.example-set th {
+    background-color: #F7F7F7;
+    color: #606060;
+    font-weight: bold;
+}
+
+table.example-set caption {
+    text-align: left;
+    font-weight: bold;
+    padding-bottom: 4px;
+}
+
+img.screenshot {
+    margin-bottom: 1em;
+    max-width: 780px;
+}

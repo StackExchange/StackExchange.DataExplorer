@@ -6,7 +6,7 @@
     Data in SEDE is organized in several tables&ndash;posts (questions and answers are together in one table), users,
     badges, comments, and so on. There are a lot of tables; you can see the list in the Query Composer:
 </p>
-##IMAGE
+<img src="~/Content/images/tutorial/composer-table-list.png" alt="compose-query page with tables circled" class="screenshot">
 <p>
     Some of these tables are specialized; you can come back to them later. As a newcomer to SEDE you are probably most
     interested in the first two tables, <strong>Posts</strong> and <strong>Users</strong>. Let's look at <strong>Posts</strong>.
@@ -24,7 +24,7 @@
     This query returns all the columns for the first 100 posts (questions and answers). This shows you what columns are in
     the data and what their values look like. Let's take a look at some results from this query:
 </p>
-##RESULTS
+<img src="~/Content/images/tutorial/select-100-posts-output.png" alt="output from previous query" class="screenshot">
 <p>
     Notice that one of the columns is <strong>PostTypeId</strong>, and its value (in these results) is always either 1 or 2.
     Looking at the data, we might observe that only posts with a type of 1 have values for <strong>AcceptedAnswerId</strong>
@@ -38,11 +38,11 @@
     of guessing. In this case the column heading is "PostTypeId" and the table list has a PostTypes table. That table
     shows two columns, a number and a name:
 </p>
-##IMAGE
+<img src="~/Content/images/tutorial/composer-table-post-types.png" alt="entry for PostTypes table" class="screenshot">
 <p>
     Unfortunately, the <strong>Posts</strong> table itself doesn't tell you that; it just records the data type:
 </p>
-##IMAGE
+<img src="~/Content/images/tutorial/composer-table-posts.png" alt="entry for Posts table" class="screenshot">
 <p>
     In SEDE, a type of <code class="cm-s-default"><span class="cm-variable-2">tinyint</span></code> usually means there is
     another table that has values that explain what this number means. If you see something listed as a
@@ -52,11 +52,11 @@
 <p>
     So what are the values? Click on the <i class="icon-info"></i> (information) icon next to the table name:
 </p>
-##IMAGE
+<img src="~/Content/images/tutorial/composer-table-post-types-2.png" alt="entry for PostTypes table with info link circled" class="screenshot">
 <p>
     Clicking on that reveals the values defined for this table:
 </p>
-##IMAGE
+<img src="~/Content/images/tutorial/post-types.png" alt="list of post types from schema" class="screenshot">
 <p>
     (Click the <i class="icon-remove"></i> to return to the main list.)
 </p>
