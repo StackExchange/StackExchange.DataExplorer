@@ -1,0 +1,103 @@
+﻿
+@using StackExchange.DataExplorer.Helpers
+@{ Layout = "~/Views/Tutorial/Shared/Navigation.cshtml"; }
+
+<h2>Parameters and Links</h2>
+<p>
+    The queries we've looked at so far have been based on "high-scoring" questions&mdash;but we hard-coded a
+    value for that (25). That value might be too limiting on some sites and too inclusive on others. Currently
+    the only way to change that value is to edit the query. That's kind of a pain&mdash;but, fortunately, you
+    don't have to do that. SEDE allows you to write queries with <em>parameters</em> so that the people who run
+    the queries can easily adjust these values on the fly.
+</p>
+<p>
+    Note: the particular syntax used for parameters is specific to SEDE. Everything we've said so far about SQL
+    is true for all flavors of SQL; this is different.
+</p>
+<p>
+    Let's modify the previous query to use a parameter for the score threshold. We'll explain the syntax below:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Accepted</span> <span class="cm-sql-word">Score</span><span class="cm-sql-word">"</span><span class="cm-sql-separator">,</span> 
+<span class="cm-sql-word">u</span>.<span class="cm-sql-word">DisplayName</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Asker</span><span class="cm-sql-word">"</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">DisplayName</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Answerer</span><span class="cm-sql-word">"</span>
+  
+<span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">a</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">AcceptedAnswerId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">u</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">au</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span>
+<span class="cm-sql-operators">AND</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;=</span> <span class="cm-sql-special">##MinScore:int##</span>
+<span class="cm-sql-operators">and</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">AcceptedAnswerId</span> <span class="cm-sql-operators">IS</span> <span class="cm-sql-operators">NOT</span> <span class="cm-sql-operators">NULL</span>
+<span class="cm-sql-comment">-- MinScore: Minimum question score to include.</span>
+<span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">DESC</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323330/high-scoring-questions-with-accepted-answers-parameterized-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    Before you can run the query you need to fill in the score:
+</p>
+<img src="~/Content/images/tutorial/specify-parameters.png" alt="output from next query: total score, number of answers, answering user" class="screenshot">
+<p>
+    As shown in this query, you refer to a parameter by surrounding its name with doubled pound signs, such as
+    <code class="cm-s-default"><span class="cm-sql-special">##MinScore##</span></code>. Optionally you can specify
+    the data type (<code class="cm-s-default"><span class="cm-variable-2">int</span></code> (a whole number),
+    <code class="cm-s-default"><span class="cm-variable-2">float</span></code> (a number with a decimal value,
+    like 2.5), or <code class="cm-s-default"><span class="cm-variable-2">string</span></code>):
+    <code class="cm-s-default"><span class="cm-sql-special">##MinScore:int##</span></code>. If you specify a type
+    then SEDE will validate values against that type, so that if you're expecting a number for score and somebody
+    types "unicorn" the query won't run. If you don't specify a type, your query may receive unexpected inputs.
+</p>
+<p>
+    A query might refer to a parameter more than once. You only need to specify the type once.
+</p>
+<p>
+    By default, the prompt on the query form (where users enter these values) is the name of the parameter, such
+    as "MinScore". But this example doesn't do that; it has a fuller explanation. That's because the query included
+    documentation for the parameter:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-comment">-- MinScore: Minimum question score to include.</span></pre>
+<p>
+    This documentation can occur anywhere within the query.
+</p>
+<p>
+    Score is pretty obvious, but if your parameters have more semantics, or required formatting, you should say so
+    in your documentation. Dates, for example, must be YYYY-MM-DD; if you're using dates as parameters, it's a good
+    idea to tell your users how to format them.
+</p>
+<p>
+    This query returns post titles and IDs, but wouldn't it be better if you could just click on links to the actual
+    posts? SEDE has some magic values that give you links. In this query, we've replaced the post title and ID and
+    both users with magic links. The only changes are in the <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code>
+    line:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[Post Link</span><span class="cm-sql-word">]</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[User Link</span><span class="cm-sql-word">]</span><span class="cm-sql-separator">,</span> 
+<span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Accepted</span> <span class="cm-sql-word">Score</span><span class="cm-sql-word">"</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[User Link</span><span class="cm-sql-word">]</span>
+  
+<span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">a</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">AcceptedAnswerId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">u</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">au</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span>
+<span class="cm-sql-operators">AND</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;=</span> <span class="cm-sql-special">##MinScore:int##</span>
+<span class="cm-sql-operators">and</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">AcceptedAnswerId</span> <span class="cm-sql-operators">IS</span> <span class="cm-sql-operators">NOT</span> <span class="cm-sql-operators">NULL</span>
+<span class="cm-sql-comment">-- MinScore: Minimum question score to include.</span>
+<span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">DESC</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323331/high-scoring-questions-with-accepted-answers-parameterized-and-linked-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    <code class="cm-s-default"><span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span>
+    <span class="cm-sql-word">[Post Link</span><span class="cm-sql-word">]</span></code> and <code class="cm-s-default"><span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span>
+    <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[User Link</span><span class="cm-sql-word">]</span></code>
+    take IDs and turn them into links. The <code class="cm-s-default"><span class="cm-sql-keyword">AS</span>
+    <span class="cm-sql-word">[something Link</span><span class="cm-sql-word">]</span></code> conversion only works
+    when used with IDs. The link for a post automatically uses the post title and the link for a user automtically
+    uses the display name. The SEDE query language supports the following magic columns:
+</p>
+<ul>
+    @foreach (var column in QueryRunner.MagicColumnNames) {
+        @: <li><code>[@column]</code></li>
+    }
+</ul>
+<p>
+    We had to make some compromises. We were previously using <code class="cm-s-default"><span class="cm-sql-keyword">AS</span></code>
+    to label the two user columns as "Asker" and "Answerer". To get the links we had to change that. We re-ordered
+    the columns, putting the asker right after the question score and the answerer right after the answer score:
+</p>
+<img src="~/Content/images/tutorial/results-with-links.png" alt="query results with magic links" class="screenshot">
+<a class="next" href="/tutorial/query-computations">Computations <i class="icon-arrow-right"></i></a>

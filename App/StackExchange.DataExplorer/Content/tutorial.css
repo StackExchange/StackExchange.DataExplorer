@@ -1,0 +1,59 @@
+﻿a.run-prompt {
+    float: right;
+    font-size: 10px;
+    padding: 2px 7px;
+    background-color: #6B87A2;
+    color: #FFF;
+    margin-top: -18px;
+    margin-bottom: 6px;
+    margin-right: 7px;
+}
+
+a.run-prompt i {
+    margin-right: 3px;
+}
+
+a.run-prompt:hover {
+    text-decoration: none;
+    background-color: #0C57A0;
+}
+
+a.run-prompt + * {
+    margin-top: 21px;
+}
+
+a.next {
+    margin-top: 0.8em;
+    margin-bottom: 1em;
+    font-size: 110%;
+    float: right;
+}
+
+table.example-set {
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+    margin-bottom: 1em;
+}
+
+table.example-set th, table.example-set td {
+    font-size: 80%;
+    border: 1px dotted #CCC;
+    padding: 3px 5px;
+}
+
+table.example-set th {
+    background-color: #F7F7F7;
+    color: #606060;
+    font-weight: bold;
+}
+
+table.example-set caption {
+    text-align: left;
+    font-weight: bold;
+    padding-bottom: 4px;
+}
+
+img.screenshot {
+    margin-bottom: 1em;
+    max-width: 780px;
+}

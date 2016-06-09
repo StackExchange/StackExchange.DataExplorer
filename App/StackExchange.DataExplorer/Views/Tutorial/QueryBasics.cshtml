@@ -1,0 +1,42 @@
+﻿
+@{ Layout = "~/Views/Tutorial/Shared/Navigation.cshtml"; }
+
+<h2>Query Basics: <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code>
+    and <code class="cm-s-default"><span class="cm-sql-keyword">WHERE</span></code></h2>
+<p>
+    The core of any query is the <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code>
+    statement. Usually instead of asking for <em>everything</em> in a row you select specific columns that
+    you're interested in seeing, like this:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">select</span> <span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">ViewCount</span> <span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span><span class="cm-sql-separator">;</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323305/post-basics-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    We use the post title to give us nicer output than just a post number. But wait, you might notice,
+    some posts don't have titles:
+</p>
+<img src="~/Content/images/tutorial/posts-missing-titles.png" alt="results of 'Post Basics' query" class="screenshot">
+<p>
+    Remember that the Posts table contains all posts&mdash;questions, answers, tag wikis, and more. Not all
+    of those have titles&mdash;questions do but answers do not, most notably. We want to restrict this query
+    to show only questions. The SQL <code class="cm-s-default"><span class="cm-sql-keyword">WHERE</span></code>
+    clause does this:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">ViewCount</span> <span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323307/post-basics-filtered-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    This produces only questions.
+</p>
+<p>
+    Now notice that we're still getting <em>all</em> the questions on Meta Stack Exchange. That's a lot of data.
+    We can extend the <code class="cm-s-default"><span class="cm-sql-keyword">WHERE</span></code> clause:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">ViewCount</span> <span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span> <span class="cm-sql-operators">AND</span> <span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;=</span> <span class="cm-sql-number">25</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323317/post-basics-filtered-more-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    You can use multiple <code class="cm-s-default"><span class="cm-sql-operators">AND</span></code> and
+    <code class="cm-s-default"><span class="cm-sql-operators">OR</span></code> operators to build up a 
+    <code class="cm-s-default"><span class="cm-sql-keyword">WHERE</span></code> clause with several conditions.
+    We will see more examples in the next section.
+</p>
+<a class="next" href="/tutorial/query-joins">Using Multiple Tables:
+    <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code> <i class="icon-arrow-right"></i></a>

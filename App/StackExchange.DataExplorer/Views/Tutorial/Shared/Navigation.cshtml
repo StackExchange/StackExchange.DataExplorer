@@ -1,0 +1,18 @@
+﻿
+@{ Layout = "~/Views/Shared/ContentPage.cshtml"; }
+@section SidebarNav
+{
+    <li><a href="/tutorial">Introduction</a></li>
+    <li><a href="/tutorial/intro-to-databases">Database Primer</a></li>
+    <li><a href="/tutorial/intro-to-queries">Writing Queries</a></li>
+    <li>
+        <ul>
+            <li><a href="/tutorial/query-basics">Basics</a></li>
+            <li><a href="/tutorial/query-joins">Multiple Tables</a></li>
+            <li><a href="/tutorial/query-parameters">Parameters &amp; Links</a></li>
+            <li><a href="/tutorial/query-computations">Computations</a></li>
+        </ul>
+    </li>
+    <li><a href="/tutorial/next-steps">Next Steps</a></li>
+}
+@RenderBody()

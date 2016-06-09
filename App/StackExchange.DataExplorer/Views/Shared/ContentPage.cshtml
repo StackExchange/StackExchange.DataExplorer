@@ -1,0 +1,34 @@
+﻿@using System.Web.Optimization
+@{ Layout = "~/Views/Shared/Master.cshtml"; }
+@section AdditionalStyles
+{
+    @Styles.Render("~/assets/css/query")
+}
+
+<div class="content-page">
+    @RenderSection("ContentHero", false)
+    <ul class="sidebar">
+        @RenderSection("SidebarNav")
+    </ul>
+    <div class="mainbar">
+        @RenderBody()
+    </div>
+</div>
+<script>
+    (function () {
+        var padding = 20,
+            sidebar = $('.sidebar'),
+            original = sidebar.offset().top - padding;
+
+        sidebar.css({
+            top: padding,
+            left: sidebar.offset().left
+        });
+
+        function reposition() {
+            sidebar.toggleClass('undocked', window.scrollY > original);
+        }
+
+        $(window).on('scroll', reposition);
+    })();
+</script>

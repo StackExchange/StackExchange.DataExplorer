@@ -1,22 +1,17 @@
 ﻿@using StackExchange.DataExplorer
-@using StackExchange.DataExplorer.Models
 @using StackExchange.DataExplorer.Helpers
-@using System.Web.Optimization
 @{this.SetPageTitle("Help - Stack Exchange Data Explorer");}
-
-@section AdditionalStyles
+@{ Layout = "~/Views/Shared/ContentPage.cshtml"; }
+@section ContentHero
 {
-    @Styles.Render("~/assets/css/query")
-}
-
-<div class="content-page">
     <div class="hero">
         <img src="/Content/images/help-icon.png" alt="Stack Exchange Data Explorer" />
         <div class="blurb">
             <h2>Stack Exchange Data Explorer is&hellip;</h2>
             <p>
                 &hellip;an open source tool for running arbitrary queries against public data from the Stack Exchange network.
-                Features include collaborative query editing @if (AppSettings.EnableOdata) { @("and") <a href="http://www.odata.org/">OData</a> @("endpoints")} for all graduated
+                Features include collaborative query editing @if (AppSettings.EnableOdata)
+                { @("and") <a href="http://www.odata.org/">OData</a> @("endpoints")} for all graduated
                 and public beta Stack Exchange sites.
             </p>
             <p>
@@ -32,194 +27,177 @@
             </ul>
         </div>
     </div>
-    <ul class="sidebar">
-        <li><a href="#getting-started">Getting Started</a></li>
-        <li><a href="#parameters">Query Parameters</a></li>
-        <li><a href="#magic-columns">Magic Columns</a></li>
-        <li><a href="#graphing">Graphing</a></li>
-        <li><a href="#faq">FAQ</a></li>
-    </ul>
-    <div class="mainbar">
-        <h2 id="getting-started">Getting Started with Data Explorer Queries</h2>
-        <p>
-            Click the Compose Query button up there and start typing your T-SQL query. That's it, it's really that easy! If you're not the
-            query-writing type, you can still make use of all of the community-created queries.
-        </p>
-        <p>
-            See something that could be improved with someone else's query? Fork it and make your own edits that they can come back to
-            build on. And using the query editor, you can get easy access to things like the target database schema and your query's
-            execution plan, as well as the ability to download the results as a CSV file.
-        </p>
-        <h2 id="parameters">Query Parameters</h2>
-        <h3>Basic Parameters</h3>
-        <p>
-            Editing your queries each time you want to change a parameter value would be inconvenient, so Data Explorer allows you
-            to specify parameter placeholders in your query that will prompt the user for input values. These take the basic form of
-            <code class="cm-s-default"><span class="cm-sql-special">##Parameter##</span></code>, where the parameter name will be
-            used as the label for the input prompt.
-        </p>
-        <p>
-            The <code class="cm-s-default"><span class="cm-sql-special">##UserId##</span></code> parameter is treated specially for 
-            users who are logged in. If they have an account on the target site that shares the email used in their Data Explorer account,
-            their user ID on that site will be automatically populated.
-        </p>
-        <h3>Advanced Parameters</h3>
-        <p>
-            Data Explorer parameters can be typed as <code class="cm-s-default"><span class="cm-variable-2">int</span></code>,
-            <code class="cm-s-default"><span class="cm-variable-2">float</span></code>, or
-            <code class="cm-s-default"><span class="cm-variable-2">string</span></code>. Value validation will be performed against user input
-            for typed parameters, and in the case of the <code class="cm-s-default"><span class="cm-variable-2">string</span></code> type, the
-            value will be properly escaped and quoted. To type your parameter, declare the type after the variable name using a colon:
-        </p>
-        <pre class="cm-s-default"><span class="cm-sql-special">##Parameter:type##</span></pre>
-        <p>
-            You can also specify default values for your parameters as part of the parameter definition by giving the default value after
-            the variable name using a question mark:
-        </p>
-        <pre class="cm-s-default"><span class="cm-sql-special">##Parameter?value##</span></pre>
-        <p>By putting both syntaxes together, you can create a typed parameter with a default value:</p>
-        <pre class="cm-s-default"><span class="cm-sql-special">##Parameter:type?value##</span></pre>
-        <p>
-            Note that if you use the same parameter in more than one location in the query, you only need to specify the type and default value
-            once.
-        </p>
-        <h3>Parameter Hints</h3>
-        <p>
-            Parameter names aren't always user-friendly, so Data Explorer allows you to provide additional metadata in the form of parameter hints.
-            These can help make the experience more pleasant for people running your queries, and take the form of single line comments in your query.
-            To illustrate this, a query with <code class="cm-s-default"><span class="cm-sql-special">##MyParameter##</span></code> could have a
-            parameter hint like the following:
-        </p>
-        <pre class="cm-s-default"><span class="cm-sql-comment">-- MyParameter: Whatever you want! "You can enter anything"</span></pre>
-        <p>
-            The label of the prompt for this parameter's value will contain the text "Whatever you want!", with a tooltip stating "You can enter
-            anything". The tooltip portion is optional, so you only need to include it when your label text doesn't capture everything.
-        </p>
-        <h2 id="magic-columns">Magic Columns and Autolinking</h2>
-        <h3>Magic Columns</h3>
-        <p>
-            Data Explorer will create special links to content on the target site when you alias id columns using one of the supported
-            magic column names. For example, the following query will generate a link to ten most recent posts:
-        </p>
-        <pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span><span class="cm-null"> </span><span class="cm-sql-keyword">TOP</span><span class="cm-null"> </span><span class="cm-sql-number">10</span><span class="cm-null"> </span><span class="cm-sql-word">Id</span><span class="cm-null"> </span><span class="cm-sql-keyword">AS</span><span class="cm-null"> </span><span class="cm-sql-word">[Post Link]</span><span class="cm-null"> </span><span class="cm-sql-keyword">FROM</span><span class="cm-null"> </span><span class="cm-sql-word">Posts</span><span class="cm-null"> </span><span class="cm-sql-keyword">ORDER</span><span class="cm-null"> </span><span class="cm-sql-keyword">BY</span><span class="cm-null"> </span><span class="cm-sql-word">CreationDate</span><span class="cm-null"> </span><span class="cm-sql-keyword">DESC</span></pre>
-        <p>The available magic columns are:</p>
-        <ul>
-            @foreach (var column in QueryRunner.MagicColumnNames) {
-                @: <li><code>[@column]</code></li>
-            }
-        </ul>
-        <p>
-            In addition to the magic columns listed above, Data Explorer will also try to transform columns named <code>[Tags]</code>
-            and <code>[TagName]</code> into stylized links to tag pages on the target site, like the
-            <a href="http://meta.stackexchange.com/tags/data-explorer" class="post-tag">data-explorer</a> tag on Meta Stack Exchange.
-        </p>
-        <h3>Autolinking</h3>
-        <p>
-            You can create your own links as well, if you return the data in the format Data Explorer expects: 
-        </p>
-        <pre>http://example.com|link text</pre>
-        <p>
-            &hellip;where the link text is optional. To make it easier to create links pointing currently-queried site, Data Explorer
-            supports the custom scheme <code>site://</code>. You can use this to link to pages not supported by the built-in magic
-            columns, like a particular post's revision history:
-        </p>
-        <pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span><br>  <span class="cm-sql-literal">'site://posts/'</span> <span class="cm-sql-operator">+</span> <span class="cm-sql-function">CAST</span>(<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-type">nvarchar</span>) <span class="cm-sql-operator">+</span> <span class="cm-sql-literal">'/revisions|'</span> <span class="cm-sql-operator">+</span> <br>  <span class="cm-sql-literal">'Revision History for Post '</span> <span class="cm-sql-operator">+</span>  <span class="cm-sql-function">CAST</span>(<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-type">nvarchar</span>) <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[Revision Link</span><span class="cm-sql-word">]</span><br><span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">Id</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-special">##PostId##</span></pre>
-        <p>
-            Data Explorer also supports the custom scheme <code>query://&lt;id&gt;</code> to link to other queries, enabling you to link
-            directly to drill-downs or related queries from your results.
-        </p>
-        <h2 id="graphing">Graphing</h2>
-        <p>
-            Being able to generate result sets is nice, but sometimes the output is more effectively conveyed as a graph. Data Explorer
-            lets you create simple graphs by automatically plotting results that have one of the following column combinations:
-        </p>
-        <ul>
-            <li>
-                <code class="cm-s-default"><span class="cm-variable-2">number</span></code>,
-                <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
-            </li>
-            <li>
-                <code class="cm-s-default"><span class="cm-variable-2">date</span></code>,
-                <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
-            </li>
-            <li>
-                <code class="cm-s-default"><span class="cm-variable-2">number</span></code>,
-                <code class="cm-s-default"><span class="cm-variable-2">string</span></code>,
-                <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
-            </li>
-            <li>
-                <code class="cm-s-default"><span class="cm-variable-2">date</span></code>,
-                <code class="cm-s-default"><span class="cm-variable-2">string</span></code>,
-                <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
-            </li>
-        </ul>
-        <p>
-            To produce more than one series, additional <code class="cm-s-default"><span class="cm-variable-2">number</span></code> columns
-            can be appended to the above combinations. The following query returns results of the first combination:
-        </p>
-        <pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-function">COUNT</span>(<span class="cm-sql-word">Score</span>) <span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;</span> <span class="cm-sql-number">10</span> <span class="cm-sql-operators">AND</span> <span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&lt;</span> <span class="cm-sql-number">100</span> <span class="cm-sql-keyword">GROUP</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">Score</span></pre>
-        <p>
-            &hellip;and produces the following graph of number of posts versus score:
-        </p>
-        <img class="block-image" src="/Content/images/help-sample-graph.png" alt="Example of graphed results" />
-        <p>
-            If you'd like to see Data Explorer's graphing support expanded to handle more complex use cases, please create a feature request
-            on <a href="http://meta.stackexchange.com/questions/ask?tags=feature-request%20data-explorer">Meta Stack Exchange</a> or the
-            <a href="https://github.com/StackExchange/StackExchange.DataExplorer/issues">GitHub project issues page</a>, or submit a pull request!
-        </p>
-        <h2 id="faq">Frequently Asked Questions</h2>
-        <dl class="qa-list">
-            <dt><i class="icon-comment-alt"></i>How often is the Stack Exchange Data Explorer updated?</dt>
-            <dd>The data is updated early every Sunday morning around 3:00 UTC.
-                @if (ViewData["LastUpdate"] != null) {
-                    @: The last update was @((ViewData["LastUpdate"] as DateTime?).ToRelativeTime()).
-                }
-            </dd>
-            <dt><i class="icon-comment-alt"></i>What's the point of logging in?</dt>
-            <dd>
-                While anonymous users can run queries without any imposed restrictions, there are a few perks to registering:
-                <ul>
-                    <li>A history of queries you've executed for your future reference</li>
-                    <li>Automatic population of <code class="cm-s-default"><span class="cm-sql-special">##UserId##</span></code> fields when possible (if you have a matching email)</li>
-                    <li>You get credit for the awesome queries you've written</li>
-                    <li>It proves you aren't part of the robot menace (no more CAPTCHAs!)</li>
-                </ul>
-            </dd>
-            <dt><i class="icon-comment-alt"></i>I already have a Stack Exchange account, why am I
-                @StackExchange.DataExplorer.Models.User.emptyLogin#### here?</dt>
-            <dd>
-                Data Explorer doesn't participate in the Stack Exchange network authentication scheme, so your account here is completely
-                separate. Don't worry though, you can update your name in your profile at any time!
-            </dd>
-            <dt><i class="icon-comment-alt"></i>What runs this thing? Is the Data Explorer powered by hamsters?</dt>
-            <dd>
-                No, because hamsters are allergic to SQL. This instance is currently running on @ViewData["DbVersion"] and ASP.NET MVC @ViewData["AspVersion"]. For a more in-depth
-                listing of what's under the hood, check out
-                <em><a href="http://meta.stackexchange.com/questions/51967/what-technologies-are-used-to-build-data-explorer">What technologies are used to build Data Explorer?</a></em>
-            </dd>
-            <dt><i class="icon-comment-alt"></i>You didn't cover my question about <code>_______</code>, what's wrong with you?</dt>
-            <dd>
-                Well&hellip;that's a story for another day. To get help with your Data Explorer question though, or to provide feedback, please
-                <a href="http://meta.stackexchange.com/questions/ask?tags=data-explorer">ask on Meta Stack Exchange</a>!
-            </dd>
-        </dl>
-    </div>
-</div>
-<script>
-    (function () {
-        var padding = 20,
-            sidebar = $('.sidebar'),
-            original = sidebar.offset().top - padding;
+}
+@section SidebarNav 
+{
+    <li><a href="#introduction">Quick Introduction</a></li>
+    <li><a href="#parameters">Query Parameters</a></li>
+    <li><a href="#magic-columns">Magic Columns</a></li>
+    <li><a href="#graphing">Graphing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+}
 
-        sidebar.css({
-            top: padding,
-            left: sidebar.offset().left
-        });
-
-        function reposition() {
-            sidebar.toggleClass('undocked', window.scrollY > original);
+<h2 id="introduction">A Quick Introduction to Data Explorer Queries</h2>
+<p>
+    Click the Compose Query button up there and start typing your T-SQL query. That's it, it's really that easy! If you're not the
+    query-writing type, you can still make use of all of the community-created queries, or check out <a href="/tutorial">the query tutorial</a>
+    for some help on how you can get started.
+</p>
+<p>
+    See something that could be improved with someone else's query? Fork it and make your own edits that they can come back to
+    build on. And using the query editor, you can get easy access to things like the target database schema and your query's
+    execution plan, as well as the ability to download the results as a CSV file.
+</p>
+<h2 id="parameters">Query Parameters</h2>
+<h3>Basic Parameters</h3>
+<p>
+    Editing your queries each time you want to change a parameter value would be inconvenient, so Data Explorer allows you
+    to specify parameter placeholders in your query that will prompt the user for input values. These take the basic form of
+    <code class="cm-s-default"><span class="cm-sql-special">##Parameter##</span></code>, where the parameter name will be
+    used as the label for the input prompt.
+</p>
+<p>
+    The <code class="cm-s-default"><span class="cm-sql-special">##UserId##</span></code> parameter is treated specially for 
+    users who are logged in. If they have an account on the target site that shares the email used in their Data Explorer account,
+    their user ID on that site will be automatically populated.
+</p>
+<h3>Advanced Parameters</h3>
+<p>
+    Data Explorer parameters can be typed as <code class="cm-s-default"><span class="cm-variable-2">int</span></code>,
+    <code class="cm-s-default"><span class="cm-variable-2">float</span></code>, or
+    <code class="cm-s-default"><span class="cm-variable-2">string</span></code>. Value validation will be performed against user input
+    for typed parameters, and in the case of the <code class="cm-s-default"><span class="cm-variable-2">string</span></code> type, the
+    value will be properly escaped and quoted. To type your parameter, declare the type after the variable name using a colon:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-special">##Parameter:type##</span></pre>
+<p>
+    You can also specify default values for your parameters as part of the parameter definition by giving the default value after
+    the variable name using a question mark:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-special">##Parameter?value##</span></pre>
+<p>By putting both syntaxes together, you can create a typed parameter with a default value:</p>
+<pre class="cm-s-default"><span class="cm-sql-special">##Parameter:type?value##</span></pre>
+<p>
+    Note that if you use the same parameter in more than one location in the query, you only need to specify the type and default value
+    once.
+</p>
+<h3>Parameter Hints</h3>
+<p>
+    Parameter names aren't always user-friendly, so Data Explorer allows you to provide additional metadata in the form of parameter hints.
+    These can help make the experience more pleasant for people running your queries, and take the form of single line comments in your query.
+    To illustrate this, a query with <code class="cm-s-default"><span class="cm-sql-special">##MyParameter##</span></code> could have a
+    parameter hint like the following:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-comment">-- MyParameter: Whatever you want! "You can enter anything"</span></pre>
+<p>
+    The label of the prompt for this parameter's value will contain the text "Whatever you want!", with a tooltip stating "You can enter
+    anything". The tooltip portion is optional, so you only need to include it when your label text doesn't capture everything.
+</p>
+<h2 id="magic-columns">Magic Columns and Autolinking</h2>
+<h3>Magic Columns</h3>
+<p>
+    Data Explorer will create special links to content on the target site when you alias id columns using one of the supported
+    magic column names. For example, the following query will generate a link to ten most recent posts:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span><span class="cm-null"> </span><span class="cm-sql-keyword">TOP</span><span class="cm-null"> </span><span class="cm-sql-number">10</span><span class="cm-null"> </span><span class="cm-sql-word">Id</span><span class="cm-null"> </span><span class="cm-sql-keyword">AS</span><span class="cm-null"> </span><span class="cm-sql-word">[Post Link]</span><span class="cm-null"> </span><span class="cm-sql-keyword">FROM</span><span class="cm-null"> </span><span class="cm-sql-word">Posts</span><span class="cm-null"> </span><span class="cm-sql-keyword">ORDER</span><span class="cm-null"> </span><span class="cm-sql-keyword">BY</span><span class="cm-null"> </span><span class="cm-sql-word">CreationDate</span><span class="cm-null"> </span><span class="cm-sql-keyword">DESC</span></pre>
+<p>The available magic columns are:</p>
+<ul>
+    @foreach (var column in QueryRunner.MagicColumnNames) {
+        @: <li><code>[@column]</code></li>
+    }
+</ul>
+<p>
+    In addition to the magic columns listed above, Data Explorer will also try to transform columns named <code>[Tags]</code>
+    and <code>[TagName]</code> into stylized links to tag pages on the target site, like the
+    <a href="http://meta.stackexchange.com/tags/data-explorer" class="post-tag">data-explorer</a> tag on Meta Stack Exchange.
+</p>
+<h3>Autolinking</h3>
+<p>
+    You can create your own links as well, if you return the data in the format Data Explorer expects: 
+</p>
+<pre>http://example.com|link text</pre>
+<p>
+    &hellip;where the link text is optional. To make it easier to create links pointing currently-queried site, Data Explorer
+    supports the custom scheme <code>site://</code>. You can use this to link to pages not supported by the built-in magic
+    columns, like a particular post's revision history:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span><br>  <span class="cm-sql-literal">'site://posts/'</span> <span class="cm-sql-operator">+</span> <span class="cm-sql-function">CAST</span>(<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-type">nvarchar</span>) <span class="cm-sql-operator">+</span> <span class="cm-sql-literal">'/revisions|'</span> <span class="cm-sql-operator">+</span> <br>  <span class="cm-sql-literal">'Revision History for Post '</span> <span class="cm-sql-operator">+</span>  <span class="cm-sql-function">CAST</span>(<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-type">nvarchar</span>) <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[Revision Link</span><span class="cm-sql-word">]</span><br><span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">Id</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-special">##PostId##</span></pre>
+<p>
+    Data Explorer also supports the custom scheme <code>query://&lt;id&gt;</code> to link to other queries, enabling you to link
+    directly to drill-downs or related queries from your results.
+</p>
+<h2 id="graphing">Graphing</h2>
+<p>
+    Being able to generate result sets is nice, but sometimes the output is more effectively conveyed as a graph. Data Explorer
+    lets you create simple graphs by automatically plotting results that have one of the following column combinations:
+</p>
+<ul>
+    <li>
+        <code class="cm-s-default"><span class="cm-variable-2">number</span></code>,
+        <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
+    </li>
+    <li>
+        <code class="cm-s-default"><span class="cm-variable-2">date</span></code>,
+        <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
+    </li>
+    <li>
+        <code class="cm-s-default"><span class="cm-variable-2">number</span></code>,
+        <code class="cm-s-default"><span class="cm-variable-2">string</span></code>,
+        <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
+    </li>
+    <li>
+        <code class="cm-s-default"><span class="cm-variable-2">date</span></code>,
+        <code class="cm-s-default"><span class="cm-variable-2">string</span></code>,
+        <code class="cm-s-default"><span class="cm-variable-2">number</span></code>
+    </li>
+</ul>
+<p>
+    To produce more than one series, additional <code class="cm-s-default"><span class="cm-variable-2">number</span></code> columns
+    can be appended to the above combinations. The following query returns results of the first combination:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-function">COUNT</span>(<span class="cm-sql-word">Score</span>) <span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;</span> <span class="cm-sql-number">10</span> <span class="cm-sql-operators">AND</span> <span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&lt;</span> <span class="cm-sql-number">100</span> <span class="cm-sql-keyword">GROUP</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">Score</span></pre>
+<p>
+    &hellip;and produces the following graph of number of posts versus score:
+</p>
+<img class="block-image" src="/Content/images/help-sample-graph.png" alt="Example of graphed results" />
+<p>
+    If you'd like to see Data Explorer's graphing support expanded to handle more complex use cases, please create a feature request
+    on <a href="http://meta.stackexchange.com/questions/ask?tags=feature-request%20data-explorer">Meta Stack Exchange</a> or the
+    <a href="https://github.com/StackExchange/StackExchange.DataExplorer/issues">GitHub project issues page</a>, or submit a pull request!
+</p>
+<h2 id="faq">Frequently Asked Questions</h2>
+<dl class="qa-list">
+    <dt><i class="icon-comment-alt"></i>How often is the Stack Exchange Data Explorer updated?</dt>
+    <dd>The data is updated early every Sunday morning around 3:00 UTC.
+        @if (ViewData["LastUpdate"] != null) {
+            @: The last update was @((ViewData["LastUpdate"] as DateTime?).ToRelativeTime()).
         }
-
-        $(window).on('scroll', reposition);
-    })();
-</script>
+    </dd>
+    <dt><i class="icon-comment-alt"></i>What's the point of logging in?</dt>
+    <dd>
+        While anonymous users can run queries without any imposed restrictions, there are a few perks to registering:
+        <ul>
+            <li>A history of queries you've executed for your future reference</li>
+            <li>Automatic population of <code class="cm-s-default"><span class="cm-sql-special">##UserId##</span></code> fields when possible (if you have a matching email)</li>
+            <li>You get credit for the awesome queries you've written</li>
+            <li>It proves you aren't part of the robot menace (no more CAPTCHAs!)</li>
+        </ul>
+    </dd>
+    <dt><i class="icon-comment-alt"></i>I already have a Stack Exchange account, why am I
+        @StackExchange.DataExplorer.Models.User.emptyLogin#### here?</dt>
+    <dd>
+        Data Explorer doesn't participate in the Stack Exchange network authentication scheme, so your account here is completely
+        separate. Don't worry though, you can update your name in your profile at any time!
+    </dd>
+    <dt><i class="icon-comment-alt"></i>What runs this thing? Is the Data Explorer powered by hamsters?</dt>
+    <dd>
+        No, because hamsters are allergic to SQL. This instance is currently running on @ViewData["DbVersion"] and ASP.NET MVC @ViewData["AspVersion"]. For a more in-depth
+        listing of what's under the hood, check out
+        <em><a href="http://meta.stackexchange.com/questions/51967/what-technologies-are-used-to-build-data-explorer">What technologies are used to build Data Explorer?</a></em>
+    </dd>
+    <dt><i class="icon-comment-alt"></i>You didn't cover my question about <code>_______</code>, what's wrong with you?</dt>
+    <dd>
+        Well&hellip;that's a story for another day. To get help with your Data Explorer question though, or to provide feedback, please
+        <a href="http://meta.stackexchange.com/questions/ask?tags=data-explorer">ask on Meta Stack Exchange</a>!
+    </dd>
+</dl>

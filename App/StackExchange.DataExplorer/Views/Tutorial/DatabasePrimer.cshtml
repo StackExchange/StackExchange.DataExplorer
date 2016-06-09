@@ -1,0 +1,177 @@
+﻿
+@{ Layout = "~/Views/Tutorial/Shared/Navigation.cshtml"; }
+
+<h2>But First: A Very Brief Introduction to Databases</h2>
+<p>
+    All of the content you see on Stack Exchange&mdash;all the questions, answers, edits, reviews, users, badges,
+    tags, and more&mdash;is stored in a <em>relational database</em>. A relational database is a flexible and
+    efficient way to store information&mdash;lots and lots of information. Stack Overflow has over 10 million
+    questions&mdash;<em>lots</em> of information.
+</p>
+<p>
+    You may be used to using spreadsheets to store information. Why not? They're easy to create, and they're easy
+    to sort, search, and use in other ways&mdash;no programming required. Spreadsheets don't scale, though. Imagine
+    that you wanted to store questions and answers in a spreadsheet. It might look something like this:
+</p>
+<table class="example-set">
+    <tbody>
+        <tr>
+            <th>Title</th>
+            <th>Body</th>
+            <th>Asker</th>
+            <th>Tags</th>
+            <th>Answers</th>
+        </tr>
+        <tr>
+            <td>Why do unicorns eat daisies?</td>
+            <td>blah blah blah... (3000 words here)</td>
+            <td>Joe</td>
+            <td>unicorns diet gardening</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Do unicorns really eat waffles?</td>
+            <td>insert a question here...</td>
+            <td>Princess</td>
+            <td>unicorns diet cooking</td>
+            <td><em>Wait, how do we represent multiple answers???</em></td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    We're only two questions in, and already we have some problems. That second question has three answers; how do
+    we store that in a spreadsheet? We have that problem with tags too, you may have noticed&mdash;it'd be hard,
+    using this spreadsheet, to find all the questions about unicorns and diet but not the ones about dragons and
+    flight and cooking.
+</p>
+<p>
+    Further, we might want to know more about the users than just their names. Users have badges, reputation, and
+    a bunch of other information. We could add more columns to the spreadsheet (you can put a <em>lot</em> of columns
+    in a spreadsheet), but you'd be repeating that information for every question a user asked.
+</p>
+<p>
+    A spreadsheet represents one type of thing&mdash;questions, in this case. If you want to represent more than one
+    kind of thing you use more than one spreadsheet, but they're all independent. You could have a spreadsheet for
+    questions and one for users, but you wouldn't be able to look up questions asked by users with at least 1000
+    reputation.
+</p>
+<p>
+    A database may seem similar to a spreadsheet at first glance. It has <em>tables</em>, which are like individual
+    spreadsheets. A table has columns (like in a spreadsheet), and there's one row per item. But in a <em>relational
+    database</em> the tables can interact with each other. Instead of jamming everything about users into your
+    questions table, for example, you can use <em>keys</em> to cross-reference them:
+</p>
+<table class="example-set">
+    <caption>Questions</caption>
+    <tbody>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Body</th>
+            <th>Asker</th>
+        </tr>
+        <tr>
+            <td>192</td>
+            <td>Why do unicorns eat daisies?</td>
+            <td>blah blah blah&hellip; (3000 words here)</td>
+            <td>4921</td>
+        </tr>
+        <tr>
+            <td>433</td>
+            <td>Do unicorns really eat waffles?</td>
+            <td>insert a question here&hellip;</td>
+            <td>2011</td>
+        </tr>
+        <tr>
+            <td>692</td>
+            <td>How do I tame a unicorn if I have only sons?</td>
+            <td>question body goes here</td>
+            <td>4921</td>
+        </tr>
+    </tbody>
+</table>
+<table class="example-set">
+    <caption>Users</caption>
+    <tbody>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Reputation</th>
+        </tr>
+        <tr>
+            <td>4921</td>
+            <td>Joe</td>
+            <td>1302</td>
+        </tr>
+        <tr>
+            <td>2011</td>
+            <td>Princess</td>
+            <td>101</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    (We'll come back to answers and tags in a bit.)
+</p>
+<p>
+    Here we've created two tables, Questions and Users. Every user has a unique ID, and the Questions table uses the
+    IDs from the Users table to indicate who asked the question. When a user asks more than one question (like Joe,
+    aka User 4921), we don't have to repeat information about the user for each question. There will be many more
+    rows in the Questions table than in the Users table, most likely.
+</p>
+<p>
+    Tags, like users, are something we want to define somewhere else and just refer to from the question. Tags have
+    names, descriptions, and some other information. A database column can store a set of items, so that's fine. And
+    we can take the same approach with answers. So our Questions table could look like this:
+</p>
+<table class="example-set">
+    <tbody>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Body</th>
+            <th>Asker</th>
+            <th>Tags</th>
+            <th>Answers</th>
+        </tr>
+        <tr>
+            <td>192</td>
+            <td>Why do unicorns eat daisies?</td>
+            <td>blah blah blah&hellip; (3000 words here)</td>
+            <td>4921</td>
+            <td>5 12 19</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>433</td>
+            <td>Do unicorns really eat waffles?</td>
+            <td>insert a question here&hellip;</td>
+            <td>2011</td>
+            <td>5 12 31</td>
+            <td>91256 54312 44409</td>
+        </tr>
+        <tr>
+            <td>692</td>
+            <td>How do I tame a unicorn if I have only sons?</td>
+            <td>question body goes here</td>
+            <td>4921</td>
+            <td>5 47</td>
+            <td>98751 41926</td>
+        </tr>
+
+    </tbody>
+</table>
+<p>
+    That's not exactly how the Stack Exchange data is really laid out. We'll get into those details in the next
+    sections. But the important points are:
+</p>
+<ul>
+    <li>Databases are organized into tables, one table per logical concept (like users or tags).</li>
+    <li>As with spreadsheets, tables are organized into columns for the various attributes of the data.</li>
+    <li>Each item in a table (that is, each row) has an identifier that is unique within that table. This identifier is
+    called a <em>key</em>.</li>
+    <li>An entry in a table can refer to entries in other tables by using those keys.</li>
+    <li>The definition of a table specifies which other tables those keys are for. Our Questions table has keys for users,
+    tags, and answers, and each column "knows" what type of key it holds.</li>
+</ul>
+<a class="next" href="/tutorial/intro-to-queries">A First Look at Writing Queries <i class="icon-arrow-right"></i></a>

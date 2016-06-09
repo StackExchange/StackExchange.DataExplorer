@@ -1,0 +1,75 @@
+﻿
+@{ Layout = "~/Views/Tutorial/Shared/Navigation.cshtml"; }
+
+<h2>A First Look at Writing Queries</h2>
+<p>
+    Data in SEDE is organized in several tables&ndash;posts (questions and answers are together in one table), users,
+    badges, comments, and so on. There are a lot of tables; you can see the list in the Query Composer:
+</p>
+<img src="~/Content/images/tutorial/composer-table-list.png" alt="compose-query page with tables circled" class="screenshot">
+<p>
+    Some of these tables are specialized; you can come back to them later. As a newcomer to SEDE you are probably most
+    interested in the first two tables, <strong>Posts</strong> and <strong>Users</strong>. Let's look at <strong>Posts</strong>.
+</p>
+<p>
+    To view data from a table in SEDE, you write a SQL <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code>
+    statement. (You can type your SQL right into the Query Composer window.) As the name implies, a
+    <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code> statement picks out the specific
+    information that you're looking for. But what if you just want to browse, to get a feel for what kind of data is
+    in a table? Try this:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-keyword">TOP</span> <span class="cm-sql-number">100</span> <span class="cm-sql-operator">*</span> <span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/230846/explore-posts-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    This query returns all the columns for the first 100 posts (questions and answers). This shows you what columns are in
+    the data and what their values look like. Let's take a look at some results from this query:
+</p>
+<img src="~/Content/images/tutorial/select-100-posts-output.png" alt="output from previous query" class="screenshot">
+<p>
+    Notice that one of the columns is <strong>PostTypeId</strong>, and its value (in these results) is always either 1 or 2.
+    Looking at the data, we might observe that only posts with a type of 1 have values for <strong>AcceptedAnswerId</strong>
+    and <strong>ViewCount</strong>, and might (correctly) conclude that a post type of 1 means the post is a question. By
+    extension, then, a value of 2 would probably mean an answer (with <strong>ParentId</strong> pointing to the question).
+</p>
+<p>
+    That's correct in this case, but reasoning from the data like this is risky. In SEDE there are two kinds of numeric
+    values you might see&ndash;"real numbers", like view count or score, and numbers like post types which represent
+    categories or types. If you see a number that looks like the latter, look for an explicit list of the values instead
+    of guessing. In this case the column heading is "PostTypeId" and the table list has a PostTypes table. That table
+    shows two columns, a number and a name:
+</p>
+<img src="~/Content/images/tutorial/composer-table-post-types.png" alt="entry for PostTypes table" class="screenshot">
+<p>
+    Unfortunately, the <strong>Posts</strong> table itself doesn't tell you that; it just records the data type:
+</p>
+<img src="~/Content/images/tutorial/composer-table-posts.png" alt="entry for Posts table" class="screenshot">
+<p>
+    In SEDE, a type of <code class="cm-s-default"><span class="cm-variable-2">tinyint</span></code> usually means there is
+    another table that has values that explain what this number means. If you see something listed as a
+    <code class="cm-s-default"><span class="cm-variable-2">tinyint</span></code>, look for a table listing the values. The
+    table's name matches up with the name of the column using it&ndash;"PostTypeId" and "PostTypes", in this case.
+</p>
+<p>
+    So what are the values? Click on the <i class="icon-info"></i> (information) icon next to the table name:
+</p>
+<img src="~/Content/images/tutorial/composer-table-post-types-2.png" alt="entry for PostTypes table with info link circled" class="screenshot">
+<p>
+    Clicking on that reveals the values defined for this table:
+</p>
+<img src="~/Content/images/tutorial/post-types.png" alt="list of post types from schema" class="screenshot">
+<p>
+    (Click the <i class="icon-remove"></i> to return to the main list.)
+</p>
+<p>
+    You'll notice that not all tables in the composer have the <i class="icon-info"></i> icon. This is specifically for
+    tables with these special (enumerated) values, which always have the data type of <code class="cm-s-default"><span class="cm-variable-2">tinyint</span></code>.
+    There are lots of other number values (of type <code class="cm-s-default"><span class="cm-variable-2">int</span></code>,
+    for integer) running around in the data, like scores and view counts and user numbers; there's nothing to show there.
+    But if there is something to show, you'll see the <i class="icon-info"></i>.
+</p>
+<p>
+    Ok, back to writing queries. So far we've just sampled the data&ndash;we selected everything in the first few rows so
+    we could browse. That's handy if you need to familiarize yourself with the data, but it's not how real queries are written.
+</p>
+<a class="next" href="/tutorial/query-basics">Query Basics: <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code>
+    and <code class="cm-s-default"><span class="cm-sql-keyword">WHERE</span></code> <i class="icon-arrow-right"></i></a>

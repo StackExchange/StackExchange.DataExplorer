@@ -196,6 +196,7 @@
     <Compile Include="Controllers\StackOverflowController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QueryController.cs" />
+    <Compile Include="Controllers\TutorialController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VoteController.cs" />
     <Compile Include="Current.cs" />
@@ -282,6 +283,18 @@
     <Content Include="Content\images\help-icon.png" />
     <Content Include="Content\images\help-sample-graph.png" />
     <Content Include="Content\images\so-sprites.png" />
+    <Content Include="Content\images\tutorial\answered-questions.png" />
+    <Content Include="Content\images\tutorial\composer-table-list.png" />
+    <Content Include="Content\images\tutorial\composer-table-post-types-2.png" />
+    <Content Include="Content\images\tutorial\composer-table-post-types.png" />
+    <Content Include="Content\images\tutorial\composer-table-posts.png" />
+    <Content Include="Content\images\tutorial\join-posts-users.png" />
+    <Content Include="Content\images\tutorial\most-effective-answerers.png" />
+    <Content Include="Content\images\tutorial\post-types.png" />
+    <Content Include="Content\images\tutorial\posts-missing-titles.png" />
+    <Content Include="Content\images\tutorial\results-with-links.png" />
+    <Content Include="Content\images\tutorial\select-100-posts-output.png" />
+    <Content Include="Content\images\tutorial\specify-parameters.png" />
     <Content Include="Content\Img\login-icons.svg" />
     <Content Include="Content\login.css">
       <DependentUpon>login.less</DependentUpon>
@@ -365,6 +378,7 @@
     <Content Include="Content\qp\qp.css" />
     <Content Include="Content\qp\qp.xslt" />
     <Content Include="Content\topbar.css" />
+    <Content Include="Content\tutorial.css" />
     <Content Include="Scripts\codemirror\codemirror.js" />
     <Content Include="Scripts\codemirror\runmode.js" />
     <Content Include="Scripts\codemirror\sql.js" />
@@ -477,6 +491,16 @@
     <Content Include="Views\Shared\UserList.cshtml" />
     <Content Include="Views\Home\Help.cshtml" />
     <Content Include="Views\Account\LogInActiveDirectory.cshtml" />
+    <Content Include="Views\Tutorial\Index.cshtml" />
+    <Content Include="Views\Shared\ContentPage.cshtml" />
+    <Content Include="Views\Tutorial\Shared\Navigation.cshtml" />
+    <Content Include="Views\Tutorial\DatabasePrimer.cshtml" />
+    <Content Include="Views\Tutorial\Queries.cshtml" />
+    <Content Include="Views\Tutorial\QueryBasics.cshtml" />
+    <Content Include="Views\Tutorial\QueryJoins.cshtml" />
+    <Content Include="Views\Tutorial\QueryParameters.cshtml" />
+    <Content Include="Views\Tutorial\QueryComputations.cshtml" />
+    <Content Include="Views\Tutorial\NextSteps.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -62,6 +62,7 @@ namespace StackExchange.DataExplorer
                 .Include("~/Content/topbar.css", new CssRewriteUrlTransform())
                 .Include("~/Content/header.css", new CssRewriteUrlTransform())
                 .Include("~/Content/jquery.autocomplete.css")
+                .Include("~/Content/tutorial.css")
             );
 
             bundles.Add(new StyleBundle("~/assets/css/query")

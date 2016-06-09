@@ -1,0 +1,133 @@
+﻿
+@{ Layout = "~/Views/Tutorial/Shared/Navigation.cshtml"; }
+
+<h2>Using Multiple Tables: <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code></h2>
+<p>
+    So far we've looked at queries restricted to a single table. As we saw in the introductory section, the
+    real power of a database (as compared to a spreadsheet) is in being able to <em>combine</em> tables. We
+    do this with the <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code> clause.
+</p>
+<p>
+    Joining tables works by finding shared values (keys) in two tables. If a post was created by a user with
+    ID 9753, we can find the user in the <strong>Users</strong> table with an ID of 9753. This allows us to
+    display the name of the user (which comes from the <strong>Users</strong> table) as part of the results
+    of a query on the <strong>Posts</strong> table:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">ViewCount</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">DisplayName</span>
+<span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">u</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span>
+<span class="cm-sql-operators">AND</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;=</span> <span class="cm-sql-number">25</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323321/high-scoring-questions-with-authors-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    If you're new to SQL, the best way to read this statement is from the inside out. The logic is:
+</p>
+<ul>
+    <li>
+        Start with the <strong>Posts</strong> table: <code class="cm-s-default"><span class="cm-sql-keyword">FROM</span>
+        <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span></code>. Because we're now talking
+        about more than one table we need to use names; <code class="cm-s-default"><span class="cm-sql-word">p</span></code>
+        refers to any row in the <strong>Posts</strong> table. Think of it sort of like a loop counter;
+        <code class="cm-s-default"><span class="cm-sql-word">p</span></code> means "whatever row we're currently
+        looking at". A query will end up looking at every row in the table to decide whether that row is relevant.
+    </li>
+    <li>
+        Now we're going to cross-reference this with the <strong>Users</strong> table: <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span>
+        <span class="cm-sql-word">Users</span> <span class="cm-sql-word">u</span> <span class="cm-sql-keyword">ON</span>
+        <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span>
+        <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span></code>. Just as we used
+        <code class="cm-s-default"><span class="cm-sql-word">p</span></code> to mean a row in the <strong>Posts</strong>
+        table, here we use <code class="cm-s-default"><span class="cm-sql-word">u</span></code> to mean a row in the
+        <strong>Users</strong> table. The <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code>
+        says to take the value in the <strong>OwnerUserId</strong> column in <code class="cm-s-default"><span class="cm-sql-word">p</span></code>
+        (a post), find the same value in the Id column in u (a user), and match them up.
+        <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code> does a lot of the heavy lifting in
+        SEDE (and many other databases).
+    </li>
+    <li>
+        Remember what we said about reading this query from the inside out? Now we go up to the first line:
+        <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span>
+        <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span>
+        <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span>
+        <span class="cm-sql-word">p</span>.<span class="cm-sql-word">ViewCount</span><span class="cm-sql-separator">,</span>
+        <span class="cm-sql-word">u</span>.<span class="cm-sql-word">DisplayName</span></code>. Notice that we've now
+        added prefixes to the column names to indicate which table they come from. To the four columns from the
+        <strong>Posts</strong> table we've added the display name from the <strong>Users</strong> table.
+    </li>
+    <li>
+        Finally, we go to the bottom for further restrictions. The <code class="cm-s-default"><span class="cm-sql-keyword">WHERE</span></code>
+        clause restricts the values we show. Note that we've also added the prefixes to the values here.
+    </li>
+</ul>
+<p>
+    This query produces results in an unspecified order:
+</p>
+<img src="~/Content/images/tutorial/join-posts-users.png" alt="results of previous query" class="screenshot">
+<p>
+    We can use any column in either of the joined tables to control the ordering. It doesn't need to be one of the
+    columns listed in the <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code> statement.
+    For the purpose of illustration, we'll use user reputation, starting with the highest, to sort the results. This
+    also has the effect of grouping all questions from the same author together. We add the
+    <code class="cm-s-default"><span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span></code>
+    clause to the previous query:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">ViewCount</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">DisplayName</span>
+<span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">u</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span>
+<span class="cm-sql-operators">AND</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;=</span> <span class="cm-sql-number">25</span>
+<span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Reputation</span> <span class="cm-sql-keyword">DESC</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323323/high-scoring-questions-by-author-rep-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    See how that changes the results.
+</p>
+<p>
+    (If you wanted the lowest-reputation user first, you would replace <code class="cm-s-default"><span class="cm-sql-keyword">DESC</span></code>
+    (descending) with <code class="cm-s-default"><span class="cm-sql-keyword">ASC</span></code> (ascending) in the
+    <code class="cm-s-default"><span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span></code> clause.)
+</p>
+<p>
+    <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code>s are not limited to two tables. They
+    also aren't limited to <em>different</em> tables. Consider the <strong>Posts</strong> table, which contains both
+    questions and answers (among other things). Suppose you want to access a question and its accepted answer? You can
+    do that by joining <strong>Posts</strong> to <strong>Posts</strong>:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Accepted</span> <span class="cm-sql-word">Score</span><span class="cm-sql-word">"</span><span class="cm-sql-separator">,</span> 
+<span class="cm-sql-word">u</span>.<span class="cm-sql-word">DisplayName</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Asker</span><span class="cm-sql-word">"</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">DisplayName</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Answerer</span><span class="cm-sql-word">"</span>
+  
+<span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">a</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">AcceptedAnswerId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">u</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">u</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">au</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span>
+<span class="cm-sql-operators">AND</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-operator">&gt;=</span> <span class="cm-sql-number">25</span>
+<span class="cm-sql-operators">and</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">AcceptedAnswerId</span> <span class="cm-sql-operators">IS</span> <span class="cm-sql-operators">NOT</span> <span class="cm-sql-operators">NULL</span>
+<span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">DESC</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/323324/high-scoring-questions-with-accepted-answers-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    Yes, that's a four-way <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code>. For each post
+    (that is a question), we find its accepted answer (if that is not null). The answer, being a post, has an ID. We
+    can therefore join a question to its answer: <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span>
+    <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">a</span> <span class="cm-sql-keyword">ON</span>
+    <span class="cm-sql-word">p</span>.<span class="cm-sql-word">AcceptedAnswerId</span> <span class="cm-sql-operator">=</span>
+    <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Id</span></code>.
+</p>
+<p>
+    The <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code> of the (question) post to its user
+    is unchanged. We need a <em>separate</em> <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code>
+    to do the same for the <em>answering</em> user, because answers are in <strong>a</strong>, not <strong>p</strong>,
+    even though they are both references to the <strong>Posts</strong> table.
+</p>
+<p>
+    Notice that with all the extra posts and users involved in this query, we've used
+    <code class="cm-s-default"><span class="cm-sql-keyword">AS</span></code> clauses in the
+    <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code> to specify more meaningful column
+    headers:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Title</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Accepted</span> <span class="cm-sql-word">Score</span><span class="cm-sql-word">"</span><span class="cm-sql-separator">,</span> 
+<span class="cm-sql-word">u</span>.<span class="cm-sql-word">DisplayName</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Asker</span><span class="cm-sql-word">"</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">DisplayName</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">"Answerer</span><span class="cm-sql-word">"</span></pre>
+<p>
+    We've also changed the sorting:
+</p>
+<img src="~/Content/images/tutorial/answered-questions.png" alt="results of previous query" class="screenshot">
+<a class="next" href="/tutorial/query-parameters">Parameters and Links <i class="icon-arrow-right"></i></a>

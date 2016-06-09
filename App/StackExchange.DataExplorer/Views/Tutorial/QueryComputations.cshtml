@@ -1,0 +1,94 @@
+﻿
+@{ Layout = "~/Views/Tutorial/Shared/Navigation.cshtml"; }
+
+<h2>Computations</h2>
+<p>
+    So far we've seen how to find individual interesting rows, like posts with high scores. A lot of the
+    queries you'll find on SEDE are of this type&mdash;find posts from low-reputation users, all comments over
+    a certain score threshold, all self-answered questions with positive scores for both question and answer,
+    most-edited tag wikis, and so on. But SEDE (and SQL) can also do computations and aggregation.
+</p>
+<p>
+    Consider the question "who answers my questions"&mdash;that is, who are the users on the site who tend to
+    help me? We can start with the following query:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[Post Link</span><span class="cm-sql-word">]</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span><span class="cm-sql-separator">,</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[User Link</span><span class="cm-sql-word">]</span>
+<span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span> 
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">a</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">ParentId</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">au</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span>
+<span class="cm-sql-operators">AND</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-special">##UserId##</span>
+<span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span> <span class="cm-sql-keyword">DESC</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/230853/who-answers-my-questions-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    This query finds all questions (<code  ><span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span>
+    <span class="cm-sql-number">1</span></code>) from a given user(<code class="cm-s-default"><span class="cm-sql-special">##UserId##</span></code>)
+    and returns the answer links, answer scores, and answering users, ordered by answer score (highest first).
+    With this query we can start to see who provides the most-popular answers to somebody's questions.
+</p>
+<p>
+    But this doesn't tell us anything about <em>overall</em> patterns; it operates at the single-answer level.
+    We're really more interested in patterns&ndash;which users tend to give good answers to my (or anybody else's)
+    questions?
+</p>
+<p>
+    The next query produces some aggregate data, like this:
+</p>
+<img src="~/Content/images/tutorial/most-effective-answerers.png" alt="output from next query: total score, number of answers, answering user" class="screenshot">
+<p>
+    Here's the query:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-function">SUM</span>(<span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span>) <span class="cm-sql-keyword">as</span> <span class="cm-sql-literal">'Total Score'</span><span class="cm-sql-separator">,</span>
+<span class="cm-sql-function">COUNT</span>(<span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>) <span class="cm-sql-keyword">as</span> <span class="cm-sql-literal">'# Answers'</span><span class="cm-sql-separator">,</span>
+<span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[User Link</span><span class="cm-sql-word">]</span>
+<span class="cm-sql-keyword">FROM</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">p</span> 
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Posts</span> <span class="cm-sql-word">a</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">ParentId</span>
+<span class="cm-sql-operators">JOIN</span> <span class="cm-sql-word">Users</span> <span class="cm-sql-word">au</span> <span class="cm-sql-keyword">ON</span> <span class="cm-sql-word">a</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">WHERE</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">PostTypeId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-number">1</span>
+<span class="cm-sql-operators">AND</span> <span class="cm-sql-word">p</span>.<span class="cm-sql-word">OwnerUserId</span> <span class="cm-sql-operator">=</span> <span class="cm-sql-special">##UserId##</span>
+<span class="cm-sql-comment">-- We want one row per user:</span>
+<span class="cm-sql-keyword">GROUP</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-comment">-- In order by total score, highest first:</span>
+<span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-function">SUM</span>(<span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span>) <span class="cm-sql-keyword">DESC</span></pre>
+<a class="run-prompt" href="//data.stackexchange.com/meta.stackexchange/query/231043/who-answers-my-questions-most-effectively-tutorial"><i class="icon-terminal"></i> Run Query</a>
+<p>
+    We use the <code class="cm-s-default"><span class="cm-sql-function">SUM</span></code> and
+    <code class="cm-s-default"><span class="cm-sql-function">COUNT</span></code> functions in the
+    <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code> statement to get the row values.
+    We want the total score (<code class="cm-s-default"><span class="cm-sql-function">SUM</span></code>) of all
+    answers from each user, and we want to know how many answers there were. That's the first part of the query:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">SELECT</span> <span class="cm-sql-function">SUM</span>(<span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span>) <span class="cm-sql-keyword">as</span> <span class="cm-sql-literal">'Total Score'</span><span class="cm-sql-separator">,</span>
+<span class="cm-sql-function">COUNT</span>(<span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>) <span class="cm-sql-keyword">as</span> <span class="cm-sql-literal">'# Answers'</span><span class="cm-sql-separator">,</span>
+<span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span> <span class="cm-sql-keyword">AS</span> <span class="cm-sql-word">[User Link</span><span class="cm-sql-word">]</span></pre>
+<p>
+    (Perhaps you would prefer the average score, not the sum. You can do that with
+    <code class="cm-s-default"><span class="cm-sql-function">AVG</span></code>.)
+</p>
+<p>
+    The <code class="cm-s-default"><span class="cm-sql-operators">JOIN</span></code>s are the same as in the
+    previous query; we're linking question, answers, and answering users. The restrictions
+    (<code class="cm-s-default"><span class="cm-sql-keyword">WHERE</span></code>) are also the same.
+</p>
+<p>
+    When reporting results we group the rows by answering user&mdash;one row per user, as opposed to one row per
+    answer&mdash;and we also want to show the highest score first. We used the
+    <code class="cm-s-default"><span class="cm-sql-function">SUM</span></code> earlier, in the
+    <code class="cm-s-default"><span class="cm-sql-keyword">SELECT</span></code>, but it's not actually a value
+    stored in the table, so we have to use it again here:
+</p>
+<pre class="cm-s-default"><span class="cm-sql-keyword">GROUP</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-word">au</span>.<span class="cm-sql-word">Id</span>
+<span class="cm-sql-keyword">ORDER</span> <span class="cm-sql-keyword">BY</span> <span class="cm-sql-function">SUM</span>(<span class="cm-sql-word">a</span>.<span class="cm-sql-word">Score</span>) <span class="cm-sql-keyword">DESC</span></pre>
+<p>
+    Aggregate functions you might find helpful, in addition to <code class="cm-s-default"><span class="cm-sql-function">SUM</span></code>
+    and <code class="cm-s-default"><span class="cm-sql-function">COUNT</span></code>, are
+    <code class="cm-s-default"><span class="cm-sql-function">AVG</span></code> (average),
+    <code class="cm-s-default"><span class="cm-sql-function">MIN</span></code>, and
+    <code class="cm-s-default"><span class="cm-sql-function">MAX</span></code>.
+</p>
+<p>
+    Notice, by the way, that while the "base" table in the last two queries is <strong>Posts</strong>, we don't
+    actually return any columns from that table. That's fine. We're using it entirely as "glue" to hold the rest
+    of the query together. Just because you include a table doesn't mean you have to show anything from it.
+</p>
+<a class="next" href="/tutorial/next-steps">Next Steps <i class="icon-arrow-right"></i></a>
