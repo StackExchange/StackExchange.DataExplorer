@@ -270,6 +270,7 @@ namespace Dapper
                 }
 
                 connection.Close();
+                connection.Dispose();
                 connection = null;
             }
         }
