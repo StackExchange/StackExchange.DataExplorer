@@ -21,10 +21,12 @@ Sort:
 <br/><br/>
 <table>
     <thead>
-        <th>OpenId</th>
-        <th>Approved</th>
-        <th>Creation Date</th>
-        <th></th>
+        <tr>
+            <th>OpenId</th>
+            <th>Approved</th>
+            <th>Creation Date</th>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var group in Model)
@@ -38,7 +40,7 @@ Sort:
                 <td>@dupe.OpenId</td>
                 <td>@dupe.Approved</td>
                 <td>@dupe.CreationDate</td>
-                <td><a class="remove" href="/admin/whitelist/remove/@(dupe.Id)" class="remove">remove</a></td>
+                <td><a class="remove" href="/admin/whitelist/remove/@(dupe.Id)">remove</a></td>
             </tr>
         }
     }
@@ -51,7 +53,7 @@ Sort:
 }
 
 @Html.AntiForgeryToken()
-<script type="text/javascript">
+<script>
     (function () {
         $("a.remove").click(function () {
             var href = $(this);

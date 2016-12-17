@@ -4,12 +4,12 @@
 @{ this.SetPageTitle("Users - Stack Exchange Data Explorer"); }
 
 <div id="user-filter">
-    <label>Type to find users:</label> <input type="text" name="search" autocomplete="off" value="@Html.Raw(@Html.AttributeEncode(ViewData["SearchUser"]))" />
+    <label>Type to find users:</label> <input type="text" name="search" autocomplete="off" value="@Html.Raw(Html.AttributeEncode(ViewData["SearchUser"]))" />
 </div>
 <div id="user-search">
     @Html.Partial("UserList", Model)
 </div>
-<script type="text/javascript">
+<script>
     (function () {
         var users = $('#user-search'),
             filter = new DataExplorer.DeferredRequest({

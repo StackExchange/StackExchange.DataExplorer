@@ -1,6 +1,5 @@
 ﻿@model QuerySetViewModel
 @using StackExchange.DataExplorer
-@using StackExchange.DataExplorer.Helpers
 @using StackExchange.DataExplorer.Models
 @using StackExchange.DataExplorer.ViewModel
 @using System.Web.Optimization
@@ -29,7 +28,7 @@
     <a id="edit-query-description" href="#">edit description</a>
     <textarea style="display:none" name="description" id="query-description" placeholder='enter a description'>@(Model != null && Model.QuerySet != null ? Model.QuerySet.Description : "")</textarea>
     
-    <script type="text/javascript">
+    <script>
         $(function () {
             $("#edit-query-description").click(function () {
                 $("#edit-query-description").hide();
@@ -81,6 +80,6 @@
     <li id="schema-toggle">hide sidebar</li>
 </ul>
 @Scripts.Render("~/assets/js/editor")
-<script type="text/javascript">
+<script>
     DataExplorer.TableHelpers.init(@Html.Raw(ViewData["HelperTables"] as string));
 </script>

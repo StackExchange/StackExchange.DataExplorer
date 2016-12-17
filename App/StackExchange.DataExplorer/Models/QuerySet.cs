@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using StackExchange.DataExplorer.Helpers;
 
 namespace StackExchange.DataExplorer.Models
 {
     public class QuerySet
     {
-
         public int Id { get; set; }
         public int InitialRevisionId { get; set; }
         public int CurrentRevisionId { get; set; }
@@ -26,6 +24,5 @@ namespace StackExchange.DataExplorer.Models
         public List<Revision> Revisions { get; set; }
 
         public User Owner { get; set; }
-
     }
 }

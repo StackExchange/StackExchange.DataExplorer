@@ -16,12 +16,6 @@ namespace StackExchange.DataExplorer.Helpers
     {
         public PagedList() { }
 
-        public static PagedList<T> Map<U>(IEnumerable<U> raw, Func<IEnumerable<U>, IEnumerable<T>> mapper, int page, int perpage)
-        {
-            var filtered = mapper(raw.Skip((page - 1) * perpage).Take(perpage));
-            return new PagedList<T>(filtered, page, perpage, false, raw.Count());
-        }
-
         // we need a distinct overload for IQueryable, so efficient paging queries can be created by linq2sql
         public PagedList(IQueryable<T> source, int index, int pageSize)
         {
@@ -105,8 +99,8 @@ namespace StackExchange.DataExplorer.Helpers
         public int PageIndex { get; set; }
         public int PageSize { get; set; }
 
-        public bool IsPreviousPage { get { return (PageIndex > 0); } }
-        public bool IsNextPage { get { return (PageIndex * PageSize) <= TotalCount; } }
+        public bool IsPreviousPage => PageIndex > 0;
+        public bool IsNextPage => PageIndex * PageSize <= TotalCount;
 
 
         /// <summary>
@@ -120,10 +114,10 @@ namespace StackExchange.DataExplorer.Helpers
             // retain all the paging properties
             var result = new PagedList<TNew>
             {
-                TotalCount = this.TotalCount,
-                PageCount = this.PageCount,
-                PageIndex = this.PageIndex,
-                PageSize = this.PageSize
+                TotalCount = TotalCount,
+                PageCount = PageCount,
+                PageIndex = PageIndex,
+                PageSize = PageSize
             };
 
             // call the converter to generate the data we want in the resulting list
@@ -133,35 +127,6 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             return result;
-        }
-    }
-
-    public static class PagedListExtensions
-    {
-        public static PagedList<T> ToPagedList<T>(this IEnumerable<T> source, int index)
-        {
-            return ToPagedList(source, index, null);
-        }
-
-        public static PagedList<T> ToPagedList<T>(this IEnumerable<T> source, int index, int? pageSize, bool forceIndexInBounds = false, int? prePagedTotalCount = null)
-        {
-            if (!pageSize.HasValue || pageSize.Value < 1)
-                pageSize = PageSizer.DefaultPageSize;
-
-            return new PagedList<T>(source, index, pageSize.Value, forceIndexInBounds, prePagedTotalCount);
-        }
-
-        public static PagedList<T> ToPagedList<T>(this IQueryable<T> source, int index, int? pageSize)
-        {
-            if (!pageSize.HasValue || pageSize.Value < 1)
-                pageSize = PageSizer.DefaultPageSize;
-
-            return new PagedList<T>(source, index, pageSize.Value);
-        }
-
-        public static PagedList<T> ToPagedList<T>(this IQueryable<T> source, int index)
-        {
-            return ToPagedList(source, index, null);
         }
     }
 }

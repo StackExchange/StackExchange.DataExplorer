@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace StackExchange.DataExplorer.Models
 {
-    public partial class RevisionExecution
+    public class RevisionExecution
     {
         public int Id { get; set; }
         public int? UserId { get; set; }

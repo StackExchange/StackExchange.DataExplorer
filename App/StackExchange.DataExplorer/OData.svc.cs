@@ -14,19 +14,17 @@ using System.Web;
 using StackExchange.DataExplorer.Models.StackEntities;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
-using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer
 {
     public class OData : DataService<Entities>
     {
-        const int ConnectionPoolSize = 10;
-
-        private static Regex _ipAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+        private const int ConnectionPoolSize = 10;
+        private static readonly Regex _ipAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
         private static bool IsPrivateIP(string s) {
-            return (s.StartsWith("192.168.") || s.StartsWith("10.") || s.StartsWith("127.0.0."));
+            return s.StartsWith("192.168.") || s.StartsWith("10.") || s.StartsWith("127.0.0.");
         }
 
         /// <summary>

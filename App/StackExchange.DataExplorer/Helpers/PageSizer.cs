@@ -4,7 +4,7 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class PageSizer
     {
-        private static readonly int[] PageSizes = {30, 50, 100};
+        private static readonly int[] _pageSizes = {30, 50, 100};
 
         public PageSizer(string href, int pageIndex, int currentPageSize, int pageCount, string cssClass)
         {
@@ -21,10 +21,7 @@ namespace StackExchange.DataExplorer.Helpers
         public int PageCount { get; set; }
         public string CssClass { get; set; }
 
-        public static int DefaultPageSize
-        {
-            get { return PageSizes[0]; }
-        }
+        public static int DefaultPageSize => _pageSizes[0];
 
         public override string ToString()
         {
@@ -37,7 +34,7 @@ namespace StackExchange.DataExplorer.Helpers
             sb.Append(CssClass);
             sb.Append(@""">");
 
-            foreach (int pageSize in PageSizes)
+            foreach (int pageSize in _pageSizes)
             {
                 sb.Append(@"<a href=""");
                 sb.Append(HRef.Replace("pagesize=-1", "pagesize=" + pageSize));
@@ -61,10 +58,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static int? ValidatePageSize(int? pageSize)
         {
-            if (pageSize.HasValue)
-            {
-                if ((pageSize.Value > 0) && pageSize.Value <= 50) return pageSize;
-            }
+            if (pageSize > 0 && pageSize.Value <= 50) return pageSize;
             return null;
         }
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Web;
+﻿using System.Text.RegularExpressions;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -10,7 +6,7 @@ namespace StackExchange.DataExplorer.Helpers
     {
         public const int MIN_SEARCH_CHARS = 2;
 
-        public string RawInput { get; private set; }
+        public string RawInput { get; }
         public bool IsValid { get; private set; }
 
         public string SearchTerm { get; private set; }
@@ -31,7 +27,7 @@ namespace StackExchange.DataExplorer.Helpers
         {
             if (RawInput == null) return;
 
-            string s = (RawInput ?? string.Empty).Trim();
+            var s = (RawInput ?? string.Empty).Trim();
 
             IsFeatured = _MatchIsFeatured(ref s);
 
@@ -42,17 +38,15 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
+        private static readonly Regex _featuredRegex = new Regex(@"\bisfeatured:1\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private bool _MatchIsFeatured(ref string s)
         {
-            string pattern = @"\bisfeatured:1\b";
-            RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Compiled;
-            Match match = null;
             bool matched = false;
-
-            while ((match = Regex.Match(s, pattern, ro)).Success)
+            while (_featuredRegex.Match(s).Success)
             {
                 matched = true;
-                s = Regex.Replace(s, pattern, string.Empty, ro).Trim();
+                s = _featuredRegex.Replace(s, "").Trim();
             }
 
             return matched;

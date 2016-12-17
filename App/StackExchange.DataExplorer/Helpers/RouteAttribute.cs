@@ -19,43 +19,20 @@ namespace StackExchange.DataExplorer.Helpers
         /// Contains keys that can be used in routes for well-known constraints, e.g. "users/{id:INT}" - this route would ensure the 'id' parameter
         /// would only accept at least one number to match.
         /// </summary>
-        public static readonly Dictionary<string, string> PredefinedConstraints = new Dictionary<string, string>
-                                                                                      {
-                                                                                          {"INT", @"\d+"},
-                                                                                          {
-                                                                                              "INTS_DELIMITED",
-                                                                                              @"\d+(;\d+)*"
-                                                                                              },
-                                                                                          {
-                                                                                              "GUID",
-                                                                                              @"\b[A-Fa-f0-9]{8}(?:-[A-Fa-f0-9]{4}){3}-[A-Za-z0-9]{12}\b"
-                                                                                              }
-                                                                                      };
+        public static readonly Dictionary<string, string> PredefinedConstraints =
+            new Dictionary<string, string>
+            {
+                {"INT", @"\d+"},
+                {"INTS_DELIMITED", @"\d+(;\d+)*"},
+                {"GUID", @"\b[A-Fa-f0-9]{8}(?:-[A-Fa-f0-9]{4}){3}-[A-Za-z0-9]{12}\b"}
+            };
 
         private string _url;
 
-        public StackRouteAttribute(string url)
-            : this(url, "", null, RoutePriority.Default)
-        {
-        }
-
-
-        public StackRouteAttribute(string url, HttpVerbs verbs)
-            : this(url, "", verbs, RoutePriority.Default)
-        {
-        }
-
-
-        public StackRouteAttribute(string url, RoutePriority priority)
-            : this(url, "", null, priority)
-        {
-        }
-
-        public StackRouteAttribute(string url, HttpVerbs verbs, RoutePriority priority)
-            : this(url, "", verbs, priority)
-        {
-        }
-
+        public StackRouteAttribute(string url) : this(url, "", null, RoutePriority.Default) { }
+        public StackRouteAttribute(string url, HttpVerbs verbs) : this(url, "", verbs, RoutePriority.Default) { }
+        public StackRouteAttribute(string url, RoutePriority priority) : this(url, "", null, priority) { }
+        public StackRouteAttribute(string url, HttpVerbs verbs, RoutePriority priority) : this(url, "", verbs, priority) { }
         private StackRouteAttribute(string url, string name, HttpVerbs? verbs, RoutePriority priority)
         {
             Url = url.ToLower();
@@ -86,11 +63,7 @@ namespace StackExchange.DataExplorer.Helpers
         public string Url
         {
             get { return _url; }
-            set
-            {
-                _url = ParseUrlForConstraints(value);
-                    /* side-effects include setting this.OptionalParameters and this.Constraints */
-            }
+            set { _url = ParseUrlForConstraints(value); } /* side-effects include setting this.OptionalParameters and this.Constraints */
         }
 
         /// <summary>
@@ -139,22 +112,22 @@ namespace StackExchange.DataExplorer.Helpers
         /// <param name="assemblyToSearch">An assembly containing Controllers with public methods decorated with the RouteAttribute</param>
         public static void MapDecoratedRoutes(RouteCollection routes, Assembly assemblyToSearch)
         {
-            IEnumerable<MethodInfo> decoratedMethods = from t in assemblyToSearch.GetTypes()
-                                                       where t.IsSubclassOf(typeof (Controller))
-                                                       from m in t.GetMethods()
-                                                       where m.IsDefined(typeof (StackRouteAttribute), false)
-                                                       select m;
+            var decoratedMethods =
+                from t in assemblyToSearch.GetTypes()
+                where t.IsSubclassOf(typeof(Controller))
+                from m in t.GetMethods()
+                where m.IsDefined(typeof(StackRouteAttribute), false)
+                select m;
 
-            Debug.WriteLine(string.Format("MapDecoratedRoutes - found {0} methods decorated with RouteAttribute",
-                                          decoratedMethods.Count()));
+            Debug.WriteLine($"MapDecoratedRoutes - found {decoratedMethods.Count()} methods decorated with RouteAttribute");
 
             var methodsToRegister = new SortedDictionary<StackRouteAttribute, MethodInfo>();
                 // sort urls alphabetically via RouteAttribute's IComparable implementation
 
             // first, collect all the methods decorated with our RouteAttribute
-            foreach (MethodInfo method in decoratedMethods)
+            foreach (var method in decoratedMethods)
             {
-                foreach (object attr in method.GetCustomAttributes(typeof (StackRouteAttribute), false))
+                foreach (var attr in method.GetCustomAttributes(typeof (StackRouteAttribute), false))
                 {
                     var ra = (StackRouteAttribute) attr;
                     if (!methodsToRegister.Any(p => p.Key.Url.Equals(ra.Url)))
@@ -175,11 +148,12 @@ namespace StackExchange.DataExplorer.Helpers
                 string controllerName = controllerType.Name.Replace("Controller", "");
                 string controllerNamespace = controllerType.FullName.Replace("." + controllerType.Name, "");
 
-                Debug.WriteLine(string.Format("MapDecoratedRoutes - mapping url '{0}' to {1}.{2}.{3}", attr.Url,
-                                              controllerNamespace, controllerName, action));
+                Debug.WriteLine($"MapDecoratedRoutes - mapping url '{attr.Url}' to {controllerNamespace}.{controllerName}.{action}");
 
-                var route = new Route(attr.Url, new MvcRouteHandler());
-                route.Defaults = new RouteValueDictionary(new {controller = controllerName, action});
+                var route = new Route(attr.Url, new MvcRouteHandler())
+                {
+                    Defaults = new RouteValueDictionary(new {controller = controllerName, action})
+                };
 
                 // optional parameters are specified like: "users/filter/{filter?}"
                 if (attr.OptionalParameters != null)
@@ -233,9 +207,9 @@ namespace StackExchange.DataExplorer.Helpers
         {
             // example url with both optional specifier and a constraint: "posts/{id:INT}/edit-submit/{revisionguid?:GUID}"
             // note that a constraint regex cannot use { } for quantifiers
-            MatchCollection matches = Regex.Matches(url,
-                                                    @"{(?<param>\w+)(?<metadata>(?<optional>\?)?(?::(?<constraint>[^}]*))?)}",
-                                                    RegexOptions.IgnoreCase);
+            var matches = Regex.Matches(url,
+                @"{(?<param>\w+)(?<metadata>(?<optional>\?)?(?::(?<constraint>[^}]*))?)}",
+                RegexOptions.IgnoreCase);
 
             if (matches.Count == 0) return url; // vanilla route without any parameters, e.g. "home", "users/login"   
 

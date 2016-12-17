@@ -1,4 +1,4 @@
-﻿@model PagedList<StackExchange.DataExplorer.ViewModel.QueryExecutionViewData>
+﻿@model PagedList<QueryExecutionViewData>
 @using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
 @using StackExchange.DataExplorer.Models
@@ -6,7 +6,7 @@
 @{
     this.SetPageTitle("Browse Queries - Stack Exchange Data Explorer");
     var site = ViewData["Site"] as Site;
-    int totalQueries = (int)Model.TotalCount;
+    int totalQueries = Model.TotalCount;
     var qsc = ViewData["SearchCriteria"] as QuerySearchCriteria;
 }
 @section SecondaryContent {
@@ -135,7 +135,7 @@
     @UIHelper.PageNumber(ViewData["Href"].ToString() + "&page=-1&pagesize=" + Model.PageSize, Model, "pager")
 </div>
 
-<script type="text/javascript">
+<script>
     $(document).ready(function () {
 
         var hideSkipped = function () {

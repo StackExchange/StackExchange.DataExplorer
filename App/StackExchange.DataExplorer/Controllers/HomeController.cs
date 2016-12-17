@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using StackExchange.DataExplorer.Models;
@@ -16,7 +15,7 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeader("Choose a Site");
             SelectMenuItem("Home");
 
-            var sites = Current.DB.Query<Models.Site>("select * from Sites order by TotalQuestions desc").ToList();
+            var sites = Current.DB.Query<Site>("select * from Sites order by TotalQuestions desc").ToList();
 
             ViewData["LastUpdate"] = Current.DB.Query<DateTime?>("SELECT MAX(LastPost) FROM Sites").FirstOrDefault();
 
@@ -43,34 +42,23 @@ namespace StackExchange.DataExplorer.Controllers
         }
 
         [StackRoute("about")]
-        public ActionResult About()
-        {
-            return Redirect("/help");
-        }
-
-
+        public ActionResult About() => Redirect("/help");
+        
         [StackRoute("faq")]
-        public ActionResult Faq()
-        {
-            return Redirect("/help");
-        }
+        public ActionResult Faq() => Redirect("/help");
 
         [StackRoute("sites")]
         public ActionResult SearchSites()
         {
             var sites = Current.DB.Query<Site>("SELECT * FROM Sites").Select<Site, object>(
-                site =>
+                site => new
                 {
-                    return new
-                    {
-                        Id = site.Id,
-                        Url = site.Url,
-                        Name = site.Name,
-                        IconUrl = site.IconUrl,
-                        LongName = site.LongName
-                    };
-                }
-            );
+                    site.Id,
+                    site.Url,
+                    site.Name,
+                    site.IconUrl,
+                    site.LongName
+                });
 
             return Json(sites);
         }

@@ -63,11 +63,7 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     return ErrorLogin("User is now in allowed Active Directory groups.", returnUrl);
                 }
-                var user = Models.User.GetByADLogin(username);
-                if (user == null)
-                {
-                    user = Models.User.CreateUser(username);
-                }
+                var user = Models.User.GetByADLogin(username) ?? Models.User.CreateUser(username);
                 if (user == null)
                 {
                     return ErrorLogin("Error creating user for " + username + ".", returnUrl);
@@ -112,7 +108,7 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     try
                     {
-                        IAuthenticationRequest request = OpenIdRelay.CreateRequest(id);
+                        var request = OpenIdRelay.CreateRequest(id);
 
                         request.AddExtension(
                             new ClaimsRequest
@@ -211,7 +207,7 @@ namespace StackExchange.DataExplorer.Controllers
                             {
                                 return LoginError("User preferences prohibit insecure (non-https) variants of the provided OpenID identifier");
                             }
-                            else if (isSecure && !openId.IsSecure)
+                            if (isSecure && !openId.IsSecure)
                             {
                                 Current.DB.UserOpenIds.Update(openId.Id, new { IsSecure = true });
                             }
@@ -223,10 +219,7 @@ namespace StackExchange.DataExplorer.Controllers
                         {
                             return Redirect(returnUrl);
                         }
-                        else
-                        {
-                            return RedirectToAction("Index", "Home");
-                        }
+                        return RedirectToAction("Index", "Home");
                     case AuthenticationStatus.Canceled:
                         return LoginError("Canceled at provider");
                     case AuthenticationStatus.Failed:
@@ -307,15 +300,9 @@ namespace StackExchange.DataExplorer.Controllers
             return null;
         }
 
-        private ActionResult LoginError(string message)
-        {
-            return RedirectToAction("Login", new {message});
-        }
+        private ActionResult LoginError(string message) => RedirectToAction("Login", new {message});
 
-        private string BaseUrl
-        {
-            get { return Current.Request.Url.Scheme + "://" + Current.Request.Url.Host; }
-        }
+        private string BaseUrl => Current.Request.Url.Scheme + "://" + Current.Request.Url.Host;
 
         private ActionResult OAuthLogin()
         {
@@ -483,7 +470,7 @@ namespace StackExchange.DataExplorer.Controllers
             }
             catch (Exception e)
             {
-                GlobalApplication.LogException(new Exception("Error in parsing google response: " + result, e));
+                Current.LogException("Error in parsing google response: " + result, e);
                 return LoginError("There was an error fetching your account from Google.  Please try logging in again");
             }
         }
@@ -496,7 +483,7 @@ namespace StackExchange.DataExplorer.Controllers
                 //return;
             }
 
-            GlobalApplication.LogException(e);
+            Current.LogException(e);
         }
 
         private void IssueFormsTicket(User user)
@@ -573,7 +560,6 @@ namespace StackExchange.DataExplorer.Controllers
             public string gender { get; set; }
             public string locale { get; set; }
         }
-
         // ReSharper restore InconsistentNaming
     }
 }

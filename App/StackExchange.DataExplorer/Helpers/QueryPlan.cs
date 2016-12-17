@@ -7,22 +7,11 @@ namespace StackExchange.DataExplorer.Helpers
     /// </summary>
     public class QueryPlan
     {
-        private XmlDocument planDocument;
-
+        private XmlDocument _planDocument;
         /// <summary>
         /// Gets the complete plan Xml, as a string.
         /// </summary>
-        public string PlanXml
-        {
-            get
-            {
-                if (planDocument == null)
-                {
-                    return null;
-                }
-                return planDocument.OuterXml;
-            }
-        }
+        public string PlanXml => _planDocument?.OuterXml;
 
         /// <summary>
         /// Appends an xml query execution plan statement to the result plan document.
@@ -35,22 +24,22 @@ namespace StackExchange.DataExplorer.Helpers
         /// </remarks>
         public void AppendStatementPlan(string xml)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.LoadXml(xml);
 
-            if (planDocument == null)
+            if (_planDocument == null)
             {
-                planDocument = doc;
+                _planDocument = doc;
                 return;
             }
 
             var nsManager = new XmlNamespaceManager(doc.NameTable);
             nsManager.AddNamespace("s", "http://schemas.microsoft.com/sqlserver/2004/07/showplan");
 
-            var allBatches = planDocument.SelectNodes("s:ShowPlanXML/s:BatchSequence/s:Batch/s:Statements", nsManager);
+            var allBatches = _planDocument.SelectNodes("s:ShowPlanXML/s:BatchSequence/s:Batch/s:Statements", nsManager);
             if (allBatches.Count == 0)
             {
-                planDocument = doc;
+                _planDocument = doc;
                 return;
             }
             var batch = allBatches[allBatches.Count - 1];
@@ -78,22 +67,22 @@ namespace StackExchange.DataExplorer.Helpers
                 return;
             }
 
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.LoadXml(xml);
 
-            if (planDocument == null)
+            if (_planDocument == null)
             {
-                planDocument = doc;
+                _planDocument = doc;
                 return;
             }
 
             var nsManager = new XmlNamespaceManager(doc.NameTable);
             nsManager.AddNamespace("s", "http://schemas.microsoft.com/sqlserver/2004/07/showplan");
 
-            var batchSequence = planDocument.SelectSingleNode("s:ShowPlanXML/s:BatchSequence", nsManager);
+            var batchSequence = _planDocument.SelectSingleNode("s:ShowPlanXML/s:BatchSequence", nsManager);
             if (batchSequence == null)
             {
-                planDocument = doc;
+                _planDocument = doc;
                 return;
             }
 

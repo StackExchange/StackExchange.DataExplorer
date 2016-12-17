@@ -13,11 +13,10 @@ namespace StackExchange.DataExplorer.Controllers
 
     public class AdminController : StackOverflowController
     {
-
         protected override void OnActionExecuting(ActionExecutingContext c)
         {
             // all actions in this controller are admin only
-            if (!Allowed()) c.Result = TextPlainNotFound();
+            if (!CurrentUser.IsAdmin) c.Result = TextPlainNotFound();
 
             base.OnActionExecuting(c);
         }
@@ -88,7 +87,7 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute("admin/refresh-stats", HttpVerbs.Post)]
         public ActionResult RefreshStats()
         {
-            foreach (Site site in Current.DB.Sites.All())
+            foreach (var site in Current.DB.Sites.All())
             {
                 site.UpdateStats();
             }
@@ -100,14 +99,14 @@ namespace StackExchange.DataExplorer.Controllers
             return Content("sucess");
         }
 
-        private Dictionary<string, user2user> userSorts = new Dictionary<string, user2user>()
+        private readonly Dictionary<string, user2user> _userSorts = new Dictionary<string, user2user>()
         {
             { "oldest", users => users.OrderBy(u => u.CreationDate) },
             { "last-seen", users => users.OrderByDescending(u => u.LastSeenDate) },
             { "last-active", users => users.OrderByDescending(u => u.LastActivityDate) }
         };
 
-        private Dictionary<string, whitelist2whitelist> whitelistSorts = new Dictionary<string, whitelist2whitelist>()
+        private readonly Dictionary<string, whitelist2whitelist> _whitelistSorts = new Dictionary<string, whitelist2whitelist>()
         {
             { "approved", whitelist => whitelist.OrderByDescending(w => w.Approved) },
             { "oldest", whitelist => whitelist.OrderBy(w => w.CreationDate) },
@@ -117,7 +116,7 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute("admin/find-dupe-users")]
         public ActionResult FindDuplicateUsers(string sort, bool useEmail = false)
         {
-            var sorter = userSorts[sort ?? "oldest"];
+            var sorter = _userSorts[sort ?? "oldest"];
 
 
             List<Tuple<string, IEnumerable<int>>> dupeUserIds = null; 
@@ -146,10 +145,10 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             }
 
             ViewBag.Sort = sort;
-            ViewBag.Sorts = userSorts.Keys;
+            ViewBag.Sorts = _userSorts.Keys;
             SetHeader("Possible Duplicate Users");
 
-            if (dupeUserIds.Count() > 0)
+            if (dupeUserIds.Count > 0)
             {
 
                 var userMap = Current.DB.Query<User>("select * from Users where Id in @Ids", new { Ids = dupeUserIds.Select(u => u.Item2).SelectMany(u => u) })
@@ -159,11 +158,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
 
                 return View(dupeUsers);
             }
-            else
-            {
-                return View((object)null);
-            }
-
+            return View((object)null);
         }
 
         [StackRoute("admin/normalize-openids")]
@@ -183,7 +178,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         [StackRoute("admin/find-dupe-whitelist-openids")]
         public ActionResult FindDuplicateWhitelistOpenIds(string sort)
         {
-            var sorter = whitelistSorts[sort ?? "approved"];
+            var sorter = _whitelistSorts[sort ?? "approved"];
             var whitelistOpenIds = Current.DB.OpenIdWhiteList.All().ToList();
             var dupeOpenIds = (from openid in whitelistOpenIds
                                group openid by Models.User.NormalizeOpenId(openid.OpenId)
@@ -192,7 +187,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
                                    select new Tuple<string, IEnumerable<OpenIdWhiteList>>(grp.Key, sorter(grp.Select(id => id)))).
                 ToList();
             ViewBag.Sort = sort;
-            ViewBag.Sorts = whitelistSorts.Keys;
+            ViewBag.Sorts = _whitelistSorts.Keys;
 
             SetHeader("Possible Duplicate Whitelist OpenIds");
             return View(dupeOpenIds);
@@ -260,7 +255,7 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         [StackRoute("admin/error-test")]
         public ActionResult ErrorTestPage()
         {
-            GlobalApplication.LogException(new Exception("Test Exception via GlobalApplication.LogException()"));
+            Current.LogException("Test Exception via GlobalApplication.LogException()");
 
             throw new NotImplementedException("I AM IMPLEMENTED, I WAS BORN TO THROW ERRORS!");
         }
@@ -275,12 +270,6 @@ where Email is not null and len(rtrim(Email)) > 0 ");
             page.ProcessRequest(context);
 
             return null;
-        }
-
-
-        public bool Allowed()
-        {
-            return CurrentUser.IsAdmin;
         }
     }
 }

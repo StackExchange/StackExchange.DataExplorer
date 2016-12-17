@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
+using static System.String;
 
 namespace StackExchange.DataExplorer.Helpers
 {
@@ -11,11 +12,11 @@ namespace StackExchange.DataExplorer.Helpers
         public override void ExecuteResult(ControllerContext context)
         {
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
-            HttpResponseBase response = context.HttpContext.Response;
+            var response = context.HttpContext.Response;
 
-            if (!String.IsNullOrEmpty(ContentType))
+            if (!IsNullOrEmpty(ContentType))
                 response.ContentType = ContentType;
             else
                 response.ContentType = "application/json";
@@ -25,12 +26,11 @@ namespace StackExchange.DataExplorer.Helpers
 
             if (Data != null)
             {
-                HttpRequestBase request = context.HttpContext.Request;
+                var request = context.HttpContext.Request;
 
                 var serializer = new JavaScriptSerializer();
-                if (!string.IsNullOrEmpty(request.Params["callback"]))
-                    response.Write(SanitizeCallback(request.Params["callback"]) + "(" + serializer.Serialize(Data) +
-                                   ");");
+                if (!IsNullOrEmpty(request.Params["callback"]))
+                    response.Write(SanitizeCallback(request.Params["callback"]) + "(" + serializer.Serialize(Data) + ");");
                 else
                     response.Write(serializer.Serialize(Data));
             }
@@ -38,7 +38,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         private string SanitizeCallback(string callback)
         {
-            if (String.IsNullOrEmpty(callback)) return callback;
+            if (IsNullOrEmpty(callback)) return callback;
             return Regex.Replace(callback, @"[^_A-Za-z0-9]", "").Truncate(80);
         }
     }

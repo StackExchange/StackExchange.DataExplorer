@@ -6,7 +6,6 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Security;
 using StackExchange.DataExplorer.Helpers;
-using StackExchange.Exceptional;
 using StackExchange.Profiling;
 
 namespace StackExchange.DataExplorer
@@ -20,11 +19,11 @@ namespace StackExchange.DataExplorer
         {
             get
             {
-                var s = HttpContext.Current.Application["AppRevision"] as string;
+                var s = HttpContext.Current.Application[nameof(AppRevision)] as string;
                 if (string.IsNullOrEmpty(s))
                 {
                     s = Assembly.GetAssembly(typeof (GlobalApplication)).GetName().Version.ToString(4);
-                    HttpContext.Current.Application["AppRevision"] = s;
+                    HttpContext.Current.Application[nameof(AppRevision)] = s;
                 }
                 return s;
             }
@@ -58,7 +57,6 @@ namespace StackExchange.DataExplorer
 
             // MUST be the last route as a catch-all!
             routes.MapRoute("{*url}", new {controller = "Error", action = "PageNotFound"});
-
         }
 
 
@@ -96,8 +94,7 @@ namespace StackExchange.DataExplorer
             HttpContext.Current.Response.StatusCode = 500;
             HttpContext.Current.Response.Status = "Internal Server Error";
             HttpContext.Current.Response.End();
-#endif
-        
+#endif  
         }
 
         protected void Application_BeginRequest()
@@ -112,44 +109,16 @@ namespace StackExchange.DataExplorer
             MiniProfiler.Stop();
         }
 
-
-        /// <summary>
-        /// manually write a message (wrapped in a simple Exception) to our standard exception log
-        /// </summary>
-        public static void LogException(string message)
+        protected void Application_AuthenticateRequest(object sender, EventArgs e)
         {
-            LogException(new Exception(message));
-        }
+            if (HttpContext.Current.User == null) return;
+            if (!HttpContext.Current.User.Identity.IsAuthenticated) return;
+            var id = HttpContext.Current.User.Identity as FormsIdentity;
+            if (id == null) return;
 
-        /// <summary>
-        /// manually write an exception to our standard exception log
-        /// </summary>
-        public static void LogException(Exception ex, bool rollupPerServer = false)
-        {
-            try
-            {
-                ErrorStore.LogException(ex, Current.Context, appendFullStackTrace: true, rollupPerServer: rollupPerServer);
-            }
-            catch { /* Do nothing */ }
-        }
-
-        protected void Application_AuthenticateRequest(Object sender, EventArgs e)
-        {
-            if (HttpContext.Current.User != null)
-            {
-                if (HttpContext.Current.User.Identity.IsAuthenticated)
-                {
-                    if (HttpContext.Current.User.Identity is FormsIdentity)
-                    {
-                        var id = (FormsIdentity) HttpContext.Current.User.Identity;
-                        FormsAuthenticationTicket ticket = id.Ticket;
-
-                        string[] roles = (ticket.UserData ?? "").Split(',');
-                        HttpContext.Current.User = new GenericPrincipal(id, roles);
-                        return;
-                    }
-                }
-            }
+            var ticket = id.Ticket;
+            string[] roles = (ticket.UserData ?? "").Split(',');
+            HttpContext.Current.User = new GenericPrincipal(id, roles);
         }
     }
 }

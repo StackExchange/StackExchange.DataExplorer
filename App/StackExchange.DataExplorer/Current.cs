@@ -6,9 +6,16 @@ using StackExchange.DataExplorer.Controllers;
 using StackExchange.DataExplorer.Models;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Data;
 using System.Data.Common;
+using System.Text.RegularExpressions;
+using Recaptcha;
+using StackExchange.Exceptional;
 using StackExchange.Profiling;
+using StackExchange.Profiling.Data;
+using StackExchange.Profiling.SqlFormatters;
 
 
 namespace StackExchange.DataExplorer
@@ -18,17 +25,16 @@ namespace StackExchange.DataExplorer
     /// </summary>
     public static class Current
     {
-        private static DeploymentTier? _tier;
-
         const string DISPOSE_CONNECTION_KEY = "dispose_connections";
 
-        public static Recaptcha.RecaptchaControl NewRecaptchControl()
+        public static RecaptchaControl NewRecaptchControl()
         {
-
-            Recaptcha.RecaptchaControl control = new Recaptcha.RecaptchaControl();
-            control.PrivateKey = AppSettings.RecaptchaPrivateKey;
-            control.PublicKey = AppSettings.RecaptchaPublicKey;
-            control.Theme = "clean";
+            var control = new RecaptchaControl
+            {
+                PrivateKey = AppSettings.RecaptchaPrivateKey,
+                PublicKey = AppSettings.RecaptchaPublicKey,
+                Theme = "clean"
+            };
 
             if (!Context.Request.IsSecureConnection)
             {
@@ -41,7 +47,7 @@ namespace StackExchange.DataExplorer
 
         public static void RegisterConnectionForDisposal(SqlConnection connection)
         {
-            List<SqlConnection> connections = Context.Items[DISPOSE_CONNECTION_KEY] as List<SqlConnection>;
+            var connections = Context.Items[DISPOSE_CONNECTION_KEY] as List<SqlConnection>;
             if (connections == null)
             {
                 Context.Items[DISPOSE_CONNECTION_KEY] = connections  = new List<SqlConnection>();
@@ -52,57 +58,43 @@ namespace StackExchange.DataExplorer
 
         public static void DisposeRegisteredConnections()
         {
-            List<SqlConnection> connections = Context.Items[DISPOSE_CONNECTION_KEY] as List<SqlConnection>;
-            if (connections != null)
+            var connections = Context.Items[DISPOSE_CONNECTION_KEY] as List<SqlConnection>;
+            if (connections == null) return;
+
+            Context.Items[DISPOSE_CONNECTION_KEY] = null;
+            foreach (var connection in connections)
             {
-                Context.Items[DISPOSE_CONNECTION_KEY] = null;
-
-                foreach (var connection in connections)
+                try
                 {
-                    try
+                    if (connection.State != ConnectionState.Closed)
                     {
-                        if (connection.State != ConnectionState.Closed) {
-                            GlobalApplication.LogException("Connection was not in a closed state.");
-                        }
-
-                        connection.Dispose();
+                        LogException("Connection was not in a closed state.");
                     }
-                    catch { 
-                        /* don't care, nothing we can do */
-                    }
+                    connection.Dispose();
                 }
+                catch { /* don't care, nothing we can do */ }
             }
         }
 
         /// <summary>
         /// Shortcut to HttpContext.Current.
         /// </summary>
-        public static HttpContext Context
-        {
-            get { return HttpContext.Current; }
-        }
+        public static HttpContext Context => HttpContext.Current;
 
         /// <summary>
         /// Shortcut to HttpContext.Current.Request.
         /// </summary>
-        public static HttpRequest Request
-        {
-            get { return Context.Request; }
-        }
+        public static HttpRequest Request => Context.Request;
 
         /// <summary>
         /// Is this request is over HTTPS (or behind an HTTPS load balancer)?
         /// </summary>
-        public static bool IsSecureConnection
-        {
-            get
-            {
-                return Request.IsSecureConnection ||
-                    // This can be "http", "https", or the more fun "https, http, https, https" even.
-                       (Request.Headers["X-Forwarded-Proto"] != null &&
-                        Request.Headers["X-Forwarded-Proto"].StartsWith("https"));
-            }
-        }
+        /// <remarks>
+        /// This can be "http", "https", or the more fun "https, http, https, https" even.
+        /// </remarks>
+        public static bool IsSecureConnection =>
+            Request.IsSecureConnection ||
+            (Request.Headers["X-Forwarded-Proto"]?.StartsWith("https") ?? false);
 
         /// <summary>
         /// Gets the controller for the current request; should be set during init of current request's controller.
@@ -129,40 +121,37 @@ namespace StackExchange.DataExplorer
         }
 
 
-        class ErrorLoggingProfiler : Profiling.Data.IDbProfiler
+        class ErrorLoggingProfiler : IDbProfiler
         {
-            Profiling.Data.IDbProfiler wrapped;
+            private readonly IDbProfiler _wrapped;
 
-            public ErrorLoggingProfiler(Profiling.Data.IDbProfiler wrapped)
+            public ErrorLoggingProfiler(IDbProfiler wrapped)
             {
-                this.wrapped = wrapped;
+                _wrapped = wrapped;
             }
 
-            public void ExecuteFinish(IDbCommand profiledDbCommand, Profiling.Data.SqlExecuteType executeType, DbDataReader reader)
+            public void ExecuteFinish(IDbCommand profiledDbCommand, SqlExecuteType executeType, DbDataReader reader)
             {
-                this.wrapped.ExecuteFinish(profiledDbCommand, executeType, reader);
+                _wrapped.ExecuteFinish(profiledDbCommand, executeType, reader);
             }
 
-            public void ExecuteStart(IDbCommand profiledDbCommand, Profiling.Data.SqlExecuteType executeType)
+            public void ExecuteStart(IDbCommand profiledDbCommand, SqlExecuteType executeType)
             {
-                this.wrapped.ExecuteStart(profiledDbCommand, executeType);
+                _wrapped.ExecuteStart(profiledDbCommand, executeType);
             }
 
-            public bool IsActive
-            {
-                get { return this.wrapped.IsActive; }
-            }
+            public bool IsActive => _wrapped.IsActive;
 
-            public void OnError(IDbCommand profiledDbCommand, Profiling.Data.SqlExecuteType executeType, Exception exception)
+            public void OnError(IDbCommand profiledDbCommand, SqlExecuteType executeType, Exception exception)
             {
-                var formatter = new Profiling.SqlFormatters.SqlServerFormatter();
+                var formatter = new SqlServerFormatter();
                 exception.Data["SQL"] = formatter.FormatSql(profiledDbCommand.CommandText, SqlTiming.GetCommandParameters(profiledDbCommand));
-                this.wrapped.OnError(profiledDbCommand, executeType, exception);
+                _wrapped.OnError(profiledDbCommand, executeType, exception);
             }
 
             public void ReaderFinish(IDataReader reader)
             {
-                this.wrapped.ReaderFinish(reader);
+                _wrapped.ReaderFinish(reader);
             }
         }
 
@@ -173,7 +162,7 @@ namespace StackExchange.DataExplorer
         {
             get
             {
-                DataExplorerDatabase result = null;
+                DataExplorerDatabase result;
                 if (Context != null)
                 {
                     result = Context.Items["DB"] as DataExplorerDatabase;
@@ -186,9 +175,14 @@ namespace StackExchange.DataExplorer
 
                 if (result == null)
                 {
-                    DbConnection cnn = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString);
-                    if (Profiler != null)
-                        cnn = new Profiling.Data.ProfiledDbConnection(cnn, new ErrorLoggingProfiler(Profiler));
+                    DbConnection cnn = new SqlConnection(ConfigurationManager.ConnectionStrings["AppConnection"].ConnectionString);
+
+                    var profiler = MiniProfiler.Current;
+                    if (profiler != null)
+                    {
+                        cnn = new ProfiledDbConnection(cnn, new ErrorLoggingProfiler(profiler));
+                    }
+
                     cnn.Open();
                     result = DataExplorerDatabase.Create(cnn, 30);
                     if (Context != null)
@@ -206,89 +200,29 @@ namespace StackExchange.DataExplorer
         }
 
         /// <summary>
-        /// Gets where this code is running, e.g. Prod, Dev
-        /// </summary>
-        public static DeploymentTier Tier
-        {
-            get
-            {
-                if (!_tier.HasValue)
-                    _tier = DeploymentTier.Local;
-                //_tier = (DeploymentTier) Enum.Parse(typeof(DeploymentTier), Site.Tier, true);
-
-                return _tier.Value;
-            }
-        }
-
-        /// <summary>
         /// Allows end of reqeust code to clean up this request's DB.
         /// </summary>
         public static void DisposeDB()
         {
-            DataExplorerDatabase db = null;
             if (Context != null)
             {
-                db = Context.Items["DB"] as DataExplorerDatabase;
+                var db = Context.Items["DB"] as DataExplorerDatabase;
+                db?.Dispose();
+                Context.Items["DB"] = null;
             }
             else
             {
-                db = CallContext.GetData("DB") as DataExplorerDatabase;
+                var db = CallContext.GetData("DB") as DataExplorerDatabase;
+                db?.Dispose();
+                CallContext.SetData("DB", null);
             }
-            if (db != null)
-            {
-                db.Dispose();
-                if (Context != null)
-                {
-                    Context.Items["DB"] = null;
-                }
-                else
-                {
-                    CallContext.SetData("DB", null);
-                }
-            }
-        }
-
-        /// <summary>
-        /// retrieve an integer from the HttpRuntime.Cache; returns 0 if value does not exist
-        /// </summary>
-        public static int GetCachedInt(string key)
-        {
-            object o = HttpRuntime.Cache[key];
-            if (o == null) return 0;
-            return (int)o;
-        }
-
-        /// <summary>
-        /// remove a cached object from the HttpRuntime.Cache
-        /// </summary>
-        public static void RemoveCachedObject(string key)
-        {
-            HttpRuntime.Cache.Remove(key);
         }
 
         /// <summary>
         /// retrieve an object from the HttpRuntime.Cache
         /// </summary>
-        public static object GetCachedObject(string key)
-        {
-            return HttpRuntime.Cache[key];
-        }
-
-        /// <summary>
-        /// add an object to the HttpRuntime.Cache with an absolute expiration time
-        /// </summary>
-        public static void SetCachedObject(string key, object o, int durationSecs)
-        {
-            HttpRuntime.Cache.Add(
-                key,
-                o,
-                null,
-                DateTime.Now.AddSeconds(durationSecs),
-                Cache.NoSlidingExpiration,
-                CacheItemPriority.High,
-                null);
-        }
-
+        public static object GetCachedObject(string key) => HttpRuntime.Cache[key];
+        
         /// <summary>
         /// add an object to the HttpRuntime.Cache with a sliding expiration time
         /// </summary>
@@ -305,67 +239,23 @@ namespace StackExchange.DataExplorer
         }
 
         /// <summary>
-        /// add a non-removable, non-expiring object to the HttpRuntime.Cache
-        /// </summary>
-        public static void SetCachedObjectPermanent(string key, object o)
-        {
-            HttpRuntime.Cache.Remove(key);
-            HttpRuntime.Cache.Add(
-                key,
-                o,
-                null,
-                Cache.NoAbsoluteExpiration,
-                Cache.NoSlidingExpiration,
-                CacheItemPriority.NotRemovable,
-                null);
-        }
-
-        /// <summary>
-        /// retrieves a string from the HttpContext.Cache, or null if the key doesn't exist
-        /// </summary>
-        public static string GetCachedString(string key)
-        {
-            object o = HttpRuntime.Cache[key];
-            if (o != null) return o.ToString();
-            return null;
-        }
-
-        /// <summary>
-        /// places a string in the HttpContext.Cache
-        /// cached with "sliding expiration", so will only be deleted if NOT accessed for durationSecs
-        /// </summary>
-        public static void SetCachedString(string key, int durationSecs, string s)
-        {
-            HttpRuntime.Cache.Add(
-                key,
-                s,
-                null,
-                DateTime.MaxValue,
-                TimeSpan.FromSeconds(durationSecs),
-                CacheItemPriority.High,
-                null);
-        }
-
-        /// <summary>
         /// manually write a message (wrapped in a simple Exception) to our standard exception log
         /// </summary>
-        public static void LogException(string message, Exception inner = null)
-        {
-            if (inner != null)
-                GlobalApplication.LogException(new Exception(message, inner));
-            else 
-                GlobalApplication.LogException(message);
-        }
+        public static void LogException(string message, Exception inner = null) =>
+            LogException(inner != null ? new Exception(message, inner) : new Exception(message));
 
         /// <summary>
         /// manually write an exception to our standard exception log
         /// </summary>
-        public static void LogException(Exception ex)
+        public static void LogException(Exception ex, bool rollupPerServer = false)
         {
-            GlobalApplication.LogException(ex);
+            try
+            {
+                ErrorStore.LogException(ex, Context, appendFullStackTrace: true, rollupPerServer: rollupPerServer);
+            }
+            catch { /* Do nothing */ }
         }
-
-
+        
         public static string GoogleAnalytics
         {
             get
@@ -373,37 +263,56 @@ namespace StackExchange.DataExplorer
 #if DEBUG
                 return "";
 #else
-   return @"<script type=""text/javascript"">
+   return @"<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-50203-8']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>"; 
-   
+ga('create', 'UA-50203-8', 'auto');
+ga('send', 'pageview');
+</script>";
 #endif
             }
         }
 
-        public static StackExchange.Profiling.MiniProfiler Profiler 
-        { 
-            get 
-            {
-                return StackExchange.Profiling.MiniProfiler.Current;
-            } 
-        }
-    }
+        /// <summary>
+        /// When a client IP can't be determined
+        /// </summary>
+        public const string UnknownIP = "0.0.0.0";
 
-    public enum DeploymentTier
-    {
-        Prod,
-        Dev,
-        Local
+        private static readonly Regex _ipAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$",
+            RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+
+        /// <summary>
+        /// returns true if this is a private network IP  
+        /// http://en.wikipedia.org/wiki/Private_network
+        /// </summary>
+        private static bool IsPrivateIP(string s) => 
+            s.StartsWith("192.168.") || s.StartsWith("10.") || s.StartsWith("127.0.0.");
+
+        /// <summary>
+        /// Answers the current request's user's ip address; checks for any forwarding proxy
+        /// </summary>
+        public static string RemoteIP => GetRemoteIP(Request.ServerVariables);
+
+        /// <summary>
+        /// retrieves the IP address of the current request -- handles proxies and private networks
+        /// </summary>
+        public static string GetRemoteIP(NameValueCollection serverVariables, string unknownIP = UnknownIP)
+        {
+            string ip = serverVariables["REMOTE_ADDR"]; // could be a proxy -- beware
+            string ipForwarded = serverVariables["HTTP_X_FORWARDED_FOR"];
+
+            // check if we were forwarded from a proxy
+            if (ipForwarded.HasValue())
+            {
+                ipForwarded = _ipAddress.Match(ipForwarded).Value;
+                if (ipForwarded.HasValue() && !IsPrivateIP(ipForwarded))
+                    ip = ipForwarded;
+            }
+
+            return ip.HasValue() ? ip : unknownIP;
+        }
     }
 }

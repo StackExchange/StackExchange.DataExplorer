@@ -1,28 +1,25 @@
-﻿using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
 namespace StackExchange.DataExplorer.Helpers
 {
     internal class QueryPlanResult : ActionResult
     {
-        private readonly string plan;
+        private readonly string _plan;
 
         public QueryPlanResult(string plan)
         {
-            this.plan = plan;
+            _plan = plan;
         }
 
         public override void ExecuteResult(ControllerContext context)
         {
-            HttpResponseBase response = context.HttpContext.Response;
-
-            string attachment = "attachment; filename=ExecutionPlan.sqlplan";
-
+            var response = context.HttpContext.Response;
+            
             response.Clear();
             response.ContentType = "text/xml";
-            response.AddHeader("content-disposition", attachment);
+            response.AddHeader("content-disposition", "attachment; filename=ExecutionPlan.sqlplan");
             response.AddHeader("Pragma", "public");
-            response.Write(plan);
+            response.Write(_plan);
             response.Flush();
             response.Close();
         }

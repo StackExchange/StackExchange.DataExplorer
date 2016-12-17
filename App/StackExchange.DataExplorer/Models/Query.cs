@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace StackExchange.DataExplorer.Models
 {
-    public partial class Query
+    public class Query
     {
         private static readonly int TITLE_LENGTH = 60;
 

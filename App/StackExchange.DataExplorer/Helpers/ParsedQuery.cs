@@ -18,36 +18,27 @@ namespace StackExchange.DataExplorer.Helpers
             Multiline = 1 << 3
         }
 
-        private static readonly Regex WhitespaceRegex = new Regex(@"(?<!^)(?<whitespace>[\n ])\1+(?!$)", RegexOptions.Compiled);
-        private static readonly Regex BoundarySpacesRegex = new Regex(@"(?<!\A)^ *| *$(?!\Z)", RegexOptions.Compiled | RegexOptions.Multiline);
+        private static readonly Regex _whitespaceRegex = new Regex(@"(?<!^)(?<whitespace>[\n ])\1+(?!$)", RegexOptions.Compiled);
+        private static readonly Regex _boundarySpacesRegex = new Regex(@"(?<!\A)^ *| *$(?!\Z)", RegexOptions.Compiled | RegexOptions.Multiline);
 
-        private static readonly Regex ParamsRegex = new Regex(
+        private static readonly Regex _paramsRegex = new Regex(
             @"##(?<name>[a-zA-Z][a-zA-Z0-9]*)(?::(?<type>[a-zA-Z]+))?(?:\?(?<default>[^#]+))?##",
             RegexOptions.Compiled
         );
 
-        private static readonly Regex DescriptionRegex = new Regex(
+        private static readonly Regex _descriptionRegex = new Regex(
             @"-- *(?<name>[a-zA-Z][A-Za-z0-9]*) *: *(?<label>[^""]+)(?:""(?<description>[^""]+)"")?",
             RegexOptions.Compiled
         );
 
-        private static readonly Regex QuotesRegex = new Regex(
-            @"'[^']*'",
-            RegexOptions.Compiled
-        );
-
-        private static readonly Regex ValidIntRegex = new Regex(
-            @"\A-?[0-9]+\Z",
-            RegexOptions.Compiled | RegexOptions.Multiline
-        );
+        private static readonly Regex ValidIntRegex = new Regex( @"\A-?[0-9]+\Z", RegexOptions.Compiled | RegexOptions.Multiline);
 
         private static readonly Regex ValidFloatRegex = new Regex(
             @"\A-?[0-9]+(\.[0-9]+)?\Z",
             RegexOptions.Compiled | RegexOptions.Multiline
         );
 
-        private static readonly ParameterType[] ParameterTypes = new[]
-        {
+        private static readonly ParameterType[] ParameterTypes = {
             new ParameterType("", _ => true, _ => _),
             new ParameterType("int", data => ValidIntRegex.IsMatch(data), _ => _),
             new ParameterType("string", _ => true, data => string.Format("'{0}'", data.Replace("'", "''"))),
@@ -64,68 +55,48 @@ namespace StackExchange.DataExplorer.Helpers
             IncludeExecutionPlan = executionPlan;
             TargetSites = targetSites;
             Parameters = new Dictionary<string, QueryParameter>();
-            Errors = new List<String>();
+            Errors = new List<string>();
             Parse(sql, requestParams);
         }
 
-        public List<string> Errors { get; private set; }
-        public string ErrorMessage { 
-            get
-            {
-                return string.Join("\n", Errors);
-            } 
-        }
+        public List<string> Errors { get; }
+        public string ErrorMessage => string.Join("\n", Errors);
 
-        public Dictionary<string, QueryParameter> Parameters { get; private set; }
+        public Dictionary<string, QueryParameter> Parameters { get; }
         public string Name { get; private set; }
         public string Description { get; private set; }
 
         public bool IsExecutionReady { get; private set; }
 
-        private bool includeExecutionPlan = false;
+        private bool _includeExecutionPlan;
 
         /// <summary>
         /// Whether or not running this query should produce an execution plan
         /// </summary>
-        public bool IncludeExecutionPlan {
-            get
-            {
-                return TargetSites == TargetSites.Current && includeExecutionPlan;
-            }
-
-            private set
-            {
-                includeExecutionPlan = value;
-            }
+        public bool IncludeExecutionPlan
+        {
+            get { return TargetSites == TargetSites.Current && _includeExecutionPlan; }
+            private set { _includeExecutionPlan = value; }
         }
 
         /// <summary>
         /// Whether or not this query should be executed across all sites
         /// </summary>
-        public TargetSites TargetSites { get; private set; }
-
-
-        
+        public TargetSites TargetSites { get; }
 
         /// <summary>
         /// Sql with param placeholders, initial comment is stripped, newlines normalized and query is trimmed 
         ///   all final and initial empty lines are removed
         /// </summary>
-        private StringBuilder sql = new StringBuilder();
-        public string Sql {
-            get
-            {
-                return sql.ToString().Trim();
-            }
-        }
+        private readonly StringBuilder _sql = new StringBuilder();
+        public string Sql => _sql.ToString().Trim();
 
         /// <summary>
         /// Sql we are supposed to execute, newlines are normalizes, initial comment is stripped
         ///  all final and initial empty lines are removed
         /// </summary>
         public string ExecutionSql { get; private set; }
-
-
+        
         /// <summary>
         /// Sometimes our execution SQL contains GO in that case this can be split into batches
         ///  so the engine can execute each batch seperately
@@ -174,7 +145,7 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        private StringBuilder PrepareSQL(String raw)
+        private StringBuilder PrepareSQL(string raw)
         {
             var state = StateFlags.Literal;
             var token = new StringBuilder();
@@ -276,7 +247,7 @@ namespace StackExchange.DataExplorer.Helpers
             if (state.HasFlag(StateFlags.Comment)) {
                 if (!state.HasFlag(StateFlags.Multiline))
                 {
-                    var match = DescriptionRegex.Match(token);
+                    var match = _descriptionRegex.Match(token);
 
                     if (match.Success)
                     {
@@ -296,16 +267,16 @@ namespace StackExchange.DataExplorer.Helpers
                     executionSql.Append('\n');
                 }
 
-                sql.Append(token);
+                _sql.Append(token);
             }
             else
             {
-                sql.Append(token);
+                _sql.Append(token);
 
                 if (!state.HasFlag(StateFlags.String))
                 {
-                    token = WhitespaceRegex.Replace(token, "${whitespace}");
-                    token = BoundarySpacesRegex.Replace(token, "");
+                    token = _whitespaceRegex.Replace(token, "${whitespace}");
+                    token = _boundarySpacesRegex.Replace(token, "");
 
                     if (nextState.HasValue && nextState.Value.HasFlag(StateFlags.Comment) && !nextState.Value.HasFlag(StateFlags.Multiline))
                     {
@@ -313,7 +284,7 @@ namespace StackExchange.DataExplorer.Helpers
                     }
                 }
 
-                var matches = ParamsRegex.Matches(token);
+                var matches = _paramsRegex.Matches(token);
 
                 foreach (Match match in matches)
                 {
@@ -330,10 +301,8 @@ namespace StackExchange.DataExplorer.Helpers
                         }
                         else
                         {
-                            Errors.Add(string.Format("{0} has unknown parameter type {1}!", name, type));
+                            Errors.Add($"{name} has unknown parameter type {type}!");
                         }
-
-                        
                     }
 
                     if (match.Groups["default"].Success)
@@ -346,7 +315,7 @@ namespace StackExchange.DataExplorer.Helpers
                         }
                         else
                         {
-                            Errors.Add(string.Format("{0}'s default value of {1} is invalid for the type {2}!", name, value, parameter.Type));
+                            Errors.Add($"{name}'s default value of {value} is invalid for the type {parameter.Type}!");
                         }
                     }
 
@@ -367,14 +336,14 @@ namespace StackExchange.DataExplorer.Helpers
 
         private string SubstituteParameters(StringBuilder sql, NameValueCollection requestParams)
         {
-            foreach (string name in Parameters.Keys)
+            foreach (var name in Parameters.Keys)
             {
                 var parameter = Parameters[name];
                 var value = requestParams != null && requestParams.Contains(name) ? requestParams[name] : parameter.Default;
 
                 if (parameter.Required && !value.HasValue())
                 {
-                    Errors.Add(string.Format("Missing value for {0}!", name));
+                    Errors.Add($"Missing value for {name}!");
 
                     continue;
                 }
@@ -383,7 +352,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     if (!ValidateType(parameter.Type, value))
                     {
-                        Errors.Add(string.Format("Expected value of {0} to be a {1}!", name, parameter.Type));
+                        Errors.Add($"Expected value of {name} to be a {parameter.Type}!");
 
                         continue;
                     }
@@ -397,25 +366,10 @@ namespace StackExchange.DataExplorer.Helpers
             return sql.ToString();
         }
 
-        private static bool CheckIfTypeIsKnown(string type)
-        {
-            return ParameterTypes.Any(p => p.TypeName == type);
-        }
-
-        private static ParameterType GetType(string type)
-        {
-            return ParameterTypes.First(p => p.TypeName == type);
-        }
-
-        private static bool ValidateType(string type, string data)
-        {
-            return GetType(type).Validator(data);
-        }
-
-        private static string EncodeType(string type, string data)
-        {
-            return GetType(type).Encoder(data);
-        }
+        private static bool CheckIfTypeIsKnown(string type) => ParameterTypes.Any(p => p.TypeName == type);
+        private static ParameterType GetType(string type) => ParameterTypes.First(p => p.TypeName == type);
+        private static bool ValidateType(string type, string data) => GetType(type).Validator(data);
+        private static string EncodeType(string type, string data) => GetType(type).Encoder(data);
 
         public struct QueryParameter
         {
@@ -431,16 +385,16 @@ namespace StackExchange.DataExplorer.Helpers
 
         private class ParameterType
         {
+            public Func<string, bool> Validator { get; }
+            public Func<string, string> Encoder { get; }
+            public string TypeName { get; }
+
             public ParameterType(string typeName, Func<string, bool> validator, Func<string, string> encoder)
             {
                 TypeName = typeName;
                 Encoder = encoder;
                 Validator = validator;
             }
-
-            public Func<string, bool> Validator { get; private set; }
-            public Func<string, string> Encoder { get; private set; }
-            public string TypeName { get; private set; }
         }
 
         #endregion

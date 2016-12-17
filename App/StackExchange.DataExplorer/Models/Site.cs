@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data;
 using System.Data.SqlClient;
 using System.Web;
 using StackExchange.DataExplorer.Helpers;
@@ -34,71 +33,48 @@ namespace StackExchange.DataExplorer.Models
         public string BadgeIconUrl { get; set; }
         // above props are columns on dbo.Sites
 
-        private Site relatedSite;
-        private bool checkedRelatedSite = false;
+        private Site _relatedSite;
+        private bool _checkedRelatedSite;
 
         public Site RelatedSite
         {
             get
             {
-                if (!checkedRelatedSite && relatedSite == null)
+                if (!_checkedRelatedSite && _relatedSite == null)
                 {
                     if (ParentId == null)
                     {
-                        relatedSite = Current.DB.Query<Site>("SELECT * FROM Sites WHERE ParentId = @id", new { Id }).FirstOrDefault();
+                        _relatedSite = Current.DB.Query<Site>("SELECT * FROM Sites WHERE ParentId = @id", new { Id }).FirstOrDefault();
                     }
                     else
                     {
-                        relatedSite = Current.DB.Query<Site>("SELECT * FROM Sites WHERE Id = @parentId", new { parentId = ParentId.Value }).FirstOrDefault();
+                        _relatedSite = Current.DB.Query<Site>("SELECT * FROM Sites WHERE Id = @parentId", new { parentId = ParentId.Value }).FirstOrDefault();
                     }
 
                     // We could just query for the related site when getting this site and avoid the need
                     // for this variable, but we don't always need related site...so I'm not sure what's
                     // "less silly"...
-                    checkedRelatedSite = true;
+                    _checkedRelatedSite = true;
                 }
 
-                return relatedSite;
+                return _relatedSite;
             }
             private set {}
         }
 
-        public string ConnectionString
-        {
-            get { return UseConnectionStringOverride ? ConnectionStringOverride : ConnectionStringWebConfig; }
-        }
+        public string ConnectionString => 
+            UseConnectionStringOverride ? ConnectionStringOverride : ConnectionStringWebConfig;
 
-        private string ConnectionStringWebConfig
-        {
-            get
-            {
-                return ConfigurationManager.ConnectionStrings["ReaderConnection"]
-                    .ConnectionString
-                    .Replace("!!DB!!", DatabaseName);
-            }
-        }
+        private string ConnectionStringWebConfig =>
+            ConfigurationManager.ConnectionStrings["ReaderConnection"]
+                .ConnectionString
+                .Replace("!!DB!!", DatabaseName);
 
-        private bool UseConnectionStringOverride
-        {
-            get { return ConnectionStringOverride.HasValue(); }
-        }
+        private bool UseConnectionStringOverride => ConnectionStringOverride.HasValue();
 
-        public string ImageCss
-        {
-            get
-            {
-                if (ImageBackgroundColor != null)
-                {
-                    return "background-color: #" + ImageBackgroundColor; 
-                }
-                return "";
-            }
-        }
+        public string ImageCss => ImageBackgroundColor != null ? "background-color: #" + ImageBackgroundColor : "";
 
-        public string ODataEndpoint
-        {
-            get { return "/" + TinyName.ToLower() + "/atom"; }
-        }
+        public string ODataEndpoint => "/" + TinyName.ToLower() + "/atom";
 
         public SqlConnection GetConnection(int maxPoolSize)
         {
@@ -119,40 +95,23 @@ namespace StackExchange.DataExplorer.Models
         {
             var shares = false;
 
-            if (this.Url.StartsWith("http://meta.") && this.Url != "http://meta.stackexchange.com")
+            if (Url.StartsWith("http://meta.") && Url != "http://meta.stackexchange.com")
             {
-                shares = this.Url.Substring("http://meta.".Length) == site.Url.Substring("http://".Length);
+                shares = Url.Substring("http://meta.".Length) == site.Url.Substring("http://".Length);
             }
             else if (site.Url.StartsWith("http://meta.") && site.Url != "http://meta.stackexchange.com")
             {
-                shares = site.Url.Substring("http://meta.".Length) == this.Url.Substring("http://".Length);
+                shares = site.Url.Substring("http://meta.".Length) == Url.Substring("http://".Length);
             }
 
             return shares;
         }
 
-        public static IEnumerable<Site> GetSites()
-        {
-            // Could/should probably just cache this somewhere
-            return Current.DB.Query<Site>(@"SELECT s.*
-FROM
-    Sites s
-LEFT JOIN
-    Sites m
-ON
-    REPLACE(s.Url, 'http://meta.', 'http://') = m.Url
-ORDER BY
-    isnull(m.Name,s.Name) asc,
-    CHARINDEX('http://meta.', s.Url)"
-            );
-        }
-
         public void UpdateStats()
         {
-            using (SqlConnection cnn = GetOpenConnection())
-            using( var cmd = new SqlCommand())
+            using (var cnn = GetOpenConnection())
+            using (var cmd = new SqlCommand())
             {
-               
                 cmd.Connection = cnn;
                 cmd.CommandTimeout = 300;
 
@@ -207,8 +166,7 @@ ORDER BY
         {
             if (!user.IsAnonymous && user.Email != null)
             {
-
-                using (SqlConnection cnn = GetOpenConnection())
+                using (var cnn = GetOpenConnection())
                 {
                     string hash = Util.GravatarHash(user.Email);
                     try
@@ -233,26 +191,25 @@ ORDER BY
         {
             List<ColumnInfo> columns;
             var tables = new List<TableInfo>();
-
-
-            using (SqlConnection cnn = GetOpenConnection())
+            using (var cnn = GetOpenConnection())
             {
-                string sql =
-                    @"
+                const string sql = @"
 select TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
 order by TABLE_NAME, ORDINAL_POSITION
 ";
                 using (var cmd = new SqlCommand(sql))
                 {
                     cmd.Connection = cnn;
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (var reader = cmd.ExecuteReader())
                     {
                         columns = new List<ColumnInfo>();
                         while (reader.Read())
                         {
-                            var info = new ColumnInfo();
-                            info.TableName = reader.GetString(0);
-                            info.ColumnName = reader.GetString(1);
+                            var info = new ColumnInfo
+                            {
+                                TableName = reader.GetString(0),
+                                ColumnName = reader.GetString(1)
+                            };
                             info.SetDataType(reader.GetString(2), reader.IsDBNull(3) ? null : (int?) reader.GetInt32(3));
                             columns.Add(info);
                         }
@@ -262,12 +219,11 @@ order by TABLE_NAME, ORDINAL_POSITION
 
             TableInfo tableInfo = null;
 
-            foreach (ColumnInfo column in columns)
+            foreach (var column in columns)
             {
                 if (tableInfo == null || tableInfo.Name != column.TableName)
                 {
-                    tableInfo = new TableInfo();
-                    tableInfo.Name = column.TableName;
+                    tableInfo = new TableInfo {Name = column.TableName};
                     tables.Add(tableInfo);
                 }
 
@@ -318,6 +274,6 @@ order by TABLE_NAME, ORDINAL_POSITION
 
         #endregion
 
-        public SiteInfo SiteInfo { get { return new SiteInfo { Id = Id, Name = LongName, Url = Url }; } }
+        public SiteInfo SiteInfo => new SiteInfo { Id = Id, Name = LongName, Url = Url };
     }
 }

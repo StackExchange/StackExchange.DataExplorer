@@ -11,7 +11,7 @@ namespace StackExchange.DataExplorer.Controllers
 {
     public class UserController : StackOverflowController
     {
-        private static readonly HashSet<string> AllowedPreferences = new HashSet<string>
+        private static readonly HashSet<string> _allowedPreferences = new HashSet<string>
         {
             "HideSchema",
             "OrderBy"
@@ -57,18 +57,16 @@ namespace StackExchange.DataExplorer.Controllers
             int currentPage = Math.Max(page ?? 1, 1);
             var builder = new SqlBuilder();
             var pager = builder.AddTemplate(@"
-                SELECT
-                    *,
+                SELECT *,
                     (SELECT COUNT(*) FROM QuerySets WHERE OwnerId = Y.Id) SavedQueriesCount,
                     (SELECT COUNT(*) FROM RevisionExecutions WHERE UserId = Y.Id) QueryExecutionsCount
                 FROM
                 (
                     SELECT * FROM
                     (
-                        SELECT
-                            ROW_NUMBER() OVER (/**orderby**/) AS Row, Users.Id, Users.Login, Users.Email,
-                            Users.IPAddress, Users.IsAdmin, Users.CreationDate /**select**/
-                        FROM Users /**join**/ /**where**/
+                        SELECT ROW_NUMBER() OVER (/**orderby**/) AS Row, Users.Id, Users.Login, Users.Email,
+                               Users.IPAddress, Users.IsAdmin, Users.CreationDate /**select**/
+                          FROM Users /**join**/ /**where**/
                     ) AS X
                     WHERE Row > @start AND Row <= @finish
                 ) AS Y
@@ -165,17 +163,15 @@ namespace StackExchange.DataExplorer.Controllers
                     return Edit(user.Id);
                 }
             }
-            else
-            {
-                return Redirect("/");
-            }
+
+            return Redirect("/");
         }
 
         [HttpGet]
         [StackRoute(@"users/edit/{id:\d+}", RoutePriority.High)]
         public ActionResult Edit(int id)
         {
-            User user = Current.DB.Users.Get(id);
+            var user = Current.DB.Users.Get(id);
             if (user == null)
             {
                 return PageNotFound();
@@ -188,22 +184,19 @@ namespace StackExchange.DataExplorer.Controllers
 
                 return View(user);
             }
-            else
-            {
-                return Redirect("/");
-            }
+
+            return Redirect("/");
         }
 
         [HttpPost]
         [StackRoute(@"users/save-preference/{id:\d+}/{preference}")]
         public ActionResult SavePreference(int id, string preference, string value)
         {
-            if (!AllowedPreferences.Contains(preference)) {
+            if (!_allowedPreferences.Contains(preference)) {
                 return ContentError("Invalid preference");
             }
 
-            User user = Current.DB.Users.Get(id);
-
+            var user = Current.DB.Users.Get(id);
             if (user == null || (user.Id != CurrentUser.Id && !CurrentUser.IsAdmin))
             {
                 return ContentError("Invalid action");
@@ -220,7 +213,7 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute(@"users/{id:INT}/{name?}")]
         public ActionResult Show(int id, string name, string order_by, int? page)
         {
-            User user = !Current.User.IsAnonymous && Current.User.Id == id ? Current.User : Current.DB.Users.Get(id);
+            var user = !Current.User.IsAnonymous && Current.User.Id == id ? Current.User : Current.DB.Users.Get(id);
 
             if (user == null)
             {
@@ -230,10 +223,8 @@ namespace StackExchange.DataExplorer.Controllers
             // if this user has a display name, and the title is missing or does not match, permanently redirect to it
             if (user.UrlTitle.HasValue() && (string.IsNullOrEmpty(name) || name != user.UrlTitle))
             {
-                return PageMovedPermanentlyTo(string.Format("/users/{0}{1}", user.ProfilePath, Request.Url.Query));
+                return PageMovedPermanentlyTo($"/users/{user.ProfilePath}{Request.Url.Query}");
             }
-
-            DataExplorerDatabase db = Current.DB;
 
             SetHeader(user.Login);
             SelectMenuItem("Users");
@@ -274,23 +265,16 @@ namespace StackExchange.DataExplorer.Controllers
             string message;
             var builder = new SqlBuilder();
             var pager = builder.AddTemplate(@"
-                SELECT
-                    *
-                FROM
-                    (
-                        SELECT
-                            /**select**/, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
-                        FROM
-                            Queries q
-                            /**join**/
-                            /**leftjoin**/
-                            /**where**/
+                SELECT *
+                FROM (SELECT /**select**/, ROW_NUMBER() OVER(/**orderby**/) AS RowNumber
+                        FROM Queries q
+                             /**join**/
+                             /**leftjoin**/
+                             /**where**/
                     ) AS results
-                WHERE
-                    RowNumber BETWEEN @start AND @finish
-                ORDER BY
-                    RowNumber",
-                new { start = start, finish = finish }
+                WHERE RowNumber BETWEEN @start AND @finish
+             ORDER BY RowNumber",
+                new {start, finish}
             );
             var counter = builder.AddTemplate("SELECT COUNT(*) FROM Queries q /**join**/ /**leftjoin**/ /**where**/");
 
@@ -351,17 +335,16 @@ namespace StackExchange.DataExplorer.Controllers
             var queries = Current.DB.Query<QueryExecutionViewData>(
                 pager.RawSql,
                 pager.Parameters
-            ).Select<QueryExecutionViewData, QueryExecutionViewData>(
-                (view) =>
+            ).Select(
+                view =>
                 {
                     view.SiteName = (view.SiteName ?? Site.TinyName).ToLower();
-
                     return view;
                 }
             );
             int total = Current.DB.Query<int>(counter.RawSql, counter.Parameters).First();
 
-            ViewData["Href"] = string.Format("/users/{0}{1}", user.ProfilePath, "?order_by=" + profileTabs.Selected);
+            ViewData["Href"] = $"/users/{user.ProfilePath}?order_by={profileTabs.Selected}";
             ViewData["Queries"] = new PagedList<QueryExecutionViewData>(queries, page.Value, pagesize.Value, false, total);
 
             if (!queries.Any())

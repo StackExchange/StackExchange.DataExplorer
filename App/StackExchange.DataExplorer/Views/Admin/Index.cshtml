@@ -33,7 +33,7 @@
     else
     {
         hasTables = true;
-        @: Caching the following <strong>@cachedTables.Count</strong> distinct @("table".Pluralize(@cachedTables.Count)) on a @(HelperTableCache.Preferences.PerSite ? "per-site" : "global") basis
+        @: Caching the following <strong>@cachedTables.Count</strong> distinct @("table".Pluralize(cachedTables.Count)) on a @(HelperTableCache.Preferences.PerSite ? "per-site" : "global") basis
     }
     (<a class="post-action" data-reload="true" href="/admin/clear-table-cache">refresh cache</a>)
     @if (hasTables)
@@ -68,7 +68,7 @@
     </li>
 </ul>
 @Html.AntiForgeryToken()
-<script type="text/javascript">
+<script>
 (function () {
     $('a.post-action').each(function () {
         $(this).on('click', function () {

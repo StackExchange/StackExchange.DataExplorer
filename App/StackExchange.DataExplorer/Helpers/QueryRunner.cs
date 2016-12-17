@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Web;
 using StackExchange.DataExplorer.Models;
 using Dapper;
 
@@ -13,21 +11,11 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class QueryRunner
     {
-        private static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> magic_columns
+        private static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>> _magicColumns
             = GetMagicColumns();
 
-        public static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>.KeyCollection MagicColumnNames = magic_columns.Keys;
-
-        static void AddBody(StringBuilder buffer, QueryResults results, Site site)
-        {
-            buffer.AppendLine(site.LongName);
-            buffer.AppendLine("-------------------------------------------------");
-            buffer.AppendLine(results.Messages);
-            buffer.AppendLine();
-            buffer.AppendLine();
-            buffer.AppendLine();
-        }
-
+        public static readonly Dictionary<string, Func<SqlConnection, IEnumerable<object>, List<object>>>.KeyCollection MagicColumnNames = _magicColumns.Keys;
+        
         public static void MergePivot(Site site, QueryResults current, QueryResults newResults)
         {
             int pivotIndex = -1;
@@ -115,9 +103,9 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             var firstSite = sites.First();
-            var results = QueryRunner.GetSingleSiteResults(parsedQuery, firstSite, currentUser, result);
+            var results = GetSingleSiteResults(parsedQuery, firstSite, currentUser, result);
 
-            if (results.ResultSets.First().Columns.Where(c => c.Name == "Pivot").Any())
+            if (results.ResultSets.First().Columns.Any(c => c.Name == "Pivot"))
             {
                 foreach (var info in results.ResultSets.First().Columns)
                 {
@@ -132,7 +120,7 @@ namespace StackExchange.DataExplorer.Helpers
                 {
                     try
                     {
-                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser);
+                        var tmp = GetSingleSiteResults(parsedQuery, s, currentUser);
                         results.ExecutionTime += tmp.ExecutionTime;
                         MergePivot(s, results, tmp);
                     }
@@ -160,7 +148,7 @@ namespace StackExchange.DataExplorer.Helpers
 
                     try
                     {
-                        var tmp = QueryRunner.GetSingleSiteResults(parsedQuery, s, currentUser, result);
+                        var tmp = GetSingleSiteResults(parsedQuery, s, currentUser, result);
 
                         foreach (var row in tmp.ResultSets[0].Rows)
                         {
@@ -188,13 +176,12 @@ namespace StackExchange.DataExplorer.Helpers
         {
 
             int updated = Current.DB.Query<int>(@"
-                UPDATE RevisionExecutions SET
-                    ExecutionCount = ExecutionCount + 1,
-                    LastRun = @last
-                WHERE
-                    RevisionId = @revision AND
-                    SiteId = @site AND
-                    UserId " + (user.IsAnonymous ? "IS NULL" : "= @user") + @"
+                UPDATE RevisionExecutions 
+                   SET ExecutionCount = ExecutionCount + 1,
+                       LastRun = @last
+                 WHERE RevisionId = @revision
+                   AND SiteId = @site
+                   AND UserId " + (user.IsAnonymous ? "IS NULL" : "= @user") + @"
 
                 SELECT @@ROWCOUNT",
                 new
@@ -221,7 +208,7 @@ namespace StackExchange.DataExplorer.Helpers
                         last = DateTime.UtcNow,
                         revision = revisionId,
                         site = siteId,
-                        user = (user.IsAnonymous ? (int?)null : user.Id)
+                        user = user.IsAnonymous ? (int?)null : user.Id
                     }
                 );
             }
@@ -287,7 +274,7 @@ namespace StackExchange.DataExplorer.Helpers
 
                     var plan = new QueryPlan();
 
-                    foreach (string batch in query.ExecutionSqlBatches)
+                    foreach (var batch in query.ExecutionSqlBatches)
                     {
                         using (var command = new SqlCommand(batch, cnn))
                         {
@@ -352,8 +339,8 @@ namespace StackExchange.DataExplorer.Helpers
         /// in the results sets; otherwise, false.</param>
         private static void PopulateResults(QueryResults results, SqlCommand command, AsyncQueryRunner.AsyncResult result, StringBuilder messages, bool IncludeExecutionPlan)
         {
-            QueryPlan plan = new QueryPlan();
-            using (SqlDataReader reader = command.ExecuteReader())
+            var plan = new QueryPlan();
+            using (var reader = command.ExecuteReader())
             {
                 if (result != null && reader.HasRows)
                 {
@@ -372,14 +359,12 @@ namespace StackExchange.DataExplorer.Helpers
                     }
                     else if (reader.FieldCount != 0)
                     {
-                        var resultSet = new ResultSet();
-                        resultSet.MessagePosition = messages.Length;
+                        var resultSet = new ResultSet {MessagePosition = messages.Length};
                         results.ResultSets.Add(resultSet);
 
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            var columnInfo = new ResultColumnInfo();
-                            columnInfo.Name = reader.GetName(i);
+                            var columnInfo = new ResultColumnInfo {Name = reader.GetName(i)};
                             ResultColumnType colType;
                             if (ResultColumnInfo.ColumnTypeMap.TryGetValue(reader.GetFieldType(i), out colType))
                             {
@@ -448,14 +433,9 @@ namespace StackExchange.DataExplorer.Helpers
 
         public static QueryResults GetResults(ParsedQuery query, Site site, User user, AsyncQueryRunner.AsyncResult result = null)
         {
-            if (query.TargetSites != TargetSites.Current)
-            {
-                return GetMultiSiteResults(query, user, result);
-            }
-            else
-            {
-                return GetSingleSiteResults(query, site, user, result);
-            }
+            return query.TargetSites != TargetSites.Current
+                ? GetMultiSiteResults(query, user, result)
+                : GetSingleSiteResults(query, site, user, result);
         }
 
         private static QueryResults GetSingleSiteResults(ParsedQuery query, Site site, User user, AsyncQueryRunner.AsyncResult result = null)
@@ -552,12 +532,9 @@ namespace StackExchange.DataExplorer.Helpers
                 // Should we just update everything in this case? Presumably the only
                 // thing that changed was the addition of the execution plan, but...
                 Current.DB.Execute(@"
-                    UPDATE
-                        CachedResults
-                    SET
-                        ExecutionPlan = @plan
-                    WHERE
-                        QueryHash = @hash",
+                    UPDATE CachedResults
+                       SET ExecutionPlan = @plan
+                     WHERE QueryHash = @hash",
                     new
                     {
                         plan = results.ExecutionPlan,
@@ -569,13 +546,12 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static void ProcessMagicColumns(QueryResults results, SqlConnection cnn)
         {
-            foreach (ResultSet resultSet in results.ResultSets)
+            foreach (var resultSet in results.ResultSets)
             {
                 int index = 0;
-
-                foreach (ResultColumnInfo column in resultSet.Columns)
+                foreach (var column in resultSet.Columns)
                 {
-                    if (magic_columns.ContainsKey(column.Name))
+                    if (_magicColumns.ContainsKey(column.Name))
                     {
                         DecorateColumn(column);
 
@@ -611,8 +587,8 @@ namespace StackExchange.DataExplorer.Helpers
 
         private static void ProcessColumn(SqlConnection cnn, int index, List<List<object>> rows, ResultColumnInfo column)
         {
-            IEnumerable<object> values = rows.Select(row => row[index]);
-            List<object> processedValues = magic_columns[column.Name](cnn, values);
+            var values = rows.Select(row => row[index]);
+            var processedValues = _magicColumns[column.Name](cnn, values);
             int rowNumber = 0;
             foreach (var row in rows)
             {
@@ -693,17 +669,17 @@ namespace StackExchange.DataExplorer.Helpers
                 return items.ToList();
             }
 
-            StringBuilder query = new StringBuilder()
+            var query = new StringBuilder()
                 .Append(lookupSql)
                 .Append("( ")
                 .Append(list)
                 .Append(" ) ");
 
             var linkMap = new Dictionary<long, object>();
-            using (SqlCommand cmd = cnn.CreateCommand())
+            using (var cmd = cnn.CreateCommand())
             {
                 cmd.CommandText = query.ToString();
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -721,7 +697,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             foreach (object item in items)
             {
-                if (item == null || !(item is int))
+                if (!(item is int))
                 {
                     rval.Add(item);
                 }

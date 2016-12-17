@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Text;
 using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.ViewModel
 {
     public class QueryExecutionViewData
     {
-        private string name;
-        private QuerySetVoting voting;
+        private string _name;
+        private QuerySetVoting _voting;
 
         public QuerySetVoting QueryVoting
         {
             get
             {
-                return voting ?? new QuerySetVoting
+                return _voting ?? new QuerySetVoting
                 {
                     HasVoted = false,
                     TotalVotes = FavoriteCount,
@@ -21,35 +20,25 @@ namespace StackExchange.DataExplorer.ViewModel
                 };
             }
 
-            set { voting = value; }
+            set { _voting = value; }
         }
 
         public string Name
         {
-            get
-            {
-                return name ?? Query.SqlAsTitle(SQL);
-            }
-            set
-            {
-                name = value.IsNullOrEmpty() ? null : value;
-            }
+            get { return _name ?? Query.SqlAsTitle(SQL); }
+            set { _name = value.IsNullOrEmpty() ? null : value; }
         }
 
         public string Url
         {
             get
             {
-                var slug = name == null ? "" : "/" + name.URLFriendly();
-
+                var slug = _name == null ? "" : "/" + _name.URLFriendly();
                 if (RevisionId == null)
                 {
-                    return string.Format("/{0}/query/{1}{2}", SiteName, QuerySetId, slug);
+                    return $"/{SiteName}/query/{QuerySetId}{slug}";
                 }
-                else
-                {
-                    return string.Format("/{0}/revision/{1}/{2}{3}", SiteName, QuerySetId, RevisionId, slug);
-                }
+                return $"/{SiteName}/revision/{QuerySetId}/{RevisionId}{slug}";
             }
         }
 

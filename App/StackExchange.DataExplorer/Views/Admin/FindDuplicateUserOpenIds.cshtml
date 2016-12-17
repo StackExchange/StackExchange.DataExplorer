@@ -9,8 +9,10 @@
 <br/><br/>
 <table>
     <thead>
-        <th>OpenId</th>
-        <th></th>
+        <tr>
+            <th>OpenId</th>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var group in Model)
@@ -21,14 +23,14 @@
         {
             <tr>
                 <td>@dupe.OpenIdClaim</td>
-                <td><a class="remove" href="/admin/useropenid/remove/@(dupe.Id)" class="remove">remove</a></td>
+                <td><a class="remove" href="/admin/useropenid/remove/@(dupe.Id)">remove</a></td>
             </tr>
         }
     }
     </tbody>
 </table>
 @Html.AntiForgeryToken()
-<script type="text/javascript">
+<script>
     (function () {
         $("a.remove").click(function () {
             var href = $(this);

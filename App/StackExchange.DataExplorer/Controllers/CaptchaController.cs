@@ -13,14 +13,14 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute("captcha", HttpVerbs.Post)]
         public ActionResult Captcha(FormCollection form)
         {
-            var challenge = form.Get<string>("recaptcha_challenge_field", "");
+            var challenge = form.Get("recaptcha_challenge_field", "");
 
             var validator = new Recaptcha.RecaptchaValidator
             {
                 PrivateKey = AppSettings.RecaptchaPrivateKey,
-                RemoteIP = GetRemoteIP(),
+                RemoteIP = Current.RemoteIP,
                 Challenge = challenge,
-                Response = form.Get<string>("recaptcha_response_field", "")
+                Response = form.Get("recaptcha_response_field", "")
             };
 
             Recaptcha.RecaptchaResponse response;
@@ -37,18 +37,14 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (response == Recaptcha.RecaptchaResponse.Valid)
             {
-                Current.SetCachedObjectSliding(CaptchaKey(GetRemoteIP()), true, 60 * 15);
+                Current.SetCachedObjectSliding(CaptchaKey(Current.RemoteIP), true, 60 * 15);
                 return Json(new { success = true });
             }
        
             return  Json(new { success = false });;
         }
 
-        private static string CaptchaKey(string ipAddress)
-        {
-            return "captcha-" + ipAddress;
-        }
-
+        private static string CaptchaKey(string ipAddress) => "captcha-" + ipAddress;
 
         public static bool CaptchaPassed(string ipAddress)
         {

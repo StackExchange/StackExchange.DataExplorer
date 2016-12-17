@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
 using Dapper;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using StackExchange.DataExplorer.ViewModel;
-
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -17,8 +15,7 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute(@"{sitename}/s/{queryId:\d+}/{slug?}")]
         public ActionResult MapQuery(string sitename, int queryId, string slug)
         {
-            Revision revision = QueryUtil.GetMigratedRevision(queryId, MigrationType.Saved);
-
+            var revision = QueryUtil.GetMigratedRevision(queryId, MigrationType.Saved);
             if (revision == null)
             {
                 return PageNotFound();
@@ -39,9 +36,8 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!TryGetSite(sitename, out site))
             {
-                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/query/{1}{2}{3}",
-                    site.TinyName.ToLower(), querySetId, slug.HasValue() ? "/" + slug : "", Request.Url.Query
-                ));
+                return site == null ? (ActionResult)PageNotFound() : 
+                    RedirectPermanent($"/{site.TinyName.ToLower()}/query/{querySetId}{(slug.HasValue() ? "/" + slug : "")}{Request.Url.Query}");
             }
 
             Site = site;
@@ -61,24 +57,21 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult Show(string sitename, int querySetId, int revisionId, string slug)
         {
             Site site;
-
             if (!TryGetSite(sitename, out site))
             {
-                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/revision/{1}/{2}{3}{4}",
-                    site.TinyName.ToLower(), querySetId, revisionId, slug.HasValue() ? "/" + slug : "", Request.Url.Query
-                ));
+                return site == null
+                    ? (ActionResult) PageNotFound()
+                    : RedirectPermanent($"/{site.TinyName.ToLower()}/revision/{querySetId}/{revisionId}{(slug.HasValue() ? "/" + slug : "")}{Request.Url.Query}");
             }
 
             Site = site;
             var querySet = QueryUtil.GetFullQuerySet(querySetId);
-
             if (querySet == null)
             {
                 return PageNotFound();
             }
 
             var revision = querySet.Revisions.FirstOrDefault(r => r.Id == revisionId);
-
             if (revision == null)
             {
                 return PageNotFound();
@@ -95,7 +88,6 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             var title = revision.QuerySet.Title;
-            int ownerId = revision.OwnerId ?? 0;
 
             title = title.URLFriendly();
 
@@ -193,10 +185,8 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!IsSearchEngine())
             {
-                QueryViewTracker.TrackQueryView(GetRemoteIP(), revision.QuerySet.Id);
+                QueryViewTracker.TrackQueryView(Current.RemoteIP, revision.QuerySet.Id);
             }
-
-            var initialRevision = revision.QuerySet.InitialRevision; 
 
             var viewmodel = new QueryViewerData
             {
@@ -214,7 +204,6 @@ namespace StackExchange.DataExplorer.Controllers
             if (Current.User.IsAdmin)
             {
                 var querySet = Current.DB.QuerySets.Get(querySetId);
-
                 if (querySet != null)
                 {
                     Current.DB.QuerySets.Update(querySetId, new { Featured = true });
@@ -243,9 +232,9 @@ namespace StackExchange.DataExplorer.Controllers
             Site site;
             TryGetSite(sitename, out site);
 
-            return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/queries",
-                site.TinyName.ToLower()
-            ));
+            return site == null
+                ? (ActionResult) PageNotFound()
+                : RedirectPermanent($"/{site.TinyName.ToLower()}/queries");
         }
 
         [StackRoute("{sitename}/queries")]
@@ -255,14 +244,13 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (!TryGetSite(sitename, out site))
             {
-                return site == null ? (ActionResult)PageNotFound() : RedirectPermanent(string.Format("/{0}/queries",
-                    site.TinyName.ToLower()
-                ));
+                return site == null
+                    ? (ActionResult) PageNotFound()
+                    : RedirectPermanent($"/{site.TinyName.ToLower()}/queries");
             }
 
             Site = site;
-            QuerySearchCriteria searchCriteria = new QuerySearchCriteria(q);
-
+            var searchCriteria = new QuerySearchCriteria(q);
             if (string.IsNullOrEmpty(order_by))
             {
                 if (searchCriteria.IsValid)
@@ -351,14 +339,14 @@ namespace StackExchange.DataExplorer.Controllers
 
                     if (order_by == "popular")
                     {
-                        builder.Where("qs.Views > @threshold", new { threshold = threshold });
+                        builder.Where("qs.Views > @threshold", new {threshold});
                         builder.OrderBy("qs.Views DESC");
                         builder.OrderBy("qs.Votes DESC");
                     }
                     else
                     {
                         order_by = "favorite";
-                        builder.Where("qs.Votes > @threshold", new { threshold = threshold });
+                        builder.Where("qs.Votes > @threshold", new {threshold});
                         builder.OrderBy("qs.Votes DESC");
                         builder.OrderBy("qs.Views DESC");
                     }

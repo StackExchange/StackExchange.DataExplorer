@@ -5,9 +5,11 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class RedirectPermanentResult : ActionResult
     {
+        public string Url { get; }
+
         public RedirectPermanentResult(string url)
         {
-            if (String.IsNullOrEmpty(url))
+            if (url.IsNullOrEmpty())
             {
                 throw new ArgumentException("url should not be empty");
             }
@@ -15,14 +17,11 @@ namespace StackExchange.DataExplorer.Helpers
             Url = url;
         }
 
-
-        public string Url { get; private set; }
-
         public override void ExecuteResult(ControllerContext context)
         {
             if (context == null)
             {
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             }
             if (context.IsChildAction)
             {

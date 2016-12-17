@@ -4,7 +4,7 @@ namespace StackExchange.DataExplorer.ViewModel
 {
     public class SubHeader
     {
-        private IEnumerable<SubHeaderViewData> items = null;
+        private IEnumerable<SubHeaderViewData> _items;
 
         public SubHeader()
         {
@@ -18,19 +18,20 @@ namespace StackExchange.DataExplorer.ViewModel
 
         public string Title { get; set; }
         public string Selected { get; set; }
-        public IEnumerable<SubHeaderViewData> Items {
-            get {
-                return items;
-            }
-            set {
-                items = value;
+
+        public IEnumerable<SubHeaderViewData> Items
+        {
+            get { return _items; }
+            set
+            {
+                _items = value;
                 DetermineSelected();
             }
         }
 
         private void DetermineSelected()
         {
-            if (items == null)
+            if (_items == null)
             {
                 return;
             }
@@ -38,7 +39,7 @@ namespace StackExchange.DataExplorer.ViewModel
             var found = false;
             SubHeaderViewData defaultTab = null;
 
-            foreach (SubHeaderViewData tab in items)
+            foreach (SubHeaderViewData tab in _items)
             {
                 // In case the tab is explicitly selected
                 if (tab.Name == Selected || tab.Selected)

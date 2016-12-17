@@ -2,7 +2,7 @@
 {
     public class SubHeaderViewData
     {
-        private string name;
+        private string _name;
 
         public string Id { get; set; }
         public string Title { get; set; }
@@ -14,14 +14,8 @@
 
         public string Name
         {
-            get
-            {
-                return name ?? Description;
-            }
-            set
-            {
-                name = value;
-            }
+            get { return _name ?? Description; }
+            set { _name = value; }
         }
     }
 }

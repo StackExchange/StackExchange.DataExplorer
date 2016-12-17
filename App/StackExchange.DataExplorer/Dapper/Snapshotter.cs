@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -9,22 +8,19 @@ namespace Dapper
 {
     public static class Snapshotter
     {
-        public static Snapshot<T> Start<T>(T obj)
-        {
-            return new Snapshot<T>(obj);
-        }
+        public static Snapshot<T> Start<T>(T obj) => new Snapshot<T>(obj);
 
         public class Snapshot<T>
         {
-            static Func<T, T> cloner;
-            static Func<T, T, List<Change>> differ;
-            T memberWiseClone;
-            T trackedObject;
+            private static Func<T, T> _cloner;
+            private static Func<T, T, List<Change>> _differ;
+            private readonly T _memberWiseClone;
+            private readonly T _trackedObject;
 
             public Snapshot(T original)
             {
-                memberWiseClone = Clone(original);
-                trackedObject = original;
+                _memberWiseClone = Clone(original);
+                _trackedObject = original;
             }
 
             public class Change
@@ -33,31 +29,26 @@ namespace Dapper
                 public object NewValue { get; set; }
             }
 
-            public DynamicParameters Diff()
-            {
-                return Diff(memberWiseClone, trackedObject);
-            }
-
-
+            public DynamicParameters Diff() => Diff(_memberWiseClone, _trackedObject);
+            
             private static T Clone(T myObject)
             {
-                cloner = cloner ?? GenerateCloner();
-                return cloner(myObject);
+                _cloner = _cloner ?? GenerateCloner();
+                return _cloner(myObject);
             }
 
             private static DynamicParameters Diff(T original, T current)
             {
                 var dm = new DynamicParameters();
-                differ = differ ?? GenerateDiffer();
-                foreach (var pair in differ(original, current))
+                _differ = _differ ?? GenerateDiffer();
+                foreach (var pair in _differ(original, current))
                 {
                     dm.Add(pair.Name, pair.NewValue);
                 }
                 return dm;
             }
-
-
-            static List<PropertyInfo> RelevantProperties()
+            
+            private static List<PropertyInfo> RelevantProperties()
             {
                 return typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public)
                     .Where(p =>
@@ -79,8 +70,7 @@ namespace Dapper
 
             private static Func<T, T, List<Change>> GenerateDiffer()
             {
-
-                var dm = new DynamicMethod("DoDiff", typeof(List<Change>), new Type[] { typeof(T), typeof(T) }, true);
+                var dm = new DynamicMethod("DoDiff", typeof(List<Change>), new[] { typeof(T), typeof(T) }, true);
 
                 var il = dm.GetILGenerator();
                 // change list
@@ -116,7 +106,7 @@ namespace Dapper
                     il.Emit(OpCodes.Stloc_2);
                     // [original prop val, current prop val]
 
-                    il.EmitCall(OpCodes.Call, typeof(Snapshot<T>).GetMethod("AreEqual", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(new Type[] { prop.PropertyType }), null);
+                    il.EmitCall(OpCodes.Call, typeof(Snapshot<T>).GetMethod(nameof(AreEqual), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(new Type[] { prop.PropertyType }), null);
                     // [result] 
 
                     Label skip = il.DefineLabel();
@@ -149,7 +139,7 @@ namespace Dapper
                     // [change list]
                     il.Emit(OpCodes.Ldloc_1);
                     // [change list, change]
-                    il.Emit(OpCodes.Callvirt, typeof(List<Change>).GetMethod("Add"));
+                    il.Emit(OpCodes.Callvirt, typeof(List<Change>).GetMethod(nameof(List<Change>.Add)));
                     // []
 
                     il.MarkLabel(skip);
@@ -166,7 +156,6 @@ namespace Dapper
             // adapted from http://stackoverflow.com/a/966466/17174
             private static Func<T, T> GenerateCloner()
             {
-                Delegate myExec = null;
                 var dm = new DynamicMethod("DoClone", typeof(T), new Type[] { typeof(T) }, true);
                 var ctor = typeof(T).GetConstructor(new Type[] { });
 
@@ -194,7 +183,7 @@ namespace Dapper
                 // Return constructed object.   --> 0 items on stack
                 il.Emit(OpCodes.Ret);
 
-                myExec = dm.CreateDelegate(typeof(Func<T, T>));
+                var myExec = dm.CreateDelegate(typeof(Func<T, T>));
 
                 return (Func<T, T>)myExec;
             }

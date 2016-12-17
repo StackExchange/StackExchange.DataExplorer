@@ -8,7 +8,7 @@
             Please <a href="/account/login?returnurl=@Request.RawUrl">login or register</a> to vote for this query.</h2>
         (click on this box to dismiss)
     </div>
-    <script type="text/javascript">
+    <script>
         DataExplorer.ready(function () {
             DataExplorer.Voting.init('#query-voting', @(Model.QuerySetId), @(Model.HasVoted.ToString().ToLower()), @(Model.ReadOnly.ToString().ToLower()));
         });

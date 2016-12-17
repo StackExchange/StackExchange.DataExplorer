@@ -44,10 +44,7 @@ namespace StackExchange.DataExplorer.Models
 
         public bool IsAnonymous { get; set; }
 
-        public string SafeAboutMe
-        {
-            get { return HtmlUtilities.Safe(HtmlUtilities.RawToCooked(AboutMe ?? "")); }
-        }
+        public string SafeAboutMe => HtmlUtilities.Safe(HtmlUtilities.RawToCooked(AboutMe ?? ""));
 
         public string Age
         {
@@ -55,7 +52,7 @@ namespace StackExchange.DataExplorer.Models
             {
                 if (DOB == null) return "";
 
-                DateTime now = DateTime.Today;
+                var now = DateTime.Today;
                 int age = now.Year - DOB.Value.Year;
                 if (DOB.Value > now.AddYears(-age)) age--;
 
@@ -63,10 +60,7 @@ namespace StackExchange.DataExplorer.Models
             }
         }
 
-        public bool IsValid(ChangeAction action)
-        {
-            return (GetBusinessRuleViolations(action).Count == 0);
-        }
+        public bool IsValid(ChangeAction action) => GetBusinessRuleViolations(action).Count == 0;
 
         public void OnValidate(ChangeAction action)
         {
@@ -81,7 +75,7 @@ namespace StackExchange.DataExplorer.Models
             if (Login.IsNullOrEmpty())
                 violations.Add(new BusinessRuleViolation("Login name is required.", "Login"));
 
-            if ((action == ChangeAction.Insert) || (action == ChangeAction.Update))
+            if (action == ChangeAction.Insert || action == ChangeAction.Update)
             {
                 if (Current.DB.Query<int>("select 1 from Users where Login = @Login and Id <> @Id", new { Login, Id }).Any())
                 {
@@ -117,8 +111,10 @@ namespace StackExchange.DataExplorer.Models
 
         public static User CreateUser(string login, string email, string openIdClaim)
         {
-            var u = new User();
-            u.CreationDate = DateTime.UtcNow;
+            var u = new User
+            {
+                CreationDate = DateTime.UtcNow
+            };
 
             login = CleanLogin(login ?? string.Empty);
 
@@ -138,8 +134,7 @@ namespace StackExchange.DataExplorer.Models
 
             while (!success)
             {
-                IList<BusinessRuleViolation> violations = u.GetBusinessRuleViolations(ChangeAction.Insert);
-
+                var violations = u.GetBusinessRuleViolations(ChangeAction.Insert);
                 if (violations.Any(v => v.PropertyName == "Login"))
                 {
                     u.Login = login + (maxId + retries);
@@ -177,33 +172,24 @@ namespace StackExchange.DataExplorer.Models
             if (openId.EndsWith("/"))
                 openId = openId.Substring(0, openId.Length - 1);
 
-            if (canRemoveWww.IsMatch(openId))
+            if (_canRemoveWww.IsMatch(openId))
                 openId = openId.ReplaceFirst("www.", "");
 
             return openId;
         }
 
         // allow varying of "www." only as the third-level domain
-        private static Regex canRemoveWww = new Regex(@"^https?://www\.[^./]+\.[^./]+(?:/|$)", RegexOptions.Compiled);
+        private static readonly Regex _canRemoveWww = new Regex(@"^https?://www\.[^./]+\.[^./]+(?:/|$)", RegexOptions.Compiled);
 
         public string Gravatar(int width)
         {
-            return
-                String.Format(
-                    "<img src=\"//www.gravatar.com/avatar/{0}?s={2}&amp;d=identicon&amp;r=PG\" height=\"{1}\" width=\"{1}\" class=\"logo\">",
-                    Util.GravatarHash(Email ?? Id.ToString()), width + "px", width * 2
-                    );
+            return string.Format(
+                "<img src=\"//www.gravatar.com/avatar/{0}?s={2}&amp;d=identicon&amp;r=PG\" height=\"{1}\" width=\"{1}\" class=\"logo\">",
+                Util.GravatarHash(Email ?? Id.ToString()), width + "px", width * 2);
         }
 
-        public string UrlTitle
-        {
-            get { return HtmlUtilities.URLFriendly(Login); }
-        }
-
-        public string ProfilePath
-        {
-            get { return Id + Login.Slugify(); }
-        }
+        public string UrlTitle => HtmlUtilities.URLFriendly(Login);
+        public string ProfilePath => Id + Login.Slugify();
 
         internal static bool MergeUsers(int masterId, int mergeId, StringBuilder log)
         {
@@ -219,7 +205,7 @@ namespace StackExchange.DataExplorer.Models
             var masterUser = db.Users.Get(masterId);
             var mergeUser = db.Users.Get(mergeId);
 
-            log.AppendLine(string.Format("Beginning merge of {0} into {1}", mergeId, masterId));
+            log.AppendLine($"Beginning merge of {mergeId} into {masterId}");
 
             // Revision Executions
             {
@@ -237,26 +223,26 @@ where r.UserId = @mergeId  and r2.UserId = @masterId", new { mergeId, masterId }
 from RevisionExecutions r
 where UserId = @mergeId", new { mergeId, masterId });
 
-                log.AppendLine(string.Format("Moving revision executions over {0} dupes, {1} remapped, {2} deleted", updates, remaps, deletes));
+                log.AppendLine($"Moving revision executions over {updates} dupes, {remaps} remapped, {deletes} deleted");
             }
 
             // User Open Ids
             {
                 var rempped = db.Execute("update UserOpenIds set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
-                log.AppendLine(string.Format("Remapped {0} user open ids", rempped));
+                log.AppendLine($"Remapped {rempped} user open ids");
             }
 
 
             // update QuerySets
             {
                 var rempped = db.Execute("update QuerySets set OwnerId = @masterId where OwnerId = @mergeId", new { mergeId, masterId });
-                log.AppendLine(string.Format("Remapped {0} user query sets", rempped));
+                log.AppendLine($"Remapped {rempped} user query sets");
             }
 
             // revisions 
             {
                 var rempped = db.Execute("update Revisions set OwnerId = @masterId where OwnerId = @mergeId", new { mergeId, masterId });
-                log.AppendLine(string.Format("Remapped {0} revisions", rempped));
+                log.AppendLine($"Remapped {rempped} revisions");
             }
 
             // votes
@@ -268,14 +254,14 @@ where v.UserId = @mergeId and v2.UserId = @masterId", new { mergeId, masterId })
 
                 var rempped = db.Execute("update Votes set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
 
-                log.AppendLine(string.Format("Remapped {0} votes, deleted {1} dupes", rempped, dupes));
+                log.AppendLine($"Remapped {rempped} votes, deleted {dupes} dupes");
             }
 
             // SavedQueries (it is deprecated, but do it just in case)
             try
             {
                 var count = db.Execute("update SavedQueries set UserId = @masterId where UserId = @mergeId", new { mergeId, masterId });
-                log.AppendLine(string.Format("Remapped {0} saved queries", count));
+                log.AppendLine($"Remapped {count} saved queries");
             }
             catch 
             {
@@ -321,15 +307,13 @@ where v.UserId = @mergeId and v2.UserId = @masterId", new { mergeId, masterId })
             else
             {
                 log.AppendLine("**UNABLE TO SUBMIT:");
-                violations.ToList().ForEach(v => log.AppendLine(string.Format("--{0}: {1}", v.PropertyName, v.ErrorMessage)));
+                violations.ToList().ForEach(v => log.AppendLine($"--{v.PropertyName}: {v.ErrorMessage}"));
                 return false;
             }
 
-
             db.Users.Delete(mergeUser.Id);
             log.AppendLine("Deleted merged user");
-
-
+            
             if (savedLogin.HasValue())
             {
                 Current.DB.Users.Update(masterUser.Id, new { Login = savedLogin });
@@ -348,14 +332,14 @@ where v.UserId = @mergeId and v2.UserId = @masterId", new { mergeId, masterId })
                 canMergeMsg = "User ids are identical";
                 return false;
             }
-            else if (masterUser == null)
+            if (masterUser == null)
             {
-                canMergeMsg = string.Format("Master user (id {0}) not found", masterId);
+                canMergeMsg = $"Master user (id {masterId}) not found";
                 return false;
             }
-            else if (mergeUser == null)
+            if (mergeUser == null)
             {
-                canMergeMsg = string.Format("Merge user (id {0}) not found", mergeId);
+                canMergeMsg = $"Merge user (id {mergeId}) not found";
                 return false;
             }
 

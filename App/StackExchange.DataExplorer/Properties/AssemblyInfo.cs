@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Stack Exchange")]
 [assembly: AssemblyProduct("StackExchange.DataExplorer")]
-[assembly: AssemblyCopyright("Copyright © Stack Exchange 2010")]
+[assembly: AssemblyCopyright("Copyright © Stack Exchange 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

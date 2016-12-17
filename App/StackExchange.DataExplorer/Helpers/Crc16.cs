@@ -10,12 +10,10 @@ namespace StackExchange.DataExplorer.Helpers
 
         public Crc16()
         {
-            ushort value;
-            ushort temp;
             for (ushort i = 0; i < table.Length; ++i)
             {
-                value = 0;
-                temp = i;
+                ushort value = 0;
+                var temp = i;
                 for (byte j = 0; j < 8; ++j)
                 {
                     if (((value ^ temp) & 0x0001) != 0)

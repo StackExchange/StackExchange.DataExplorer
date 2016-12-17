@@ -19,27 +19,22 @@ namespace StackExchange.DataExplorer.Controllers
 
             if (voteType == "favorite")
             {
-                QuerySet querySet = Current.DB.QuerySets.Get(querySetId);
-
+                var querySet = Current.DB.QuerySets.Get(querySetId);
                 if (querySet == null)
                 {
                     return Json(new { error = true });
                 }
 
-                Vote vote = Current.DB.Query<Vote>(@"
-                    SELECT
-                        *
-                    FROM
-                        Votes
-                    WHERE
-                        VoteTypeId = @vote AND
-                        QuerySetId = @querySetId AND
-                        UserId = @user"
-                    ,
+                var vote = Current.DB.Query<Vote>(@"
+                    SELECT *
+                      FROM Votes
+                     WHERE VoteTypeId = @vote 
+                       AND QuerySetId = @querySetId
+                       AND UserId = @user",
                     new
                     {
-                        vote = (int)VoteType.Favorite,
-                        querySetId = querySetId,
+                        vote = (int) VoteType.Favorite,
+                        querySetId,
                         user = CurrentUser.Id
                     }
                 ).FirstOrDefault();
@@ -60,12 +55,9 @@ namespace StackExchange.DataExplorer.Controllers
                 }
 
                 Current.DB.Execute(@"
-                    UPDATE
-                        QuerySets
-                    SET
-                        Votes = Votes + @change
-                    WHERE
-                        Id = @id",
+                    UPDATE QuerySets
+                       SET Votes = Votes + @change
+                     WHERE Id = @id",
                     new
                     {
                         change = vote == null ? 1 : -1,

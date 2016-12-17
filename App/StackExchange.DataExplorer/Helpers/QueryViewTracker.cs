@@ -14,17 +14,10 @@ namespace StackExchange.DataExplorer.Helpers
             if (IsNewView(ipAddress, querySetId))
             {
                 Current.DB.Execute(@"
-                    UPDATE
-                        QuerySets
-                    SET
-                        Views = Views + 1
-                    WHERE
-                        Id = @querySetId",
-                    new
-                    {
-                        querySetId
-                    }
-                );
+                    UPDATE QuerySets
+                       SET Views = Views + 1
+                     WHERE Id = @querySetId",
+                    new {querySetId});
             }
         }
 
@@ -52,16 +45,11 @@ namespace StackExchange.DataExplorer.Helpers
                 Cache.NoAbsoluteExpiration,
                 new TimeSpan(0, 0, VIEW_EXPIRES_SECS),
                 CacheItemPriority.High,
-                null
-                );
+                null);
 
             return isNewView;
         }
 
-
-        private static int GetTimeBracket()
-        {
-            return Convert.ToInt32(DateTime.UtcNow.Ticks.ToString().Substring(0, 8));
-        }
+        private static int GetTimeBracket() => Convert.ToInt32(DateTime.UtcNow.Ticks.ToString().Substring(0, 8));
     }
 }

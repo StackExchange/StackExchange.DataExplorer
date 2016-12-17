@@ -87,7 +87,7 @@ namespace StackExchange.DataExplorer
         [Default("")]
         public static string GoogleOAuthSecret { get; private set; }
 
-        public static bool EnableGoogleLogin { get { return GoogleOAuthClientId.HasValue() && GoogleOAuthSecret.HasValue(); } }
+        public static bool EnableGoogleLogin => GoogleOAuthClientId.HasValue() && GoogleOAuthSecret.HasValue();
 
 
         public enum AuthenitcationMethod
@@ -117,7 +117,7 @@ namespace StackExchange.DataExplorer
                     if (property.PropertyType == typeof(bool))
                     {
                         bool parsed;
-                        Boolean.TryParse(overrideData, out parsed);
+                        bool.TryParse(overrideData, out parsed);
                         property.SetValue(null, parsed, null);
                     }
                     else if (property.PropertyType == typeof(int))
@@ -160,8 +160,7 @@ namespace StackExchange.DataExplorer
                 }
             }
             // For anyone who wants to listen and update their downstream data...
-            var handler = Refreshed;
-            if (handler != null) handler();
+            Refreshed?.Invoke();
         }
     }
 }

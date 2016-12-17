@@ -9,7 +9,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult Index()
         {
             SetHeader("Tutorial");
-
             return View();
         }
 
@@ -17,7 +16,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult DatabasePrimer()
         {
             SetHeader("Tutorial");
-
             return View();
         }
 
@@ -25,7 +23,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult Queries()
         {
             SetHeader("Tutorial");
-
             return View();
         }
 
@@ -33,7 +30,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryBasics()
         {
             SetHeader("Tutorial");
-
             return View();
         }
 
@@ -41,7 +37,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryJoins()
         {
             SetHeader("Tutorial");
-
             return View();
         }
 
@@ -49,7 +44,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryParameters()
         {
             SetHeader("Tutorial");
-
             return View();
         }
 
@@ -57,7 +51,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryComputations()
         {
             SetHeader("Tutorial");
-
             return View();
         }
 
@@ -65,7 +58,6 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult NextSteps()
         {
             SetHeader("Tutorial");
-
             return View();
         }
     }

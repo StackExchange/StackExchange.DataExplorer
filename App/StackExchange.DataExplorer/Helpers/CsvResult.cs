@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web;
 using System.Web.Mvc;
 
 namespace StackExchange.DataExplorer.Helpers
 {
     internal class CsvResult : ActionResult
     {
-        private readonly List<ResultSet> resultSets;
+        private readonly List<ResultSet> _resultSets;
 
         public CsvResult(List<ResultSet> results)
         {
-            resultSets = results;
+            _resultSets = results;
         }
 
         public string RawCsv
@@ -21,16 +20,15 @@ namespace StackExchange.DataExplorer.Helpers
             get
             {
                 var sb = new StringBuilder();
-                sb.AppendLine(String.Join(",", resultSets[0].Columns.Select(col => col.Name).ToArray()));
+                sb.AppendLine(string.Join(",", _resultSets[0].Columns.Select(col => col.Name).ToArray()));
                 sb.Append(
-                    String.Join(
+                    string.Join(
                         Environment.NewLine,
-                        resultSets[0].Rows.Select(
+                        _resultSets[0].Rows.Select(
                             row =>
                             {
                                 var i = 0;
-
-                                return "\"" + String.Join("\",\"", row.Select(c => Prepare(c, i++)).ToArray()) + "\"";
+                                return "\"" + string.Join("\",\"", row.Select(c => Prepare(c, i++)).ToArray()) + "\"";
                             }
                         ).ToArray()
                     )
@@ -47,7 +45,7 @@ namespace StackExchange.DataExplorer.Helpers
                 return "";
             }
 
-            if (resultSets[0].Columns[index].Type == ResultColumnType.Date)
+            if (_resultSets[0].Columns[index].Type == ResultColumnType.Date)
             {
                 return Util.FromJavaScriptTime((long)value).ToString("yyyy-MM-dd HH:mm:ss");
             }
@@ -64,7 +62,7 @@ namespace StackExchange.DataExplorer.Helpers
 
         public override void ExecuteResult(ControllerContext context)
         {
-            HttpResponseBase response = context.HttpContext.Response;
+            var response = context.HttpContext.Response;
 
             response.Clear();
             response.ContentType = "text/csv";

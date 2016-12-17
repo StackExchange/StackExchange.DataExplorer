@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-
-using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 
 namespace StackExchange.DataExplorer.Helpers
 {
     public class QueryUtil
     {
-
         public static QuerySet GetFullQuerySet(int querySetId)
         {
             var querySet = Current.DB.QuerySets.Get(querySetId);
@@ -69,13 +64,10 @@ order by qr.Id asc", new {querySetId}).ToList();
             }
 
             var cache = Current.DB.Query<CachedResult>(@"
-                SELECT
-                    *
-                FROM
-                    CachedResults
-                WHERE
-                    QueryHash = @hash AND
-                    SiteId = @site",
+                SELECT *
+                  FROM CachedResults
+                 WHERE QueryHash = @hash
+                   AND SiteId = @site",
                 new
                 {
                     hash = query.ExecutionHash,
@@ -109,11 +101,9 @@ order by qr.Id asc", new {querySetId}).ToList();
             }
 
             Current.DB.Query<CachedResult>(@"
-                DELETE
-                    CachedResults
-                WHERE
-                    QueryHash = @hash AND
-                    SiteId = @site",
+                DELETE CachedResults
+                 WHERE QueryHash = @hash
+                   AND SiteId = @site",
                 new
                 {
                     hash = query.ExecutionHash,
@@ -124,30 +114,21 @@ order by qr.Id asc", new {querySetId}).ToList();
 
         public static Revision GetMigratedRevision(int id, MigrationType type)
         {
-            return Current.DB.Query<Revision,QuerySet,Revision>(@"
-                SELECT
-                    r.*, qs.*
-                FROM
-                    Revisions r
-                JOIN
-                    QueryMap qm
-                ON
-                    r.Id = qm.RevisionId
-                JOIN 
-                    QuerySets qs on qs.Id = r.OriginalQuerySetId 
-                WHERE
-                    qm.OriginalId = @original AND
-                    MigrationType = @type",(r,q) => 
+            return Current.DB.Query<Revision, QuerySet, Revision>(@"
+                SELECT r.*, qs.*
+                  FROM Revisions r
+                       JOIN QueryMap qm
+                         ON r.Id = qm.RevisionId
+                       JOIN QuerySets qs 
+                         ON qs.Id = r.OriginalQuerySetId 
+                 WHERE qm.OriginalId = @id
+                   AND MigrationType = @type",
+                (r, q) =>
                 {
                     r.QuerySet = q;
                     return r;
                 },
-                new
-                {
-                    original = id,
-                    type = (int)type
-                }
-            ).FirstOrDefault();
+                new {id, type = (int) type}).FirstOrDefault();
         }
 
         /// <summary>
@@ -158,17 +139,12 @@ order by qr.Id asc", new {querySetId}).ToList();
         public static Query GetQueryForRevision(int revisionId)
         {
             return Current.DB.Query<Query>(@"
-                SELECT
-                    *
-                FROM
-                    Queries JOIN
-                    Revisions ON Queries.Id = Revisions.QueryId AND Revisions.Id = @revision
-                ",
-                new
-                {
-                    revision = revisionId
-                }
-            ).FirstOrDefault();
+                SELECT *
+                FROM Queries
+                     JOIN Revisions 
+                       ON Queries.Id = Revisions.QueryId 
+                      AND Revisions.Id = @revision",
+                new { revision = revisionId }).FirstOrDefault();
         }
     }
 }

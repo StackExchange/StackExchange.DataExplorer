@@ -11,3 +11,5 @@ App/_ReSharper.DataExplorerFull/
 App/TestResults/
 PublishProfiles/
 !App/packages/**/lib/**/*.dll
+*.stackdump
+sh.exe.stackdump

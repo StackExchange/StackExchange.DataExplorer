@@ -10,14 +10,14 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class XSRFSafeAttribute : ActionMethodSelectorAttribute
     {
-        public static void EnsureSafe(NameValueCollection form, User CurrentUser)
+        public static void EnsureSafe(NameValueCollection form, User currentUser)
         {
             string xsrfFormValue = form["fkey"];
 
             if (xsrfFormValue.IsNullOrEmpty())
                 throw new InvalidOperationException("XSRF validation: Request did not have required form value 'fkey'");
 
-            if (!xsrfFormValue.Equals(CurrentUser.XSRFFormValue, StringComparison.OrdinalIgnoreCase))
+            if (!xsrfFormValue.Equals(currentUser.XSRFFormValue, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException(
                     "XSRF validation: Request form value 'fkey' did not match CurrentUser.XSRFFormValue");
 

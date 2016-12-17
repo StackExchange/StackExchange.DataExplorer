@@ -6,13 +6,13 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public static class Util
     {
-        private static readonly MD5CryptoServiceProvider md5Provider = new MD5CryptoServiceProvider();
+        private static readonly MD5CryptoServiceProvider _md5Provider = new MD5CryptoServiceProvider();
 
         public static Guid GetMD5(string str)
         {
-            lock (md5Provider)
+            lock (_md5Provider)
             {
-                return new Guid(md5Provider.ComputeHash(Encoding.Unicode.GetBytes(str)));
+                return new Guid(_md5Provider.ComputeHash(Encoding.Unicode.GetBytes(str)));
             }
         }
 
@@ -29,14 +29,9 @@ namespace StackExchange.DataExplorer.Helpers
             }
         }
 
-        public static string GravatarHash(string str)
-        {
-            return GetMD5String(str.ToLower().Trim()).ToLower();
-        }
+        public static string GravatarHash(string str) => GetMD5String(str.ToLower().Trim()).ToLower();
 
-        public static DateTime FromJavaScriptTime(long milliseconds)
-        {
-            return (new DateTime(1970, 1, 1, 0, 0, 0, 0)).AddMilliseconds(milliseconds);
-        }
+        public static DateTime FromJavaScriptTime(long milliseconds) => 
+            new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(milliseconds);
     }
 }

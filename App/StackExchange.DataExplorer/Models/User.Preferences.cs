@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using StackExchange.DataExplorer.Helpers;
 using System.Text;
 using System.Text.RegularExpressions;
-
 
 namespace StackExchange.DataExplorer.Models
 {
     
     partial class User
     {
-
-        private UserPreferenceDictionary _preferences = null;
+        private UserPreferenceDictionary _preferences;
 
         public bool EnforceSecureOpenId
         {
             get
             {
-                return Preferences.Get<bool>(Preference.EnforceSecureOpenId, AppSettings.EnforceSecureOpenIdDefault);
+                return Preferences.Get(Preference.EnforceSecureOpenId, AppSettings.EnforceSecureOpenIdDefault);
             }
             set
             {
@@ -32,7 +28,7 @@ namespace StackExchange.DataExplorer.Models
         { 
             get 
             {
-                return Preferences.Get<bool>(Preference.HideSchema, false);
+                return Preferences.Get(Preference.HideSchema, false);
             } 
             set 
             {
@@ -64,8 +60,7 @@ namespace StackExchange.DataExplorer.Models
         {
             get
             {
-                var value = Preferences.Get<int>(Preference.DefaultQueryPageSize, -1);
-
+                var value = Preferences.Get(Preference.DefaultQueryPageSize, -1);
                 return value == -1 ? (int?)null : value;
             }
             set
@@ -92,10 +87,7 @@ namespace StackExchange.DataExplorer.Models
             }
         }
 
-        public bool PreferencesInitialized
-        {
-            get { return _preferences != null; }
-        }
+        public bool PreferencesInitialized => _preferences != null;
 
         private void InitPreferences()
         {
@@ -165,7 +157,7 @@ namespace StackExchange.DataExplorer.Helpers
     public class UserPreferenceDictionary
     {
         public bool HasChanges { get; private set; }
-        private Dictionary<string, string> _prefs;
+        private readonly Dictionary<string, string> _prefs;
 
         public UserPreferenceDictionary(string serializedState)
         {
@@ -181,25 +173,14 @@ namespace StackExchange.DataExplorer.Helpers
         }
 
         // to avoid excessive internal int -> string conversions
-        private bool HasValuePrivate(string k)
-        {
-            return _prefs.ContainsKey(k) && _prefs[k] != null;
-        }
-
-        public T Get<T>(Preference key)
-        {
-            return Get(key, default(T));
-        }
-
-        public T Get<T>(Preference key, T defaultValue)
-        {
-            return Get(((int)key).ToString(), defaultValue);
-        }
+        private bool HasValuePrivate(string k) => _prefs.ContainsKey(k) && _prefs[k] != null;
+        public T Get<T>(Preference key) => Get(key, default(T));
+        public T Get<T>(Preference key, T defaultValue) => Get(((int)key).ToString(), defaultValue);
 
         public T Get<T>(string key, T defaultValue)
         {
             T result = defaultValue;
-            Type defaultValueType = typeof(T);
+            var defaultValueType = typeof(T);
 
             string v = HasValuePrivate(key) ? _prefs[key] : "";
 
@@ -272,6 +253,5 @@ namespace StackExchange.DataExplorer.Helpers
             }
             return result;
         }
-
     }
 }

@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
 using StackExchange.DataExplorer.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -13,20 +12,21 @@ namespace StackExchange.DataExplorer.Helpers
 {
     public class HelperTableCache
     {
-        private static ConcurrentDictionary<string, Dictionary<string, ResultSet>> cache = 
+        private static readonly ConcurrentDictionary<string, Dictionary<string, ResultSet>> _cache = 
             new ConcurrentDictionary<string, Dictionary<string, ResultSet>>();
-        private static HelperTableCachePreferences preferences = null;
-        private static Regex tableMatcher;
+        private static HelperTableCachePreferences _preferences;
+        private static Regex _tableMatcher;
 
         public static HelperTableCachePreferences Preferences
         {
-            get { return preferences;  }
-            set {
-                preferences = value;
+            get { return _preferences;  }
+            set
+            {
+                _preferences = value;
 
                 if (value != null)
                 {
-                    tableMatcher = new Regex(preferences.IncludePattern);
+                    _tableMatcher = new Regex(_preferences.IncludePattern);
                 }
             }
         }
@@ -35,7 +35,7 @@ namespace StackExchange.DataExplorer.Helpers
         {
             var tables = new SortedSet<string>();
 
-            foreach (var siteCache in cache.Values)
+            foreach (var siteCache in _cache.Values)
             {
                 foreach (var tableName in siteCache.Keys)
                 {
@@ -53,7 +53,7 @@ namespace StackExchange.DataExplorer.Helpers
         {
             if (Preferences == null)
             {
-                lock (cache)
+                lock (_cache)
                 {
                     if (Preferences == null)
                     {
@@ -71,12 +71,12 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 Dictionary<string, ResultSet> tablesCache;
 
-                cache.TryGetValue(site.TinyName, out tablesCache);
+                _cache.TryGetValue(site.TinyName, out tablesCache);
 
                 return tablesCache;
             }
 
-            return cache.First().Value;
+            return _cache.First().Value;
         }
 
         public static string GetCacheAsJson(Site site)
@@ -100,7 +100,7 @@ namespace StackExchange.DataExplorer.Helpers
             Preferences = AppSettings.HelperTableOptions;
             IEnumerable<Site> sites;
 
-            cache.Clear();
+            _cache.Clear();
 
             if (Preferences == null)
             {
@@ -122,7 +122,7 @@ namespace StackExchange.DataExplorer.Helpers
                 var tablesCache = new Dictionary<string, ResultSet>();
 
                 foreach (var table in tables) {
-                    if (tableMatcher.IsMatch(table.Name))
+                    if (_tableMatcher.IsMatch(table.Name))
                     {
                         using (SqlConnection connection = site.GetOpenConnection()) {
                             tablesCache[table.Name] = GetTableResults(connection, table);
@@ -130,7 +130,7 @@ namespace StackExchange.DataExplorer.Helpers
                     }
                 }
 
-                cache[site.TinyName] = tablesCache;
+                _cache[site.TinyName] = tablesCache;
             }
         }
 
@@ -138,7 +138,7 @@ namespace StackExchange.DataExplorer.Helpers
         {
             // We could probably refactor QueryRunner to expose this functionality
             // to us without having to recreate it here.
-            var command = new SqlCommand(String.Format("SELECT * FROM {0} ORDER BY Id ASC", table.Name), connection);
+            var command = new SqlCommand($"SELECT * FROM {table.Name} ORDER BY Id ASC", connection);
             var resultSet = new ResultSet();
 
             using (var reader = command.ExecuteReader())
@@ -192,10 +192,7 @@ namespace StackExchange.DataExplorer.Helpers
             IncludePattern = ".*Types$";
         }
 
-        public override string ToString()
-        {
-            return "[PerSite = " + PerSite + ", IncludePattern = " + IncludePattern + "]";
-        }
+        public override string ToString() => "[PerSite = " + PerSite + ", IncludePattern = " + IncludePattern + "]";
 
         public bool PerSite { get; set; }
         public string IncludePattern { get; set; }

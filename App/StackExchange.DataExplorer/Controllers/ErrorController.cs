@@ -6,15 +6,9 @@ namespace StackExchange.DataExplorer.Controllers
     public class ErrorController : StackOverflowController
     {
         [StackRoute("error")]
-        public ActionResult ErrorPage()
-        {
-            return View("Error");
-        }
+        public ActionResult ErrorPage() => View("Error");
 
         [StackRoute("404")]
-        public new ActionResult PageNotFound()
-        {
-            return base.PageNotFound();
-        }
+        public new ActionResult PageNotFound() => base.PageNotFound();
     }
 }

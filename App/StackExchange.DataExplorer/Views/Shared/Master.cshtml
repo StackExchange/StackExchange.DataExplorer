@@ -11,21 +11,17 @@
         @Html.Raw(string.Format("<link rel=\"odata.service\" title=\"{0} OData Endpoint\" href=\"{1}\"/>", site.LongName, site.ODataEndpoint))
     }
 
-    
-
     @Styles.Render("~/assets/css/master")
     @RenderSection("AdditionalStyles", required: false)
-
     @Scripts.Render("~/assets/js/jquery")
     @Scripts.Render("~/assets/js/master")
-
     @StackExchange.Profiling.MiniProfiler.RenderIncludes()
 
-    <script type="text/javascript">
+    <script>
         DataExplorer.init({
             'User.id': @(Current.User.IsAnonymous ? "null" : Current.User.Id.ToString()),
-            'User.guessedID': @(ViewData["GuessedUserId"] != null ? ViewData["GuessedUserId"] : "null"),
-            'User.hideSchema': @((Current.User.HideSchema == true).ToString().ToLower()),
+            'User.guessedID': @(ViewData["GuessedUserId"] ?? "null"),
+            'User.hideSchema': @Current.User.HideSchema.ToString().ToLower(),
             'User.isAuthenticated': @((!Current.User.IsAnonymous).ToString().ToLower()),
             'Site.id': @(Current.Controller.Site != null ? Current.Controller.Site.Id.ToString() : "null"),
             'WhitelistEnabled': @(AppSettings.EnableWhiteList.ToString().ToLower())
@@ -70,7 +66,7 @@
         <div id="header">
             <a id="logo" href="/" title="Stack Exchange Data Explorer">Stack Exchange Data Explorer</a>
             @Html.Partial("Menu", ViewData["Menu"])
-            <script type="text/javascript">
+            <script>
                 DataExplorer.initComposeButton({
                     IconUrl: '@Current.Controller.Site.IconUrl',
                     LongName: '@Current.Controller.Site.LongName'
@@ -85,18 +81,18 @@
         <div class="footerwrap">
             <div id="footer-menu">
                 <a href="/about">help</a>
-                <a href="http://stackexchange.com/sites">sites</a>
-                <a href="http://blog.stackexchange.com">blog</a>
+                <a href="https://stackexchange.com/sites">sites</a>
+                <a href="https://stackoverflow.blog/">blog</a>
                 <a href="http://chat.stackexchange.com/rooms/13526/sede-stack-exchange-data-explorer">chat</a>
-                <a href="http://data.stackexchange.com">data</a>
-                <a href="http://stackexchange.com/legal">legal</a>
+                <a href="https://data.stackexchange.com">data</a>
+                <a href="https://stackexchange.com/legal">legal</a>
                 <strong><a href="http://meta.stackexchange.com/contact">contact us</a></strong>
                 <strong><a href="http://meta.stackexchange.com">feedback</a></strong>
             </div>
             <div id="copyright">
                 site design / logo &copy; @DateTime.UtcNow.Year Stack Exchange Inc; 
                 user contributions licensed under <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="license">cc by-sa 3.0</a>
-                with <a href="http://blog.stackoverflow.com/2009/06/attribution-required/" rel="license">attribution required</a>
+                with <a href="https://stackoverflow.blog/2009/06/attribution-required/" rel="license">attribution required</a>
             </div>
             <div id="revision">rev @GlobalApplication.AppRevision</div>
         </div>

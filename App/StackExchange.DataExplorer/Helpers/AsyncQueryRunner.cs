@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using StackExchange.DataExplorer.Models;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -24,18 +23,20 @@ namespace StackExchange.DataExplorer.Helpers
     {
         static AsyncQueryRunner()
         {
-            Thread t = new Thread(new ThreadStart(FlushOldJobs));
-            t.IsBackground = true;
-            t.Priority = ThreadPriority.Lowest;
+            var t = new Thread(FlushOldJobs)
+            {
+                IsBackground = true,
+                Priority = ThreadPriority.Lowest
+            };
             t.Start();
         }
 
         // expire any jobs that completed 120 seconds ago or less 
-        const int AutoExpireSeconds = 120;
-        const int ExpireNonPolledSeconds = 10; 
+        private const int AutoExpireSeconds = 120;
+        private const int ExpireNonPolledSeconds = 10; 
 
-        static ConcurrentDictionary<Guid, AsyncResult> jobs = new ConcurrentDictionary<Guid, AsyncResult>();
-        static ConcurrentDictionary<string, List<Task>> running = new ConcurrentDictionary<string, List<Task>>();
+        private static readonly ConcurrentDictionary<Guid, AsyncResult> _jobs = new ConcurrentDictionary<Guid, AsyncResult>();
+        private static readonly ConcurrentDictionary<string, List<Task>> _running = new ConcurrentDictionary<string, List<Task>>();
 
         public enum AsyncState
         {
@@ -71,12 +72,12 @@ namespace StackExchange.DataExplorer.Helpers
             string userTag = user.IsAnonymous ? user.IPAddress : user.Id.ToString();
 
             List<Task> activeTasks;
-            running.TryGetValue(userTag, out activeTasks);
+            _running.TryGetValue(userTag, out activeTasks);
             if (activeTasks != null)
             {
                 lock(activeTasks)
                 {
-                    if (activeTasks.Where(t => !t.IsCompleted).Count() >= AppSettings.ConcurrentQueries)
+                    if (activeTasks.Count(t => !t.IsCompleted) >= AppSettings.ConcurrentQueries)
                     {
                         throw new ApplicationException("Too many queries are running, you may only run " + AppSettings.ConcurrentQueries + " queries at a time");
                     }
@@ -84,11 +85,11 @@ namespace StackExchange.DataExplorer.Helpers
             }
             else
             {
-                running.TryAdd(userTag, new List<Task>());
-                activeTasks = running[userTag];
+                _running.TryAdd(userTag, new List<Task>());
+                activeTasks = _running[userTag];
             }
 
-            AsyncResult result = new AsyncResult
+            var result = new AsyncResult
             {
                 JobId = Guid.NewGuid(),
                 State = AsyncState.Pending,
@@ -127,7 +128,7 @@ namespace StackExchange.DataExplorer.Helpers
 
             result.Task = task;
 
-            jobs.TryAdd(result.JobId, result);
+            _jobs.TryAdd(result.JobId, result);
             task.Start();
             lock(activeTasks)
             {
@@ -135,7 +136,7 @@ namespace StackExchange.DataExplorer.Helpers
             }
 
             // give it some time to get results ... 
-            System.Threading.Thread.Sleep(50);
+            Thread.Sleep(50);
 
             return result;
         }
@@ -146,24 +147,24 @@ namespace StackExchange.DataExplorer.Helpers
             {
                 try
                 {
-                    System.Threading.Thread.Sleep(1000 * 10);
+                    Thread.Sleep(1000 * 10);
 
                     var expires = DateTime.UtcNow.AddSeconds(-AutoExpireSeconds);
-                    foreach (var job in jobs.Values.Where(j => j.CompletionDate != null && j.CompletionDate < expires).ToList())
+                    foreach (var job in _jobs.Values.Where(j => j.CompletionDate != null && j.CompletionDate < expires).ToList())
                     {
                         AsyncResult ignore;
-                        jobs.TryRemove(job.JobId, out ignore);
+                        _jobs.TryRemove(job.JobId, out ignore);
                     }
 
-                    foreach (var job in jobs.Values.Where(j => !j.Task.IsCompleted && j.LastPoll < DateTime.UtcNow.AddSeconds(-ExpireNonPolledSeconds)))
+                    foreach (var job in _jobs.Values.Where(j => !j.Task.IsCompleted && j.LastPoll < DateTime.UtcNow.AddSeconds(-ExpireNonPolledSeconds)))
                     {
                         AsyncResult result;
-                        jobs.TryGetValue(job.JobId, out result);
+                        _jobs.TryGetValue(job.JobId, out result);
                         if (result != null)
                         {
                             result.Cancelled = true;
                             var cmd = result.Command;
-                            if (cmd != null) cmd.Cancel();
+                            cmd?.Cancel();
                         }
                     }
                 }
@@ -178,7 +179,7 @@ namespace StackExchange.DataExplorer.Helpers
         public static AsyncResult PollJob(Guid guid)
         {
             AsyncResult result;
-            jobs.TryGetValue(guid, out result);
+            _jobs.TryGetValue(guid, out result);
             if (result != null)
             {
                 result.LastPoll = DateTime.UtcNow;
@@ -189,15 +190,13 @@ namespace StackExchange.DataExplorer.Helpers
         public static AsyncResult CancelJob(Guid guid)
         {
             AsyncResult result;
-            jobs.TryGetValue(guid, out result);
+            _jobs.TryGetValue(guid, out result);
 
-            if (result != null) {
-                if (result.Command != null)
-                {
-                    result.Command.Cancel();
-                    result.Cancelled = true;
-                    result.State = AsyncState.Cancelled;
-                }
+            if (result?.Command != null)
+            {
+                result.Command.Cancel();
+                result.Cancelled = true;
+                result.State = AsyncState.Cancelled;
             }
 
             return result;

@@ -2,7 +2,6 @@ using System;
 using System.Web;
 using System.Web.Mvc;
 using System.Linq;
-using StackExchange.DataExplorer.Controllers;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Mvc;
 using StackExchange.Profiling.Storage;
@@ -11,12 +10,9 @@ namespace StackExchange.DataExplorer
 {
     public static class MiniProfilerPackage
     {
-        class ProxySafeUserProvider : IUserProvider
+        private class ProxySafeUserProvider : IUserProvider
         {
-            public string GetUser(HttpRequest request)
-            {
-                return StackOverflowController.GetRemoteIP(request.ServerVariables);
-            }
+            public string GetUser(HttpRequest request) => Current.GetRemoteIP(request.ServerVariables);
         }
 
         public static void Start()
