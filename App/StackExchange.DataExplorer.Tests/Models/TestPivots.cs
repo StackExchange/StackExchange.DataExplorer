@@ -1,13 +1,8 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StackExchange.DataExplorer.Tests;
 using StackExchange.DataExplorer.Helpers;
-using StackExchange.DataExplorer;
 
-namespace CloudOverflowWeb.Tests.Models
+namespace StackExchange.DataExplorer.Tests.Models
 {
     [TestClass]
     public class TestPivots : BaseTest
@@ -18,32 +13,32 @@ namespace CloudOverflowWeb.Tests.Models
             var results1 = new QueryResults();
             var results2 = new QueryResults();
 
-            results1.ResultSets = new List<ResultSet>() { new ResultSet() };
-            results2.ResultSets = new List<ResultSet>() { new ResultSet() };
+            results1.ResultSets = new List<ResultSet> { new ResultSet() };
+            results2.ResultSets = new List<ResultSet> { new ResultSet() };
 
-            results1.ResultSets[0].Columns = new List<ResultColumnInfo> 
-            {  
+            results1.ResultSets[0].Columns = new List<ResultColumnInfo>
+            {
                 new ResultColumnInfo{ Name = "col1", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "col2", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "Pivot", Type = ResultColumnType.Default }
             };
 
-            results2.ResultSets[0].Columns = new List<ResultColumnInfo> 
-            {  
+            results2.ResultSets[0].Columns = new List<ResultColumnInfo>
+            {
                 new ResultColumnInfo{ Name = "col1", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "col2", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "Pivot", Type = ResultColumnType.Default }
             };
 
-            results1.ResultSets[0].Rows = new List<List<object>> 
-            { 
+            results1.ResultSets[0].Rows = new List<List<object>>
+            {
                 new List<object>{1,1,1},
                 new List<object>{2,2,2},
                 new List<object>{3,3,3},
             };
 
-            results2.ResultSets[0].Rows = new List<List<object>> 
-            { 
+            results2.ResultSets[0].Rows = new List<List<object>>
+            {
                 new List<object>{2,2,99}
             };
 
@@ -62,32 +57,32 @@ namespace CloudOverflowWeb.Tests.Models
             var results1 = new QueryResults();
             var results2 = new QueryResults();
 
-            results1.ResultSets = new List<ResultSet>() { new ResultSet() };
-            results2.ResultSets = new List<ResultSet>() { new ResultSet() };
+            results1.ResultSets = new List<ResultSet> { new ResultSet() };
+            results2.ResultSets = new List<ResultSet> { new ResultSet() };
 
-            results1.ResultSets[0].Columns = new List<ResultColumnInfo> 
-            {  
+            results1.ResultSets[0].Columns = new List<ResultColumnInfo>
+            {
                 new ResultColumnInfo{ Name = "col1", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "col2", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "Pivot", Type = ResultColumnType.Default }
             };
 
-            results2.ResultSets[0].Columns = new List<ResultColumnInfo> 
-            {  
+            results2.ResultSets[0].Columns = new List<ResultColumnInfo>
+            {
                 new ResultColumnInfo{ Name = "col1", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "col2", Type = ResultColumnType.Default },
                 new ResultColumnInfo{ Name = "Pivot", Type = ResultColumnType.Default }
             };
 
-            results1.ResultSets[0].Rows = new List<List<object>> 
-            { 
+            results1.ResultSets[0].Rows = new List<List<object>>
+            {
                 new List<object>{1,1,1},
                 new List<object>{2,2,2},
                 new List<object>{3,3,3},
             };
 
-            results2.ResultSets[0].Rows = new List<List<object>> 
-            { 
+            results2.ResultSets[0].Rows = new List<List<object>>
+            {
                 new List<object>{2,2,99},
                 new List<object>{4,4,666}
             };

@@ -1,17 +1,13 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StackExchange.DataExplorer.Helpers;
-using StackExchange.DataExplorer.Models;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace StackExchange.DataExplorer.Tests.Util {
+namespace StackExchange.DataExplorer.Tests.Helpers
+{
     [TestClass]
     public class TestAppSettings : BaseTest
     {
         [TestMethod]
-        public void TestBoolSetting() {
+        public void TestBoolSetting()
+        {
             Current.DB.Execute("delete from AppSettings");
             AppSettings.Refresh();
             Assert.IsFalse(AppSettings.EnableWhiteList);
@@ -26,7 +22,8 @@ namespace StackExchange.DataExplorer.Tests.Util {
             Current.DB.Execute("DELETE FROM AppSettings");
             AppSettings.Refresh();
             Assert.IsNull(AppSettings.HelperTableOptions);
-            Current.DB.AppSettings.Insert(new {
+            Current.DB.AppSettings.Insert(new
+            {
                 Setting = "HelperTableOptions",
                 Value = "{ \"PerSite\": \"true\", \"IncludePattern\": \".*Types$\" }"
             });

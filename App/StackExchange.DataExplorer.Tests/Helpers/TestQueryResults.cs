@@ -1,19 +1,17 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StackExchange.DataExplorer.Helpers;
-using System.Web.Script.Serialization;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace StackExchange.DataExplorer.Tests.Helpers {
+namespace StackExchange.DataExplorer.Tests.Helpers
+{
     [TestClass]
-    public class TestQueryResults {
-
+    public class TestQueryResults
+    {
         [TestMethod]
-        public void TestJsonPersistance() {
+        public void TestJsonPersistance()
+        {
             QueryResults results = MockResults();
 
             var data = JObject.Parse(results.ToJson());
@@ -23,7 +21,8 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
-        public void TestDeserialization() {
+        public void TestDeserialization()
+        {
             QueryResults results = MockResults();
             var other = QueryResults.FromJson(results.ToJson());
 
@@ -33,29 +32,26 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
-        public void TestToText() {
-            QueryResults results = new QueryResults();
-            results.Messages = 
-@"1
+        public void TestToText()
+        {
+            QueryResults results = new QueryResults { Messages = @"1
 
 2
 
-";
+" };
 
-            ResultSet first = new ResultSet();
-            first.MessagePosition = 0;
-            first.Columns.Add(new ResultColumnInfo() {Name =  "a"});
-            first.Rows.Add(new List<object>() { "xxx" });
+            ResultSet first = new ResultSet { MessagePosition = 0 };
+            first.Columns.Add(new ResultColumnInfo { Name = "a" });
+            first.Rows.Add(new List<object> { "xxx" });
 
-            ResultSet second = new ResultSet();
-            second.MessagePosition = 4;
-            second.Columns.Add(new ResultColumnInfo() {Name =  "hello"});
-            second.Rows.Add(new List<object>() { "x" });
+            ResultSet second = new ResultSet { MessagePosition = 4 };
+            second.Columns.Add(new ResultColumnInfo { Name = "hello" });
+            second.Rows.Add(new List<object> { "x" });
 
             results.ResultSets.Add(first);
             results.ResultSets.Add(second);
 
-            var transformed = results.ToTextResults(); 
+            var transformed = results.ToTextResults();
 
             Assert.AreEqual(true, transformed.TextOnly);
 
@@ -78,18 +74,17 @@ x
 
             Assert.AreEqual(expected
  , actual);
-    
+
         }
 
-        private static QueryResults MockResults() {
-            var rows = new List<List<object>>();
-            rows.Add(new List<object>());
+        private static QueryResults MockResults()
+        {
+            var rows = new List<List<object>> { new List<object>() };
             rows[0].Add("hello");
 
-            var resultSet = new ResultSet();
-            resultSet.Rows = rows;
+            var resultSet = new ResultSet { Rows = rows };
 
-            QueryResults results = new QueryResults()
+            var results = new QueryResults
             {
                 Url = "test",
                 QueryId = 100

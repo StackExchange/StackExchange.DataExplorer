@@ -1,39 +1,34 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Transactions;
 using StackExchange.DataExplorer.Models;
-using System.Data.Common;
-using StackExchange.DataExplorer.Helpers;
 
-namespace StackExchange.DataExplorer.Tests.Models {
-
+namespace StackExchange.DataExplorer.Tests.Models
+{
     [TestClass]
-    public class TestUser : BaseTest {
-
+    public class TestUser : BaseTest
+    {
         [TestMethod]
-        public void TestUserCreationSetsCreationDate() {
+        public void TestUserCreationSetsCreationDate()
+        {
             var u = User.CreateUser("Fred", "a@a.com", "xyz");
             Assert.IsNotNull(u.CreationDate);
         }
 
         [TestMethod]
-        public void TestBasicUserCreation() {
-
+        public void TestBasicUserCreation()
+        {
             User.CreateUser("Fred", "a@a.com", "xyz");
 
-            var u2 = Current.DB.Query<User>("select * from Users where Login = @Login", new {Login = "Fred"}).First();
+            var u2 = Current.DB.Query<User>("select * from Users where Login = @Login", new { Login = "Fred" }).First();
             Assert.AreEqual("Fred", u2.Login);
 
-            var o = Current.DB.Query<UserOpenId>("select * from UserOpenIds where OpenIdClaim = @claim", new {claim = "xyz"}).FirstOrDefault(); 
+            var o = Current.DB.Query<UserOpenId>("select * from UserOpenIds where OpenIdClaim = @claim", new { claim = "xyz" }).FirstOrDefault();
             Assert.AreEqual("xyz", o.OpenIdClaim);
         }
 
         [TestMethod]
-        public void TestNoName() {
-
+        public void TestNoName()
+        {
             Current.DB.Execute("delete from Users where Login like 'jon.doe%'");
 
             var u1 = User.CreateUser("", null, "xyz");
@@ -45,8 +40,8 @@ namespace StackExchange.DataExplorer.Tests.Models {
         }
 
         [TestMethod]
-        public void TestNoSpaces() {
-
+        public void TestNoSpaces()
+        {
             Current.DB.Execute("delete from Users where Login like 'jon.doe%'");
 
             var u1 = User.CreateUser("jon   doe", null, "xyz");
@@ -54,9 +49,10 @@ namespace StackExchange.DataExplorer.Tests.Models {
         }
 
         [TestMethod]
-        public void TestWeirdChars() {
+        public void TestWeirdChars()
+        {
             var u1 = User.CreateUser("jon&*doe", null, "xyz");
             Assert.AreEqual(u1.Login, "jondoe");
-        } 
+        }
     }
 }

@@ -1,19 +1,18 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Text;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StackExchange.DataExplorer.Helpers;
 using System.Collections.Specialized;
 
-namespace StackExchange.DataExplorer.Tests.Helpers {
+namespace StackExchange.DataExplorer.Tests.Helpers
+{
     [TestClass]
-    public class TestParsedQuery {
+    public class TestParsedQuery
+    {
         [TestMethod]
         public void TestSimpleParsing()
         {
-            string sql = "SELECT TOP 10 * FROM Posts";
-
+            const string sql = "SELECT TOP 10 * FROM Posts";
             var query = new ParsedQuery(sql, null);
 
             Assert.AreEqual(sql, query.ExecutionSql);
@@ -70,7 +69,8 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
-        public void TestBatchSplitting() {
+        public void TestBatchSplitting()
+        {
             string sql = new StringBuilder()
                 .AppendLine("SELECT 1")
                 .AppendLine("  GO  ")
@@ -87,7 +87,8 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
-        public void TestBatchSplittingIgnoresComments() {
+        public void TestBatchSplittingIgnoresComments()
+        {
             string sql = new StringBuilder()
                 .AppendLine("SELECT 1")
                 .AppendLine("--Go")
@@ -100,11 +101,12 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
 
             Assert.AreEqual(1, batches.Length);
             Assert.AreEqual("SELECT 1\n\nSELECT 2\n1", batches[0]);
-       
+
         }
 
         [TestMethod]
-        public void TestBatchSplittingIgnoresEmptyBatches() {
+        public void TestBatchSplittingIgnoresEmptyBatches()
+        {
             string sql = new StringBuilder()
                 .AppendLine("SELECT 1")
                 .AppendLine("GO")
@@ -118,7 +120,8 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
-        public void TestWeDetectMissingParameterValues() {
+        public void TestWeDetectMissingParameterValues()
+        {
             string sql = "##a## ##b##";
 
             var parameters = new NameValueCollection
@@ -134,7 +137,8 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
-        public void TestWeDetectAllParameters() {
+        public void TestWeDetectAllParameters()
+        {
             string sql = "##a## ##b##";
 
             var parameters = new NameValueCollection
@@ -230,7 +234,8 @@ namespace StackExchange.DataExplorer.Tests.Helpers {
         }
 
         [TestMethod]
-        public void TestInvalidIntParameters() {
+        public void TestInvalidIntParameters()
+        {
             string sql = "##a:int## ##b##";
 
             var parameters = new NameValueCollection
