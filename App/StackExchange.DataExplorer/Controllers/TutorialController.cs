@@ -9,6 +9,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult Index()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Tutorial - Stack Exchange Data Explorer";
             return View();
         }
 
@@ -16,6 +17,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult DatabasePrimer()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Introduction to Databases - Stack Exchange Data Explorer";
             return View();
         }
 
@@ -23,6 +25,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult Queries()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Introduction to Queries - Stack Exchange Data Explorer";
             return View();
         }
 
@@ -30,6 +33,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryBasics()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Query Basics - Stack Exchange Data Explorer";
             return View();
         }
 
@@ -37,6 +41,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryJoins()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Query Joins - Stack Exchange Data Explorer";
             return View();
         }
 
@@ -44,6 +49,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryParameters()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Query Parameters - Stack Exchange Data Explorer";
             return View();
         }
 
@@ -51,6 +57,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult QueryComputations()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Query Computations - Stack Exchange Data Explorer";
             return View();
         }
 
@@ -58,6 +65,7 @@ namespace StackExchange.DataExplorer.Controllers
         public ActionResult NextSteps()
         {
             SetHeader("Tutorial");
+            ViewData["PageTitle"] = "Next Steps - Stack Exchange Data Explorer";
             return View();
         }
     }
