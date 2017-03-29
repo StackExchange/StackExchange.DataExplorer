@@ -19,7 +19,7 @@
 .cm-s-default span.cm-sql-number   { color: #008B8B; }
 .cm-s-default span.cm-sql-function { color: #CC00BB; }
 .cm-s-default span.cm-sql-keyword  { color: #0000FF; }
-.cm-s-default span.cm-sql-literal  { color: #008000; }
+.cm-s-default span.cm-sql-literal  { color: #C72929; }
 .cm-s-default span.cm-sql-word     { color: #000000; }
 .cm-s-default span.cm-sql-special  { color: #C78800; }
 
