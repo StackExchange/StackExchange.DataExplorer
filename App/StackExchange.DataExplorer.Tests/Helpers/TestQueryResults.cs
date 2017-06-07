@@ -77,6 +77,39 @@ x
 
         }
 
+        [TestMethod]
+        public void TestToTextWithDateColumn()
+        {
+            QueryResults results = new QueryResults { Messages = @"1
+
+" };
+
+            ResultSet first = new ResultSet { MessagePosition = 0 };
+            first.Columns.Add(new ResultColumnInfo { Name = "date", Type = ResultColumnType.Date });
+            first.Columns.Add(new ResultColumnInfo { Name = "text", Type = ResultColumnType.Text });
+            first.Rows.Add(new List<object> { 1L , "hello" });
+            results.ResultSets.Add(first);
+
+            var transformed = results.ToTextResults();
+
+            Assert.AreEqual(true, transformed.TextOnly);
+
+            var expected = @"date                text
+------------------- -----
+1970-01-01 00:00:00 hello
+
+1
+
+";
+
+            var actual = string.Join("\r\n", transformed.Messages.Split('\n').Select(s => s.Trim()));
+
+
+            Assert.AreEqual(expected
+ , actual);
+
+        }
+
         private static QueryResults MockResults()
         {
             var rows = new List<List<object>> { new List<object>() };
