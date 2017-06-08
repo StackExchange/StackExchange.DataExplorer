@@ -98,6 +98,9 @@ namespace StackExchange.DataExplorer.Helpers
     public class QueryResults
     {
         private const int MAX_TEXT_COLUMN_WIDTH = 512;
+        // based on this date format yyyy-MM-dd HH:mm:ss 
+        // you'll need 19 characters to align textresult columns
+        private const int DATE_COLUMN_WIDTH = 19; 
 
         private static readonly List<ResultColumnType> _nativeTypes =
             new List<ResultColumnType>
@@ -303,7 +306,8 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         if (col != null && resultSet.Columns[i].Type == ResultColumnType.Date)
                         {
-                            currentVal = Util.FromJavaScriptTime((long)col).ToString("yyyy-MM-dd HH:mm:ss");
+                            // if you change the format, also adapt DATE_COLUMN_WIDTH 
+                            currentVal = Util.FromJavaScriptTime((long)col).ToString("yyyy-MM-dd HH:mm:ss"); 
                         }
                         else
                         {
@@ -349,7 +353,20 @@ namespace StackExchange.DataExplorer.Helpers
                     int curLength;
                     if (_nativeTypes.Contains(resultSet.Columns[i].Type))
                     {
-                        curLength = col?.ToString().Length ?? 4;
+                        // Date is formatted later for textresults!
+                        if (col != null && resultSet.Columns[i].Type == ResultColumnType.Date)
+                        {
+                            // col contains a long 
+                            // for textresults it is formatted later
+                            // instead of taking its length
+                            // use the length that will come out after
+                            // the String.Format is applied
+                            curLength = DATE_COLUMN_WIDTH; 
+                        }
+                        else
+                        {
+                            curLength = col?.ToString().Length ?? 4;
+                        }
                     }
                     else
                     {
