@@ -118,7 +118,9 @@
                     case 'user':
                         return linkFormatter('/users/', siteColumnName);
                     case 'post':
-                        return linkFormatter('/questions/', siteColumnName);
+                        // use q instead of questions because q also works for answers
+                        // when oneboxed in a chatroom, questions does not.
+                        return linkFormatter('/q/', siteColumnName);
                     case 'suggestededit':
                         return linkFormatter('/suggested-edits/', siteColumnName);
                     case 'comment':
