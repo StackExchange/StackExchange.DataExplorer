@@ -8,7 +8,7 @@ The Stack Exchange [Data Explorer](http://data.stackexchange.com) is a tool for 
 
  - [Visual Studio](https://www.visualstudio.com/en-us/visual-studio-homepage-vs.aspx) 2015 or later
  - [.NET Framework 4.5](https://www.microsoft.com/en-us/download/details.aspx?id=30653)
- - [SQL Server 2010 Express](https://www.microsoft.com/en-us/sqlserver/editions/2012-editions/express.aspx) or later/higher
+ - [SQL Server 2012 Express](https://www.microsoft.com/en-us/sqlserver/editions/2012-editions/express.aspx) or later/higher
  - [IIS7](http://www.iis.net/) or later
     - The [URL Rewrite 2.0 extension](http://www.iis.net/downloads/microsoft/url-rewrite) is required for OData endpoint support. If you don't need this, you can comment out the `<rewrite>` section in `web.config`.
 
