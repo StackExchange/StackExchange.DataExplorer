@@ -1,7 +1,7 @@
 ﻿@model StackExchange.DataExplorer.ViewModel.QuerySetVoting
 
 <div id="query-voting">
-    <span title="This is a favorite query (click again to undo)" class="star-@(Model.HasVoted?"on":"off")"></span>
+    <span title="" class="star-@(Model.HasVoted?"on":"off")"></span>
     <div class="favoritecount"><strong class="@(Model.HasVoted?"favoritecount-selected":"")">@Model.TotalVotes</strong></div>
     <div class="error-notification supernovabg">
         <h2>

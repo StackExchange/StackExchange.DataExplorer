@@ -174,7 +174,11 @@ DataExplorer.Voting = (function () {
     var id, error, counter, star,
         voted = false, pending = false;
 
+    var favoriteQueryTitle = "This is one of your favorite queries (click to undo)";
+    var nonFavoriteQueryTitle = "Click to mark as favorite query (click again to undo)";
+
     function init(target, revision, vote, readOnly) {
+        var count;
         target = $(target);
 
         if (readOnly) {
@@ -187,6 +191,27 @@ DataExplorer.Voting = (function () {
         star = target.find('span').click(click);
         counter = target.find('.favoritecount');
         error = target.find('.error-notification');
+
+        count = parseInt(counter.text());
+
+        updateFavorite(voted, count);
+    }
+
+    function updateFavorite(favorited, count) {
+
+        counter.text(count);
+
+        if (!favorited) {
+            counter.removeClass('favoritecount-selected');
+            star.removeClass('star-on');
+            star.addClass('star-off');
+            star.prop('title', nonFavoriteQueryTitle);
+        } else {
+            counter.addClass('favoritecount-selected');
+            star.removeClass('star-off');
+            star.addClass('star-on');
+            star.prop('title', favoriteQueryTitle);
+        }
     }
 
     function click(event) {
@@ -204,21 +229,13 @@ DataExplorer.Voting = (function () {
 
         $.post('/vote/' + id, { 'voteType': 'favorite' }, function (response) {
             if (typeof response === 'object' && response.success) {
-                var count = parseInt(counter.text());
+                var count;
 
                 voted = !voted;
+                count = parseInt(counter.text()) + (voted ? 1 : -1);
 
-                if (!voted) {
-                    counter.removeClass('favoritecount-selected');
-                    counter.text(count - 1);
-                    star.removeClass('star-on');
-                    star.addClass('star-off');
-                } else {
-                    counter.addClass('favoritecount-selected');
-                    counter.text(count + 1);
-                    star.removeClass('star-off');
-                    star.addClass('star-on');
-                }
+                updateFavorite(voted, count);
+                
             }
 
             pending = false;
