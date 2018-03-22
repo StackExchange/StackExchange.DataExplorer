@@ -60,7 +60,7 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute(@"query/save/{siteId:\d+}/{querySetId?:\d+}")]
         public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, bool? bypassCache, TargetSites? targetSites)
         {
-            if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(Current.RemoteIP))
+            if (!Captcha.ChallengeIsvalid(Request.Form))
             {
                 return Json(new { captcha = true });
             }
@@ -278,7 +278,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
         [StackRoute(@"query/run/{siteId:\d+}/{querySetId:\d+}/{revisionId:\d+}")]
         public ActionResult Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? bypassCache, TargetSites? targetSites)
         {
-            if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(Current.RemoteIP))
+            if (!Captcha.ChallengeIsvalid(Request.Form))
             {
                 return Json(new { captcha = true });
             }

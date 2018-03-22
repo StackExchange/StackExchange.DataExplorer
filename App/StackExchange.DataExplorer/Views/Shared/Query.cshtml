@@ -1,6 +1,5 @@
 ﻿@using StackExchange.DataExplorer
 @using StackExchange.DataExplorer.Helpers
-@using StackExchange.DataExplorer.Models
 @using System.Web.Optimization
 @{
     Layout = "~/Views/Shared/Master.cshtml";
@@ -64,9 +63,10 @@
             }
             </span>
         </div>
-    @if (Current.User.IsAnonymous)
+    @if(Captcha.IsShownForCurrentUser())
     {
-        @Html.Partial("Captcha", Current.NewRecaptchControl())
+        <script src="https://www.google.com/recaptcha/api.js"></script>
+        <div id="captcha" class="g-recaptcha" data-sitekey="@AppSettings.RecaptchaPublicKey" style="display: none"></div>
     }
         <div class="clear"></div>
     </form>

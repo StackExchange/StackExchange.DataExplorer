@@ -106,9 +106,6 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Recaptcha">
-      <HintPath>..\..\Lib\Recaptcha.dll</HintPath>
-    </Reference>
     <Reference Include="StackExchange.Exceptional, Version=1.0.0.122, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\StackExchange.Exceptional.1.0.122\lib\StackExchange.Exceptional.dll</HintPath>
       <Private>True</Private>
@@ -197,7 +194,6 @@
     <Compile Include="App_Start\MiniProfiler.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
-    <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\QuerySetController.cs" />
     <Compile Include="Controllers\StackOverflowController.cs" />
@@ -215,6 +211,8 @@
     </Compile>
     <Compile Include="Helpers\AsyncQueryRunner.cs" />
     <Compile Include="Helpers\BusinessRuleViolation.cs" />
+    <Compile Include="Helpers\CaptchaResponse.cs" />
+    <Compile Include="Helpers\Captcha.cs" />
     <Compile Include="Helpers\ChangeAction.cs" />
     <Compile Include="Helpers\HelperTableCache.cs" />
     <Compile Include="Helpers\Crc16.cs" />

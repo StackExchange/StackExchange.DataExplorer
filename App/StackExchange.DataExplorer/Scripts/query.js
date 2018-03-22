@@ -621,47 +621,24 @@ DataExplorer.ready(function () {
         return true;
     }
 
-    var captcha = $('#captcha'), captchaSubmit = captcha.find('button[type=submit]');
-
     function showCaptcha(response) {
-        if (!response || !response.captcha) {
-            return false;
-        }
+        var needsCaptcha = response && response.captcha;
+        var target = document.getElementById('captcha');
+        var display = 'none';
 
-        captcha.find('input[type=text]').off('keydown').on('keydown', function (key) {
-            if (key.keyCode === 13) {
-                captchaSubmit.click();
-
-                return false;
+        if (needsCaptcha) {
+            if (!grecaptcha) {
+                return showError({ error: "Anonymous users must solve a captcha, but it doesn't seem to have loaded. Please try again later." });
             }
 
-            return true;
-        });
+            showError({ error: "Anonymous users must solve a captcha. Please complete the captcha and submit again." });
+            grecaptcha.reset();
 
-        var submit = function () {
-            $.post('/captcha', captcha.find('input').serialize(), function (response) {
-                if (response.success) {
-                    $('form button[type=submit]').not(captchaSubmit).prop('disabled', true);
-                    captcha.hide().closest('form').submit();
-                } else {
-                    var error = captcha.find('.error-message');
+            display = 'block';
+        }
 
-                    captcha.find('input[type=text]').one('keydown', function () {
-                        error.hide();
-                    });
-                    captchaSubmit.one('click', submit);
-                    error.show();
-                }
-            });
+        target.style = 'display: ' + display;
 
-            return false;
-        };
-
-        $('form button[type=submit]').not(captchaSubmit).prop('disabled', true);
-
-        captchaSubmit.one('click', submit);
-        captcha.show().find('input[type=text]').focus();
-
-        return true;
+        return needsCaptcha;
     }
 });
