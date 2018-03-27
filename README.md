@@ -50,7 +50,7 @@ Once done, you'll need to populate the `Sites` table with a record for each site
  - [CodeMirror](https://codemirror.net/)
  - [SlickGrid](https://github.com/mleibman/SlickGrid) (currently using [a fork](https://github.com/tms/SlickGrid) for updates)
  - [Flot](https://www.flotcharts.org/)
- - [StackExcahnge.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional)
+ - [StackExchange.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional)
  - [Json.NET](james.newtonking.com/json)
  - [DotNetOpenAuth](http://www.dotnetopenauth.net/)
  - [reCAPTCHA](https://code.google.com/p/recaptcha/)
