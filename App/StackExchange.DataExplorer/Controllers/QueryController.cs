@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -58,9 +59,9 @@ namespace StackExchange.DataExplorer.Controllers
 
         [HttpPost]
         [StackRoute(@"query/save/{siteId:\d+}/{querySetId?:\d+}")]
-        public ActionResult Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, bool? bypassCache, TargetSites? targetSites)
+        public async Task<ActionResult> Save(string sql, string title, string description, int siteId, int? querySetId, bool? textResults, bool? withExecutionPlan, bool? bypassCache, TargetSites? targetSites)
         {
-            if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(Current.RemoteIP))
+            if (!(await Captcha.ChallengeIsvalidAsync(Request.Form)))
             {
                 return Json(new { captcha = true });
             }
@@ -276,9 +277,9 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
         [HttpPost]
         [StackRoute(@"query/run/{siteId:\d+}/{querySetId:\d+}/{revisionId:\d+}")]
-        public ActionResult Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? bypassCache, TargetSites? targetSites)
+        public async Task<ActionResult> Execute(int querySetId, int revisionId, int siteId, bool? textResults, bool? withExecutionPlan, bool? bypassCache, TargetSites? targetSites)
         {
-            if (CurrentUser.IsAnonymous && !CaptchaController.CaptchaPassed(Current.RemoteIP))
+            if (!(await Captcha.ChallengeIsvalidAsync(Request.Form)))
             {
                 return Json(new { captcha = true });
             }

@@ -11,7 +11,6 @@ using System.Configuration;
 using System.Data;
 using System.Data.Common;
 using System.Text.RegularExpressions;
-using Recaptcha;
 using StackExchange.Exceptional;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
@@ -26,24 +25,6 @@ namespace StackExchange.DataExplorer
     public static class Current
     {
         const string DISPOSE_CONNECTION_KEY = "dispose_connections";
-
-        public static RecaptchaControl NewRecaptchControl()
-        {
-            var control = new RecaptchaControl
-            {
-                PrivateKey = AppSettings.RecaptchaPrivateKey,
-                PublicKey = AppSettings.RecaptchaPublicKey,
-                Theme = "clean"
-            };
-
-            if (!Context.Request.IsSecureConnection)
-            {
-                var forwarded = Context.Request.Headers["X-Forwarded-Proto"];
-                control.OverrideSecureMode = forwarded != null && forwarded.StartsWith("https");
-            }
-
-            return control;
-        }
 
         public static void RegisterConnectionForDisposal(SqlConnection connection)
         {
