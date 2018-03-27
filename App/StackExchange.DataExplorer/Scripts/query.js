@@ -637,7 +637,9 @@ DataExplorer.ready(function () {
             display = 'block';
         }
 
-        target.style = 'display: ' + display;
+        if (target) {
+            target.style = 'display: ' + display;
+        }
 
         return needsCaptcha;
     }
