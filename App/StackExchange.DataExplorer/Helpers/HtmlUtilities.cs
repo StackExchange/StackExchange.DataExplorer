@@ -340,7 +340,7 @@ namespace StackExchange.DataExplorer.Helpers
                     {
                         sb.Append("n");
                     }
-                    else if ("ýŸ".Contains(s))
+                    else if ("ýÿ".Contains(s))
                     {
                         sb.Append("y");
                     }
