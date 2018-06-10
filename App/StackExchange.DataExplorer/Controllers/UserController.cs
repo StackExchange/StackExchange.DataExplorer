@@ -122,11 +122,6 @@ namespace StackExchange.DataExplorer.Controllers
         {
             User user = Current.DB.Users.Get(id);
 
-            if (updatedUser.DOB < DateTime.UtcNow.AddYears(-100) || updatedUser.DOB > DateTime.UtcNow.AddYears(-6))
-            {
-                updatedUser.DOB = null;
-            }
-
             if (user.Id == updatedUser.Id && (updatedUser.Id == CurrentUser.Id || CurrentUser.IsAdmin))
             {
                 var violations = updatedUser.GetBusinessRuleViolations(ChangeAction.Update);
@@ -136,7 +131,6 @@ namespace StackExchange.DataExplorer.Controllers
                     var snapshot = Snapshotter.Start(user);
                     user.Login = HtmlUtilities.Safe(updatedUser.Login);
                     user.AboutMe = updatedUser.AboutMe;
-                    user.DOB = updatedUser.DOB;
                     user.Email = HtmlUtilities.Safe(updatedUser.Email);
                     user.Website = HtmlUtilities.Safe(updatedUser.Website);
                     user.Location = HtmlUtilities.Safe(updatedUser.Location);

@@ -19,7 +19,6 @@ namespace StackExchange.DataExplorer.Models
         public string AboutMe { get; set; }
         public string Website { get; set; }
         public string Location { get; set; }
-        public DateTime? DOB { get; set; }
         public DateTime? LastActivityDate { get; set; }
         public DateTime? LastSeenDate { get; set; }
         public string PreferencesRaw { get; set; }
@@ -45,21 +44,7 @@ namespace StackExchange.DataExplorer.Models
         public bool IsAnonymous { get; set; }
 
         public string SafeAboutMe => HtmlUtilities.Safe(HtmlUtilities.RawToCooked(AboutMe ?? ""));
-
-        public string Age
-        {
-            get
-            {
-                if (DOB == null) return "";
-
-                var now = DateTime.Today;
-                int age = now.Year - DOB.Value.Year;
-                if (DOB.Value > now.AddYears(-age)) age--;
-
-                return age.ToString();
-            }
-        }
-
+        
         public bool IsValid(ChangeAction action) => GetBusinessRuleViolations(action).Count == 0;
 
         public void OnValidate(ChangeAction action)
@@ -278,7 +263,6 @@ where v.UserId = @mergeId and v2.UserId = @masterId", new { mergeId, masterId })
             if (masterUser.AboutMe.IsNullOrEmpty() && mergeUser.AboutMe.HasValue()) masterUser.AboutMe = mergeUser.AboutMe;
             if (masterUser.Website.IsNullOrEmpty() && mergeUser.Website.HasValue()) masterUser.Website = mergeUser.Website;
             if (masterUser.Location.IsNullOrEmpty() && mergeUser.Location.HasValue()) masterUser.Location = mergeUser.Location;
-            if (!masterUser.DOB.HasValue && mergeUser.DOB.HasValue) masterUser.DOB = mergeUser.DOB;
             if (masterUser.LastSeenDate.GetValueOrDefault() < mergeUser.LastSeenDate.GetValueOrDefault())
             {
                 masterUser.LastSeenDate = mergeUser.LastSeenDate;
@@ -297,7 +281,6 @@ where v.UserId = @mergeId and v2.UserId = @masterId", new { mergeId, masterId })
                     masterUser.AboutMe, 
                     masterUser.Website, 
                     masterUser.Location, 
-                    masterUser.DOB, 
                     masterUser.LastSeenDate,
                     masterUser.IPAddress
                 });
