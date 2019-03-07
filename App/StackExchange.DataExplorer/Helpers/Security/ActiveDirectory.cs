@@ -106,7 +106,7 @@ namespace StackExchange.DataExplorer.Helpers.Security
                 if (retries > 0)
                 {
                     Thread.Sleep(500);
-                    RunCommand(command, retries - 1);
+                    return RunCommand(command, retries - 1);
                 }
                 else
                 {
