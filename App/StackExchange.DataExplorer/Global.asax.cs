@@ -99,14 +99,15 @@ namespace StackExchange.DataExplorer
 
         protected void Application_BeginRequest()
         {
-            MiniProfiler.Start();
+            // Incoming IP handling isn't correct - disabling MiniProfiler until a 4.1.0 upgrade and proper decoding
+            //MiniProfiler.Start();
         }
 
         protected void Application_EndRequest()
         {
             Current.DisposeDB();
             Current.DisposeRegisteredConnections();
-            MiniProfiler.Stop();
+            //MiniProfiler.Stop();
         }
 
         protected void Application_AuthenticateRequest(object sender, EventArgs e)
