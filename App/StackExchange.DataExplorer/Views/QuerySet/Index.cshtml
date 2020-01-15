@@ -12,7 +12,7 @@
 @section SecondaryContent {
     <div id="sidebar">
         <div class="module">
-            <div class="summarycount al">@string.Format("{0:n0}", totalQueries)</div>
+            <div class="summarycount al @(totalQueries >= 1000000 ? "bignum" : "")">@string.Format("{0:n0}", totalQueries)</div>
             <p>@(totalQueries == 1 ? "query" : "queries")</p>
         </div>
         @if (qsc.IsValid)

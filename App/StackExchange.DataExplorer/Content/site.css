@@ -1472,6 +1472,10 @@ font-weight:bold;
   text-align:center;
 }
 
+.summarycount.bignum {
+  font-size: 300%;
+}
+
 .al  {
   text-align:left;
 }
