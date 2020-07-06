@@ -494,7 +494,69 @@ namespace StackExchange.DataExplorer.Controllers
         [StackRoute("user/oauth/stackapps")]
         public ActionResult StackAppsCallback(string code, string state, string error)
         {
-            throw new NotImplementedException();
+            if (code.IsNullOrEmpty() || error == "access_denied")
+            {
+                return LoginError("(From StackApps) Access Denied");
+            }
+            string secret, clientId, path;
+            if (!TryGetStackAppsConfig(out secret, out clientId, out path))
+            {
+                return LoginError("StackApps Auth not enabled");
+            }
+
+            // Verify state
+            var oAuthState = JsonConvert.DeserializeObject<OAuthLoginState>(state);
+            var hash = (AppSettings.OAuthSessionSalt + ":" + oAuthState.ses).ToMD5Hash();
+            if (oAuthState.hash != hash)
+            {
+                return LoginError("Invalid verification hash");
+            }
+
+            var postForm = HttpUtility.ParseQueryString("");
+            postForm["code"] = code;
+            postForm["client_id"] = clientId;
+            postForm["client_secret"] = secret;
+            postForm["redirect_uri"] = BaseUrl + path;
+
+            for (var retry = 0; retry < GoogleAuthRetryAttempts; retry++)
+            {
+                StackAppsAuthResponse authResponse;
+                try
+                {
+                    using (var wc = new WebClient())
+                    {
+                        var response = wc.UploadValues(AppSettings.StackAppsAuthUrl + "/access_token/json", postForm);
+                        var responseStr = Encoding.UTF8.GetString(response);
+                        authResponse = JsonConvert.DeserializeObject<StackAppsAuthResponse>(responseStr);
+                    }
+                    if (authResponse != null)
+                    {
+                        var loginResponse = FetchFromStackApps(authResponse.access_token);
+                        if (loginResponse != null) return loginResponse;
+                    }
+                }
+                catch (WebException e)
+                {
+                    using (var reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        var text = reader.ReadToEnd();
+                        LogAuthError(new Exception("Error contacting " + AppSettings.StackAppsDomain + ": " + text));
+                    }
+                    continue;
+                }
+                catch(Exception e)
+                {
+                    LogAuthError(e);
+                    continue;
+                }
+            }
+
+            return LoginError("StackApps authentication failed");
+        }
+
+        private ActionResult FetchFromStackApps(string authToken)
+        {
+            return LoginError("Not Implemented Yet");
         }
 
         private void LogAuthError(Exception e)
@@ -581,6 +643,12 @@ namespace StackExchange.DataExplorer.Controllers
             public string picture { get; set; }
             public string gender { get; set; }
             public string locale { get; set; }
+        }
+        public class StackAppsAuthResponse
+        {
+            public string access_token { get; set; }
+
+            public long expires { get; set; }
         }
         // ReSharper restore InconsistentNaming
     }
