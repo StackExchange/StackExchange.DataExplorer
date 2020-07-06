@@ -313,8 +313,6 @@ namespace StackExchange.DataExplorer.Controllers
             var hash = (AppSettings.OAuthSessionSalt + ":" + session).ToMD5Hash();
             var stateJson = JsonConvert.SerializeObject(new OAuthLoginState { ses = session, hash = hash });
 
-            switch (server)
-            {
                 //case "https://graph.facebook.com/oauth/authorize": // Facebook
                 //    GetFacebookConfig(out secret, out clientId);
                 //    var redirect = string.Format(
@@ -325,8 +323,7 @@ namespace StackExchange.DataExplorer.Controllers
                 //        session,
                 //        state);
                 //    return Redirect(redirect);
-                case "https://accounts.google.com/o/oauth2/auth": // Google
-                    GetGoogleConfig(out secret, out clientId, out path);
+            if (server == "https://accounts.google.com/o/oauth2/auth" && TryGetGoogleConfig(out secret, out clientId, out path)) // Google
                     return Redirect(string.Format(
                             "{0}?client_id={1}&scope=openid+email&redirect_uri={2}&state={3}&response_type=code",
                             server,
@@ -334,16 +331,24 @@ namespace StackExchange.DataExplorer.Controllers
                             (BaseUrl + path).UrlEncode(),
                             stateJson.UrlEncode()
                             ));
-            }
+            else if(server == AppSettings.StackAppsAuthUrl && TryGetStackAppsConfig(out secret, out clientId, out path))
+                    return Redirect(string.Format(
+                            "{0}?client_id={1}&scope=&redirect_uri={2}&state={3}",
+                            server,
+                            clientId,
+                            (BaseUrl + path).UrlEncode(),
+                            stateJson.UrlEncode()
+                            ));
 
             return LoginError("Unsupported OAuth version or server");
         }
 
-        private void GetGoogleConfig(out string secret , out string clientId, out string path)
+        private static bool TryGetGoogleConfig(out string secret , out string clientId, out string path)
         {
             secret = AppSettings.GoogleOAuthSecret;
             clientId = AppSettings.GoogleOAuthClientId;
             path = "/user/oauth/google";
+            return AppSettings.EnableGoogleLogin;
         }
 
         [StackRoute("user/oauth/google")]
@@ -354,7 +359,10 @@ namespace StackExchange.DataExplorer.Controllers
                 return LoginError("(From Google) Access Denied");
             }
             string secret, clientId, path;
-            GetGoogleConfig(out secret, out clientId, out path);
+            if (!TryGetGoogleConfig(out secret, out clientId, out path))
+            {
+                return LoginError("Google Auth not enabled");
+            }
 
             // Verify state
             var oAuthState = JsonConvert.DeserializeObject<OAuthLoginState>(state);
@@ -473,6 +481,20 @@ namespace StackExchange.DataExplorer.Controllers
                 Current.LogException("Error in parsing google response: " + result, e);
                 return LoginError("There was an error fetching your account from Google.  Please try logging in again");
             }
+        }
+
+        private bool TryGetStackAppsConfig(out string secret , out string clientId, out string path)
+        {
+            secret = AppSettings.StackAppsOAuthSecret;
+            clientId = AppSettings.StackAppsClientId;
+            path = "/user/oauth/stackapps";
+            return AppSettings.EnableStackAppsAuth;
+        }
+
+        [StackRoute("user/oauth/stackapps")]
+        public ActionResult StackAppsCallback(string code, string state, string error)
+        {
+            throw new NotImplementedException();
         }
 
         private void LogAuthError(Exception e)

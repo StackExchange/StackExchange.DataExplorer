@@ -89,6 +89,15 @@ namespace StackExchange.DataExplorer
 
         public static bool EnableGoogleLogin => GoogleOAuthClientId.HasValue() && GoogleOAuthSecret.HasValue();
 
+        [Default("")]
+        public static string StackAppsClientId { get; private set; }
+        [Default("")]
+        public static string StackAppsOAuthSecret { get; private set; }
+        [Default("stackoverflow.com")]
+        public static string StackAppsDomain { get; private set; }
+        private static string _stackAppsAuthUrl;
+        public static string StackAppsAuthUrl => _stackAppsAuthUrl ?? (_stackAppsAuthUrl = "https://" + StackAppsDomain + "/oauth");
+        public static bool EnableStackAppsAuth => StackAppsClientId.HasValue() && StackAppsOAuthSecret.HasValue() && StackAppsDomain.HasValue();
 
         public enum AuthenitcationMethod
         {
