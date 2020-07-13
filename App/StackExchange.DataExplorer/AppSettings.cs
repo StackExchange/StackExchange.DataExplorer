@@ -97,7 +97,12 @@ namespace StackExchange.DataExplorer
         public static string StackAppsDomain { get; private set; }
         private static string _stackAppsAuthUrl;
         public static string StackAppsAuthUrl => _stackAppsAuthUrl ?? (_stackAppsAuthUrl = "https://" + StackAppsDomain + "/oauth");
-        public static bool EnableStackAppsAuth => StackAppsClientId.HasValue() && StackAppsOAuthSecret.HasValue() && StackAppsDomain.HasValue();
+        [Default("")]
+        public static string StackAppsApiKey { get; private set; }
+        public static bool EnableStackAppsAuth => StackAppsClientId.HasValue() && StackAppsOAuthSecret.HasValue() && StackAppsDomain.HasValue() && StackAppsApiKey.HasValue();
+        [Default("api.stackexchange.com")]
+        public static string StackExchangeApiDomain { get; private set; }
+
 
         public enum AuthenitcationMethod
         {

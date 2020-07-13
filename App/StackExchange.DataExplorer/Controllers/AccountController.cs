@@ -229,6 +229,44 @@ namespace StackExchange.DataExplorer.Controllers
             return new EmptyResult();
         }
 
+        private ActionResult LoginViaAccountId(string displayName, int accountId, string returnUrl)
+        {
+            var syntheticId = Models.User.NormalizeOpenId($"https://stackauth.com/synthetic-open-id/stackexchange/{accountId}");
+
+            var openId = Current.DB.Query<UserOpenId>(
+                @"
+                    select UserId
+                    from UserOpenIds
+                    where OpenIdClaim = @syntheticId",
+                new { syntheticId }).FirstOrDefault();
+
+            try
+            {
+                User user = null;
+                if (openId != null)
+                {
+                    user = Current.DB.Query<User>(
+                        @"
+                            select *
+                            from Users
+                            where Id = @UserId"
+                        , new { openId.UserId }).FirstOrDefault();
+                }
+                if (user == null)
+                {
+                    user = Models.User.CreateUser(displayName, null, syntheticId);
+                }
+
+                IssueFormsTicket(user);
+                return Redirect(returnUrl);
+            }
+            catch (Exception ex)
+            {
+                Current.LogException(ex);
+                return ErrorLogin("Error: " + ex.Message, returnUrl);
+            }
+        }
+
         private ActionResult LoginViaEmail(string email, string displayName, string returnUrl)
         {
             var whiteListResponse = CheckWhitelist("", email, trustEmail: true);
@@ -529,9 +567,9 @@ namespace StackExchange.DataExplorer.Controllers
                         var responseStr = Encoding.UTF8.GetString(response);
                         authResponse = JsonConvert.DeserializeObject<StackAppsAuthResponse>(responseStr);
                     }
-                    if (authResponse != null)
+                    if (authResponse != null && authResponse.access_token.HasValue())
                     {
-                        var loginResponse = FetchFromStackApps(authResponse.access_token);
+                        var loginResponse = FetchFromStackApps(authResponse.access_token, "/"); // TODO not the actual returnUrl, but LoginViaEmail does the same...
                         if (loginResponse != null) return loginResponse;
                     }
                 }
@@ -554,9 +592,62 @@ namespace StackExchange.DataExplorer.Controllers
             return LoginError("StackApps authentication failed");
         }
 
-        private ActionResult FetchFromStackApps(string authToken)
+        private ActionResult FetchFromStackApps(string accessToken, string returnUrl)
         {
-            return LoginError("Not Implemented Yet");
+            string result = null;
+            Exception lastException = null;
+            for (var retry = 0; retry < GoogleAuthRetryAttempts; retry++)
+            {
+                try
+                {
+                    var url = $"https://{AppSettings.StackExchangeApiDomain}/2.2/me?site={HttpUtility.UrlEncode(AppSettings.StackAppsDomain)}&access_token={HttpUtility.UrlEncode(accessToken)}&key={HttpUtility.UrlEncode(AppSettings.StackAppsApiKey)}";
+                    var request = WebRequest.CreateHttp(url);
+                    request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                    using (var response = request.GetResponse())
+                    using (var reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        result = reader.ReadToEnd();
+                        break;
+                    }
+                }
+                catch (WebException e)
+                {
+                    using (var reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        var text = reader.ReadToEnd();
+                        LogAuthError(new Exception($"Error fetching from {AppSettings.StackExchangeApiDomain}: {text}"));
+                    }
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    lastException = e;
+                }
+                if (retry == GoogleAuthRetryAttempts - 1)
+                    LogAuthError(lastException);
+            }
+
+            if (result.IsNullOrEmpty() || result == "false")
+            {
+                return LoginError($"Error accessing {AppSettings.StackAppsDomain} user");
+            }
+
+            try
+            {
+                var user = JsonConvert.DeserializeObject<SEApiUserResponse>(result)?.items?.FirstOrDefault();
+
+                if (user == null)
+                    return LoginError($"Error fetching user from {AppSettings.StackAppsDomain}");
+                if (user.account_id == null)
+                    return LoginError($"Error fetching account_id from {AppSettings.StackAppsDomain}");
+
+                return LoginViaAccountId(user.display_name, user.account_id.Value, returnUrl);
+            }
+            catch (Exception e)
+            {
+                Current.LogException($"Error in parsing {AppSettings.StackExchangeApiDomain} response: " + result, e);
+                return LoginError($"There was an error fetching your account from {AppSettings.StackAppsDomain}. Please try logging in again");
+            }
         }
 
         private void LogAuthError(Exception e)
@@ -649,6 +740,20 @@ namespace StackExchange.DataExplorer.Controllers
             public string access_token { get; set; }
 
             public long expires { get; set; }
+        }
+
+        public class SEApiUserResponse
+        {
+            public SEApiUser[] items { get; set; }
+        }
+
+        public class SEApiUser
+        {
+            public int? account_id { get; set; }
+            public int? user_id { get; set; }
+            public string link { get; set; }
+            public string profile_image { get; set; }
+            public string display_name { get; set; }
         }
         // ReSharper restore InconsistentNaming
     }
