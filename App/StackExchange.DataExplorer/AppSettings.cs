@@ -102,6 +102,8 @@ namespace StackExchange.DataExplorer
         public static bool EnableStackAppsAuth => StackAppsClientId.HasValue() && StackAppsOAuthSecret.HasValue() && StackAppsDomain.HasValue() && StackAppsApiKey.HasValue();
         [Default("api.stackexchange.com")]
         public static string StackExchangeApiDomain { get; private set; }
+        [Default("")]
+        public static string StackExchangeSyntheticIdPrefix { get; private set; }
 
 
         public enum AuthenitcationMethod

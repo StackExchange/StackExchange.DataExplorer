@@ -231,7 +231,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         private ActionResult LoginViaAccountId(string displayName, int accountId, string returnUrl)
         {
-            var syntheticId = Models.User.NormalizeOpenId($"https://stackauth.com/synthetic-open-id/stackexchange/{accountId}");
+            var syntheticId = Models.User.NormalizeOpenId($"{AppSettings.StackExchangeSyntheticIdPrefix}{accountId}");
 
             var openId = Current.DB.Query<UserOpenId>(
                 @"
