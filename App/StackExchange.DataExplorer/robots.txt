@@ -30,3 +30,9 @@ Disallow: /
 #
 User-agent: KSCrawler
 Disallow: /
+
+#
+# Applebot - please no
+#
+User-agent: Applebot
+Disallow: /
