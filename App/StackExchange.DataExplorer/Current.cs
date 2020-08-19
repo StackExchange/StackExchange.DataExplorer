@@ -164,7 +164,6 @@ namespace StackExchange.DataExplorer
                         cnn = new ProfiledDbConnection(cnn, new ErrorLoggingProfiler(profiler));
                     }
 
-                    cnn.Open();
                     result = DataExplorerDatabase.Create(cnn, 30);
                     if (Context != null)
                     {
@@ -191,7 +190,7 @@ namespace StackExchange.DataExplorer
                 db?.Dispose();
                 Context.Items["DB"] = null;
             }
-            else
+            // Also clear the call context DB if we ever hit it in a background thread
             {
                 var db = CallContext.GetData("DB") as DataExplorerDatabase;
                 db?.Dispose();
