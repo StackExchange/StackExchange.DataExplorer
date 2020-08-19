@@ -164,7 +164,6 @@ namespace StackExchange.DataExplorer
                         cnn = new ProfiledDbConnection(cnn, new ErrorLoggingProfiler(profiler));
                     }
 
-                    cnn.Open();
                     result = DataExplorerDatabase.Create(cnn, 30);
                     if (Context != null)
                     {
