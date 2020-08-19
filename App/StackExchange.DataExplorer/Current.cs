@@ -191,7 +191,7 @@ namespace StackExchange.DataExplorer
                 db?.Dispose();
                 Context.Items["DB"] = null;
             }
-            else
+            // Also clear the call context DB if we ever hit it in a background thread
             {
                 var db = CallContext.GetData("DB") as DataExplorerDatabase;
                 db?.Dispose();
