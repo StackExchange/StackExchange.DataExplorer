@@ -22,6 +22,7 @@ namespace StackExchange.DataExplorer.Controllers
     {
         private static readonly OpenIdRelyingParty OpenIdRelay = new OpenIdRelyingParty();
         const int GoogleAuthRetryAttempts = 3;
+        const int StackAppsAuthRetryAttempts = 3;
 
         [StackRoute("account/logout")]
         public ActionResult Logout()
@@ -556,7 +557,7 @@ namespace StackExchange.DataExplorer.Controllers
             postForm["client_secret"] = secret;
             postForm["redirect_uri"] = BaseUrl + path;
 
-            for (var retry = 0; retry < GoogleAuthRetryAttempts; retry++)
+            for (var retry = 0; retry < StackAppsAuthRetryAttempts; retry++)
             {
                 StackAppsAuthResponse authResponse;
                 try
@@ -596,7 +597,7 @@ namespace StackExchange.DataExplorer.Controllers
         {
             string result = null;
             Exception lastException = null;
-            for (var retry = 0; retry < GoogleAuthRetryAttempts; retry++)
+            for (var retry = 0; retry < StackAppsAuthRetryAttempts; retry++)
             {
                 try
                 {
@@ -623,7 +624,7 @@ namespace StackExchange.DataExplorer.Controllers
                 {
                     lastException = e;
                 }
-                if (retry == GoogleAuthRetryAttempts - 1)
+                if (retry == StackAppsAuthRetryAttempts - 1)
                     LogAuthError(lastException);
             }
 
