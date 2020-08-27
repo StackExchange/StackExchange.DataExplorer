@@ -24,12 +24,25 @@
                     <span>Log in using Facebook</span>
                 </p>
             </div>*@
-            <div class="preferred-login" data-provider='{ " name": "Stack Exchange", "url": "https://openid.stackexchange.com/" }'>
-                <p>
-                    <span class="icon" style="background-position: -356px 0;"></span>
-                    <span>Log in using Stack Exchange</span>
-                </p>
-            </div>
+
+            @if (AppSettings.EnableStackAppsAuth)
+            {
+                <div class="preferred-login" data-provider='{ " name": "Stack Overflow", "oauth2url": "@AppSettings.StackAppsAuthUrl" }'>
+                    <p>
+                        <span class="icon" style="background-position: -356px 0;"></span>
+                        <span>Log in using Stack Overflow</span>
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="preferred-login" data-provider='{ " name": "Stack Exchange", "url": "https://openid.stackexchange.com/" }'>
+                    <p>
+                        <span class="icon" style="background-position: -356px 0;"></span>
+                        <span>Log in using Stack Exchange</span>
+                    </p>
+                </div>
+            }
         </div>
         <div>
             <noscript>
