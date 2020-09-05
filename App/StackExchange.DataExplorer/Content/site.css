@@ -661,11 +661,13 @@ i.button {
 }
 
 #schema dl dt {
-  border-right: 1px dotted #CCCCCC;
-  float: left;
-  margin-left: 7px;
-  margin-right: 7px;
-  width: 55%;
+    border-right: 1px dotted #CCCCCC;
+    float: left;
+    margin-left: 7px;
+    margin-right: 7px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 60%;
 }
 
 #schema dl > * {
