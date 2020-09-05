@@ -189,11 +189,15 @@
 
         function tagFormatter(siteColumnName) {
             var siteColumnName = siteColumnName;
+            var unicodeSupport = new RegExp().unicode != undefined; // IE11 will not have unicode support
 
             return function (row, cell, value, column, context) {
                 var isMultiTags;
+                // use unicode if it is supported. Don't break IE11 by trying to do /[\p{L}]/u, use the RegExp contructor instead
+                var singleTagRegExp = unicodeSupport ? new RegExp('^[\\p{L}a-z0-9#.+-]+$', 'u') : /^[a-z0-9#.+-]+$/;
+                var multiTagRegExp = unicodeSupport ? new RegExp('^(?:<[\\p{L}a-z0-9#.+-]+>)+$', 'u') : /^(?:<[a-z0-9#.+-]+>)+$/;
 
-                if (!value || !(value.match(/^[a-z0-9#.+-]+$/) || (isMultiTags = (value.search(/^(?:<[a-z0-9#.+-]+>)+$/) > -1)))) {
+                if (!value || !(value.match(singleTagRegExp) || (isMultiTags = (value.search(multiTagRegExp) > -1)))) {
                     return defaultFormatter(row, cell, value, column, context);
                 }
 
