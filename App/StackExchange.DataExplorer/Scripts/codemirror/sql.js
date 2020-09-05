@@ -21,8 +21,8 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
 
     function tokenBase(stream, state) {
         var ch = stream.next();
-        // start of string?
-        if (ch == "'") {
+        // start of string? Both single and double-quote is allowed
+        if (ch == "'" || ch == '"') {
             return chain(stream, state, tokenString(ch));
         }
         else if (ch == "[") {
@@ -102,11 +102,17 @@ CodeMirror.defineMode("sql", function (config, parserConfig) {
 
     function tokenString(quote) {
         return function (stream, state) {
-            var escaped = false, next, end = false;
+            var escaped = false, next, previous, end = false;
             while ((next = stream.next()) != null) {
-                // This isn't how T-SQL strings work, need to fix
-                if (next == quote && !escaped) { end = true; break; }
-                escaped = !escaped && next == "\\";
+                // T-SQL strings escape a quote by doubling up, hence the previous and next handling
+                // when next is a quote, this is what previous contains
+                // string '' -> previous == null
+                // string 'fubar' -> previous != null and not equals quote
+                // string 'fu''bar' -> previous != null and equal quote, keep state as escaped
+                // the escapedd state needs to be captured for the case where the string literal is multiline
+                if (next == quote && (previous == null || previous != quote)) { end = true; break; }
+                escaped = !escaped && (next == quote && previous == quote);
+                previous = next;
             }
             if (end || !(escaped || multiLineStrings))
                 state.tokenize = tokenBase;
