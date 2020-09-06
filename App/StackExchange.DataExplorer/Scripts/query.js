@@ -610,13 +610,18 @@ DataExplorer.ready(function () {
     }
 
     function showError(response, className) {
+        var msg;
         if (response && !response.error) {
             error.hide();
 
             return false;
         }
-
-        error.text(response.error).show()[0].className = 'error-message' + (className || '');
+        if (response.line) {
+            msg = 'Line ' + response.line + ': ' + response.error;
+        } else {
+            msg = response.error;
+        }
+        error.text(msg).show()[0].className = 'error-message' + (className || '');
 
         return true;
     }
