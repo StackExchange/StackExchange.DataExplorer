@@ -69,7 +69,7 @@
                 <dl>
                 @for (int i = 0; i < table.ColumnNames.Count; i++)
                 {
-                    <dt data-order="@i">@table.ColumnNames[i]</dt>
+                    <dt data-order="@i" title="@table.ColumnNames[i]">@table.ColumnNames[i]</dt>
                     <dd class="cm-variable-2">@table.DataTypes[i]</dd>
                 }
                 </dl>
