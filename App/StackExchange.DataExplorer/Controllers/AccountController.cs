@@ -341,7 +341,7 @@ namespace StackExchange.DataExplorer.Controllers
 
         private ActionResult LoginError(string message) => RedirectToAction("Login", new {message});
 
-        private string BaseUrl => Current.Request.Url.Scheme + "://" + Current.Request.Url.Host;
+        private string BaseUrl => (Current.IsSecureConnection ? "https://" : "http://") + Current.Request.Url.Host;
 
         private ActionResult OAuthLogin()
         {
