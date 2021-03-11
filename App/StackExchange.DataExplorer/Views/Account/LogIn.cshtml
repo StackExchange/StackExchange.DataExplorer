@@ -9,41 +9,53 @@
     }
     <div class="js-openid-wrap">
         <div class="js-script-only">
-            @if (AppSettings.EnableGoogleLogin)
-            {
-                <div class="preferred-login" data-provider='{ "name": "Google", "oauth2url": "https://accounts.google.com/o/oauth2/auth" }'>
-                    <p>
-                        <span class="icon" style="background-position: -426px 0;"></span>
-                        <span>Log in using Google</span>
-                    </p>
-                </div>
-            }
-            @*<div class="preferred-login" data-provider='{ "name": "Facebook", "oauth2url": "https://www.facebook.com/v2.0/dialog/oauth" }'>
+        @if (AppSettings.EnableGoogleLogin)
+        {
+            <div class="preferred-login" data-provider='{ "name": "Google", "oauth2url": "https://accounts.google.com/o/oauth2/auth" }'>
+                <p>
+                    <span class="icon" style="background-position: -426px 0;"></span>
+                    <span>Log in using Google</span>
+                </p>
+            </div>
+        }
+
+        @if (AppSettings.EnableOktaLogin)
+        {
+            <div class="preferred-login" data-provider='{ "name": "Okta", "oauth2url": "@AppSettings.OktaBaseUrl/v1/authorize" }'>
+                <p>
+                    <span class="icon" style="background-position: -356px 0;"></span>
+                    <span>Log in using Okta</span>
+                </p>
+            </div>
+        }
+        @*<div class="preferred-login" data-provider='{ "name": "Facebook", "oauth2url": "https://www.facebook.com/v2.0/dialog/oauth" }'>
                 <p>
                     <span class="icon" style="background-position: -390px 0;"></span>
                     <span>Log in using Facebook</span>
                 </p>
             </div>*@
 
-            @if (AppSettings.EnableStackAppsAuth)
-            {
-                <div class="preferred-login" data-provider='{ " name": "Stack Overflow", "oauth2url": "@AppSettings.StackAppsAuthUrl" }'>
-                    <p>
-                        <span class="icon" style="background-position: -356px 0;"></span>
-                        <span>Log in using Stack Overflow</span>
-                    </p>
-                </div>
-            }
-            else
-            {
-                <div class="preferred-login" data-provider='{ " name": "Stack Exchange", "url": "https://openid.stackexchange.com/" }'>
-                    <p>
-                        <span class="icon" style="background-position: -356px 0;"></span>
-                        <span>Log in using Stack Exchange</span>
-                    </p>
-                </div>
-            }
-        </div>
+        @if (AppSettings.EnableStackAppsAuth)
+        {
+            <div class="preferred-login" data-provider='{ " name": "Stack Overflow", "oauth2url": "@AppSettings.StackAppsAuthUrl" }'>
+                <p>
+                    <span class="icon" style="background-position: -356px 0;"></span>
+                    <span>Log in using Stack Overflow</span>
+                </p>
+            </div>
+        }
+        else if (AppSettings.EnableStackExchangeAuth)
+        {
+            <div class="preferred-login" data-provider='{ " name": "Stack Exchange", "url": "https://openid.stackexchange.com/" }'>
+                <p>
+                    <span class="icon" style="background-position: -356px 0;"></span>
+                    <span>Log in using Stack Exchange</span>
+                </p>
+            </div>
+        }
+    </div>
+    @if (AppSettings.EnableOpenIdAuth)
+    {
         <div>
             <noscript>
                 <p class="noscript-notice">Open ID is a service that allows you to log on to many different websites using a single identity. Find out <a href="http://openid.net/what/">more about OpenId</a> and <a href="http://openid.net/get/">how to get an OpenID-enabled account</a>.</p>
@@ -90,7 +102,14 @@
                 </div>
             </div>
         </form>
-    </div>
+    }
+    else
+    {
+        <form class="openid-form" action="/user/authenticate" method="POST">
+            <input type="hidden" id="oauth2url" name="@Keys.OAuth2Url" value="">
+        </form>
+    }
+</div>
 </div>
 <script>
     var currentUrl, usernameBox = $(".openid-username");

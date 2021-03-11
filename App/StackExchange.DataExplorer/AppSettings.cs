@@ -90,6 +90,17 @@ namespace StackExchange.DataExplorer
         public static bool EnableGoogleLogin => GoogleOAuthClientId.HasValue() && GoogleOAuthSecret.HasValue();
 
         [Default("")]
+        public static string OktaClientId { get; private set; }
+
+        [Default("")]
+        public static string OktaClientSecret { get; private set; }
+
+        [Default("")]
+        public static string OktaBaseUrl { get; private set; }
+
+        public static bool EnableOktaLogin => OktaClientId.HasValue() && OktaClientSecret.HasValue() && OktaBaseUrl.HasValue();
+
+        [Default("")]
         public static string StackAppsClientId { get; private set; }
         [Default("")]
         public static string StackAppsOAuthSecret { get; private set; }
@@ -104,7 +115,12 @@ namespace StackExchange.DataExplorer
         public static string StackExchangeApiDomain { get; private set; }
         [Default("")]
         public static string StackExchangeSyntheticIdPrefix { get; private set; }
-
+        [Default(true)]
+        public static bool EnableStackExchangeAuth { get; private set; }
+        [Default(true)]
+        public static bool EnableOpenIdAuth { get; private set; }
+        [Default(false)]
+        public static bool RequireAuthentication { get; private set; }
 
         public enum AuthenitcationMethod
         {
