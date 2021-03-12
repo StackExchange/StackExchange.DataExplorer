@@ -22,6 +22,13 @@ namespace StackExchange.DataExplorer.Controllers
             return View(sites);
         }
 
+        [StackRoute("ping")]
+        public ActionResult Ping()
+        {
+            Current.DB.Execute("SELECT 1");
+            return Content("pong");
+        }
+
         [StackRoute("help")]
         public ActionResult Help()
         {
