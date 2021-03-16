@@ -23,6 +23,7 @@ namespace StackExchange.DataExplorer.Controllers
         private static readonly OpenIdRelyingParty OpenIdRelay = new OpenIdRelyingParty();
         const int GoogleAuthRetryAttempts = 3;
         const int StackAppsAuthRetryAttempts = 3;
+        const int OktaAuthRetryAttempts = 3;
 
         [StackRoute("account/logout")]
         public ActionResult Logout()
@@ -352,32 +353,47 @@ namespace StackExchange.DataExplorer.Controllers
             var hash = (AppSettings.OAuthSessionSalt + ":" + session).ToMD5Hash();
             var stateJson = JsonConvert.SerializeObject(new OAuthLoginState { ses = session, hash = hash });
 
-                //case "https://graph.facebook.com/oauth/authorize": // Facebook
-                //    GetFacebookConfig(out secret, out clientId);
-                //    var redirect = string.Format(
-                //        "{0}?client_id={1}&scope=email&redirect_uri={2}/{3}&state={4}",
-                //        server,
-                //        clientId,
-                //        host,
-                //        session,
-                //        state);
-                //    return Redirect(redirect);
-            if (server == "https://accounts.google.com/o/oauth2/auth" && TryGetGoogleConfig(out secret, out clientId, out path)) // Google
-                    return Redirect(string.Format(
-                            "{0}?client_id={1}&scope=openid+email&redirect_uri={2}&state={3}&response_type=code",
-                            server,
-                            clientId,
-                            (BaseUrl + path).UrlEncode(),
-                            stateJson.UrlEncode()
-                            ));
-            else if(server == AppSettings.StackAppsAuthUrl && TryGetStackAppsConfig(out secret, out clientId, out path))
-                    return Redirect(string.Format(
-                            "{0}?client_id={1}&scope=&redirect_uri={2}&state={3}",
-                            server,
-                            clientId,
-                            (BaseUrl + path).UrlEncode(),
-                            stateJson.UrlEncode()
-                            ));
+            //case "https://graph.facebook.com/oauth/authorize": // Facebook
+            //    GetFacebookConfig(out secret, out clientId);
+            //    var redirect = string.Format(
+            //        "{0}?client_id={1}&scope=email&redirect_uri={2}/{3}&state={4}",
+            //        server,
+            //        clientId,
+            //        host,
+            //        session,
+            //        state);
+            //    return Redirect(redirect);
+            if (server == "https://accounts.google.com/o/oauth2/auth" && TryGetGoogleConfig(out secret, out clientId, out path))
+            {
+                // Google
+                return Redirect(string.Format(
+                        "{0}?client_id={1}&scope=openid+email&redirect_uri={2}&state={3}&response_type=code",
+                        server,
+                        clientId,
+                        (BaseUrl + path).UrlEncode(),
+                        stateJson.UrlEncode()
+                    ));
+            }
+            else if (server == AppSettings.StackAppsAuthUrl && TryGetStackAppsConfig(out secret, out clientId, out path))
+            {
+                return Redirect(string.Format(
+                        "{0}?client_id={1}&scope=&redirect_uri={2}&state={3}",
+                        server,
+                        clientId,
+                        (BaseUrl + path).UrlEncode(),
+                        stateJson.UrlEncode()
+                    ));
+            }
+            else if (TryGetOktaConfig(out _, out clientId, out path) && server.StartsWith(AppSettings.OktaBaseUrl))
+            {
+                return Redirect(string.Format(
+                        "{0}?client_id={1}&scope=openid+email+profile&redirect_uri={2}&state={3}&response_type=code",
+                        server,
+                        clientId,
+                        (BaseUrl + path).UrlEncode(),
+                        stateJson.UrlEncode()
+                    ));
+            }
 
             return LoginError("Unsupported OAuth version or server");
         }
@@ -651,6 +667,138 @@ namespace StackExchange.DataExplorer.Controllers
             }
         }
 
+        private bool TryGetOktaConfig(out string secret, out string clientId, out string path)
+        {
+            secret = AppSettings.OktaClientSecret;
+            clientId = AppSettings.OktaClientId;
+            path = "/user/oauth/okta";
+            return AppSettings.EnableOktaLogin;
+        }
+
+        [StackRoute("user/oauth/okta")]
+        public ActionResult OktaCallback(string code, string state, string error)
+        {
+            if (code.IsNullOrEmpty() || error == "access_denied")
+            {
+                return LoginError("(From Okta) Access Denied");
+            }
+            string secret, clientId, path;
+            if (!TryGetOktaConfig(out secret, out clientId, out path))
+            {
+                return LoginError("Okta Auth not enabled");
+            }
+
+            // Verify state
+            var oAuthState = JsonConvert.DeserializeObject<OAuthLoginState>(state);
+            var hash = (AppSettings.OAuthSessionSalt + ":" + oAuthState.ses).ToMD5Hash();
+            if (oAuthState.hash != hash)
+            {
+                return LoginError("Invalid verification hash");
+            }
+
+            var postForm = HttpUtility.ParseQueryString("");
+            postForm["code"] = code;
+            postForm["client_id"] = clientId;
+            postForm["client_secret"] = secret;
+            postForm["scope"] = "openid email profile";
+            postForm["redirect_uri"] = BaseUrl + path;
+            postForm["grant_type"] = "authorization_code";
+            
+            for (var retry = 0; retry < OktaAuthRetryAttempts; retry++)
+            {
+                OktaAuthResponse authResponse;
+                try
+                {
+                    using (var wc = new WebClient())
+                    {
+                        var response = wc.UploadValues(AppSettings.OktaBaseUrl + "/v1/token", postForm);
+                        var responseStr = Encoding.UTF8.GetString(response);
+                        authResponse = JsonConvert.DeserializeObject<OktaAuthResponse>(responseStr);
+                    }
+                    if (authResponse != null && authResponse.access_token.HasValue())
+                    {
+                        var loginResponse = FetchFromOkta(authResponse.access_token, "/"); // TODO not the actual returnUrl, but LoginViaEmail does the same...
+                        if (loginResponse != null) return loginResponse;
+                    }
+                }
+                catch (WebException e)
+                {
+                    using (var reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        var text = reader.ReadToEnd();
+                        LogAuthError(new Exception("Error contacting " + AppSettings.OktaBaseUrl + ": " + text));
+                    }
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    LogAuthError(e);
+                    continue;
+                }
+            }
+
+            return LoginError("Okta authentication failed");
+        }
+
+        private ActionResult FetchFromOkta(string accessToken, string returnUrl)
+        {
+            string result = null;
+            Exception lastException = null;
+            for (var retry = 0; retry < OktaAuthRetryAttempts; retry++)
+            {
+                try
+                {
+                    var url = $"{AppSettings.OktaBaseUrl}/v1/userinfo";
+                    var request = WebRequest.CreateHttp(url);
+                    request.Headers.Add("Authorization", "Bearer " + accessToken);
+                    request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                    using (var response = request.GetResponse())
+                    using (var reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        result = reader.ReadToEnd();
+                        break;
+                    }
+                }
+                catch (WebException e)
+                {
+                    using (var reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        var text = reader.ReadToEnd();
+                        LogAuthError(new Exception($"Error fetching from {AppSettings.OktaBaseUrl}: {text}"));
+                    }
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    lastException = e;
+                }
+                if (retry == StackAppsAuthRetryAttempts - 1)
+                    LogAuthError(lastException);
+            }
+
+            if (result.IsNullOrEmpty() || result == "false")
+            {
+                return LoginError($"Error accessing {AppSettings.OktaBaseUrl} user");
+            }
+
+            try
+            {
+                var userInfo = JsonConvert.DeserializeObject<OktaUserInfo>(result);
+
+                if (userInfo == null)
+                    return LoginError($"Error fetching user from {AppSettings.OktaBaseUrl}");
+                if (userInfo.email == null)
+                    return LoginError($"Error fetching email from {AppSettings.OktaBaseUrl}");
+
+                return LoginViaEmail(userInfo.email, userInfo.name, returnUrl);
+            }
+            catch (Exception e)
+            {
+                Current.LogException($"Error in parsing {AppSettings.OktaBaseUrl} response: " + result, e);
+                return LoginError($"There was an error fetching your account from {AppSettings.OktaBaseUrl}. Please try logging in again");
+            }
+        }
+
         private void LogAuthError(Exception e)
         {
             if (e == null) return;
@@ -741,6 +889,39 @@ namespace StackExchange.DataExplorer.Controllers
             public string access_token { get; set; }
 
             public long expires { get; set; }
+        }
+
+        public class OktaAuthResponse
+        {
+            public string access_token { get; set; }
+
+            public long expires_in { get; set; }
+        }
+
+        public class OktaUserInfo
+        {
+            // Example response:
+            //
+            //{
+            //  "sub": "00uid4BxXw6I6TV4m0g3",
+            //  "name" :"John Doe",
+            //  "nickname":"Jimmy",
+            //  "given_name":"John",
+            //  "middle_name":"James",
+            //  "family_name":"Doe",
+            //  "profile":"https://example.com/john.doe",
+            //  "zoneinfo":"America/Los_Angeles",
+            //  "locale":"en-US",
+            //  "updated_at":1311280970,
+            //  "email":"john.doe@example.com",
+            //  "email_verified":true,
+            //  "address" : { "street_address":"123 Hollywood Blvd.", "locality":"Los Angeles", "region":"CA", "postal_code":"90210", "country":"US" },
+            //  "phone_number":"+1 (425) 555-1212"
+            //}
+
+            public string sub { get; set; }
+            public string name { get; set; }
+            public string email { get; set; }
         }
 
         public class SEApiUserResponse
