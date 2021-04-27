@@ -114,8 +114,6 @@ namespace StackExchange.DataExplorer.Controllers
             SetHeader(title);
             SelectMenuItem("Queries");
 
-            ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
-
             // Need to revamp voting process
             int totalVotes = Current.DB.Query<int>(@"
                 SELECT

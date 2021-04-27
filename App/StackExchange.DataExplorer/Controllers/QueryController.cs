@@ -597,8 +597,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             Site = site;
             SetHeader(header);
             SelectMenuItem("Compose Query");
-            
-            ViewData["GuessedUserId"] = Site.GuessUserId(CurrentUser);
+
             ViewData["Tables"] = Site.GetTableInfos();
         }
     }

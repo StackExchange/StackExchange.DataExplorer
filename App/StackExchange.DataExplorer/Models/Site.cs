@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Web;
 using StackExchange.DataExplorer.Helpers;
 using Dapper;
 using System.Linq;
@@ -136,52 +135,6 @@ namespace StackExchange.DataExplorer.Models
 
             Current.DB.Sites.Update(Id, new {TotalQuestions, TotalAnswers, TotalComments, LastPost, TotalUsers, TotalTags });
         }
-
-        public int? GuessUserId(User user)
-        {
-            if (user.IsAnonymous || !AppSettings.GuessUserId) return null;
-
-            string cacheKey = "UserIdForSite" + Id + "_" + user.Id;
-
-            var currentId = HttpContext.Current.Session[cacheKey] as int?;
-            if (currentId == null)
-            {
-                int? id = FindUserId(user);
-                if (id != null)
-                {
-                    HttpContext.Current.Cache[cacheKey] = id;
-                }
-            }
-
-            currentId = HttpContext.Current.Cache[cacheKey] as int?;
-            if (currentId == null)
-            {
-                HttpContext.Current.Cache[cacheKey] = -1;
-            }
-
-            return currentId != -1 ? currentId : null;
-        }
-
-        private int? FindUserId(User user)
-        {
-            if (!user.IsAnonymous && user.Email != null)
-            {
-                using (var cnn = GetOpenConnection())
-                {
-                    string hash = Util.GravatarHash(user.Email);
-                    try
-                    {
-                        return cnn.Query<int?>("select top 1 Id from Users where EmailHash = @hash order by Reputation desc", new {hash}).FirstOrDefault();
-                    }
-                    catch
-                    { 
-                        // allow this to fail, its not critical
-                    }
-                }
-            }
-            return null;
-        }
-
 
         /// <summary>
         /// Get the sites schema

@@ -475,7 +475,6 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\PageNotFound.cshtml" />
     <Content Include="Views\Shared\AboutSite.cshtml" />
-    <Content Include="Views\Shared\GuessedUserId.cshtml" />
     <Content Include="Views\Shared\Menu.cshtml" />
     <Content Include="Views\Shared\PageSizer.cshtml" />
     <Content Include="Views\Shared\QueryVoting.cshtml" />
