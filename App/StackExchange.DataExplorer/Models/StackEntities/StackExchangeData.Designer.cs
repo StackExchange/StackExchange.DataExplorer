@@ -1416,30 +1416,6 @@ namespace StackExchange.DataExplorer.Models.StackEntities
         /// </summary>
         [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=true)]
         [DataMemberAttribute()]
-        public global::System.String EmailHash
-        {
-            get
-            {
-                return _EmailHash;
-            }
-            set
-            {
-                OnEmailHashChanging(value);
-                ReportPropertyChanging("EmailHash");
-                _EmailHash = StructuralObject.SetValidValue(value, true, "EmailHash");
-                ReportPropertyChanged("EmailHash");
-                OnEmailHashChanged();
-            }
-        }
-        private global::System.String _EmailHash;
-        partial void OnEmailHashChanging(global::System.String value);
-        partial void OnEmailHashChanged();
-    
-        /// <summary>
-        /// No Metadata Documentation available.
-        /// </summary>
-        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=true)]
-        [DataMemberAttribute()]
         public Nullable<global::System.DateTime> CreationDate
         {
             get

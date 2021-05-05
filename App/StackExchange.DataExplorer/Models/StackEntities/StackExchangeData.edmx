@@ -71,7 +71,6 @@
           </Key>
           <Property Name="Id" Type="int" Nullable="false" />
           <Property Name="Reputation" Type="int" />
-          <Property Name="EmailHash" Type="varchar" MaxLength="40" />
           <Property Name="CreationDate" Type="datetime" />
           <Property Name="DisplayName" Type="nvarchar" MaxLength="40" />
           <Property Name="LastAccessDate" Type="datetime" />
@@ -205,7 +204,6 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" />
           <Property Name="Reputation" Type="Int32" />
-          <Property Name="EmailHash" Type="String" MaxLength="40" Unicode="false" FixedLength="false" />
           <Property Name="CreationDate" Type="DateTime" />
           <Property Name="DisplayName" Type="String" MaxLength="40" Unicode="true" FixedLength="false" />
           <Property Name="LastAccessDate" Type="DateTime" />
@@ -341,7 +339,6 @@
           <EntitySetMapping Name="Users"><EntityTypeMapping TypeName="MetaModel.User"><MappingFragment StoreEntitySet="Users">
             <ScalarProperty Name="Id" ColumnName="Id" />
             <ScalarProperty Name="Reputation" ColumnName="Reputation" />
-            <ScalarProperty Name="EmailHash" ColumnName="EmailHash" />
             <ScalarProperty Name="CreationDate" ColumnName="CreationDate" />
             <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
             <ScalarProperty Name="LastAccessDate" ColumnName="LastAccessDate" />
