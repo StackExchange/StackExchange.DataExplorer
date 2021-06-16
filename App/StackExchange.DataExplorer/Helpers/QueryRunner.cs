@@ -290,7 +290,7 @@ namespace StackExchange.DataExplorer.Helpers
 
                             try
                             {
-                                PopulateResults(results, command, result, messages, query.IncludeExecutionPlan);
+                                PopulateResults(results, command, result, messages, query.IncludeExecutionPlan, timer);
                             }
                             catch (Exception ex)
                             {
@@ -337,7 +337,7 @@ namespace StackExchange.DataExplorer.Helpers
         /// <param name="messages"><see cref="StringBuilder" /> instance to which to append messages.</param>
         /// <param name="IncludeExecutionPlan">If true indciates that the query execution plans are expected to be contained
         /// in the results sets; otherwise, false.</param>
-        private static void PopulateResults(QueryResults results, SqlCommand command, AsyncQueryRunner.AsyncResult result, StringBuilder messages, bool IncludeExecutionPlan)
+        private static void PopulateResults(QueryResults results, SqlCommand command, AsyncQueryRunner.AsyncResult result, StringBuilder messages, bool IncludeExecutionPlan, Stopwatch timer)
         {
             var plan = new QueryPlan();
             using (var reader = command.ExecuteReader())
@@ -378,6 +378,12 @@ namespace StackExchange.DataExplorer.Helpers
 
                         while (reader.Read())
                         {
+                            if (timer.Elapsed.TotalSeconds > AppSettings.QueryTimeout)
+                            {
+                                result.State = AsyncQueryRunner.AsyncState.Cancelled;
+                                command.Cancel();
+                                throw new InvalidOperationException("Query timed out");
+                            }
                             if (++currentRow > AppSettings.MaxResultsPerResultSet || totalRows + currentRow > AppSettings.MaxTotalResults)
                             {
                                 resultSet.Truncated = true;
