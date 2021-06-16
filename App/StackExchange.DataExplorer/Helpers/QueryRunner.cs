@@ -381,6 +381,7 @@ namespace StackExchange.DataExplorer.Helpers
                             if (timer.Elapsed.TotalSeconds > AppSettings.QueryTimeout)
                             {
                                 result.State = AsyncQueryRunner.AsyncState.Cancelled;
+                                command.Cancel();
                                 throw new InvalidOperationException("Query timed out");
                             }
                             if (++currentRow > AppSettings.MaxResultsPerResultSet || totalRows + currentRow > AppSettings.MaxTotalResults)
