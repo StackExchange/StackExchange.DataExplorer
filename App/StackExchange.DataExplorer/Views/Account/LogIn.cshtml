@@ -61,7 +61,7 @@
                 <p class="noscript-notice">Open ID is a service that allows you to log on to many different websites using a single identity. Find out <a href="http://openid.net/what/">more about OpenId</a> and <a href="http://openid.net/get/">how to get an OpenID-enabled account</a>.</p>
             </noscript>
         </div>
-        <form class="openid-form" action="/user/authenticate" method="POST">
+        <form class="openid-form" action="/user/authenticate?returnurl=@Request.Params["returnurl"]" method="POST">
             <input type="hidden" id="oauth2url" name="@Keys.OAuth2Url" value="">
             <div class="small-buttons js-script-only">
                 <div>
