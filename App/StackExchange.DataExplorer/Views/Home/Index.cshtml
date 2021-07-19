@@ -3,7 +3,7 @@
 @{this.SetPageTitle("Stack Exchange Data Explorer");}
 <div id="mainbar-full">
     <div class="info-wrapper">
-        <span class="info">Data updated @((ViewData["LastUpdate"] as DateTime?).ToRelativeTime())</span>
+        <span class="info">Data updated @((ViewData["LastUpdate"] as DateTime?).ToRelativeTime()) <i>@(ViewData["UpdateStatus"])</i></span>
     </div>
     <ul class="site-list">
     @foreach (Site site in Model)

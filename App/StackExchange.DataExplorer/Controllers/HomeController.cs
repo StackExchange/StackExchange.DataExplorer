@@ -19,6 +19,14 @@ namespace StackExchange.DataExplorer.Controllers
 
             ViewData["LastUpdate"] = Current.DB.Query<DateTime?>("SELECT MAX(LastPost) FROM Sites").FirstOrDefault();
 
+            // sp_Refresh_Database https://gist.github.com/NickCraver/f009ab6e0d6b85ae54f6 
+            // will create a [name]_Temp database when the restore starts
+            // we rely on that implementation detail to determine if 
+            // a restore of data is in progress
+            ViewData["UpdateStatus"] = Current.DB.Query<string>(@"SELECT TOP 1 CASE WHEN [name] LIKE '%_Temp' THEN 'restoring' ELSE NULL END [status]
+FROM [sys].[databases] 
+ORDER BY [create_date] DESC").FirstOrDefault();
+
             return View(sites);
         }
 
