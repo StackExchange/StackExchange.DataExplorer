@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StackExchange.Exceptional</name>
+    </assembly>
+    <members>
+        <member name="T:StackExchange.Exceptional.AspNetExtensions">
+            <summary>
+            Extensions methods for logging an <see cref="T:System.Exception"/>.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.AspNetExtensions.Log(System.Exception,System.Web.HttpContext,System.String,System.Boolean,System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Logs an exception to the configured error store, or the in-memory default store if none is configured.
+            </summary>
+            <param name="ex">The exception to log.</param>
+            <param name="context">The HTTPContext to record variables from.  If this isn't a web request, pass <see langword="null" /> in here.</param>
+            <param name="category">The category to associate with this exception.</param>
+            <param name="rollupPerServer">Whether to log up per-server, e.g. errors are only duplicates if they have same stack on the same machine.</param>
+            <param name="customData">Any custom data to store with the exception like UserId, etc...this will be rendered as JSON in the error view for script use.</param>
+            <param name="applicationName">If specified, the application name to log with, if not specified the name in <see cref="P:StackExchange.Exceptional.ErrorStoreSettings.ApplicationName"/> is used.</param>
+            <returns>The Error created, if one was created and logged, null if nothing was logged.</returns>
+            <remarks>
+            When dealing with a non web requests, pass <see langword="null" /> in for context.  
+            It shouldn't be forgotten for most web application usages, so it's not an optional parameter.
+            </remarks>
+        </member>
+        <member name="M:StackExchange.Exceptional.AspNetExtensions.LogAsync(System.Exception,System.Web.HttpContext,System.String,System.Boolean,System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Asynchronously logs an exception to the configured error store, or the in-memory default store if none is configured.
+            </summary>
+            <param name="ex">The exception to log.</param>
+            <param name="context">The HTTPContext to record variables from.  If this isn't a web request, pass <see langword="null" /> in here.</param>
+            <param name="category">The category to associate with this exception.</param>
+            <param name="rollupPerServer">Whether to log up per-server, e.g. errors are only duplicates if they have same stack on the same machine.</param>
+            <param name="customData">Any custom data to store with the exception like UserId, etc...this will be rendered as JSON in the error view for script use.</param>
+            <param name="applicationName">If specified, the application name to log with, if not specified the name in <see cref="P:StackExchange.Exceptional.ErrorStoreSettings.ApplicationName"/> is used.</param>
+            <returns>The Error created, if one was created and logged, null if nothing was logged.</returns>
+            <remarks>
+            When dealing with a non web requests, pass <see langword="null" /> in for context.  
+            It shouldn't be forgotten for most web application usages, so it's not an optional parameter.
+            </remarks>
+        </member>
+        <member name="M:StackExchange.Exceptional.AspNetExtensions.SetProperties(StackExchange.Exceptional.Error,System.Web.HttpContext)">
+            <summary>
+            Sets Error properties pulled from HttpContext, if present.
+            </summary>
+            <param name="error">The error to set properties on.</param>
+            <param name="context">The <see cref="T:System.Web.HttpContext"/> related to the request.</param>
+            <returns>The passed-in <see cref="T:StackExchange.Exceptional.Error"/> for chaining.</returns>
+        </member>
+        <member name="T:StackExchange.Exceptional.Settings">
+            <summary>
+            The Settings element for Exceptional's configuration.
+            This is the legacy web.config settings, that only serve as an adapter to populate <see cref="T:StackExchange.Exceptional.ExceptionalSettings"/>.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.Settings.LoadSettings">
+            <summary>
+            Trigger deserialization, which loads settings from the .config file.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.Settings.IgnoreSettings.Populate(StackExchange.Exceptional.ExceptionalSettings)">
+            <summary>
+            Runs after deserialization, to populate <see cref="P:StackExchange.Exceptional.Internal.ExceptionalSettingsBase.Ignore"/>.
+            </summary>
+            <param name="settings">The <see cref="T:StackExchange.Exceptional.ExceptionalSettings"/> to populate.</param>
+        </member>
+        <member name="T:StackExchange.Exceptional.Settings.SettingsCollection`1">
+            <summary>
+            A collection of list types all with a Name attribute.
+            </summary>
+            <typeparam name="T">The type of collection, inherited from SettingsCollectionElement.</typeparam>
+        </member>
+        <member name="P:StackExchange.Exceptional.Settings.SettingsCollection`1.Item(System.String)">
+            <summary>
+            Accessor by key.
+            </summary>
+            <param name="key">The key to lookup.</param>
+        </member>
+        <member name="P:StackExchange.Exceptional.Settings.SettingsCollection`1.Item(System.Int32)">
+            <summary>
+            Accessor by index.
+            </summary>
+            <param name="index">The index position to lookup.</param>
+        </member>
+        <member name="M:StackExchange.Exceptional.Settings.SettingsCollection`1.CreateNewElement">
+            <summary>
+            Default constructor for this element.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.Settings.SettingsCollection`1.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Default by-key fetch for this element.
+            </summary>
+            <param name="element">The element to get a key for.</param>
+        </member>
+        <member name="T:StackExchange.Exceptional.Settings.SettingsCollectionElement">
+            <summary>
+            An element in a settings collection that has a Name property, a generic base for SettingsCollection collections.
+            </summary>
+        </member>
+        <member name="T:StackExchange.Exceptional.Exceptional">
+            <summary>
+            Central settings config point for context-less logging.
+            </summary>
+        </member>
+        <member name="P:StackExchange.Exceptional.Exceptional.Settings">
+            <summary>
+            Settings for context-less logging.
+            </summary>
+        </member>
+        <member name="P:StackExchange.Exceptional.Exceptional.IsLoggingEnabled">
+            <summary>
+            Returns whether an error passed in right now would be logged.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.Exceptional.EnableLogging">
+            <summary>
+            Re-enables error logging after a <see cref="M:StackExchange.Exceptional.Exceptional.DisableLogging"/> call.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.Exceptional.DisableLogging">
+            <summary>
+            Disables error logging, call <see cref="M:StackExchange.Exceptional.Exceptional.EnableLogging"/> to re-enable.
+            </summary>
+            <remarks>
+            This is useful when an <see cref="T:System.AppDomain"/> is being torn down, for example <code>IRegisteredObject.Stop()</code> when a web application is being stopped
+            </remarks>
+        </member>
+        <member name="M:StackExchange.Exceptional.Exceptional.Configure(StackExchange.Exceptional.ExceptionalSettings)">
+            <summary>
+            Saves the given <paramref name="settings"/> as the global <see cref="P:StackExchange.Exceptional.Exceptional.Settings"/> available for use globally.
+            These are intended to be used by global/background handlers where normal context access isn't available.
+            </summary>
+            <param name="settings">The settings object to set for background settings.</param>
+        </member>
+        <member name="M:StackExchange.Exceptional.Exceptional.Configure(System.Action{StackExchange.Exceptional.ExceptionalSettings})">
+            <summary>
+            Configures existing settings (creating them if missing), also making them available for use globally.
+            </summary>
+            <param name="configSettings">The settings object to set for background settings.</param>
+        </member>
+        <member name="M:StackExchange.Exceptional.Exceptional.ObserveTaskExceptions">
+            <summary>
+            Attaches to <see cref="E:System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/> and handles all <see cref="T:System.Threading.Tasks.Task"/> background exceptions.
+            Without handling these (or at least observing them) the default behavior is an application pool crashing.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.Exceptional.ObserveAppDomainUnhandledExceptions">
+            <summary>
+            Attaches to <see cref="E:System.AppDomain.UnhandledException"/> and handles all global exceptions.
+            This is useful for console applications where not observing the exception as part of the ASP.NET pipeline.
+            </summary>
+        </member>
+        <member name="T:StackExchange.Exceptional.ExceptionalAsyncHandler">
+            <summary>
+            Single handler for all module requests, async style.
+            </summary>
+        </member>
+        <member name="T:StackExchange.Exceptional.ExceptionalModule">
+            <summary>
+            HTTP module that catches and log exceptions from ASP.NET Applications.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.ExceptionalModule.Init(System.Web.HttpApplication)">
+            <summary>
+            Initializes the module and prepares it to handle requests.
+            </summary>
+            <param name="context">The <see cref="T:System.Web.HttpApplication"/> we're running in.</param>
+        </member>
+        <member name="M:StackExchange.Exceptional.ExceptionalModule.Dispose">
+            <summary>
+            Disposes of the resources (other than memory) used by the module.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.ExceptionalModule.OnError(System.Object,System.EventArgs)">
+            <summary>
+            The handler called when an unhandled exception bubbles up to the module.
+            </summary>
+            <param name="sender">The source of the error.</param>
+            <param name="args">The error arguments.</param>
+        </member>
+        <member name="M:StackExchange.Exceptional.ExceptionalModule.HandleRequestAsync(System.Web.HttpContext)">
+            <summary>
+            Convenience method for handling a request, for usage in your routing, MVC, etc. See example.
+            </summary>
+            <example>
+            <code>
+            [Route("/path/my-route")]
+            public Task Exceptions() => ExceptionalModule.HandleRequestAsync(System.Web.HttpContext.Current);
+            </code>
+            </example>
+            <param name="context">The context to process, usually System.Web.HttpContext.Current.</param>
+            <returns>A task to await.</returns>
+        </member>
+        <member name="T:StackExchange.Exceptional.ExceptionalSettings">
+            <summary>
+            ASP.NET Core settings for Exceptional error logging.
+            </summary>
+        </member>
+        <member name="P:StackExchange.Exceptional.ExceptionalSettings.GetIPAddress">
+            <summary>
+            Method of getting the IP address for the error, defaults to retrieving it from server variables.
+            but may need to be replaced in special multi-proxy situations.
+            </summary>
+        </member>
+        <member name="T:StackExchange.Exceptional.HandlerFactory">
+            <summary>
+            HTTP handler that chooses the correct handler/view based on the request.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Exceptional.HandlerFactory.GetHandler(System.Web.HttpContext,System.String,System.String,System.String)">
+            <summary>
+            Gets the HttpHandler for executing the request, used to proxy requests through here (e.g. MVC) or by the HttpModule directly.
+            </summary>
+            <param name="context">The HTTPContext for the request.</param>
+            <param name="requestType">The type of request, GET/POST.</param>
+            <param name="url">The URL of the request.</param>
+            <param name="pathTranslated">The translated path of the request.</param>
+            <returns>The HTTPHandler that can execute the request.</returns>
+        </member>
+        <member name="M:StackExchange.Exceptional.HandlerFactory.ReleaseHandler(System.Web.IHttpHandler)">
+            <summary>
+            Enables the factory to reuse an existing handler instance.
+            </summary>
+            <param name="handler">The handler to release.</param>
+        </member>
+    </members>
+</doc>

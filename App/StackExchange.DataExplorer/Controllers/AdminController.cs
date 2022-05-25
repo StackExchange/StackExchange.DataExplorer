@@ -5,6 +5,8 @@ using System.Web.Mvc;
 using StackExchange.DataExplorer.Helpers;
 using StackExchange.DataExplorer.Models;
 using System.Linq;
+using System.Threading.Tasks;
+using StackExchange.Exceptional;
 
 namespace StackExchange.DataExplorer.Controllers
 {
@@ -261,15 +263,6 @@ where Email is not null and len(rtrim(Email)) > 0 ");
         }
 
         [StackRoute("admin/errors/{resource?}/{subResource?}")]
-        public ActionResult InvokeErrorHandler(string resource, string subResource)
-        {
-            var context = System.Web.HttpContext.Current;
-            var factory = new Exceptional.HandlerFactory();
-
-            var page = factory.GetHandler(context, Request.RequestType, Request.Url.ToString(), Request.PathInfo);
-            page.ProcessRequest(context);
-
-            return null;
-        }
+        public Task Exceptions() => ExceptionalModule.HandleRequestAsync(System.Web.HttpContext.Current);
     }
 }
