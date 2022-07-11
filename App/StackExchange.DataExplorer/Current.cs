@@ -231,7 +231,7 @@ namespace StackExchange.DataExplorer
         {
             try
             {
-                ErrorStore.LogException(ex, Context, appendFullStackTrace: true, rollupPerServer: rollupPerServer);
+                ex.Log(Context, rollupPerServer: rollupPerServer);
             }
             catch { /* Do nothing */ }
         }
