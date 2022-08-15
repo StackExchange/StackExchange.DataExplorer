@@ -421,6 +421,11 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
 
         private ActionResult GetCsv(string sitename, int revisionId, TargetSites targetSites)
         {
+            if (!ValidateTargetSites(targetSites))
+            {
+                throw new ApplicationException("Invalid target sites selection");
+            }
+
             var query = QueryUtil.GetQueryForRevision(revisionId);
             if (query == null)
             {
