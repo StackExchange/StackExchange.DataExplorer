@@ -423,7 +423,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
         {
             if (!ValidateTargetSites(targetSites))
             {
-                throw new ApplicationException("Invalid target sites selection");
+                return PageBadRequest();
             }
 
             var query = QueryUtil.GetQueryForRevision(revisionId);
