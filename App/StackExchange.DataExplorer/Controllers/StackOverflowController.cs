@@ -199,6 +199,30 @@ namespace StackExchange.DataExplorer.Controllers
             base.OnActionExecuted(filterContext);
         }
 #endif
+
+        private NameValueCollection _userParams;
+
+        public NameValueCollection UserParams
+        {
+            get
+            {
+                if (_userParams == null) InitUserParams();
+                return _userParams;
+            }
+        }
+
+        protected void InitUserParams()
+        {
+            var combinedParams = new NameValueCollection(Request.QueryString);
+
+            foreach (string key in Request.Form)
+            {
+                combinedParams[key] = Request.Form[key];
+            }
+
+            _userParams = combinedParams;
+        }
+
         private User _currentUser;
         /// <summary>
         /// Gets a User object representing the current request's client.

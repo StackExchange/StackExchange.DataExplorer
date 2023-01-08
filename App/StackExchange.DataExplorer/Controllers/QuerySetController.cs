@@ -158,7 +158,7 @@ namespace StackExchange.DataExplorer.Controllers
             }
 
             CachedResult cachedResults = QueryUtil.GetCachedResults(
-                new ParsedQuery(revision.Query.QueryBody, Request.Params),
+                new ParsedQuery(revision.Query.QueryBody, UserParams),
                 Site.Id
             );
 

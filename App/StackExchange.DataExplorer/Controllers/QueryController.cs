@@ -87,7 +87,7 @@ namespace StackExchange.DataExplorer.Controllers
 
                 var parsedQuery = new ParsedQuery(
                     sql,
-                    Request.Params,
+                    UserParams,
                     withExecutionPlan == true,
                     targetSites ?? TargetSites.Current
                 );
@@ -307,7 +307,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                 var query = Current.DB.Queries.Get(revision.QueryId);
                 var parsedQuery = new ParsedQuery(
                     query.QueryBody,
-                    Request.Params,
+                    UserParams,
                     withExecutionPlan == true,
                     targetSites ?? TargetSites.Current
                 );
@@ -371,7 +371,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                     : RedirectPermanent($"/{site.TinyName.ToLower()}/csv/{revisionId}{(slug.HasValue() ? "/" + slug : "")}{Request.Url.Query}");
             }
 
-            var parsedQuery = new ParsedQuery(query.QueryBody, Request.Params);
+            var parsedQuery = new ParsedQuery(query.QueryBody, UserParams);
             if (!parsedQuery.IsExecutionReady)
             {
                 return PageBadRequest();
@@ -433,7 +433,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
             }
 
             var results = QueryRunner.GetResults(
-                new ParsedQuery(query.QueryBody, Request.Params, executionPlan: false, targetSites: targetSites),
+                new ParsedQuery(query.QueryBody, UserParams, executionPlan: false, targetSites: targetSites),
                 null,
                 CurrentUser
             );
@@ -511,7 +511,7 @@ select @newId, RevisionId from QuerySetRevisions where QuerySetId = @oldId", new
                     : RedirectPermanent($"/{site.TinyName.ToLower()}/plan/{revisionId}{(slug.HasValue() ? "/" + slug : "")}{Request.Url.Query}");
             }
 
-            var parsedQuery = new ParsedQuery(query.QueryBody, Request.Params);
+            var parsedQuery = new ParsedQuery(query.QueryBody, UserParams);
             if (!parsedQuery.IsExecutionReady)
             {
                 return PageBadRequest();
