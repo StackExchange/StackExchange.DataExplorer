@@ -399,7 +399,7 @@ DataExplorer.ready(function () {
         }
 
         DataExplorer.template('#execution-stats', 'text', {
-            'records': textOnly ? "Results" : records + " rows",
+            'records': textOnly ? "Results" : records + " row" + (records == 1 ? "" : "s"),
             'time': response.executionTime === 0 ? "<1" : response.executionTime,
             'cached': response.fromCache ? ' (cached)' : ''
         });
